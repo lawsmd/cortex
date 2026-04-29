@@ -1,0 +1,24 @@
+name: 'Mar (Gogh)'
+accent: '#73a0cd'
+background: '#ffffff'
+foreground: '#23476a'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#b5407b'
+    green: '#7bb540'
+    yellow: '#b57b40'
+    blue: '#407bb5'
+    magenta: '#7b40b5'
+    cyan: '#40b57b'
+    white: '#f8f8f8'
+  bright:
+    black: '#737373'
+    red: '#cd73a0'
+    green: '#a0cd73'
+    yellow: '#cda073'
+    blue: '#73a0cd'
+    magenta: '#a073cd'
+    cyan: '#73cda0'
+    white: '#ffffff'

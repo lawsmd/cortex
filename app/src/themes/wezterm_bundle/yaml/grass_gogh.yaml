@@ -1,0 +1,24 @@
+name: 'Grass (Gogh)'
+accent: '#0000bb'
+background: '#13773d'
+foreground: '#fff0a5'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#bb0000'
+    green: '#00bb00'
+    yellow: '#e7b000'
+    blue: '#0000a3'
+    magenta: '#950062'
+    cyan: '#00bbbb'
+    white: '#bbbbbb'
+  bright:
+    black: '#555555'
+    red: '#bb0000'
+    green: '#00bb00'
+    yellow: '#e7b000'
+    blue: '#0000bb'
+    magenta: '#ff55ff'
+    cyan: '#55ffff'
+    white: '#ffffff'

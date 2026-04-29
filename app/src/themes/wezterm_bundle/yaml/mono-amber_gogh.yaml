@@ -1,0 +1,24 @@
+name: 'mono-amber (Gogh)'
+accent: '#ff9400'
+background: '#2b1900'
+foreground: '#ff9400'
+details: darker
+terminal_colors:
+  normal:
+    black: '#402500'
+    red: '#ff9400'
+    green: '#ff9400'
+    yellow: '#ff9400'
+    blue: '#ff9400'
+    magenta: '#ff9400'
+    cyan: '#ff9400'
+    white: '#ff9400'
+  bright:
+    black: '#ff9400'
+    red: '#ff9400'
+    green: '#ff9400'
+    yellow: '#ff9400'
+    blue: '#ff9400'
+    magenta: '#ff9400'
+    cyan: '#ff9400'
+    white: '#ff9400'

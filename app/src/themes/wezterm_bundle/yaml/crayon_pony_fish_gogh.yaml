@@ -1,0 +1,24 @@
+name: 'Crayon Pony Fish (Gogh)'
+accent: '#cfc9ff'
+background: '#150707'
+foreground: '#68525a'
+details: darker
+terminal_colors:
+  normal:
+    black: '#2b1b1d'
+    red: '#91002b'
+    green: '#579524'
+    yellow: '#ab311b'
+    blue: '#8c87b0'
+    magenta: '#692f50'
+    cyan: '#e8a866'
+    white: '#68525a'
+  bright:
+    black: '#3d2b2e'
+    red: '#c5255d'
+    green: '#8dff57'
+    yellow: '#c8381d'
+    blue: '#cfc9ff'
+    magenta: '#fc6cba'
+    cyan: '#ffceaf'
+    white: '#b0949d'

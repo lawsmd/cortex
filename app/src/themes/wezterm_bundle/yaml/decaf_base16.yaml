@@ -1,0 +1,24 @@
+name: 'Decaf (base16)'
+accent: '#90bee1'
+background: '#2d2d2d'
+foreground: '#cccccc'
+details: darker
+terminal_colors:
+  normal:
+    black: '#2d2d2d'
+    red: '#ff7f7b'
+    green: '#beda78'
+    yellow: '#ffd67c'
+    blue: '#90bee1'
+    magenta: '#efb3f7'
+    cyan: '#bed6ff'
+    white: '#cccccc'
+  bright:
+    black: '#777777'
+    red: '#ff7f7b'
+    green: '#beda78'
+    yellow: '#ffd67c'
+    blue: '#90bee1'
+    magenta: '#efb3f7'
+    cyan: '#bed6ff'
+    white: '#ffffff'

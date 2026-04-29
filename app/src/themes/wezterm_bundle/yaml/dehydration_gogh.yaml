@@ -1,0 +1,24 @@
+name: 'DeHydration (Gogh)'
+accent: '#5f8dd3'
+background: '#333333'
+foreground: '#cccccc'
+details: darker
+terminal_colors:
+  normal:
+    black: '#333333'
+    red: '#ff5555'
+    green: '#5fd38d'
+    yellow: '#ff9955'
+    blue: '#3771c8'
+    magenta: '#bc5fd3'
+    cyan: '#5fd3bc'
+    white: '#999999'
+  bright:
+    black: '#666666'
+    red: '#ff8080'
+    green: '#87deaa'
+    yellow: '#ffb380'
+    blue: '#5f8dd3'
+    magenta: '#cd87de'
+    cyan: '#87decd'
+    white: '#cccccc'

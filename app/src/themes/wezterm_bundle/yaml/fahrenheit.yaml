@@ -1,0 +1,24 @@
+name: 'Fahrenheit'
+accent: '#cb4a05'
+background: '#000000'
+foreground: '#ffffce'
+details: darker
+terminal_colors:
+  normal:
+    black: '#1d1d1d'
+    red: '#cda074'
+    green: '#9e744d'
+    yellow: '#fecf75'
+    blue: '#720102'
+    magenta: '#734c4d'
+    cyan: '#979797'
+    white: '#ffffce'
+  bright:
+    black: '#000000'
+    red: '#fecea0'
+    green: '#cc734d'
+    yellow: '#fd9f4d'
+    blue: '#cb4a05'
+    magenta: '#4e739f'
+    cyan: '#fed04d'
+    white: '#ffffff'

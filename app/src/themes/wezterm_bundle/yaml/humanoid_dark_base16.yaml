@@ -1,0 +1,24 @@
+name: 'Humanoid dark (base16)'
+accent: '#00a6fb'
+background: '#232629'
+foreground: '#f8f8f2'
+details: darker
+terminal_colors:
+  normal:
+    black: '#232629'
+    red: '#f11235'
+    green: '#02d849'
+    yellow: '#ffb627'
+    blue: '#00a6fb'
+    magenta: '#f15ee3'
+    cyan: '#0dd9d6'
+    white: '#f8f8f2'
+  bright:
+    black: '#60615d'
+    red: '#f11235'
+    green: '#02d849'
+    yellow: '#ffb627'
+    blue: '#00a6fb'
+    magenta: '#f15ee3'
+    cyan: '#0dd9d6'
+    white: '#fcfcfc'

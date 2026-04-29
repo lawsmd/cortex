@@ -1,0 +1,24 @@
+name: 'MonokaiPro (Gogh)'
+accent: '#fc9867'
+background: '#363537'
+foreground: '#fdf9f3'
+details: darker
+terminal_colors:
+  normal:
+    black: '#363537'
+    red: '#ff6188'
+    green: '#a9dc76'
+    yellow: '#ffd866'
+    blue: '#fc9867'
+    magenta: '#ab9df2'
+    cyan: '#78dce8'
+    white: '#fdf9f3'
+  bright:
+    black: '#908e8f'
+    red: '#ff6188'
+    green: '#a9dc76'
+    yellow: '#ffd866'
+    blue: '#fc9867'
+    magenta: '#ab9df2'
+    cyan: '#78dce8'
+    white: '#fdf9f3'

@@ -1,0 +1,24 @@
+name: 'Unikitty Reversible (base16)'
+accent: '#7864fa'
+background: '#2e2a31'
+foreground: '#c3c2c4'
+details: darker
+terminal_colors:
+  normal:
+    black: '#2e2a31'
+    red: '#d8137f'
+    green: '#17ad98'
+    yellow: '#dc8a0e'
+    blue: '#7864fa'
+    magenta: '#b33ce8'
+    cyan: '#149bda'
+    white: '#c3c2c4'
+  bright:
+    black: '#878589'
+    red: '#d8137f'
+    green: '#17ad98'
+    yellow: '#dc8a0e'
+    blue: '#7864fa'
+    magenta: '#b33ce8'
+    cyan: '#149bda'
+    white: '#ffffff'

@@ -1,0 +1,24 @@
+name: 'Highway (Gogh)'
+accent: '#4fc2fd'
+background: '#222225'
+foreground: '#ededed'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#d00e18'
+    green: '#138034'
+    yellow: '#ffcb3e'
+    blue: '#006bb3'
+    magenta: '#6b2775'
+    cyan: '#384564'
+    white: '#ededed'
+  bright:
+    black: '#5d504a'
+    red: '#f07e18'
+    green: '#b1d130'
+    yellow: '#fff120'
+    blue: '#4fc2fd'
+    magenta: '#de0071'
+    cyan: '#5d504a'
+    white: '#ffffff'

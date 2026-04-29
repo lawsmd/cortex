@@ -1,0 +1,24 @@
+name: 'Cupertino (base16)'
+accent: '#0000ff'
+background: '#ffffff'
+foreground: '#404040'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#ffffff'
+    red: '#c41a15'
+    green: '#007400'
+    yellow: '#826b28'
+    blue: '#0000ff'
+    magenta: '#a90d91'
+    cyan: '#318495'
+    white: '#404040'
+  bright:
+    black: '#808080'
+    red: '#c41a15'
+    green: '#007400'
+    yellow: '#826b28'
+    blue: '#0000ff'
+    magenta: '#a90d91'
+    cyan: '#318495'
+    white: '#5e5e5e'

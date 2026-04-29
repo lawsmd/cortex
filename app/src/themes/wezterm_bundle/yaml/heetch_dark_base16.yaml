@@ -1,0 +1,24 @@
+name: 'Heetch Dark (base16)'
+accent: '#bd0152'
+background: '#190134'
+foreground: '#bdb6c5'
+details: darker
+terminal_colors:
+  normal:
+    black: '#190134'
+    red: '#27d9d5'
+    green: '#c33678'
+    yellow: '#8f6c97'
+    blue: '#bd0152'
+    magenta: '#82034c'
+    cyan: '#f80059'
+    white: '#bdb6c5'
+  bright:
+    black: '#7b6d8b'
+    red: '#27d9d5'
+    green: '#c33678'
+    yellow: '#8f6c97'
+    blue: '#bd0152'
+    magenta: '#82034c'
+    cyan: '#f80059'
+    white: '#feffff'

@@ -1,0 +1,24 @@
+name: 'Hybrid (terminal.sexy)'
+accent: '#d0d0ff'
+background: '#000000'
+foreground: '#ffffff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#393939'
+    red: '#da4939'
+    green: '#9acc79'
+    yellow: '#d0d26b'
+    blue: '#6d9cbe'
+    magenta: '#9f5079'
+    cyan: '#435d75'
+    white: '#c2c2c2'
+  bright:
+    black: '#474747'
+    red: '#ff6c5c'
+    green: '#8fb676'
+    yellow: '#c8bc45'
+    blue: '#d0d0ff'
+    magenta: '#a761c2'
+    cyan: '#6e98a4'
+    white: '#c2c2c2'

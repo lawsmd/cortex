@@ -1,0 +1,24 @@
+name: 'Apathy (base16)'
+accent: '#96883e'
+background: '#031a16'
+foreground: '#81b5ac'
+details: darker
+terminal_colors:
+  normal:
+    black: '#031a16'
+    red: '#3e9688'
+    green: '#883e96'
+    yellow: '#3e4c96'
+    blue: '#96883e'
+    magenta: '#4c963e'
+    cyan: '#963e4c'
+    white: '#81b5ac'
+  bright:
+    black: '#2b685e'
+    red: '#3e9688'
+    green: '#883e96'
+    yellow: '#3e4c96'
+    blue: '#96883e'
+    magenta: '#4c963e'
+    cyan: '#963e4c'
+    white: '#d2e7e4'

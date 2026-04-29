@@ -1,0 +1,24 @@
+name: 'Poimandres'
+accent: '#add7ff'
+background: '#1b1e28'
+foreground: '#e4f0fb'
+details: darker
+terminal_colors:
+  normal:
+    black: '#171922'
+    red: '#d0679d'
+    green: '#5de4c7'
+    yellow: '#fffac2'
+    blue: '#89ddff'
+    magenta: '#fcc5e9'
+    cyan: '#89ddff'
+    white: '#ffffff'
+  bright:
+    black: '#506477'
+    red: '#d0679d'
+    green: '#5de4c7'
+    yellow: '#fffac2'
+    blue: '#add7ff'
+    magenta: '#fcc5e9'
+    cyan: '#add7ff'
+    white: '#ffffff'

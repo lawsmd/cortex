@@ -1,0 +1,24 @@
+name: 'ibm3270 (Gogh)'
+accent: '#b3bfef'
+background: '#000000'
+foreground: '#fdfdfd'
+details: darker
+terminal_colors:
+  normal:
+    black: '#222222'
+    red: '#f01818'
+    green: '#24d830'
+    yellow: '#f0d824'
+    blue: '#7890f0'
+    magenta: '#f078d8'
+    cyan: '#54e4e4'
+    white: '#a5a5a5'
+  bright:
+    black: '#888888'
+    red: '#ef8383'
+    green: '#7ed684'
+    yellow: '#efe28b'
+    blue: '#b3bfef'
+    magenta: '#efb3e3'
+    cyan: '#9ce2e2'
+    white: '#ffffff'

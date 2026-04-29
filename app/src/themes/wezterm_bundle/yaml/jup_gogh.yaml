@@ -1,0 +1,24 @@
+name: 'Jup (Gogh)'
+accent: '#74b9ff'
+background: '#758480'
+foreground: '#23476a'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#dd006f'
+    green: '#6fdd00'
+    yellow: '#dd6f00'
+    blue: '#006fdd'
+    magenta: '#6f00dd'
+    cyan: '#00dd6f'
+    white: '#f2f2f2'
+  bright:
+    black: '#7d7d7d'
+    red: '#ff74b9'
+    green: '#b9ff74'
+    yellow: '#ffb974'
+    blue: '#74b9ff'
+    magenta: '#b974ff'
+    cyan: '#74ffb9'
+    white: '#ffffff'

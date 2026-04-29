@@ -1,0 +1,24 @@
+name: 'Kimber (base16)'
+accent: '#537c9c'
+background: '#222222'
+foreground: '#dedee7'
+details: darker
+terminal_colors:
+  normal:
+    black: '#222222'
+    red: '#c88c8c'
+    green: '#99c899'
+    yellow: '#d8b56d'
+    blue: '#537c9c'
+    magenta: '#86cacd'
+    cyan: '#78b4b4'
+    white: '#dedee7'
+  bright:
+    black: '#644646'
+    red: '#c88c8c'
+    green: '#99c899'
+    yellow: '#d8b56d'
+    blue: '#537c9c'
+    magenta: '#86cacd'
+    cyan: '#78b4b4'
+    white: '#ffffe6'

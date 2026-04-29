@@ -1,0 +1,24 @@
+name: 'Monokai (terminal.sexy)'
+accent: '#66d9ee'
+background: '#272822'
+foreground: '#f1ebeb'
+details: darker
+terminal_colors:
+  normal:
+    black: '#48483e'
+    red: '#dc2566'
+    green: '#8fc029'
+    yellow: '#d4c96e'
+    blue: '#55bcce'
+    magenta: '#9358fe'
+    cyan: '#56b7a5'
+    white: '#acada1'
+  bright:
+    black: '#76715e'
+    red: '#fa2772'
+    green: '#a7e22e'
+    yellow: '#e7db75'
+    blue: '#66d9ee'
+    magenta: '#ae82ff'
+    cyan: '#66efd5'
+    white: '#cfd0c2'

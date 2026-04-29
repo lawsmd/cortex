@@ -1,0 +1,24 @@
+name: 'Gooey (Gogh)'
+accent: '#8be9fd'
+background: '#0d101b'
+foreground: '#ebeef9'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000009'
+    red: '#bb4f6c'
+    green: '#72ccae'
+    yellow: '#c65e3d'
+    blue: '#58b6ca'
+    magenta: '#6488c4'
+    cyan: '#8d84c6'
+    white: '#858893'
+  bright:
+    black: '#1f222d'
+    red: '#ee829f'
+    green: '#a5ffe1'
+    yellow: '#f99170'
+    blue: '#8be9fd'
+    magenta: '#97bbf7'
+    cyan: '#c0b7f9'
+    white: '#ffffff'

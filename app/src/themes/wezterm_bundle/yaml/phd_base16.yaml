@@ -1,0 +1,24 @@
+name: 'PhD (base16)'
+accent: '#5299bf'
+background: '#061229'
+foreground: '#b8bbc2'
+details: darker
+terminal_colors:
+  normal:
+    black: '#061229'
+    red: '#d07346'
+    green: '#99bf52'
+    yellow: '#fbd461'
+    blue: '#5299bf'
+    magenta: '#9989cc'
+    cyan: '#72b9bf'
+    white: '#b8bbc2'
+  bright:
+    black: '#717885'
+    red: '#d07346'
+    green: '#99bf52'
+    yellow: '#fbd461'
+    blue: '#5299bf'
+    magenta: '#9989cc'
+    cyan: '#72b9bf'
+    white: '#ffffff'

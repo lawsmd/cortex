@@ -1,0 +1,24 @@
+name: 'Solarized Dark (Gogh)'
+accent: '#2699ff'
+background: '#002b36'
+foreground: '#839496'
+details: darker
+terminal_colors:
+  normal:
+    black: '#073642'
+    red: '#dc322f'
+    green: '#859900'
+    yellow: '#cf9a6b'
+    blue: '#268bd2'
+    magenta: '#d33682'
+    cyan: '#2aa198'
+    white: '#eee8d5'
+  bright:
+    black: '#657b83'
+    red: '#d87979'
+    green: '#88cf76'
+    yellow: '#657b83'
+    blue: '#2699ff'
+    magenta: '#d33682'
+    cyan: '#43b8c3'
+    white: '#fdf6e3'

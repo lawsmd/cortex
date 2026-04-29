@@ -1,0 +1,24 @@
+name: 'Seti'
+accent: '#43a5d5'
+background: '#111213'
+foreground: '#cacecd'
+details: darker
+terminal_colors:
+  normal:
+    black: '#323232'
+    red: '#c22832'
+    green: '#8ec43d'
+    yellow: '#e0c64f'
+    blue: '#43a5d5'
+    magenta: '#8b57b5'
+    cyan: '#8ec43d'
+    white: '#eeeeee'
+  bright:
+    black: '#323232'
+    red: '#c22832'
+    green: '#8ec43d'
+    yellow: '#e0c64f'
+    blue: '#43a5d5'
+    magenta: '#8b57b5'
+    cyan: '#8ec43d'
+    white: '#ffffff'

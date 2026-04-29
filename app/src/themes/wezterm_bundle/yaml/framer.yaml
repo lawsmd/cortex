@@ -1,0 +1,24 @@
+name: 'Framer'
+accent: '#33bbff'
+background: '#111111'
+foreground: '#777777'
+details: darker
+terminal_colors:
+  normal:
+    black: '#141414'
+    red: '#ff5555'
+    green: '#98ec65'
+    yellow: '#ffcc33'
+    blue: '#00aaff'
+    magenta: '#aa88ff'
+    cyan: '#88ddff'
+    white: '#cccccc'
+  bright:
+    black: '#414141'
+    red: '#ff8888'
+    green: '#b6f292'
+    yellow: '#ffd966'
+    blue: '#33bbff'
+    magenta: '#cebbff'
+    cyan: '#bbecff'
+    white: '#ffffff'

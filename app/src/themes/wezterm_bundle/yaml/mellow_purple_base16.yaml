@@ -1,0 +1,24 @@
+name: 'Mellow Purple (base16)'
+accent: '#550068'
+background: '#1e0528'
+foreground: '#ffeeff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#1e0528'
+    red: '#00d9e9'
+    green: '#05cb0d'
+    yellow: '#955ae7'
+    blue: '#550068'
+    magenta: '#8991bb'
+    cyan: '#b900b1'
+    white: '#ffeeff'
+  bright:
+    black: '#320f55'
+    red: '#00d9e9'
+    green: '#05cb0d'
+    yellow: '#955ae7'
+    blue: '#550068'
+    magenta: '#8991bb'
+    cyan: '#b900b1'
+    white: '#f8c0ff'

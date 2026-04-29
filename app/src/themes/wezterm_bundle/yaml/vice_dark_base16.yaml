@@ -1,0 +1,24 @@
+name: 'Vice Dark (base16)'
+accent: '#00eaff'
+background: '#181818'
+foreground: '#818181'
+details: darker
+terminal_colors:
+  normal:
+    black: '#181818'
+    red: '#ff29a8'
+    green: '#0badff'
+    yellow: '#f0ffaa'
+    blue: '#00eaff'
+    magenta: '#00f6d9'
+    cyan: '#8265ff'
+    white: '#818181'
+  bright:
+    black: '#3f3f3f'
+    red: '#ff29a8'
+    green: '#0badff'
+    yellow: '#f0ffaa'
+    blue: '#00eaff'
+    magenta: '#00f6d9'
+    cyan: '#8265ff'
+    white: '#e9e9e9'

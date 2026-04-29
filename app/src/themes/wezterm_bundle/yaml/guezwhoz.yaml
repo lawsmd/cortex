@@ -1,0 +1,24 @@
+name: 'Guezwhoz'
+accent: '#87afd7'
+background: '#1c1c1c'
+foreground: '#d0d0d0'
+details: darker
+terminal_colors:
+  normal:
+    black: '#080808'
+    red: '#ff5f5f'
+    green: '#87d7af'
+    yellow: '#d7d787'
+    blue: '#5fafd7'
+    magenta: '#afafff'
+    cyan: '#5fd7d7'
+    white: '#dadada'
+  bright:
+    black: '#8a8a8a'
+    red: '#d75f5f'
+    green: '#afd7af'
+    yellow: '#d7d7af'
+    blue: '#87afd7'
+    magenta: '#afafd7'
+    cyan: '#87d7d7'
+    white: '#dadada'

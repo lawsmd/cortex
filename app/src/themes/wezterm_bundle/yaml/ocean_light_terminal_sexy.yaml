@@ -1,0 +1,24 @@
+name: 'Ocean (light) (terminal.sexy)'
+accent: '#8fa1b3'
+background: '#eff1f5'
+foreground: '#4f5b66'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#2b303b'
+    red: '#bf616a'
+    green: '#a3be8c'
+    yellow: '#ebcb8b'
+    blue: '#8fa1b3'
+    magenta: '#b48ead'
+    cyan: '#96b5b4'
+    white: '#c0c5ce'
+  bright:
+    black: '#65737e'
+    red: '#bf616a'
+    green: '#a3be8c'
+    yellow: '#ebcb8b'
+    blue: '#8fa1b3'
+    magenta: '#b48ead'
+    cyan: '#96b5b4'
+    white: '#eff1f5'

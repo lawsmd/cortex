@@ -1,0 +1,24 @@
+name: 'Rosé Pine Dawn (base16)'
+accent: '#907aa9'
+background: '#faf4ed'
+foreground: '#575279'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#faf4ed'
+    red: '#b4637a'
+    green: '#286983'
+    yellow: '#d7827e'
+    blue: '#907aa9'
+    magenta: '#ea9d34'
+    cyan: '#56949f'
+    white: '#575279'
+  bright:
+    black: '#9893a5'
+    red: '#b4637a'
+    green: '#286983'
+    yellow: '#d7827e'
+    blue: '#907aa9'
+    magenta: '#ea9d34'
+    cyan: '#56949f'
+    white: '#cecacd'

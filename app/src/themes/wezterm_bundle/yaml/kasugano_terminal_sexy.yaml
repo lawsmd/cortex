@@ -1,0 +1,24 @@
+name: 'Kasugano (terminal.sexy)'
+accent: '#477ab3'
+background: '#1b1b1b'
+foreground: '#ffffff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#3d3d3d'
+    red: '#6673bf'
+    green: '#3ea290'
+    yellow: '#b0ead9'
+    blue: '#31658c'
+    magenta: '#596196'
+    cyan: '#8292b2'
+    white: '#c8cacc'
+  bright:
+    black: '#4d4d4d'
+    red: '#899aff'
+    green: '#52ad91'
+    yellow: '#98c9bb'
+    blue: '#477ab3'
+    magenta: '#7882bf'
+    cyan: '#95a7cc'
+    white: '#edeff2'

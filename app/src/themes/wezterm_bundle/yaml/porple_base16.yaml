@@ -1,0 +1,24 @@
+name: 'Porple (base16)'
+accent: '#8485ce'
+background: '#292c36'
+foreground: '#d8d8d8'
+details: darker
+terminal_colors:
+  normal:
+    black: '#292c36'
+    red: '#f84547'
+    green: '#95c76f'
+    yellow: '#efa16b'
+    blue: '#8485ce'
+    magenta: '#b74989'
+    cyan: '#64878f'
+    white: '#d8d8d8'
+  bright:
+    black: '#65568a'
+    red: '#f84547'
+    green: '#95c76f'
+    yellow: '#efa16b'
+    blue: '#8485ce'
+    magenta: '#b74989'
+    cyan: '#64878f'
+    white: '#f8f8f8'

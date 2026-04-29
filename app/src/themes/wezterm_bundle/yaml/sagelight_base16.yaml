@@ -1,0 +1,24 @@
+name: 'Sagelight (base16)'
+accent: '#a0a7d2'
+background: '#f8f8f8'
+foreground: '#383838'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#f8f8f8'
+    red: '#fa8480'
+    green: '#a0d2c8'
+    yellow: '#ffdc61'
+    blue: '#a0a7d2'
+    magenta: '#c8a0d2'
+    cyan: '#a2d6f5'
+    white: '#383838'
+  bright:
+    black: '#b8b8b8'
+    red: '#fa8480'
+    green: '#a0d2c8'
+    yellow: '#ffdc61'
+    blue: '#a0a7d2'
+    magenta: '#c8a0d2'
+    cyan: '#a2d6f5'
+    white: '#181818'

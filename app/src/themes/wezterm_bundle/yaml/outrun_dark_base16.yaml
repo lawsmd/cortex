@@ -1,0 +1,24 @@
+name: 'Outrun Dark (base16)'
+accent: '#66b0ff'
+background: '#00002a'
+foreground: '#d0d0fa'
+details: darker
+terminal_colors:
+  normal:
+    black: '#00002a'
+    red: '#ff4242'
+    green: '#59f176'
+    yellow: '#f3e877'
+    blue: '#66b0ff'
+    magenta: '#f10596'
+    cyan: '#0ef0f0'
+    white: '#d0d0fa'
+  bright:
+    black: '#50507a'
+    red: '#ff4242'
+    green: '#59f176'
+    yellow: '#f3e877'
+    blue: '#66b0ff'
+    magenta: '#f10596'
+    cyan: '#0ef0f0'
+    white: '#f5f5ff'

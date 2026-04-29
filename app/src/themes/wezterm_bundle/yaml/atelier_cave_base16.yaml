@@ -1,0 +1,24 @@
+name: 'Atelier Cave (base16)'
+accent: '#576ddb'
+background: '#19171c'
+foreground: '#8b8792'
+details: darker
+terminal_colors:
+  normal:
+    black: '#19171c'
+    red: '#be4678'
+    green: '#2a9292'
+    yellow: '#a06e3b'
+    blue: '#576ddb'
+    magenta: '#955ae7'
+    cyan: '#398bc6'
+    white: '#8b8792'
+  bright:
+    black: '#655f6d'
+    red: '#be4678'
+    green: '#2a9292'
+    yellow: '#a06e3b'
+    blue: '#576ddb'
+    magenta: '#955ae7'
+    cyan: '#398bc6'
+    white: '#efecf4'

@@ -1,0 +1,24 @@
+name: 'Ef-Autumn'
+accent: '#029fff'
+background: '#0f0e06'
+foreground: '#cfbcba'
+details: darker
+terminal_colors:
+  normal:
+    black: '#26211d'
+    red: '#ef656a'
+    green: '#2fa526'
+    yellow: '#c48702'
+    blue: '#379cf6'
+    magenta: '#d570af'
+    cyan: '#4fb0cf'
+    white: '#cfbcba'
+  bright:
+    black: '#56524f'
+    red: '#ff7a7f'
+    green: '#00b066'
+    yellow: '#df8f6f'
+    blue: '#029fff'
+    magenta: '#af8aff'
+    cyan: '#3dbbb0'
+    white: '#887c8a'

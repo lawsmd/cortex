@@ -1,0 +1,24 @@
+name: 'Raycast_Light'
+accent: '#138af2'
+background: '#ffffff'
+foreground: '#000000'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#b12424'
+    green: '#006b4f'
+    yellow: '#f8a300'
+    blue: '#138af2'
+    magenta: '#9a1b6e'
+    cyan: '#3eb8bf'
+    white: '#ffffff'
+  bright:
+    black: '#000000'
+    red: '#b12424'
+    green: '#006b4f'
+    yellow: '#f8a300'
+    blue: '#138af2'
+    magenta: '#9a1b6e'
+    cyan: '#3eb8bf'
+    white: '#ffffff'

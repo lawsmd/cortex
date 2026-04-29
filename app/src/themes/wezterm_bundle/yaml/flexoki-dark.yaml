@@ -1,0 +1,24 @@
+name: 'flexoki-dark'
+accent: '#4385be'
+background: '#1c1b1a'
+foreground: '#cecdc3'
+details: darker
+terminal_colors:
+  normal:
+    black: '#1c1b1a'
+    red: '#d14d41'
+    green: '#879a39'
+    yellow: '#d0a215'
+    blue: '#4385be'
+    magenta: '#ce5d97'
+    cyan: '#3aa99f'
+    white: '#b7b5ac'
+  bright:
+    black: '#575653'
+    red: '#d14d41'
+    green: '#879a39'
+    yellow: '#d0a215'
+    blue: '#4385be'
+    magenta: '#ce5d97'
+    cyan: '#3aa99f'
+    white: '#cecdc3'

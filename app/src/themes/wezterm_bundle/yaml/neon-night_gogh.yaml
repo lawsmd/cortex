@@ -1,0 +1,24 @@
+name: 'neon-night (Gogh)'
+accent: '#69b4f9'
+background: '#20242d'
+foreground: '#c7c8ff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#20242d'
+    red: '#ff8e8e'
+    green: '#7efdd0'
+    yellow: '#fcad3f'
+    blue: '#69b4f9'
+    magenta: '#dd92f6'
+    cyan: '#8ce8ff'
+    white: '#c9cccd'
+  bright:
+    black: '#20242d'
+    red: '#ff8e8e'
+    green: '#7efdd0'
+    yellow: '#fcad3f'
+    blue: '#69b4f9'
+    magenta: '#dd92f6'
+    cyan: '#8ce8ff'
+    white: '#c9cccd'

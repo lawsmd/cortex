@@ -1,0 +1,24 @@
+name: 'Windows 95 (base16)'
+accent: '#5454fc'
+background: '#000000'
+foreground: '#a8a8a8'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#fc5454'
+    green: '#54fc54'
+    yellow: '#fcfc54'
+    blue: '#5454fc'
+    magenta: '#fc54fc'
+    cyan: '#54fcfc'
+    white: '#a8a8a8'
+  bright:
+    black: '#545454'
+    red: '#fc5454'
+    green: '#54fc54'
+    yellow: '#fcfc54'
+    blue: '#5454fc'
+    magenta: '#fc54fc'
+    cyan: '#54fcfc'
+    white: '#fcfcfc'

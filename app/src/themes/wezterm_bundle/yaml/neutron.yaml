@@ -1,0 +1,24 @@
+name: 'Neutron'
+accent: '#6a7c93'
+background: '#1c1e22'
+foreground: '#e6e8ef'
+details: darker
+terminal_colors:
+  normal:
+    black: '#23252b'
+    red: '#b54036'
+    green: '#5ab977'
+    yellow: '#deb566'
+    blue: '#6a7c93'
+    magenta: '#a4799d'
+    cyan: '#3f94a8'
+    white: '#e6e8ef'
+  bright:
+    black: '#23252b'
+    red: '#b54036'
+    green: '#5ab977'
+    yellow: '#deb566'
+    blue: '#6a7c93'
+    magenta: '#a4799d'
+    cyan: '#3f94a8'
+    white: '#ebedf2'

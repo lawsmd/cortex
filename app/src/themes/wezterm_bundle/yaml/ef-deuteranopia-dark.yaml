@@ -1,0 +1,24 @@
+name: 'Ef-Deuteranopia-Dark'
+accent: '#009fff'
+background: '#000a1f'
+foreground: '#ddddee'
+details: darker
+terminal_colors:
+  normal:
+    black: '#121f34'
+    red: '#cf8560'
+    green: '#3faa26'
+    yellow: '#aa9f32'
+    blue: '#3f90f0'
+    magenta: '#b379bf'
+    cyan: '#5faaef'
+    white: '#ddddee'
+  bright:
+    black: '#445165'
+    red: '#cf7a7a'
+    green: '#3fa672'
+    yellow: '#bfaf7a'
+    blue: '#009fff'
+    magenta: '#9f95ff'
+    cyan: '#0db0ff'
+    white: '#7f8797'

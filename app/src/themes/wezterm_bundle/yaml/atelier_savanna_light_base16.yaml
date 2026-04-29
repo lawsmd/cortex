@@ -1,0 +1,24 @@
+name: 'Atelier Savanna Light (base16)'
+accent: '#478c90'
+background: '#ecf4ee'
+foreground: '#526057'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#ecf4ee'
+    red: '#b16139'
+    green: '#489963'
+    yellow: '#a07e3b'
+    blue: '#478c90'
+    magenta: '#55859b'
+    cyan: '#1c9aa0'
+    white: '#526057'
+  bright:
+    black: '#78877d'
+    red: '#b16139'
+    green: '#489963'
+    yellow: '#a07e3b'
+    blue: '#478c90'
+    magenta: '#55859b'
+    cyan: '#1c9aa0'
+    white: '#171c19'

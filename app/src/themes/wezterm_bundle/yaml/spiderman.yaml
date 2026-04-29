@@ -1,0 +1,24 @@
+name: 'Spiderman'
+accent: '#1d50ff'
+background: '#1b1d1e'
+foreground: '#e3e3e3'
+details: darker
+terminal_colors:
+  normal:
+    black: '#1b1d1e'
+    red: '#e60813'
+    green: '#e22928'
+    yellow: '#e24756'
+    blue: '#2c3fff'
+    magenta: '#2435db'
+    cyan: '#3256ff'
+    white: '#fffef6'
+  bright:
+    black: '#505354'
+    red: '#ff0325'
+    green: '#ff3338'
+    yellow: '#fe3a35'
+    blue: '#1d50ff'
+    magenta: '#747cff'
+    cyan: '#6184ff'
+    white: '#fffff9'

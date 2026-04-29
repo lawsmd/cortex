@@ -1,0 +1,24 @@
+name: 'Atom (Gogh)'
+accent: '#96cbfe'
+background: '#161719'
+foreground: '#c5c8c6'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#fd5ff1'
+    green: '#87c38a'
+    yellow: '#ffd7b1'
+    blue: '#85befd'
+    magenta: '#b9b6fc'
+    cyan: '#85befd'
+    white: '#e0e0e0'
+  bright:
+    black: '#000000'
+    red: '#fd5ff1'
+    green: '#94fa36'
+    yellow: '#f5ffa8'
+    blue: '#96cbfe'
+    magenta: '#b9b6fc'
+    cyan: '#85befd'
+    white: '#e0e0e0'

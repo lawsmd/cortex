@@ -1,0 +1,24 @@
+name: 'Ayu Dark (Gogh)'
+accent: '#59c2ff'
+background: '#0a0e14'
+foreground: '#b3b1ad'
+details: darker
+terminal_colors:
+  normal:
+    black: '#0a0e14'
+    red: '#ff3333'
+    green: '#c2d94c'
+    yellow: '#ff8f40'
+    blue: '#59c2ff'
+    magenta: '#ffee99'
+    cyan: '#95e6cb'
+    white: '#b3b1ad'
+  bright:
+    black: '#4d5566'
+    red: '#ff3333'
+    green: '#c2d94c'
+    yellow: '#ff8f40'
+    blue: '#59c2ff'
+    magenta: '#ffee99'
+    cyan: '#95e6cb'
+    white: '#b3b1ad'

@@ -1,0 +1,24 @@
+name: 'Pretty and Pastel (terminal.sexy)'
+accent: '#accaff'
+background: '#151515'
+foreground: '#888888'
+details: darker
+terminal_colors:
+  normal:
+    black: '#292929'
+    red: '#cf6a4c'
+    green: '#19cb00'
+    yellow: '#fad07a'
+    blue: '#8197bf'
+    magenta: '#8787af'
+    cyan: '#668799'
+    white: '#888888'
+  bright:
+    black: '#525252'
+    red: '#ff9d80'
+    green: '#23fd00'
+    yellow: '#ffefbf'
+    blue: '#accaff'
+    magenta: '#c4c4ff'
+    cyan: '#80bfaf'
+    white: '#e8e8d3'

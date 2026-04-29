@@ -1,0 +1,24 @@
+name: 'Nep (Gogh)'
+accent: '#b974ff'
+background: '#758480'
+foreground: '#23476a'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#dd6f00'
+    green: '#00dd6f'
+    yellow: '#6fdd00'
+    blue: '#6f00dd'
+    magenta: '#dd006f'
+    cyan: '#006fdd'
+    white: '#f2f2f2'
+  bright:
+    black: '#7d7d7d'
+    red: '#ffb974'
+    green: '#74ffb9'
+    yellow: '#b9ff74'
+    blue: '#b974ff'
+    magenta: '#ff74b9'
+    cyan: '#74b9ff'
+    white: '#ffffff'

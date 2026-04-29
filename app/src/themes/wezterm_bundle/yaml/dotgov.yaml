@@ -1,0 +1,24 @@
+name: 'DotGov'
+accent: '#17b2e0'
+background: '#262c35'
+foreground: '#ebebeb'
+details: darker
+terminal_colors:
+  normal:
+    black: '#191919'
+    red: '#bf091d'
+    green: '#3d9751'
+    yellow: '#f6bb34'
+    blue: '#17b2e0'
+    magenta: '#7830b0'
+    cyan: '#8bd2ed'
+    white: '#ffffff'
+  bright:
+    black: '#191919'
+    red: '#bf091d'
+    green: '#3d9751'
+    yellow: '#f6bb34'
+    blue: '#17b2e0'
+    magenta: '#7830b0'
+    cyan: '#8bd2ed'
+    white: '#ffffff'

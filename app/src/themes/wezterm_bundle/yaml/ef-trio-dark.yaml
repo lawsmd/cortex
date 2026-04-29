@@ -1,0 +1,24 @@
+name: 'Ef-Trio-Dark'
+accent: '#72afff'
+background: '#160f0f'
+foreground: '#d8cfd5'
+details: darker
+terminal_colors:
+  normal:
+    black: '#2a2228'
+    red: '#f48359'
+    green: '#60b444'
+    yellow: '#d4a052'
+    blue: '#7fa5f6'
+    magenta: '#d37faf'
+    cyan: '#8fbaff'
+    white: '#d8cfd5'
+  bright:
+    black: '#564f55'
+    red: '#ff85aa'
+    green: '#60bf88'
+    yellow: '#ef9680'
+    blue: '#72afff'
+    magenta: '#a698ef'
+    cyan: '#8fcfdf'
+    white: '#908890'

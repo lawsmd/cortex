@@ -1,0 +1,24 @@
+name: 'Tomorrow Night Blue (Gogh)'
+accent: '#badaff'
+background: '#002451'
+foreground: '#fffefe'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#ff9da3'
+    green: '#d1f1a9'
+    yellow: '#ffeead'
+    blue: '#bbdaff'
+    magenta: '#ebbbff'
+    cyan: '#99ffff'
+    white: '#fffefe'
+  bright:
+    black: '#000000'
+    red: '#ff9ca3'
+    green: '#d0f0a8'
+    yellow: '#ffedac'
+    blue: '#badaff'
+    magenta: '#ebbaff'
+    cyan: '#99ffff'
+    white: '#fffefe'

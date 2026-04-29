@@ -1,0 +1,24 @@
+name: 'Atelier Sulphurpool Light (base16)'
+accent: '#3d8fd1'
+background: '#f5f7ff'
+foreground: '#5e6687'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#f5f7ff'
+    red: '#c94922'
+    green: '#ac9739'
+    yellow: '#c08b30'
+    blue: '#3d8fd1'
+    magenta: '#6679cc'
+    cyan: '#22a2c9'
+    white: '#5e6687'
+  bright:
+    black: '#898ea4'
+    red: '#c94922'
+    green: '#ac9739'
+    yellow: '#c08b30'
+    blue: '#3d8fd1'
+    magenta: '#6679cc'
+    cyan: '#22a2c9'
+    white: '#202746'

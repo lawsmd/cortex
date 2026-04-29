@@ -1,0 +1,24 @@
+name: 'Mono Red (Gogh)'
+accent: '#ff3600'
+background: '#2b0c00'
+foreground: '#ff3600'
+details: darker
+terminal_colors:
+  normal:
+    black: '#401200'
+    red: '#ff3600'
+    green: '#ff3600'
+    yellow: '#ff3600'
+    blue: '#ff3600'
+    magenta: '#ff3600'
+    cyan: '#ff3600'
+    white: '#ff3600'
+  bright:
+    black: '#ff3600'
+    red: '#ff3600'
+    green: '#ff3600'
+    yellow: '#ff3600'
+    blue: '#ff3600'
+    magenta: '#ff3600'
+    cyan: '#ff3600'
+    white: '#ff3600'

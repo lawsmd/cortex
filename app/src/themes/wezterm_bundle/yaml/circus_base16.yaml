@@ -1,0 +1,24 @@
+name: 'Circus (base16)'
+accent: '#639ee4'
+background: '#191919'
+foreground: '#a7a7a7'
+details: darker
+terminal_colors:
+  normal:
+    black: '#191919'
+    red: '#dc657d'
+    green: '#84b97c'
+    yellow: '#c3ba63'
+    blue: '#639ee4'
+    magenta: '#b888e2'
+    cyan: '#4bb1a7'
+    white: '#a7a7a7'
+  bright:
+    black: '#5f5a60'
+    red: '#dc657d'
+    green: '#84b97c'
+    yellow: '#c3ba63'
+    blue: '#639ee4'
+    magenta: '#b888e2'
+    cyan: '#4bb1a7'
+    white: '#ffffff'

@@ -1,0 +1,24 @@
+name: 'Ef-Maris-Dark'
+accent: '#12b4ff'
+background: '#131c2b'
+foreground: '#eaedef'
+details: darker
+terminal_colors:
+  normal:
+    black: '#1d2c39'
+    red: '#ff6f6f'
+    green: '#41bf4f'
+    yellow: '#d0d24f'
+    blue: '#57b0ff'
+    magenta: '#f59acf'
+    cyan: '#2fd0db'
+    white: '#eaedef'
+  bright:
+    black: '#4a5664'
+    red: '#ff7788'
+    green: '#30c489'
+    yellow: '#cab27f'
+    blue: '#12b4ff'
+    magenta: '#cf90ff'
+    cyan: '#65d5a8'
+    white: '#969faf'

@@ -1,0 +1,24 @@
+name: 'BlulocoDark'
+accent: '#10b1fe'
+background: '#282c34'
+foreground: '#b9c0cb'
+details: darker
+terminal_colors:
+  normal:
+    black: '#41444d'
+    red: '#fc2f52'
+    green: '#25a45c'
+    yellow: '#ff936a'
+    blue: '#3476ff'
+    magenta: '#7a82da'
+    cyan: '#4483aa'
+    white: '#cdd4e0'
+  bright:
+    black: '#8f9aae'
+    red: '#ff6480'
+    green: '#3fc56b'
+    yellow: '#f9c859'
+    blue: '#10b1fe'
+    magenta: '#ff78f8'
+    cyan: '#5fb9bc'
+    white: '#ffffff'

@@ -1,0 +1,24 @@
+name: 'Andromeda'
+accent: '#2472c8'
+background: '#262a33'
+foreground: '#e5e5e5'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#cd3131'
+    green: '#05bc79'
+    yellow: '#e5e512'
+    blue: '#2472c8'
+    magenta: '#bc3fbc'
+    cyan: '#0fa8cd'
+    white: '#e5e5e5'
+  bright:
+    black: '#666666'
+    red: '#cd3131'
+    green: '#05bc79'
+    yellow: '#e5e512'
+    blue: '#2472c8'
+    magenta: '#bc3fbc'
+    cyan: '#0fa8cd'
+    white: '#e5e5e5'

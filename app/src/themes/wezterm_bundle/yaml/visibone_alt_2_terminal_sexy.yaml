@@ -1,0 +1,24 @@
+name: 'Visibone Alt. 2 (terminal.sexy)'
+accent: '#99ccff'
+background: '#333333'
+foreground: '#cccccc'
+details: darker
+terminal_colors:
+  normal:
+    black: '#666666'
+    red: '#cc6699'
+    green: '#99cc66'
+    yellow: '#cc9966'
+    blue: '#6699cc'
+    magenta: '#9966cc'
+    cyan: '#66cc99'
+    white: '#cccccc'
+  bright:
+    black: '#999999'
+    red: '#ff99cc'
+    green: '#ccff99'
+    yellow: '#ffcc99'
+    blue: '#99ccff'
+    magenta: '#cc99ff'
+    cyan: '#99ffcc'
+    white: '#ffffff'

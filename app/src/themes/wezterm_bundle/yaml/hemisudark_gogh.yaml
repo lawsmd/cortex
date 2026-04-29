@@ -1,0 +1,24 @@
+name: 'HemisuDark (Gogh)'
+accent: '#9fd3e5'
+background: '#000000'
+foreground: '#ffffff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#444444'
+    red: '#ff0054'
+    green: '#b1d630'
+    yellow: '#9d895e'
+    blue: '#67bee3'
+    magenta: '#b576bc'
+    cyan: '#569a9f'
+    white: '#ededed'
+  bright:
+    black: '#777777'
+    red: '#d65e75'
+    green: '#baffaa'
+    yellow: '#ece1c8'
+    blue: '#9fd3e5'
+    magenta: '#deb3df'
+    cyan: '#b6e0e5'
+    white: '#ffffff'

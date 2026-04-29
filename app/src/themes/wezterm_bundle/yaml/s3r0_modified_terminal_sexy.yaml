@@ -1,0 +1,24 @@
+name: 's3r0 modified (terminal.sexy)'
+accent: '#535c5c'
+background: '#1f1f1f'
+foreground: '#c0b18b'
+details: darker
+terminal_colors:
+  normal:
+    black: '#4a3637'
+    red: '#d17b49'
+    green: '#7b8748'
+    yellow: '#af865a'
+    blue: '#535c5c'
+    magenta: '#775759'
+    cyan: '#6d715e'
+    white: '#c0b18b'
+  bright:
+    black: '#4a3637'
+    red: '#d17b49'
+    green: '#7b8748'
+    yellow: '#af865a'
+    blue: '#535c5c'
+    magenta: '#775759'
+    cyan: '#6d715e'
+    white: '#c0b18b'

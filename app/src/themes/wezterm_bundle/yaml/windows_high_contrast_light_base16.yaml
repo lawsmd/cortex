@@ -1,0 +1,24 @@
+name: 'Windows High Contrast Light (base16)'
+accent: '#000080'
+background: '#fcfcfc'
+foreground: '#545454'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#fcfcfc'
+    red: '#800000'
+    green: '#008000'
+    yellow: '#808000'
+    blue: '#000080'
+    magenta: '#800080'
+    cyan: '#008080'
+    white: '#545454'
+  bright:
+    black: '#c0c0c0'
+    red: '#800000'
+    green: '#008000'
+    yellow: '#808000'
+    blue: '#000080'
+    magenta: '#800080'
+    cyan: '#008080'
+    white: '#000000'

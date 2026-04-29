@@ -1,0 +1,24 @@
+name: 'Material Lighter (base16)'
+accent: '#6182b8'
+background: '#fafafa'
+foreground: '#80cbc4'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#fafafa'
+    red: '#ff5370'
+    green: '#91b859'
+    yellow: '#ffb62c'
+    blue: '#6182b8'
+    magenta: '#7c4dff'
+    cyan: '#39adb5'
+    white: '#80cbc4'
+  bright:
+    black: '#ccd7da'
+    red: '#ff5370'
+    green: '#91b859'
+    yellow: '#ffb62c'
+    blue: '#6182b8'
+    magenta: '#7c4dff'
+    cyan: '#39adb5'
+    white: '#ffffff'

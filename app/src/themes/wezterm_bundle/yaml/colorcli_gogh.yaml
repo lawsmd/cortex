@@ -1,0 +1,24 @@
+name: 'Colorcli (Gogh)'
+accent: '#0087af'
+background: '#ffffff'
+foreground: '#005f87'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#d70000'
+    green: '#5faf00'
+    yellow: '#5faf00'
+    blue: '#005f87'
+    magenta: '#d70000'
+    cyan: '#5f5f5f'
+    white: '#e4e4e4'
+  bright:
+    black: '#5f5f5f'
+    red: '#d70000'
+    green: '#5f5f5f'
+    yellow: '#ffff00'
+    blue: '#0087af'
+    magenta: '#0087af'
+    cyan: '#0087af'
+    white: '#ffffff'

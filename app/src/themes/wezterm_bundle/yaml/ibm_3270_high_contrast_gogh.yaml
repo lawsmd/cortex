@@ -1,0 +1,24 @@
+name: 'Ibm 3270 (High Contrast) (Gogh)'
+accent: '#0000cd'
+background: '#000000'
+foreground: '#fdfdfd'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#ff0000'
+    green: '#00ff00'
+    yellow: '#ffff00'
+    blue: '#00bfff'
+    magenta: '#ffc0cb'
+    cyan: '#40e0d0'
+    white: '#bebebe'
+  bright:
+    black: '#414141'
+    red: '#ffa500'
+    green: '#98fb98'
+    yellow: '#ffff00'
+    blue: '#0000cd'
+    magenta: '#a020f0'
+    cyan: '#aeeeee'
+    white: '#ffffff'

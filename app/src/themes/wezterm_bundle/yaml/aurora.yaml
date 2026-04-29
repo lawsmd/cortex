@@ -1,0 +1,24 @@
+name: 'Aurora'
+accent: '#03d6b8'
+background: '#23262e'
+foreground: '#ffca28'
+details: darker
+terminal_colors:
+  normal:
+    black: '#23262e'
+    red: '#f0266f'
+    green: '#8fd46d'
+    yellow: '#ffe66d'
+    blue: '#0321d7'
+    magenta: '#ee5d43'
+    cyan: '#03d6b8'
+    white: '#c74ded'
+  bright:
+    black: '#292e38'
+    red: '#f92672'
+    green: '#8fd46d'
+    yellow: '#ffe66d'
+    blue: '#03d6b8'
+    magenta: '#ee5d43'
+    cyan: '#03d6b8'
+    white: '#c74ded'

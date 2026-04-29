@@ -1,0 +1,24 @@
+name: 'Freya (Gogh)'
+accent: '#268bd2'
+background: '#252e32'
+foreground: '#94a3a5'
+details: darker
+terminal_colors:
+  normal:
+    black: '#073642'
+    red: '#dc322f'
+    green: '#859900'
+    yellow: '#b58900'
+    blue: '#268bd2'
+    magenta: '#ec0048'
+    cyan: '#2aa198'
+    white: '#94a3a5'
+  bright:
+    black: '#586e75'
+    red: '#cb4b16'
+    green: '#859900'
+    yellow: '#b58900'
+    blue: '#268bd2'
+    magenta: '#d33682'
+    cyan: '#2aa198'
+    white: '#6c71c4'

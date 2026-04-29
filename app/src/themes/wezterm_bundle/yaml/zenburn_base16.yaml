@@ -1,0 +1,24 @@
+name: 'Zenburn (base16)'
+accent: '#7cb8bb'
+background: '#383838'
+foreground: '#dcdccc'
+details: darker
+terminal_colors:
+  normal:
+    black: '#383838'
+    red: '#dca3a3'
+    green: '#5f7f5f'
+    yellow: '#e0cf9f'
+    blue: '#7cb8bb'
+    magenta: '#dc8cc3'
+    cyan: '#93e0e3'
+    white: '#dcdccc'
+  bright:
+    black: '#6f6f6f'
+    red: '#dca3a3'
+    green: '#5f7f5f'
+    yellow: '#e0cf9f'
+    blue: '#7cb8bb'
+    magenta: '#dc8cc3'
+    cyan: '#93e0e3'
+    white: '#ffffff'

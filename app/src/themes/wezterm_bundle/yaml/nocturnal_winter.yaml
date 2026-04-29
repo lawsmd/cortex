@@ -1,0 +1,24 @@
+name: 'Nocturnal Winter'
+accent: '#6096ff'
+background: '#0d0d17'
+foreground: '#e6e5e5'
+details: darker
+terminal_colors:
+  normal:
+    black: '#4d4d4d'
+    red: '#f12d52'
+    green: '#09cd7e'
+    yellow: '#f5f17a'
+    blue: '#3182e0'
+    magenta: '#ff2b6d'
+    cyan: '#09c87a'
+    white: '#fcfcfc'
+  bright:
+    black: '#808080'
+    red: '#f16d86'
+    green: '#0ae78d'
+    yellow: '#fffc67'
+    blue: '#6096ff'
+    magenta: '#ff78a2'
+    cyan: '#0ae78d'
+    white: '#ffffff'

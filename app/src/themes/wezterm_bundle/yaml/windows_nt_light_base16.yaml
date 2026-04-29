@@ -1,0 +1,24 @@
+name: 'Windows NT Light (base16)'
+accent: '#000080'
+background: '#ffffff'
+foreground: '#808080'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#ffffff'
+    red: '#800000'
+    green: '#008000'
+    yellow: '#808000'
+    blue: '#000080'
+    magenta: '#800080'
+    cyan: '#008080'
+    white: '#808080'
+  bright:
+    black: '#c0c0c0'
+    red: '#800000'
+    green: '#008000'
+    yellow: '#808000'
+    blue: '#000080'
+    magenta: '#800080'
+    cyan: '#008080'
+    white: '#000000'

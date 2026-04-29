@@ -1,0 +1,24 @@
+name: 'Maia (Gogh)'
+accent: '#13bf9d'
+background: '#31363b'
+foreground: '#bdc3c7'
+details: darker
+terminal_colors:
+  normal:
+    black: '#232423'
+    red: '#ba2922'
+    green: '#7e807e'
+    yellow: '#4c4f4d'
+    blue: '#16a085'
+    magenta: '#43746a'
+    cyan: '#00cccc'
+    white: '#e0e0e0'
+  bright:
+    black: '#282928'
+    red: '#cc372c'
+    green: '#8d8f8d'
+    yellow: '#4e524f'
+    blue: '#13bf9d'
+    magenta: '#487d72'
+    cyan: '#00d1d1'
+    white: '#e8e8e8'

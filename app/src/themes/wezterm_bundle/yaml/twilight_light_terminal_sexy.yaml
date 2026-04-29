@@ -1,0 +1,24 @@
+name: 'Twilight (light) (terminal.sexy)'
+accent: '#7587a6'
+background: '#ffffff'
+foreground: '#464b50'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#1e1e1e'
+    red: '#cf6a4c'
+    green: '#8f9d6a'
+    yellow: '#f9ee98'
+    blue: '#7587a6'
+    magenta: '#9b859d'
+    cyan: '#afc4db'
+    white: '#a7a7a7'
+  bright:
+    black: '#5f5a60'
+    red: '#cf6a4c'
+    green: '#8f9d6a'
+    yellow: '#f9ee98'
+    blue: '#7587a6'
+    magenta: '#9b859d'
+    cyan: '#afc4db'
+    white: '#ffffff'

@@ -1,0 +1,24 @@
+name: 'NordLight (Gogh)'
+accent: '#6fbbe2'
+background: '#ebeaf2'
+foreground: '#004f7c'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#003b4e'
+    red: '#e64569'
+    green: '#069f5f'
+    yellow: '#dab752'
+    blue: '#439ecf'
+    magenta: '#d961dc'
+    cyan: '#00b1be'
+    white: '#b3b3b3'
+  bright:
+    black: '#3e89a1'
+    red: '#e4859a'
+    green: '#a2cca1'
+    yellow: '#e1e387'
+    blue: '#6fbbe2'
+    magenta: '#e586e7'
+    cyan: '#96dcda'
+    white: '#dedede'

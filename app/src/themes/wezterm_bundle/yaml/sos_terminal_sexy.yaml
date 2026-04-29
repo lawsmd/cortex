@@ -1,0 +1,24 @@
+name: 'SOS (terminal.sexy)'
+accent: '#afb171'
+background: '#373b43'
+foreground: '#78796f'
+details: darker
+terminal_colors:
+  normal:
+    black: '#373b43'
+    red: '#fdcd39'
+    green: '#fbfd59'
+    yellow: '#deac40'
+    blue: '#afb171'
+    magenta: '#b387e7'
+    cyan: '#63e860'
+    white: '#efdecb'
+  bright:
+    black: '#373b43'
+    red: '#fdcd39'
+    green: '#fbfd59'
+    yellow: '#deac40'
+    blue: '#afb171'
+    magenta: '#b387e7'
+    cyan: '#63e860'
+    white: '#efdecb'

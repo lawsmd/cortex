@@ -1,0 +1,24 @@
+name: 'Woodland (base16)'
+accent: '#88a4d3'
+background: '#231e18'
+foreground: '#cabcb1'
+details: darker
+terminal_colors:
+  normal:
+    black: '#231e18'
+    red: '#d35c5c'
+    green: '#b7ba53'
+    yellow: '#e0ac16'
+    blue: '#88a4d3'
+    magenta: '#bb90e2'
+    cyan: '#6eb958'
+    white: '#cabcb1'
+  bright:
+    black: '#9d8b70'
+    red: '#d35c5c'
+    green: '#b7ba53'
+    yellow: '#e0ac16'
+    blue: '#88a4d3'
+    magenta: '#bb90e2'
+    cyan: '#6eb958'
+    white: '#e4d4c8'

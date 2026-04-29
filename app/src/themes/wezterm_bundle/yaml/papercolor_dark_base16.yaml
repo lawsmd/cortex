@@ -1,0 +1,24 @@
+name: 'PaperColor Dark (base16)'
+accent: '#ff5faf'
+background: '#1c1c1c'
+foreground: '#808080'
+details: darker
+terminal_colors:
+  normal:
+    black: '#1c1c1c'
+    red: '#585858'
+    green: '#af87d7'
+    yellow: '#afd700'
+    blue: '#ff5faf'
+    magenta: '#00afaf'
+    cyan: '#ffaf00'
+    white: '#808080'
+  bright:
+    black: '#d7af5f'
+    red: '#585858'
+    green: '#af87d7'
+    yellow: '#afd700'
+    blue: '#ff5faf'
+    magenta: '#00afaf'
+    cyan: '#ffaf00'
+    white: '#d0d0d0'

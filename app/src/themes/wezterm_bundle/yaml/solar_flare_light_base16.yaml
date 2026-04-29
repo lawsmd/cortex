@@ -1,0 +1,24 @@
+name: 'Solar Flare Light (base16)'
+accent: '#33b5e1'
+background: '#f5f7fa'
+foreground: '#586875'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#f5f7fa'
+    red: '#ef5253'
+    green: '#7cc844'
+    yellow: '#e4b51c'
+    blue: '#33b5e1'
+    magenta: '#a363d5'
+    cyan: '#52cbb0'
+    white: '#586875'
+  bright:
+    black: '#85939e'
+    red: '#ef5253'
+    green: '#7cc844'
+    yellow: '#e4b51c'
+    blue: '#33b5e1'
+    magenta: '#a363d5'
+    cyan: '#52cbb0'
+    white: '#18262f'

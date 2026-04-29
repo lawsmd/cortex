@@ -1,0 +1,24 @@
+name: 'Edge Light (base16)'
+accent: '#6587bf'
+background: '#fafafa'
+foreground: '#5e646f'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#fafafa'
+    red: '#db7070'
+    green: '#7c9f4b'
+    yellow: '#d69822'
+    blue: '#6587bf'
+    magenta: '#b870ce'
+    cyan: '#509c93'
+    white: '#5e646f'
+  bright:
+    black: '#5e646f'
+    red: '#db7070'
+    green: '#7c9f4b'
+    yellow: '#d69822'
+    blue: '#6587bf'
+    magenta: '#b870ce'
+    cyan: '#509c93'
+    white: '#5e646f'

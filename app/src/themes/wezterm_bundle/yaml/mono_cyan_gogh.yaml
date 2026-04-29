@@ -1,0 +1,24 @@
+name: 'Mono Cyan (Gogh)'
+accent: '#00ccff'
+background: '#00222b'
+foreground: '#00ccff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#003340'
+    red: '#00ccff'
+    green: '#00ccff'
+    yellow: '#00ccff'
+    blue: '#00ccff'
+    magenta: '#00ccff'
+    cyan: '#00ccff'
+    white: '#00ccff'
+  bright:
+    black: '#00ccff'
+    red: '#00ccff'
+    green: '#00ccff'
+    yellow: '#00ccff'
+    blue: '#00ccff'
+    magenta: '#00ccff'
+    cyan: '#00ccff'
+    white: '#00ccff'

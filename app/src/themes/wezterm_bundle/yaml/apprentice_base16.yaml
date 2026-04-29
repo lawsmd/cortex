@@ -1,0 +1,24 @@
+name: 'Apprentice (base16)'
+accent: '#8787af'
+background: '#262626'
+foreground: '#5f5f87'
+details: darker
+terminal_colors:
+  normal:
+    black: '#262626'
+    red: '#444444'
+    green: '#ffffaf'
+    yellow: '#87af87'
+    blue: '#8787af'
+    magenta: '#5fafaf'
+    cyan: '#87afd7'
+    white: '#5f5f87'
+  bright:
+    black: '#87875f'
+    red: '#444444'
+    green: '#ffffaf'
+    yellow: '#87af87'
+    blue: '#8787af'
+    magenta: '#5fafaf'
+    cyan: '#87afd7'
+    white: '#6c6c6c'

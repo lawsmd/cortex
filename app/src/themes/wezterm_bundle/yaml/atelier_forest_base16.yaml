@@ -1,0 +1,24 @@
+name: 'Atelier Forest (base16)'
+accent: '#407ee7'
+background: '#1b1918'
+foreground: '#a8a19f'
+details: darker
+terminal_colors:
+  normal:
+    black: '#1b1918'
+    red: '#f22c40'
+    green: '#7b9726'
+    yellow: '#c38418'
+    blue: '#407ee7'
+    magenta: '#6666ea'
+    cyan: '#3d97b8'
+    white: '#a8a19f'
+  bright:
+    black: '#766e6b'
+    red: '#f22c40'
+    green: '#7b9726'
+    yellow: '#c38418'
+    blue: '#407ee7'
+    magenta: '#6666ea'
+    cyan: '#3d97b8'
+    white: '#f1efee'

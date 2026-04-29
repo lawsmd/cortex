@@ -1,0 +1,24 @@
+name: 'Sweet Love (terminal.sexy)'
+accent: '#444b4b'
+background: '#1f1f1f'
+foreground: '#c0b18b'
+details: darker
+terminal_colors:
+  normal:
+    black: '#4a3637'
+    red: '#d17b49'
+    green: '#7b8748'
+    yellow: '#af865a'
+    blue: '#535c5c'
+    magenta: '#775759'
+    cyan: '#6d715e'
+    white: '#c0b18b'
+  bright:
+    black: '#402e2e'
+    red: '#ac5d2f'
+    green: '#647035'
+    yellow: '#8f6840'
+    blue: '#444b4b'
+    magenta: '#614445'
+    cyan: '#585c49'
+    white: '#978965'

@@ -1,0 +1,24 @@
+name: 'Eva (base16)'
+accent: '#15f4ee'
+background: '#2a3b4d'
+foreground: '#9fa2a6'
+details: darker
+terminal_colors:
+  normal:
+    black: '#2a3b4d'
+    red: '#c4676c'
+    green: '#66ff66'
+    yellow: '#ffff66'
+    blue: '#15f4ee'
+    magenta: '#9c6cd3'
+    cyan: '#4b8f77'
+    white: '#9fa2a6'
+  bright:
+    black: '#55799c'
+    red: '#c4676c'
+    green: '#66ff66'
+    yellow: '#ffff66'
+    blue: '#15f4ee'
+    magenta: '#9c6cd3'
+    cyan: '#4b8f77'
+    white: '#ffffff'

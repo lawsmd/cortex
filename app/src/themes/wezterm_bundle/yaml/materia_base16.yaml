@@ -1,0 +1,24 @@
+name: 'Materia (base16)'
+accent: '#89ddff'
+background: '#263238'
+foreground: '#cdd3de'
+details: darker
+terminal_colors:
+  normal:
+    black: '#263238'
+    red: '#ec5f67'
+    green: '#8bd649'
+    yellow: '#ffcc00'
+    blue: '#89ddff'
+    magenta: '#82aaff'
+    cyan: '#80cbc4'
+    white: '#cdd3de'
+  bright:
+    black: '#707880'
+    red: '#ec5f67'
+    green: '#8bd649'
+    yellow: '#ffcc00'
+    blue: '#89ddff'
+    magenta: '#82aaff'
+    cyan: '#80cbc4'
+    white: '#ffffff'

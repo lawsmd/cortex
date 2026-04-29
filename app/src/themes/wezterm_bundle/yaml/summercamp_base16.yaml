@@ -1,0 +1,24 @@
+name: 'summercamp (base16)'
+accent: '#489bf0'
+background: '#1c1810'
+foreground: '#736e55'
+details: darker
+terminal_colors:
+  normal:
+    black: '#1c1810'
+    red: '#e35142'
+    green: '#5ceb5a'
+    yellow: '#f2ff27'
+    blue: '#489bf0'
+    magenta: '#ff8080'
+    cyan: '#5aebbc'
+    white: '#736e55'
+  bright:
+    black: '#504b38'
+    red: '#e35142'
+    green: '#5ceb5a'
+    yellow: '#f2ff27'
+    blue: '#489bf0'
+    magenta: '#ff8080'
+    cyan: '#5aebbc'
+    white: '#f8f5de'

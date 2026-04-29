@@ -1,0 +1,24 @@
+name: 'Bamboo Light'
+accent: '#1765d5'
+background: '#fafae0'
+foreground: '#3a4238'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#dadac2'
+    red: '#c72a3c'
+    green: '#4fa533'
+    yellow: '#bb9651'
+    blue: '#1765d5'
+    magenta: '#8a4adf'
+    cyan: '#00a2be'
+    white: '#3a4238'
+  bright:
+    black: '#c7c7af'
+    red: '#c72a3c'
+    green: '#4fa533'
+    yellow: '#bb9651'
+    blue: '#1765d5'
+    magenta: '#8a4adf'
+    cyan: '#00a2be'
+    white: '#252623'

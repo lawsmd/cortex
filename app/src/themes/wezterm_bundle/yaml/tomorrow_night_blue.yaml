@@ -1,0 +1,24 @@
+name: 'Tomorrow Night Blue'
+accent: '#bbdaff'
+background: '#002451'
+foreground: '#ffffff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#ff9da4'
+    green: '#d1f1a9'
+    yellow: '#ffeead'
+    blue: '#bbdaff'
+    magenta: '#ebbbff'
+    cyan: '#99ffff'
+    white: '#ffffff'
+  bright:
+    black: '#000000'
+    red: '#ff9da4'
+    green: '#d1f1a9'
+    yellow: '#ffeead'
+    blue: '#bbdaff'
+    magenta: '#ebbbff'
+    cyan: '#99ffff'
+    white: '#ffffff'

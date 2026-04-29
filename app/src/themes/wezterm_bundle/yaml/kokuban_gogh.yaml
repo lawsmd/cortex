@@ -1,0 +1,24 @@
+name: 'Kokuban (Gogh)'
+accent: '#57aeff'
+background: '#0d4a08'
+foreground: '#d8e2d7'
+details: darker
+terminal_colors:
+  normal:
+    black: '#2e8744'
+    red: '#d84e4c'
+    green: '#95da5a'
+    yellow: '#d6e264'
+    blue: '#4b9ed7'
+    magenta: '#945fc5'
+    cyan: '#d89b25'
+    white: '#d8e2d7'
+  bright:
+    black: '#34934f'
+    red: '#ff4f59'
+    green: '#aff56a'
+    yellow: '#fcff75'
+    blue: '#57aeff'
+    magenta: '#ae63e9'
+    cyan: '#ffaa2b'
+    white: '#fffefe'

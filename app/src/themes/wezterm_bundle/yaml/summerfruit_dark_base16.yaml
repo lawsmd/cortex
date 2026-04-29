@@ -1,0 +1,24 @@
+name: 'Summerfruit Dark (base16)'
+accent: '#3777e6'
+background: '#151515'
+foreground: '#d0d0d0'
+details: darker
+terminal_colors:
+  normal:
+    black: '#151515'
+    red: '#ff0086'
+    green: '#00c918'
+    yellow: '#aba800'
+    blue: '#3777e6'
+    magenta: '#ad00a1'
+    cyan: '#1faaaa'
+    white: '#d0d0d0'
+  bright:
+    black: '#505050'
+    red: '#ff0086'
+    green: '#00c918'
+    yellow: '#aba800'
+    blue: '#3777e6'
+    magenta: '#ad00a1'
+    cyan: '#1faaaa'
+    white: '#ffffff'

@@ -1,0 +1,24 @@
+name: 'vulcan (base16)'
+accent: '#977d7c'
+background: '#041523'
+foreground: '#5b778c'
+details: darker
+terminal_colors:
+  normal:
+    black: '#041523'
+    red: '#818591'
+    green: '#977d7c'
+    yellow: '#adb4b9'
+    blue: '#977d7c'
+    magenta: '#9198a3'
+    cyan: '#977d7c'
+    white: '#5b778c'
+  bright:
+    black: '#7a5759'
+    red: '#818591'
+    green: '#977d7c'
+    yellow: '#adb4b9'
+    blue: '#977d7c'
+    magenta: '#9198a3'
+    cyan: '#977d7c'
+    white: '#214d68'

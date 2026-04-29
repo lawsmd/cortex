@@ -1,0 +1,24 @@
+name: 'FrontendDelight (Gogh)'
+accent: '#3393ca'
+background: '#1b1c1d'
+foreground: '#adadad'
+details: darker
+terminal_colors:
+  normal:
+    black: '#242526'
+    red: '#f8511b'
+    green: '#565747'
+    yellow: '#fa771d'
+    blue: '#2c70b7'
+    magenta: '#f02e4f'
+    cyan: '#3ca1a6'
+    white: '#adadad'
+  bright:
+    black: '#5fac6d'
+    red: '#f74319'
+    green: '#74ec4c'
+    yellow: '#fdc325'
+    blue: '#3393ca'
+    magenta: '#e75e4f'
+    cyan: '#4fbce6'
+    white: '#8c735b'
