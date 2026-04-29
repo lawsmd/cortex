@@ -48,8 +48,8 @@ origin    https://github.com/lawsmd/cortex.git
 upstream  https://github.com/warpdotdev/warp.git
 ```
 
-- **Trunk:** `master` (matches Warp's branch name).
-- **Feature branches** for substantial work: `reskin/<thing>`, `feat/<thing>`, `ai-strip/<thing>`. Merge back to `master` with `git merge --no-ff`.
+- **Trunk:** `main` (Cortex fork only — upstream Warp's trunk is still `master`, so `upstream/master` is what we merge from).
+- **Feature branches** for substantial work: `reskin/<thing>`, `feat/<thing>`, `ai-strip/<thing>`. Merge back to `main` with `git merge --no-ff`.
 - **Commit messages:** conventional-commits-lite — `feat: ...`, `fix: ...`, `chore: ...`, `reskin: ...`, `ai-strip: ...`, `docs: ...`, `merge-upstream: ...`. Imperative subject, body explains *why*.
 - **Push to `origin`** liberally — repo is private, off-machine backup is free.
 - **Never push to `upstream`.** You can't anyway, but mind the muscle memory.
@@ -63,9 +63,9 @@ Full guide: `docs/fork-management.md`.
 ```bash
 cd ~/cortex
 git fetch upstream
-git checkout master
-git merge upstream/master   # resolve conflicts; see philosophy below
-git push origin master
+git checkout main
+git merge upstream/master   # upstream's trunk is master; resolve conflicts; see below
+git push origin main
 ```
 
 - **Cadence:** monthly default, or per-meaningful-feature when Warp ships something we want. **Pause** during big phase 1 work.
@@ -73,7 +73,7 @@ git push origin master
   - **Heavily customized files** (re-skin work, AI-strip files) → prefer Cortex's version, manually backport upstream improvements if any.
   - **Untouched files** (most of `warp_terminal/`, `lsp/`, etc.) → prefer upstream.
   - **Lightly customized** → read the conflict carefully, take upstream + re-apply our tweak.
-  - **Hairy conflicts** → use a `cortex-merge-YYYY-MM-DD` branch, finalize there, then `git merge --no-ff` back to master.
+  - **Hairy conflicts** → use a `cortex-merge-YYYY-MM-DD` branch, finalize there, then `git merge --no-ff` back to main.
 - **The `repo-sync/watermark/private-to-public` tag** appears in upstream fetches. Internal Warp tooling. **Don't push it to origin** — avoid `git push origin --tags`.
 
 Full guide: `docs/upstream-updates.md`.
@@ -122,7 +122,7 @@ A few Cortex-specific operating principles on top of `WARP.md`'s coding conventi
 
 ## Things to never do
 
-- **Force-push to `master` once shared.** Force-pushes rewrite history; if you've shared the branch, anyone who pulled the old history breaks.
+- **Force-push to `main` once shared.** Force-pushes rewrite history; if you've shared the branch, anyone who pulled the old history breaks.
 - **Push to `upstream`** (you can't anyway, but the reflex is dangerous).
 - **Commit `~/.config/terminal/.env`** or any other file containing the GITHUB_PAT, API keys, credentials. Even deleting it in a follow-up commit doesn't scrub history.
 - **Skip pre-commit hooks (`--no-verify`)** without diagnosing why they're failing first.
