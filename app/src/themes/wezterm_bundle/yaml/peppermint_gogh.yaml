@@ -1,0 +1,24 @@
+name: 'Peppermint (Gogh)'
+accent: '#6fbbe2'
+background: '#000000'
+foreground: '#c7c7c7'
+details: darker
+terminal_colors:
+  normal:
+    black: '#353535'
+    red: '#e64569'
+    green: '#89d287'
+    yellow: '#dab752'
+    blue: '#439ecf'
+    magenta: '#d961dc'
+    cyan: '#64aaaf'
+    white: '#b3b3b3'
+  bright:
+    black: '#535353'
+    red: '#e4859a'
+    green: '#a2cca1'
+    yellow: '#e1e387'
+    blue: '#6fbbe2'
+    magenta: '#e586e7'
+    cyan: '#96dcda'
+    white: '#dedede'

@@ -1,0 +1,24 @@
+name: 'Shel (Gogh)'
+accent: '#8fbaec'
+background: '#2a201f'
+foreground: '#4882cd'
+details: darker
+terminal_colors:
+  normal:
+    black: '#2c2423'
+    red: '#ab2463'
+    green: '#6ca323'
+    yellow: '#ab6423'
+    blue: '#2c64a2'
+    magenta: '#6c24a2'
+    cyan: '#2ca363'
+    white: '#918988'
+  bright:
+    black: '#918988'
+    red: '#f588b9'
+    green: '#c2ee86'
+    yellow: '#f5ba86'
+    blue: '#8fbaec'
+    magenta: '#c288ec'
+    cyan: '#8feeb9'
+    white: '#f5eeec'

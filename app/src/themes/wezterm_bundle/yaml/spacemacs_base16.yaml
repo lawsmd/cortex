@@ -1,0 +1,24 @@
+name: 'Spacemacs (base16)'
+accent: '#4f97d7'
+background: '#1f2022'
+foreground: '#a3a3a3'
+details: darker
+terminal_colors:
+  normal:
+    black: '#1f2022'
+    red: '#f2241f'
+    green: '#67b11d'
+    yellow: '#b1951d'
+    blue: '#4f97d7'
+    magenta: '#a31db1'
+    cyan: '#2d9574'
+    white: '#a3a3a3'
+  bright:
+    black: '#585858'
+    red: '#f2241f'
+    green: '#67b11d'
+    yellow: '#b1951d'
+    blue: '#4f97d7'
+    magenta: '#a31db1'
+    cyan: '#2d9574'
+    white: '#f8f8f8'

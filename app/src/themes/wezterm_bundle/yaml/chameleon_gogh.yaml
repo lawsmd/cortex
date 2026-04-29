@@ -1,0 +1,24 @@
+name: 'Chameleon (Gogh)'
+accent: '#366b71'
+background: '#2c2c2c'
+foreground: '#dedede'
+details: darker
+terminal_colors:
+  normal:
+    black: '#2c2c2c'
+    red: '#cc231c'
+    green: '#689d69'
+    yellow: '#d79922'
+    blue: '#366b71'
+    magenta: '#4e5165'
+    cyan: '#458587'
+    white: '#c8bb97'
+  bright:
+    black: '#777777'
+    red: '#cc231c'
+    green: '#689d69'
+    yellow: '#d79922'
+    blue: '#366b71'
+    magenta: '#4e5165'
+    cyan: '#458587'
+    white: '#c8bb97'

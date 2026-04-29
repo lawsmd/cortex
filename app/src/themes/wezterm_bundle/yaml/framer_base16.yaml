@@ -1,0 +1,24 @@
+name: 'Framer (base16)'
+accent: '#20bcfc'
+background: '#181818'
+foreground: '#d0d0d0'
+details: darker
+terminal_colors:
+  normal:
+    black: '#181818'
+    red: '#fd886b'
+    green: '#32ccdc'
+    yellow: '#fecb6e'
+    blue: '#20bcfc'
+    magenta: '#ba8cfc'
+    cyan: '#acddfd'
+    white: '#d0d0d0'
+  bright:
+    black: '#747474'
+    red: '#fd886b'
+    green: '#32ccdc'
+    yellow: '#fecb6e'
+    blue: '#20bcfc'
+    magenta: '#ba8cfc'
+    cyan: '#acddfd'
+    white: '#eeeeee'

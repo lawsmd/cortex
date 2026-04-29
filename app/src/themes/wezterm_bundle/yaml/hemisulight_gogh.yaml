@@ -1,0 +1,24 @@
+name: 'HemisuLight (Gogh)'
+accent: '#9db3cd'
+background: '#efefef'
+foreground: '#444444'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#777777'
+    red: '#ff0055'
+    green: '#739100'
+    yellow: '#503d15'
+    blue: '#538091'
+    magenta: '#5b345e'
+    cyan: '#538091'
+    white: '#999999'
+  bright:
+    black: '#999999'
+    red: '#d65e76'
+    green: '#9cc700'
+    yellow: '#947555'
+    blue: '#9db3cd'
+    magenta: '#a184a4'
+    cyan: '#85b2aa'
+    white: '#bababa'

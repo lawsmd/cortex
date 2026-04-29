@@ -1,0 +1,24 @@
+name: 'Ayu Mirage (Gogh)'
+accent: '#73d0ff'
+background: '#1f2430'
+foreground: '#cbccc6'
+details: darker
+terminal_colors:
+  normal:
+    black: '#1f2430'
+    red: '#ff3333'
+    green: '#bae67e'
+    yellow: '#ffa759'
+    blue: '#73d0ff'
+    magenta: '#d4bfff'
+    cyan: '#95e6cb'
+    white: '#cbccc6'
+  bright:
+    black: '#707a8c'
+    red: '#ff3333'
+    green: '#bae67e'
+    yellow: '#ffa759'
+    blue: '#73d0ff'
+    magenta: '#d4bfff'
+    cyan: '#95e6cb'
+    white: '#cbccc6'

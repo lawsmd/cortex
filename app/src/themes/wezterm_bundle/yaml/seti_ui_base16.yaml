@@ -1,0 +1,24 @@
+name: 'Seti UI (base16)'
+accent: '#55b5db'
+background: '#151718'
+foreground: '#d6d6d6'
+details: darker
+terminal_colors:
+  normal:
+    black: '#151718'
+    red: '#cd3f45'
+    green: '#9fca56'
+    yellow: '#e6cd69'
+    blue: '#55b5db'
+    magenta: '#a074c4'
+    cyan: '#55dbbe'
+    white: '#d6d6d6'
+  bright:
+    black: '#41535b'
+    red: '#cd3f45'
+    green: '#9fca56'
+    yellow: '#e6cd69'
+    blue: '#55b5db'
+    magenta: '#a074c4'
+    cyan: '#55dbbe'
+    white: '#ffffff'

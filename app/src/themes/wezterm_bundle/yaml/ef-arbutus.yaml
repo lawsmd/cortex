@@ -1,0 +1,24 @@
+name: 'Ef-Arbutus'
+accent: '#265fbf'
+background: '#ffead8'
+foreground: '#393330'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#f0d8cf'
+    red: '#b0000f'
+    green: '#007000'
+    yellow: '#906200'
+    blue: '#375cc6'
+    magenta: '#a23ea4'
+    cyan: '#3f69af'
+    white: '#393330'
+  bright:
+    black: '#c7b2ab'
+    red: '#aa184f'
+    green: '#00704f'
+    yellow: '#8a6340'
+    blue: '#265fbf'
+    magenta: '#6448ca'
+    cyan: '#0f7688'
+    white: '#6e678f'

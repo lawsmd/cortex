@@ -1,0 +1,24 @@
+name: 'primary'
+accent: '#4285f4'
+background: '#ffffff'
+foreground: '#000000'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#db4437'
+    green: '#0f9d58'
+    yellow: '#f4b400'
+    blue: '#4285f4'
+    magenta: '#db4437'
+    cyan: '#4285f4'
+    white: '#ffffff'
+  bright:
+    black: '#000000'
+    red: '#db4437'
+    green: '#0f9d58'
+    yellow: '#f4b400'
+    blue: '#4285f4'
+    magenta: '#4285f4'
+    cyan: '#0f9d58'
+    white: '#ffffff'

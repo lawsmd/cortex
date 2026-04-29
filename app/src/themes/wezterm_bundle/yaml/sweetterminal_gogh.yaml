@@ -1,0 +1,24 @@
+name: 'SweetTerminal (Gogh)'
+accent: '#f69154'
+background: '#222235'
+foreground: '#ffffff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#3f3f54'
+    red: '#f60055'
+    green: '#06c993'
+    yellow: '#9700be'
+    blue: '#f69154'
+    magenta: '#ec89cb'
+    cyan: '#60adec'
+    white: '#abb2bf'
+  bright:
+    black: '#959dcb'
+    red: '#f60055'
+    green: '#06c993'
+    yellow: '#9700be'
+    blue: '#f69154'
+    magenta: '#ec89cb'
+    cyan: '#00dded'
+    white: '#ffffff'

@@ -1,0 +1,24 @@
+name: 'nighty (Gogh)'
+accent: '#4674b8'
+background: '#2f2f2f'
+foreground: '#dfdfdf'
+details: darker
+terminal_colors:
+  normal:
+    black: '#373d48'
+    red: '#9b3e46'
+    green: '#095b32'
+    yellow: '#808020'
+    blue: '#1d3e6f'
+    magenta: '#823065'
+    cyan: '#3a7458'
+    white: '#828282'
+  bright:
+    black: '#5c6370'
+    red: '#d0555f'
+    green: '#119955'
+    yellow: '#dfe048'
+    blue: '#4674b8'
+    magenta: '#ed86c9'
+    cyan: '#70d2a4'
+    white: '#dfdfdf'

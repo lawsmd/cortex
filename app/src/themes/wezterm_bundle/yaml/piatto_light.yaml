@@ -1,0 +1,24 @@
+name: 'Piatto Light'
+accent: '#3c5ea8'
+background: '#ffffff'
+foreground: '#414141'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#414141'
+    red: '#b23771'
+    green: '#66781e'
+    yellow: '#cd6f34'
+    blue: '#3c5ea8'
+    magenta: '#a454b2'
+    cyan: '#66781e'
+    white: '#ffffff'
+  bright:
+    black: '#3f3f3f'
+    red: '#db3365'
+    green: '#829429'
+    yellow: '#cd6f34'
+    blue: '#3c5ea8'
+    magenta: '#a454b2'
+    cyan: '#829429'
+    white: '#f2f2f2'

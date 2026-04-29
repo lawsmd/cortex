@@ -1,0 +1,24 @@
+name: 'Rosé Pine (base16)'
+accent: '#c4a7e7'
+background: '#191724'
+foreground: '#e0def4'
+details: darker
+terminal_colors:
+  normal:
+    black: '#191724'
+    red: '#eb6f92'
+    green: '#31748f'
+    yellow: '#ebbcba'
+    blue: '#c4a7e7'
+    magenta: '#f6c177'
+    cyan: '#9ccfd8'
+    white: '#e0def4'
+  bright:
+    black: '#6e6a86'
+    red: '#eb6f92'
+    green: '#31748f'
+    yellow: '#ebbcba'
+    blue: '#c4a7e7'
+    magenta: '#f6c177'
+    cyan: '#9ccfd8'
+    white: '#524f67'

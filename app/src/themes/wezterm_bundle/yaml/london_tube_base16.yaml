@@ -1,0 +1,24 @@
+name: 'London Tube (base16)'
+accent: '#009ddc'
+background: '#231f20'
+foreground: '#d9d8d8'
+details: darker
+terminal_colors:
+  normal:
+    black: '#231f20'
+    red: '#ee2e24'
+    green: '#00853e'
+    yellow: '#ffd204'
+    blue: '#009ddc'
+    magenta: '#98005d'
+    cyan: '#85cebc'
+    white: '#d9d8d8'
+  bright:
+    black: '#737171'
+    red: '#ee2e24'
+    green: '#00853e'
+    yellow: '#ffd204'
+    blue: '#009ddc'
+    magenta: '#98005d'
+    cyan: '#85cebc'
+    white: '#ffffff'

@@ -1,0 +1,24 @@
+name: 'Synth Midnight Terminal Light (base16)'
+accent: '#03aeff'
+background: '#dddfe0'
+foreground: '#28292a'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#dddfe0'
+    red: '#b53b50'
+    green: '#06ea61'
+    yellow: '#c9d364'
+    blue: '#03aeff'
+    magenta: '#ea5ce2'
+    cyan: '#42fff9'
+    white: '#28292a'
+  bright:
+    black: '#a3a5a6'
+    red: '#b53b50'
+    green: '#06ea61'
+    yellow: '#c9d364'
+    blue: '#03aeff'
+    magenta: '#ea5ce2'
+    cyan: '#42fff9'
+    white: '#050608'

@@ -1,0 +1,24 @@
+name: 'Pico (base16)'
+accent: '#83769c'
+background: '#000000'
+foreground: '#5f574f'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#ff004d'
+    green: '#00e756'
+    yellow: '#fff024'
+    blue: '#83769c'
+    magenta: '#ff77a8'
+    cyan: '#29adff'
+    white: '#5f574f'
+  bright:
+    black: '#008751'
+    red: '#ff004d'
+    green: '#00e756'
+    yellow: '#fff024'
+    blue: '#83769c'
+    magenta: '#ff77a8'
+    cyan: '#29adff'
+    white: '#fff1e8'

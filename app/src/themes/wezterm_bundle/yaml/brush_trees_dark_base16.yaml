@@ -1,0 +1,24 @@
+name: 'Brush Trees Dark (base16)'
+accent: '#868cb3'
+background: '#485867'
+foreground: '#b0c5c8'
+details: darker
+terminal_colors:
+  normal:
+    black: '#485867'
+    red: '#b38686'
+    green: '#87b386'
+    yellow: '#aab386'
+    blue: '#868cb3'
+    magenta: '#b386b2'
+    cyan: '#86b3b3'
+    white: '#b0c5c8'
+  bright:
+    black: '#8299a1'
+    red: '#b38686'
+    green: '#87b386'
+    yellow: '#aab386'
+    blue: '#868cb3'
+    magenta: '#b386b2'
+    cyan: '#86b3b3'
+    white: '#e3efef'

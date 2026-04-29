@@ -1,0 +1,24 @@
+name: 'Gruvbox dark, pale (base16)'
+accent: '#83adad'
+background: '#262626'
+foreground: '#dab997'
+details: darker
+terminal_colors:
+  normal:
+    black: '#262626'
+    red: '#d75f5f'
+    green: '#afaf00'
+    yellow: '#ffaf00'
+    blue: '#83adad'
+    magenta: '#d485ad'
+    cyan: '#85ad85'
+    white: '#dab997'
+  bright:
+    black: '#8a8a8a'
+    red: '#d75f5f'
+    green: '#afaf00'
+    yellow: '#ffaf00'
+    blue: '#83adad'
+    magenta: '#d485ad'
+    cyan: '#85ad85'
+    white: '#ebdbb2'

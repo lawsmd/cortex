@@ -1,0 +1,24 @@
+name: 'Horizon Dark (base16)'
+accent: '#26bbd9'
+background: '#1c1e26'
+foreground: '#cbced0'
+details: darker
+terminal_colors:
+  normal:
+    black: '#1c1e26'
+    red: '#e95678'
+    green: '#29d398'
+    yellow: '#fac29a'
+    blue: '#26bbd9'
+    magenta: '#ee64ac'
+    cyan: '#59e1e3'
+    white: '#cbced0'
+  bright:
+    black: '#6f6f70'
+    red: '#e95678'
+    green: '#29d398'
+    yellow: '#fac29a'
+    blue: '#26bbd9'
+    magenta: '#ee64ac'
+    cyan: '#59e1e3'
+    white: '#e3e6ee'

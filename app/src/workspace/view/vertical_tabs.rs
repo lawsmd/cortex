@@ -1527,7 +1527,7 @@ fn render_vertical_tabs_panel(
         super::PanelPosition::Right => DragBarSide::Left,
     };
     let inner = Container::new(panel_with_popup)
-        .with_background(internal_colors::fg_overlay_1(theme))
+        .with_background(theme.background())
         .finish();
 
     Resizable::new(state.resizable_state.clone(), inner)

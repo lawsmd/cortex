@@ -1,0 +1,24 @@
+name: 'Shaman (Gogh)'
+accent: '#61d5ba'
+background: '#001015'
+foreground: '#405555'
+details: darker
+terminal_colors:
+  normal:
+    black: '#012026'
+    red: '#b2302d'
+    green: '#00a941'
+    yellow: '#5e8baa'
+    blue: '#449a86'
+    magenta: '#00599d'
+    cyan: '#5d7e19'
+    white: '#405555'
+  bright:
+    black: '#384451'
+    red: '#ff4242'
+    green: '#2aea5e'
+    yellow: '#8ed4fd'
+    blue: '#61d5ba'
+    magenta: '#1298ff'
+    cyan: '#98d028'
+    white: '#58fbd6'

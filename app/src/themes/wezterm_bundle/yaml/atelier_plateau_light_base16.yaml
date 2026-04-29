@@ -1,0 +1,24 @@
+name: 'Atelier Plateau Light (base16)'
+accent: '#7272ca'
+background: '#f4ecec'
+foreground: '#585050'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#f4ecec'
+    red: '#ca4949'
+    green: '#4b8b8b'
+    yellow: '#a06e3b'
+    blue: '#7272ca'
+    magenta: '#8464c4'
+    cyan: '#5485b6'
+    white: '#585050'
+  bright:
+    black: '#7e7777'
+    red: '#ca4949'
+    green: '#4b8b8b'
+    yellow: '#a06e3b'
+    blue: '#7272ca'
+    magenta: '#8464c4'
+    cyan: '#5485b6'
+    white: '#1b1818'

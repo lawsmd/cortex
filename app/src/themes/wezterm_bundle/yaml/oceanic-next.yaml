@@ -1,0 +1,24 @@
+name: 'Oceanic-Next'
+accent: '#5486c0'
+background: '#121b21'
+foreground: '#b3b8c3'
+details: darker
+terminal_colors:
+  normal:
+    black: '#121c21'
+    red: '#e44754'
+    green: '#89bd82'
+    yellow: '#f7bd51'
+    blue: '#5486c0'
+    magenta: '#b77eb8'
+    cyan: '#50a5a4'
+    white: '#ffffff'
+  bright:
+    black: '#52606b'
+    red: '#e44754'
+    green: '#89bd82'
+    yellow: '#f7bd51'
+    blue: '#5486c0'
+    magenta: '#b77eb8'
+    cyan: '#50a5a4'
+    white: '#ffffff'

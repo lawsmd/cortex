@@ -1,0 +1,24 @@
+name: 'Konsolas'
+accent: '#4b4bff'
+background: '#060606'
+foreground: '#c8c1c1'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#aa1717'
+    green: '#18b218'
+    yellow: '#ebae1f'
+    blue: '#2323a5'
+    magenta: '#ad1edc'
+    cyan: '#42b0c8'
+    white: '#c8c1c1'
+  bright:
+    black: '#7b716e'
+    red: '#ff4141'
+    green: '#5fff5f'
+    yellow: '#ffff55'
+    blue: '#4b4bff'
+    magenta: '#ff54ff'
+    cyan: '#69ffff'
+    white: '#ffffff'

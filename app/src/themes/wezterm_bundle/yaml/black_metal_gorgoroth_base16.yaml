@@ -1,0 +1,24 @@
+name: 'Black Metal (Gorgoroth) (base16)'
+accent: '#888888'
+background: '#000000'
+foreground: '#c1c1c1'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#5f8787'
+    green: '#9b8d7f'
+    yellow: '#8c7f70'
+    blue: '#888888'
+    magenta: '#999999'
+    cyan: '#aaaaaa'
+    white: '#c1c1c1'
+  bright:
+    black: '#333333'
+    red: '#5f8787'
+    green: '#9b8d7f'
+    yellow: '#8c7f70'
+    blue: '#888888'
+    magenta: '#999999'
+    cyan: '#aaaaaa'
+    white: '#c1c1c1'

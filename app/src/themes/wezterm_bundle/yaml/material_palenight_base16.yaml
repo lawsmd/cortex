@@ -1,0 +1,24 @@
+name: 'Material Palenight (base16)'
+accent: '#82aaff'
+background: '#292d3e'
+foreground: '#959dcb'
+details: darker
+terminal_colors:
+  normal:
+    black: '#292d3e'
+    red: '#f07178'
+    green: '#c3e88d'
+    yellow: '#ffcb6b'
+    blue: '#82aaff'
+    magenta: '#c792ea'
+    cyan: '#89ddff'
+    white: '#959dcb'
+  bright:
+    black: '#676e95'
+    red: '#f07178'
+    green: '#c3e88d'
+    yellow: '#ffcb6b'
+    blue: '#82aaff'
+    magenta: '#c792ea'
+    cyan: '#89ddff'
+    white: '#ffffff'

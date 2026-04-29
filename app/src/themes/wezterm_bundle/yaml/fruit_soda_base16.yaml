@@ -1,0 +1,24 @@
+name: 'Fruit Soda (base16)'
+accent: '#2931df'
+background: '#f1ecf1'
+foreground: '#515151'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#f1ecf1'
+    red: '#fe3e31'
+    green: '#47f74c'
+    yellow: '#f7e203'
+    blue: '#2931df'
+    magenta: '#611fce'
+    cyan: '#0f9cfd'
+    white: '#515151'
+  bright:
+    black: '#b5b4b6'
+    red: '#fe3e31'
+    green: '#47f74c'
+    yellow: '#f7e203'
+    blue: '#2931df'
+    magenta: '#611fce'
+    cyan: '#0f9cfd'
+    white: '#2d2c2c'

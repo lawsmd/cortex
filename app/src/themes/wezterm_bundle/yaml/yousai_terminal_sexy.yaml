@@ -1,0 +1,24 @@
+name: 'Yousai (terminal.sexy)'
+accent: '#5986b2'
+background: '#f5e7de'
+foreground: '#34302d'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#666661'
+    red: '#992e2e'
+    green: '#4c3226'
+    yellow: '#a67c53'
+    blue: '#4c7399'
+    magenta: '#bf9986'
+    cyan: '#d97742'
+    white: '#34302d'
+  bright:
+    black: '#7f7f7a'
+    red: '#b23636'
+    green: '#664233'
+    yellow: '#bf8f60'
+    blue: '#5986b2'
+    magenta: '#d9ae98'
+    cyan: '#f2854a'
+    white: '#4c4742'

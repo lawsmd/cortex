@@ -1,0 +1,24 @@
+name: 'midnight-in-mojave'
+accent: '#0a84ff'
+background: '#1e1e1e'
+foreground: '#ffffff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#1e1e1e'
+    red: '#ff453a'
+    green: '#32d74b'
+    yellow: '#ffd60a'
+    blue: '#0a84ff'
+    magenta: '#bf5af2'
+    cyan: '#5ac8fa'
+    white: '#ffffff'
+  bright:
+    black: '#1e1e1e'
+    red: '#ff453a'
+    green: '#32d74b'
+    yellow: '#ffd60a'
+    blue: '#0a84ff'
+    magenta: '#bf5af2'
+    cyan: '#5ac8fa'
+    white: '#ffffff'

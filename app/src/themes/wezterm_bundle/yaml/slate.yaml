@@ -1,0 +1,24 @@
+name: 'Slate'
+accent: '#7ab0d2'
+background: '#222222'
+foreground: '#35b1d2'
+details: darker
+terminal_colors:
+  normal:
+    black: '#222222'
+    red: '#e2a8bf'
+    green: '#81d778'
+    yellow: '#c4c9c0'
+    blue: '#264b49'
+    magenta: '#a481d3'
+    cyan: '#15ab9c'
+    white: '#02c5e0'
+  bright:
+    black: '#ffffff'
+    red: '#ffcdd9'
+    green: '#beffa8'
+    yellow: '#d0ccca'
+    blue: '#7ab0d2'
+    magenta: '#c5a7d9'
+    cyan: '#8cdfe0'
+    white: '#e0e0e0'

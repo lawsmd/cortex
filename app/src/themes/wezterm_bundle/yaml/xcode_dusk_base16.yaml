@@ -1,0 +1,24 @@
+name: 'XCode Dusk (base16)'
+accent: '#790ead'
+background: '#282b35'
+foreground: '#939599'
+details: darker
+terminal_colors:
+  normal:
+    black: '#282b35'
+    red: '#b21889'
+    green: '#df0002'
+    yellow: '#438288'
+    blue: '#790ead'
+    magenta: '#b21889'
+    cyan: '#00a0be'
+    white: '#939599'
+  bright:
+    black: '#686a71'
+    red: '#b21889'
+    green: '#df0002'
+    yellow: '#438288'
+    blue: '#790ead'
+    magenta: '#b21889'
+    cyan: '#00a0be'
+    white: '#bebfc2'

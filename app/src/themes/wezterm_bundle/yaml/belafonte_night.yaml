@@ -1,0 +1,24 @@
+name: 'Belafonte Night'
+accent: '#426a79'
+background: '#20111b'
+foreground: '#968c83'
+details: darker
+terminal_colors:
+  normal:
+    black: '#20111b'
+    red: '#be100e'
+    green: '#858162'
+    yellow: '#eaa549'
+    blue: '#426a79'
+    magenta: '#97522c'
+    cyan: '#989a9c'
+    white: '#968c83'
+  bright:
+    black: '#5e5252'
+    red: '#be100e'
+    green: '#858162'
+    yellow: '#eaa549'
+    blue: '#426a79'
+    magenta: '#97522c'
+    cyan: '#989a9c'
+    white: '#d5ccba'

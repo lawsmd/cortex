@@ -1,0 +1,24 @@
+name: 'Blue Matrix'
+accent: '#6871ff'
+background: '#101116'
+foreground: '#00a2ff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#101116'
+    red: '#ff5680'
+    green: '#00ff9c'
+    yellow: '#fffc58'
+    blue: '#00b0ff'
+    magenta: '#d57bff'
+    cyan: '#76c1ff'
+    white: '#c7c7c7'
+  bright:
+    black: '#686868'
+    red: '#ff6e67'
+    green: '#5ffa68'
+    yellow: '#fffc67'
+    blue: '#6871ff'
+    magenta: '#d682ec'
+    cyan: '#60fdff'
+    white: '#ffffff'

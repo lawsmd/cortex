@@ -1,0 +1,24 @@
+name: 'Horizon Light (base16)'
+accent: '#26bbd9'
+background: '#fdf0ed'
+foreground: '#403c3d'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#fdf0ed'
+    red: '#e95678'
+    green: '#29d398'
+    yellow: '#fadad1'
+    blue: '#26bbd9'
+    magenta: '#ee64ac'
+    cyan: '#59e1e3'
+    white: '#403c3d'
+  bright:
+    black: '#bdb3b1'
+    red: '#e95678'
+    green: '#29d398'
+    yellow: '#fadad1'
+    blue: '#26bbd9'
+    magenta: '#ee64ac'
+    cyan: '#59e1e3'
+    white: '#201c1d'

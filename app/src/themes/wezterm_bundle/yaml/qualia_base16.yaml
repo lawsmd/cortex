@@ -1,0 +1,24 @@
+name: 'Qualia (base16)'
+accent: '#50cacd'
+background: '#101010'
+foreground: '#c0c0c0'
+details: darker
+terminal_colors:
+  normal:
+    black: '#101010'
+    red: '#efa6a2'
+    green: '#80c990'
+    yellow: '#e6a3dc'
+    blue: '#50cacd'
+    magenta: '#e0af85'
+    cyan: '#c8c874'
+    white: '#c0c0c0'
+  bright:
+    black: '#454545'
+    red: '#efa6a2'
+    green: '#80c990'
+    yellow: '#e6a3dc'
+    blue: '#50cacd'
+    magenta: '#e0af85'
+    cyan: '#c8c874'
+    white: '#454545'

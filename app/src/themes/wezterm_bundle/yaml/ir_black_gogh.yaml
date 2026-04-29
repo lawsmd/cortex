@@ -1,0 +1,24 @@
+name: 'Ir Black (Gogh)'
+accent: '#b5dcfe'
+background: '#000000'
+foreground: '#eeeeee'
+details: darker
+terminal_colors:
+  normal:
+    black: '#4e4e4e'
+    red: '#ff6c60'
+    green: '#a8ff60'
+    yellow: '#ffffb6'
+    blue: '#69cbfe'
+    magenta: '#ff73fd'
+    cyan: '#c6c5fe'
+    white: '#eeeeee'
+  bright:
+    black: '#7c7c7c'
+    red: '#ffb6b0'
+    green: '#ceffac'
+    yellow: '#ffffcb'
+    blue: '#b5dcfe'
+    magenta: '#ff9cfe'
+    cyan: '#dfdffe'
+    white: '#ffffff'

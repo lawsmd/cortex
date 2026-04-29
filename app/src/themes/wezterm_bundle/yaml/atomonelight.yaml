@@ -1,0 +1,24 @@
+name: 'AtomOneLight'
+accent: '#2f5af3'
+background: '#f9f9f9'
+foreground: '#2a2c33'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#de3e35'
+    green: '#3f953a'
+    yellow: '#d2b67c'
+    blue: '#2f5af3'
+    magenta: '#950095'
+    cyan: '#3f953a'
+    white: '#bbbbbb'
+  bright:
+    black: '#000000'
+    red: '#de3e35'
+    green: '#3f953a'
+    yellow: '#d2b67c'
+    blue: '#2f5af3'
+    magenta: '#a00095'
+    cyan: '#3f953a'
+    white: '#ffffff'

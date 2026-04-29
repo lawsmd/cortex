@@ -1,0 +1,24 @@
+name: 'Material Darker (base16)'
+accent: '#82aaff'
+background: '#212121'
+foreground: '#eeffff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#212121'
+    red: '#f07178'
+    green: '#c3e88d'
+    yellow: '#ffcb6b'
+    blue: '#82aaff'
+    magenta: '#c792ea'
+    cyan: '#89ddff'
+    white: '#eeffff'
+  bright:
+    black: '#4a4a4a'
+    red: '#f07178'
+    green: '#c3e88d'
+    yellow: '#ffcb6b'
+    blue: '#82aaff'
+    magenta: '#c792ea'
+    cyan: '#89ddff'
+    white: '#ffffff'

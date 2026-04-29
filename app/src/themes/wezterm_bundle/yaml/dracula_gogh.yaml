@@ -1,0 +1,24 @@
+name: 'Dracula (Gogh)'
+accent: '#8be9fd'
+background: '#282a36'
+foreground: '#f8f8f2'
+details: darker
+terminal_colors:
+  normal:
+    black: '#44475a'
+    red: '#ff5555'
+    green: '#50fa7b'
+    yellow: '#ffb86c'
+    blue: '#8be9fd'
+    magenta: '#bd93f9'
+    cyan: '#ff79c6'
+    white: '#f8f8f2'
+  bright:
+    black: '#000000'
+    red: '#ff5555'
+    green: '#50fa7b'
+    yellow: '#ffb86c'
+    blue: '#8be9fd'
+    magenta: '#bd93f9'
+    cyan: '#ff79c6'
+    white: '#ffffff'

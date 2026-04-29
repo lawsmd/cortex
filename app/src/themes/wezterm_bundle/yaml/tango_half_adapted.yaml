@@ -1,0 +1,24 @@
+name: 'Tango Half Adapted'
+accent: '#76bfff'
+background: '#ffffff'
+foreground: '#000000'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#ff0000'
+    green: '#4cc300'
+    yellow: '#e2c000'
+    blue: '#008ef6'
+    magenta: '#a96cb3'
+    cyan: '#00bdc3'
+    white: '#e0e5db'
+  bright:
+    black: '#797d76'
+    red: '#ff0013'
+    green: '#8af600'
+    yellow: '#ffec00'
+    blue: '#76bfff'
+    magenta: '#d898d1'
+    cyan: '#00f6fa'
+    white: '#f4f4f2'

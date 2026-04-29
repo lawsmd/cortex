@@ -1,0 +1,24 @@
+name: 'Ef-Light'
+accent: '#065fff'
+background: '#ffffff'
+foreground: '#202020'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#efefef'
+    red: '#d3303a'
+    green: '#217a3c'
+    yellow: '#a45f22'
+    blue: '#375cd8'
+    magenta: '#ba35af'
+    cyan: '#1f6fbf'
+    white: '#202020'
+  bright:
+    black: '#b3b3b3'
+    red: '#d50f7f'
+    green: '#008858'
+    yellow: '#b65050'
+    blue: '#065fff'
+    magenta: '#6052cf'
+    cyan: '#1f77bb'
+    white: '#70627f'

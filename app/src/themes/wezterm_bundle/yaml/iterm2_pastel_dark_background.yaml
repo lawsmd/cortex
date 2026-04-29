@@ -1,0 +1,24 @@
+name: 'iTerm2 Pastel Dark Background'
+accent: '#c2e3ff'
+background: '#000000'
+foreground: '#c7c7c7'
+details: darker
+terminal_colors:
+  normal:
+    black: '#626262'
+    red: '#ff8373'
+    green: '#b4fb73'
+    yellow: '#fffdc3'
+    blue: '#a5d5fe'
+    magenta: '#ff90fe'
+    cyan: '#d1d1fe'
+    white: '#f1f1f1'
+  bright:
+    black: '#8f8f8f'
+    red: '#ffc4be'
+    green: '#d6fcba'
+    yellow: '#fffed5'
+    blue: '#c2e3ff'
+    magenta: '#ffb2fe'
+    cyan: '#e6e6fe'
+    white: '#ffffff'

@@ -1,0 +1,1079 @@
+3024 (base16)|#a5a2a2|#090300|#090300|#db2d20|#01a252|#fded02|#01a0e4|#a16a94|#b5e4f4|#a5a2a2|#5c5855|#db2d20|#01a252|#fded02|#01a0e4|#a16a94|#b5e4f4|#f7f7f7
+3024 (dark) (terminal.sexy)|#a5a2a2|#090300|#090300|#db2d20|#01a252|#fded02|#01a0e4|#a16a94|#b5e4f4|#a5a2a2|#5c5855|#db2d20|#01a252|#fded02|#01a0e4|#a16a94|#b5e4f4|#f7f7f7
+3024 (light) (terminal.sexy)|#4a4543|#f7f7f7|#090300|#db2d20|#01a252|#fded02|#01a0e4|#a16a94|#b5e4f4|#a5a2a2|#5c5855|#db2d20|#01a252|#fded02|#01a0e4|#a16a94|#b5e4f4|#f7f7f7
+3024 Day|#4a4543|#f7f7f7|#090300|#db2d20|#01a252|#fded02|#01a0e4|#a16a94|#b5e4f4|#a5a2a2|#5c5855|#e8bbd0|#3a3432|#4a4543|#807d7c|#d6d5d4|#cdab53|#f7f7f7
+3024 Day (Gogh)|#4a4543|#f7f7f7|#090300|#db2d20|#01a252|#fded02|#01a0e4|#a16a94|#b5e4f4|#a5a2a2|#5c5855|#e8bbd0|#3a3432|#4a4543|#807d7c|#d6d5d4|#cdab53|#f7f7f7
+3024 Night|#a5a2a2|#090300|#090300|#db2d20|#01a252|#fded02|#01a0e4|#a16a94|#b5e4f4|#a5a2a2|#5c5855|#e8bbd0|#3a3432|#4a4543|#807d7c|#d6d5d4|#cdab53|#f7f7f7
+3024 Night (Gogh)|#a5a2a2|#090300|#090300|#db2d20|#01a252|#fded02|#01a0e4|#a16a94|#b5e4f4|#a5a2a2|#5c5855|#e8bbd0|#3a3432|#4a4543|#807d7c|#d6d5d4|#cdab53|#f7f7f7
+3024Day (Gogh)|#4a4543|#f7f7f7|#090300|#db2d20|#01a252|#fded02|#01a0e4|#a16a94|#b5e4f4|#a5a2a2|#5c5855|#e8bbd0|#3a3432|#4a4543|#807d7c|#d6d5d4|#cdab53|#f7f7f7
+3024Night (Gogh)|#a5a2a2|#090300|#090300|#db2d20|#01a252|#fded02|#01a0e4|#a16a94|#b5e4f4|#a5a2a2|#5c5855|#e8bbd0|#3a3432|#4a4543|#807d7c|#d6d5d4|#cdab53|#f7f7f7
+Aardvark Blue|#dddddd|#102040|#191919|#aa342e|#4b8c0f|#dbba00|#1370d3|#c43ac3|#008eb0|#bebebe|#454545|#f05b50|#95dc55|#ffe763|#60a4ec|#e26be2|#60b6cb|#f7f7f7
+Abernathy|#eeeeec|#111416|#000000|#cd0000|#00cd00|#cdcd00|#1093f5|#cd00cd|#00cdcd|#faebd7|#404040|#ff0000|#00ff00|#ffff00|#11b5f6|#ff00ff|#00ffff|#ffffff
+Aci (Gogh)|#b4e1fd|#0d1926|#363636|#ff0883|#83ff08|#ff8308|#0883ff|#8308ff|#08ff83|#b6b6b6|#424242|#ff1e8e|#8eff1e|#ff8e1e|#1e8eff|#8e1eff|#1eff8e|#c2c2c2
+Aco (Gogh)|#b4e1fd|#1f1305|#3f3f3f|#ff0883|#83ff08|#ff8308|#0883ff|#8308ff|#08ff83|#bebebe|#474747|#ff1e8e|#8eff1e|#ff8e1e|#1e8eff|#8e1eff|#1eff8e|#c4c4c4
+Adventure|#feffff|#040404|#040404|#d84a33|#5da602|#eebb6e|#417ab3|#e5c499|#bdcfe5|#dbded8|#685656|#d76b42|#99b52c|#ffb670|#97d7ef|#aa7900|#bdcfe5|#e4d5c7
+Adventure Time (Gogh)|#f8dcc0|#1f1d45|#050404|#bd0013|#4ab118|#e7741e|#0f4ac6|#665993|#70a598|#f8dcc0|#4e7cbf|#fc5f5a|#9eff6e|#efc11a|#1997c6|#9b5953|#c8faf4|#f6f5fb
+AdventureTime|#f8dcc0|#1f1d45|#050404|#bd0013|#4ab118|#e7741e|#0f4ac6|#665993|#70a598|#f8dcc0|#4e7cbf|#fc5f5a|#9eff6e|#efc11a|#1997c6|#9b5953|#c8faf4|#f6f5fb
+Afterglow|#d0d0d0|#212121|#151515|#ac4142|#7e8e50|#e5b567|#6c99bb|#9f4e85|#7dd6cf|#d0d0d0|#505050|#ac4142|#7e8e50|#e5b567|#6c99bb|#9f4e85|#7dd6cf|#f5f5f5
+Afterglow (Gogh)|#d0d0d0|#222222|#151515|#a53c23|#7b9246|#d3a04d|#6c99bb|#9f4e85|#7dd6cf|#d0d0d0|#505050|#a53c23|#7b9246|#d3a04d|#547c99|#9f4e85|#7dd6cf|#f5f5f5
+Alabaster|#000000|#f7f7f7|#000000|#aa3731|#448c27|#cb9000|#325cc0|#7a3e9d|#0083b2|#f7f7f7|#777777|#f05050|#60cb00|#ffbc5d|#007acc|#e64ce6|#00aacb|#f7f7f7
+Alien Blood (Gogh)|#637d75|#0f1610|#112616|#7f2b27|#2f7e25|#717f24|#2f6a7f|#47587f|#327f77|#647d75|#3c4812|#e08009|#18e000|#bde000|#00aae0|#0058e0|#00e0c4|#73fa91
+AlienBlood|#637d75|#0f1610|#112616|#7f2b27|#2f7e25|#717f24|#2f6a7f|#47587f|#327f77|#647d75|#3c4812|#e08009|#18e000|#bde000|#00aae0|#0058e0|#00e0c4|#73fa91
+Andromeda|#e5e5e5|#262a33|#000000|#cd3131|#05bc79|#e5e512|#2472c8|#bc3fbc|#0fa8cd|#e5e5e5|#666666|#cd3131|#05bc79|#e5e512|#2472c8|#bc3fbc|#0fa8cd|#e5e5e5
+Apathy (base16)|#81b5ac|#031a16|#031a16|#3e9688|#883e96|#3e4c96|#96883e|#4c963e|#963e4c|#81b5ac|#2b685e|#3e9688|#883e96|#3e4c96|#96883e|#4c963e|#963e4c|#d2e7e4
+Apple Classic|#d5a200|#2c2b2b|#000000|#c91b00|#00c200|#c7c400|#0225c7|#ca30c7|#00c5c7|#c7c7c7|#686868|#ff6e67|#5ffa68|#fffc67|#6871ff|#ff77ff|#60fdff|#ffffff
+Apple System Colors|#ffffff|#1e1e1e|#1a1a1a|#cc372e|#26a439|#cdac08|#0869cb|#9647bf|#479ec2|#98989d|#464646|#ff453a|#32d74b|#ffd60a|#0a84ff|#bf5af2|#76d6ff|#ffffff
+Apprentice (Gogh)|#bcbcbc|#262626|#1c1c1c|#af5f5f|#5f875f|#87875f|#5f87af|#5f5f87|#5f8787|#6c6c6c|#444444|#ff8700|#87af87|#ffffaf|#8fafd7|#8787af|#5fafaf|#ffffff
+Apprentice (base16)|#5f5f87|#262626|#262626|#444444|#ffffaf|#87af87|#8787af|#5fafaf|#87afd7|#5f5f87|#87875f|#444444|#ffffaf|#87af87|#8787af|#5fafaf|#87afd7|#6c6c6c
+Argonaut|#fffaf4|#0e1019|#232323|#ff000f|#8ce10b|#ffb900|#008df8|#6d43a6|#00d8eb|#ffffff|#444444|#ff2740|#abe15b|#ffd242|#0092ff|#9a5feb|#67fff0|#ffffff
+Argonaut (Gogh)|#fffaf4|#0e1019|#232323|#ff000f|#8ce10b|#ffb900|#008df8|#6d43a6|#00d8eb|#ffffff|#444444|#ff2740|#abe15b|#ffd242|#0092ff|#9a5feb|#67fff0|#ffffff
+Arthur|#ddeedd|#1c1c1c|#3d352a|#cd5c5c|#86af80|#e8ae5b|#6495ed|#deb887|#b0c4de|#bbaa99|#554444|#cc5533|#88aa22|#ffa75d|#87ceeb|#996600|#b0c4de|#ddccbb
+Arthur (Gogh)|#ddeedd|#1c1c1c|#3d352a|#cd5c5c|#86af80|#e8ae5b|#6495ed|#deb887|#b0c4de|#bbaa99|#554444|#cc5533|#88aa22|#ffa75d|#87ceeb|#996600|#b0c4de|#ddccbb
+Ashes (base16)|#c7ccd1|#1c2023|#1c2023|#c7ae95|#95c7ae|#aec795|#ae95c7|#c795ae|#95aec7|#c7ccd1|#747c84|#c7ae95|#95c7ae|#aec795|#ae95c7|#c795ae|#95aec7|#f3f4f5
+Ashes (dark) (terminal.sexy)|#c7ccd1|#1c2023|#1c2023|#c7ae95|#95c7ae|#aec795|#ae95c7|#c795ae|#95aec7|#c7ccd1|#747c84|#c7ae95|#95c7ae|#aec795|#ae95c7|#c795ae|#95aec7|#f3f4f5
+Ashes (light) (terminal.sexy)|#565e65|#f3f4f5|#1c2023|#c7ae95|#95c7ae|#aec795|#ae95c7|#c795ae|#95aec7|#c7ccd1|#747c84|#c7ae95|#95c7ae|#aec795|#ae95c7|#c795ae|#95aec7|#f3f4f5
+Atelier Cave (base16)|#8b8792|#19171c|#19171c|#be4678|#2a9292|#a06e3b|#576ddb|#955ae7|#398bc6|#8b8792|#655f6d|#be4678|#2a9292|#a06e3b|#576ddb|#955ae7|#398bc6|#efecf4
+Atelier Cave Light (base16)|#585260|#efecf4|#efecf4|#be4678|#2a9292|#a06e3b|#576ddb|#955ae7|#398bc6|#585260|#7e7887|#be4678|#2a9292|#a06e3b|#576ddb|#955ae7|#398bc6|#19171c
+Atelier Dune (base16)|#a6a28c|#20201d|#20201d|#d73737|#60ac39|#ae9513|#6684e1|#b854d4|#1fad83|#a6a28c|#7d7a68|#d73737|#60ac39|#ae9513|#6684e1|#b854d4|#1fad83|#fefbec
+Atelier Dune Light (base16)|#6e6b5e|#fefbec|#fefbec|#d73737|#60ac39|#ae9513|#6684e1|#b854d4|#1fad83|#6e6b5e|#999580|#d73737|#60ac39|#ae9513|#6684e1|#b854d4|#1fad83|#20201d
+Atelier Estuary (base16)|#929181|#22221b|#22221b|#ba6236|#7d9726|#a5980d|#36a166|#5f9182|#5b9d48|#929181|#6c6b5a|#ba6236|#7d9726|#a5980d|#36a166|#5f9182|#5b9d48|#f4f3ec
+Atelier Estuary Light (base16)|#5f5e4e|#f4f3ec|#f4f3ec|#ba6236|#7d9726|#a5980d|#36a166|#5f9182|#5b9d48|#5f5e4e|#878573|#ba6236|#7d9726|#a5980d|#36a166|#5f9182|#5b9d48|#22221b
+Atelier Forest (base16)|#a8a19f|#1b1918|#1b1918|#f22c40|#7b9726|#c38418|#407ee7|#6666ea|#3d97b8|#a8a19f|#766e6b|#f22c40|#7b9726|#c38418|#407ee7|#6666ea|#3d97b8|#f1efee
+Atelier Forest Light (base16)|#68615e|#f1efee|#f1efee|#f22c40|#7b9726|#c38418|#407ee7|#6666ea|#3d97b8|#68615e|#9c9491|#f22c40|#7b9726|#c38418|#407ee7|#6666ea|#3d97b8|#1b1918
+Atelier Heath (base16)|#ab9bab|#1b181b|#1b181b|#ca402b|#918b3b|#bb8a35|#516aec|#7b59c0|#159393|#ab9bab|#776977|#ca402b|#918b3b|#bb8a35|#516aec|#7b59c0|#159393|#f7f3f7
+Atelier Heath Light (base16)|#695d69|#f7f3f7|#f7f3f7|#ca402b|#918b3b|#bb8a35|#516aec|#7b59c0|#159393|#695d69|#9e8f9e|#ca402b|#918b3b|#bb8a35|#516aec|#7b59c0|#159393|#1b181b
+Atelier Lakeside (base16)|#7ea2b4|#161b1d|#161b1d|#d22d72|#568c3b|#8a8a0f|#257fad|#6b6bb8|#2d8f6f|#7ea2b4|#5a7b8c|#d22d72|#568c3b|#8a8a0f|#257fad|#6b6bb8|#2d8f6f|#ebf8ff
+Atelier Lakeside Light (base16)|#516d7b|#ebf8ff|#ebf8ff|#d22d72|#568c3b|#8a8a0f|#257fad|#6b6bb8|#2d8f6f|#516d7b|#7195a8|#d22d72|#568c3b|#8a8a0f|#257fad|#6b6bb8|#2d8f6f|#161b1d
+Atelier Plateau (base16)|#8a8585|#1b1818|#1b1818|#ca4949|#4b8b8b|#a06e3b|#7272ca|#8464c4|#5485b6|#8a8585|#655d5d|#ca4949|#4b8b8b|#a06e3b|#7272ca|#8464c4|#5485b6|#f4ecec
+Atelier Plateau Light (base16)|#585050|#f4ecec|#f4ecec|#ca4949|#4b8b8b|#a06e3b|#7272ca|#8464c4|#5485b6|#585050|#7e7777|#ca4949|#4b8b8b|#a06e3b|#7272ca|#8464c4|#5485b6|#1b1818
+Atelier Savanna (base16)|#87928a|#171c19|#171c19|#b16139|#489963|#a07e3b|#478c90|#55859b|#1c9aa0|#87928a|#5f6d64|#b16139|#489963|#a07e3b|#478c90|#55859b|#1c9aa0|#ecf4ee
+Atelier Savanna Light (base16)|#526057|#ecf4ee|#ecf4ee|#b16139|#489963|#a07e3b|#478c90|#55859b|#1c9aa0|#526057|#78877d|#b16139|#489963|#a07e3b|#478c90|#55859b|#1c9aa0|#171c19
+Atelier Seaside (base16)|#8ca68c|#131513|#131513|#e6193c|#29a329|#98981b|#3d62f5|#ad2bee|#1999b3|#8ca68c|#687d68|#e6193c|#29a329|#98981b|#3d62f5|#ad2bee|#1999b3|#f4fbf4
+Atelier Seaside Light (base16)|#5e6e5e|#f4fbf4|#f4fbf4|#e6193c|#29a329|#98981b|#3d62f5|#ad2bee|#1999b3|#5e6e5e|#809980|#e6193c|#29a329|#98981b|#3d62f5|#ad2bee|#1999b3|#131513
+Atelier Sulphurpool (base16)|#979db4|#202746|#202746|#c94922|#ac9739|#c08b30|#3d8fd1|#6679cc|#22a2c9|#979db4|#6b7394|#c94922|#ac9739|#c08b30|#3d8fd1|#6679cc|#22a2c9|#f5f7ff
+Atelier Sulphurpool Light (base16)|#5e6687|#f5f7ff|#f5f7ff|#c94922|#ac9739|#c08b30|#3d8fd1|#6679cc|#22a2c9|#5e6687|#898ea4|#c94922|#ac9739|#c08b30|#3d8fd1|#6679cc|#22a2c9|#202746
+AtelierSulphurpool|#979db4|#202746|#202746|#c94922|#ac9739|#c08b30|#3d8fd1|#6679cc|#22a2c9|#979db4|#6b7394|#c76b29|#293256|#5e6687|#898ea4|#dfe2f1|#9c637a|#f5f7ff
+Atelierdune (dark) (terminal.sexy)|#a6a28c|#20201d|#20201d|#d73737|#60ac39|#cfb017|#6684e1|#b854d4|#1fad83|#a6a28c|#7d7a68|#d73737|#60ac39|#cfb017|#6684e1|#b854d4|#1fad83|#fefbec
+Atelierdune (light) (terminal.sexy)|#6e6b5e|#fefbec|#20201d|#d73737|#60ac39|#cfb017|#6684e1|#b854d4|#1fad83|#a6a28c|#7d7a68|#d73737|#60ac39|#cfb017|#6684e1|#b854d4|#1fad83|#fefbec
+Atelierforest (dark) (terminal.sexy)|#a8a19f|#1b1918|#1b1918|#f22c40|#5ab738|#d5911a|#407ee7|#6666ea|#00ad9c|#a8a19f|#766e6b|#f22c40|#5ab738|#d5911a|#407ee7|#6666ea|#00ad9c|#f1efee
+Atelierforest (light) (terminal.sexy)|#68615e|#f1efee|#1b1918|#f22c40|#5ab738|#d5911a|#407ee7|#6666ea|#00ad9c|#a8a19f|#766e6b|#f22c40|#5ab738|#d5911a|#407ee7|#6666ea|#00ad9c|#f1efee
+Atelierheath (dark) (terminal.sexy)|#ab9bab|#1b181b|#1b181b|#ca402b|#379a37|#bb8a35|#516aec|#7b59c0|#159393|#ab9bab|#776977|#ca402b|#379a37|#bb8a35|#516aec|#7b59c0|#159393|#f7f3f7
+Atelierheath (light) (terminal.sexy)|#695d69|#f7f3f7|#1b181b|#ca402b|#379a37|#bb8a35|#516aec|#7b59c0|#159393|#ab9bab|#776977|#ca402b|#379a37|#bb8a35|#516aec|#7b59c0|#159393|#f7f3f7
+Atelierlakeside (dark) (terminal.sexy)|#7ea2b4|#161b1d|#161b1d|#d22d72|#568c3b|#8a8a0f|#257fad|#5d5db1|#2d8f6f|#7ea2b4|#5a7b8c|#d22d72|#568c3b|#8a8a0f|#257fad|#5d5db1|#2d8f6f|#ebf8ff
+Atelierlakeside (light) (terminal.sexy)|#516d7b|#ebf8ff|#161b1d|#d22d72|#568c3b|#8a8a0f|#257fad|#5d5db1|#2d8f6f|#7ea2b4|#5a7b8c|#d22d72|#568c3b|#8a8a0f|#257fad|#5d5db1|#2d8f6f|#ebf8ff
+Atelierseaside (dark) (terminal.sexy)|#8ca68c|#131513|#131513|#e6193c|#29a329|#c3c322|#3d62f5|#ad2bee|#1999b3|#8ca68c|#687d68|#e6193c|#29a329|#c3c322|#3d62f5|#ad2bee|#1999b3|#f0fff0
+Atelierseaside (light) (terminal.sexy)|#5e6e5e|#f0fff0|#131513|#e6193c|#29a329|#c3c322|#3d62f5|#ad2bee|#1999b3|#8ca68c|#687d68|#e6193c|#29a329|#c3c322|#3d62f5|#ad2bee|#1999b3|#f0fff0
+Atlas (base16)|#a1a19a|#002635|#002635|#ff5a67|#7fc06e|#ffcc1b|#5dd7b9|#9a70a4|#14747e|#a1a19a|#6c8b91|#ff5a67|#7fc06e|#ffcc1b|#5dd7b9|#9a70a4|#14747e|#fafaf8
+Atom|#c5c8c6|#161719|#000000|#fd5ff1|#87c38a|#ffd7b1|#85befd|#b9b6fc|#85befd|#e0e0e0|#000000|#fd5ff1|#94fa36|#f5ffa8|#96cbfe|#b9b6fc|#85befd|#e0e0e0
+Atom (Gogh)|#c5c8c6|#161719|#000000|#fd5ff1|#87c38a|#ffd7b1|#85befd|#b9b6fc|#85befd|#e0e0e0|#000000|#fd5ff1|#94fa36|#f5ffa8|#96cbfe|#b9b6fc|#85befd|#e0e0e0
+AtomOneLight|#2a2c33|#f9f9f9|#000000|#de3e35|#3f953a|#d2b67c|#2f5af3|#950095|#3f953a|#bbbbbb|#000000|#de3e35|#3f953a|#d2b67c|#2f5af3|#a00095|#3f953a|#ffffff
+Aura (Gogh)|#edecee|#15141b|#110f18|#ff6767|#61ffca|#ffca85|#a277ff|#a277ff|#61ffca|#edecee|#6d6d6d|#ffca85|#a277ff|#ffca85|#a277ff|#a277ff|#61ffca|#edecee
+Aurora|#ffca28|#23262e|#23262e|#f0266f|#8fd46d|#ffe66d|#0321d7|#ee5d43|#03d6b8|#c74ded|#292e38|#f92672|#8fd46d|#ffe66d|#03d6b8|#ee5d43|#03d6b8|#c74ded
+Ayu Dark (Gogh)|#b3b1ad|#0a0e14|#0a0e14|#ff3333|#c2d94c|#ff8f40|#59c2ff|#ffee99|#95e6cb|#b3b1ad|#4d5566|#ff3333|#c2d94c|#ff8f40|#59c2ff|#ffee99|#95e6cb|#b3b1ad
+Ayu Light (Gogh)|#575f66|#fafafa|#575f66|#f51818|#86b300|#f2ae49|#399ee6|#a37acc|#4cbf99|#fafafa|#8a9199|#f51818|#86b300|#f2ae49|#399ee6|#a37acc|#4cbf99|#fafafa
+Ayu Mirage|#cbccc6|#1f2430|#191e2a|#ed8274|#a6cc70|#fad07b|#6dcbfa|#cfbafa|#90e1c6|#c7c7c7|#686868|#f28779|#bae67e|#ffd580|#73d0ff|#d4bfff|#95e6cb|#ffffff
+Ayu Mirage (Gogh)|#cbccc6|#1f2430|#1f2430|#ff3333|#bae67e|#ffa759|#73d0ff|#d4bfff|#95e6cb|#cbccc6|#707a8c|#ff3333|#bae67e|#ffa759|#73d0ff|#d4bfff|#95e6cb|#cbccc6
+AyuDark (Gogh)|#b3b1ad|#0a0e14|#0a0e14|#ff3333|#c2d94c|#ff8f40|#59c2ff|#ffee99|#95e6cb|#b3b1ad|#4d5566|#ff3333|#c2d94c|#ff8f40|#59c2ff|#ffee99|#95e6cb|#b3b1ad
+AyuLight (Gogh)|#575f66|#fafafa|#575f66|#f51818|#86b300|#f2ae49|#399ee6|#a37acc|#4cbf99|#fafafa|#8a9199|#f51818|#86b300|#f2ae49|#399ee6|#a37acc|#4cbf99|#fafafa
+AyuMirage (Gogh)|#cbccc6|#1f2430|#1f2430|#ff3333|#bae67e|#ffa759|#73d0ff|#d4bfff|#95e6cb|#cbccc6|#707a8c|#ff3333|#bae67e|#ffa759|#73d0ff|#d4bfff|#95e6cb|#cbccc6
+Azu (Gogh)|#d9e6f2|#09111a|#000000|#ac6d74|#74ac6d|#aca46d|#6d74ac|#a46dac|#6daca4|#e6e6e6|#262626|#d6b8bc|#bcd6b8|#d6d3b8|#b8bcd6|#d3b8d6|#b8d6d3|#ffffff
+Bamboo|#f1e9d2|#252623|#1c1e1b|#e75a7c|#8fb573|#dbb671|#57a5e5|#aaaaff|#70c2be|#f1e9d2|#5b5e5a|#e75a7c|#8fb573|#dbb671|#57a5e5|#aaaaff|#70c2be|#fff8f0
+Bamboo Light|#3a4238|#fafae0|#dadac2|#c72a3c|#4fa533|#bb9651|#1765d5|#8a4adf|#00a2be|#3a4238|#c7c7af|#c72a3c|#4fa533|#bb9651|#1765d5|#8a4adf|#00a2be|#252623
+Bamboo Multiplex|#ece1c0|#232923|#171f17|#dc4f62|#81af58|#cebe69|#5692c4|#ae93e0|#71ada2|#ece1c0|#5a5e5a|#dc4f62|#81af58|#cebe69|#5692c4|#ae93e0|#71ada2|#fff8f0
+Banana Blueberry|#cccccc|#191323|#17141f|#ff6b7f|#00bd9c|#e6c62f|#22e8df|#dc396a|#56b6c2|#f1f1f1|#495162|#fe9ea1|#98c379|#f9e46b|#91fff4|#da70d6|#bcf3ff|#ffffff
+Batman|#6f6f6f|#1b1d1e|#1b1d1e|#e6dc44|#c8be46|#f4fd22|#737174|#747271|#62605f|#c6c5bf|#505354|#fff78e|#fff27d|#feed6c|#919495|#9a9a9d|#a3a3a6|#dadbd6
+Belafonte Day|#45373c|#d5ccba|#20111b|#be100e|#858162|#eaa549|#426a79|#97522c|#989a9c|#968c83|#5e5252|#be100e|#858162|#eaa549|#426a79|#97522c|#989a9c|#d5ccba
+Belafonte Day (Gogh)|#45373c|#d5ccba|#20111b|#be100e|#858162|#eaa549|#426a79|#97522c|#989a9c|#968c83|#5e5252|#be100e|#858162|#eaa549|#426a79|#97522c|#989a9c|#d5ccba
+Belafonte Night|#968c83|#20111b|#20111b|#be100e|#858162|#eaa549|#426a79|#97522c|#989a9c|#968c83|#5e5252|#be100e|#858162|#eaa549|#426a79|#97522c|#989a9c|#d5ccba
+Belafonte Night (Gogh)|#968c83|#20111b|#20111b|#be100e|#858162|#eaa549|#426a79|#97522c|#989a9c|#968c83|#5e5252|#be100e|#858162|#eaa549|#426a79|#97522c|#989a9c|#d5ccba
+BelafonteDay (Gogh)|#45373c|#d5ccba|#20111b|#be100e|#858162|#eaa549|#426a79|#97522c|#989a9c|#968c83|#5e5252|#be100e|#858162|#eaa549|#426a79|#97522c|#989a9c|#d5ccba
+BelafonteNight (Gogh)|#968c83|#20111b|#20111b|#be100e|#858162|#eaa549|#426a79|#97522c|#989a9c|#968c83|#5e5252|#be100e|#858162|#eaa549|#426a79|#97522c|#989a9c|#d5ccba
+Belge (terminal.sexy)|#ffffff|#000000|#252525|#ef6769|#a6e22e|#fd971f|#6495ed|#deb887|#b0c4de|#dbdcdc|#454545|#fc7ca5|#b6e354|#fd971f|#87ceeb|#996600|#87ceeb|#fdfdfd
+Bespin (base16)|#8a8986|#28211c|#28211c|#cf6a4c|#54be0d|#f9ee98|#5ea6ea|#9b859d|#afc4db|#8a8986|#666666|#cf6a4c|#54be0d|#f9ee98|#5ea6ea|#9b859d|#afc4db|#baae9e
+Bespin (dark) (terminal.sexy)|#8a8986|#28211c|#28211c|#cf6a4c|#54be0d|#f9ee98|#5ea6ea|#9b859d|#afc4db|#8a8986|#666666|#cf6a4c|#54be0d|#f9ee98|#5ea6ea|#9b859d|#afc4db|#baae9e
+Bespin (light) (terminal.sexy)|#5e5d5c|#baae9e|#28211c|#cf6a4c|#54be0d|#f9ee98|#5ea6ea|#9b859d|#afc4db|#8a8986|#666666|#cf6a4c|#54be0d|#f9ee98|#5ea6ea|#9b859d|#afc4db|#baae9e
+Bim (Gogh)|#a9bed8|#012849|#2c2423|#f557a0|#a9ee55|#f5a255|#5ea2ec|#a957ec|#5eeea0|#918988|#918988|#f579b2|#bbee78|#f5b378|#81b3ec|#bb79ec|#81eeb2|#f5eeec
+Birds Of Paradise (Gogh)|#e0dbb7|#2a1f1d|#573d26|#be2d26|#6ba18a|#e99d2a|#5a86ad|#ac80a6|#74a6ad|#e0dbb7|#9b6c4a|#e84627|#95d8ba|#d0d150|#b8d3ed|#d19ecb|#93cfd7|#fff9d5
+BirdsOfParadise|#e0dbb7|#2a1f1d|#573d26|#be2d26|#6ba18a|#e99d2a|#5a86ad|#ac80a6|#74a6ad|#e0dbb7|#9b6c4a|#e84627|#95d8ba|#d0d150|#b8d3ed|#d19ecb|#93cfd7|#fff9d5
+Bitmute (terminal.sexy)|#ffffff|#000000|#282828|#b76969|#719d72|#909858|#68668f|#966894|#688891|#8e8e8e|#494949|#b87e7e|#839d84|#919864|#73718f|#987397|#758c93|#aeaeae
+Black Metal (Bathory) (base16)|#c1c1c1|#000000|#000000|#5f8787|#fbcb97|#e78a53|#888888|#999999|#aaaaaa|#c1c1c1|#333333|#5f8787|#fbcb97|#e78a53|#888888|#999999|#aaaaaa|#c1c1c1
+Black Metal (Burzum) (base16)|#c1c1c1|#000000|#000000|#5f8787|#ddeecc|#99bbaa|#888888|#999999|#aaaaaa|#c1c1c1|#333333|#5f8787|#ddeecc|#99bbaa|#888888|#999999|#aaaaaa|#c1c1c1
+Black Metal (Dark Funeral) (base16)|#c1c1c1|#000000|#000000|#5f8787|#d0dfee|#5f81a5|#888888|#999999|#aaaaaa|#c1c1c1|#333333|#5f8787|#d0dfee|#5f81a5|#888888|#999999|#aaaaaa|#c1c1c1
+Black Metal (Gorgoroth) (base16)|#c1c1c1|#000000|#000000|#5f8787|#9b8d7f|#8c7f70|#888888|#999999|#aaaaaa|#c1c1c1|#333333|#5f8787|#9b8d7f|#8c7f70|#888888|#999999|#aaaaaa|#c1c1c1
+Black Metal (Immortal) (base16)|#c1c1c1|#000000|#000000|#5f8787|#7799bb|#556677|#888888|#999999|#aaaaaa|#c1c1c1|#333333|#5f8787|#7799bb|#556677|#888888|#999999|#aaaaaa|#c1c1c1
+Black Metal (Khold) (base16)|#c1c1c1|#000000|#000000|#5f8787|#eceee3|#974b46|#888888|#999999|#aaaaaa|#c1c1c1|#333333|#5f8787|#eceee3|#974b46|#888888|#999999|#aaaaaa|#c1c1c1
+Black Metal (Marduk) (base16)|#c1c1c1|#000000|#000000|#5f8787|#a5aaa7|#626b67|#888888|#999999|#aaaaaa|#c1c1c1|#333333|#5f8787|#a5aaa7|#626b67|#888888|#999999|#aaaaaa|#c1c1c1
+Black Metal (Mayhem) (base16)|#c1c1c1|#000000|#000000|#5f8787|#f3ecd4|#eecc6c|#888888|#999999|#aaaaaa|#c1c1c1|#333333|#5f8787|#f3ecd4|#eecc6c|#888888|#999999|#aaaaaa|#c1c1c1
+Black Metal (Nile) (base16)|#c1c1c1|#000000|#000000|#5f8787|#aa9988|#777755|#888888|#999999|#aaaaaa|#c1c1c1|#333333|#5f8787|#aa9988|#777755|#888888|#999999|#aaaaaa|#c1c1c1
+Black Metal (Venom) (base16)|#c1c1c1|#000000|#000000|#5f8787|#f8f7f2|#79241f|#888888|#999999|#aaaaaa|#c1c1c1|#333333|#5f8787|#f8f7f2|#79241f|#888888|#999999|#aaaaaa|#c1c1c1
+Black Metal (base16)|#c1c1c1|#000000|#000000|#5f8787|#dd9999|#a06666|#888888|#999999|#aaaaaa|#c1c1c1|#333333|#5f8787|#dd9999|#a06666|#888888|#999999|#aaaaaa|#c1c1c1
+Blazer|#d9e6f2|#0d1926|#000000|#b87a7a|#7ab87a|#b8b87a|#7a7ab8|#b87ab8|#7ab8b8|#d9d9d9|#262626|#dbbdbd|#bddbbd|#dbdbbd|#bdbddb|#dbbddb|#bddbdb|#ffffff
+Blazer (Gogh)|#d9e6f2|#0d1926|#000000|#b87a7a|#7ab87a|#b8b87a|#7a7ab8|#b87ab8|#7ab8b8|#d9d9d9|#262626|#dbbdbd|#bddbbd|#dbdbbd|#bdbddb|#dbbddb|#bddbdb|#ffffff
+Bleh-1 (terminal.sexy)|#ffffff|#000000|#666666|#996578|#889965|#998565|#657a99|#8b6599|#65998d|#a5a5a4|#8c847f|#bd4b76|#95b548|#bd814b|#4c83bf|#a04bbd|#4dbda8|#848484
+Blue Matrix|#00a2ff|#101116|#101116|#ff5680|#00ff9c|#fffc58|#00b0ff|#d57bff|#76c1ff|#c7c7c7|#686868|#ff6e67|#5ffa68|#fffc67|#6871ff|#d682ec|#60fdff|#ffffff
+BlueBerryPie|#babab9|#1c0c28|#0a4c62|#99246e|#5cb1b3|#eab9a8|#90a5bd|#9d54a7|#7e83cc|#f0e8d6|#201637|#c87272|#0a6c7e|#7a3188|#39173d|#bc94b7|#5e6071|#0a6c7e
+BlueDolphin|#c5f2ff|#006984|#292d3e|#ff8288|#b4e88d|#f4d69f|#82aaff|#e9c1ff|#89ebff|#d0d0d0|#434758|#ff8b92|#ddffa7|#ffe585|#9cc4ff|#ddb0f6|#a3f7ff|#ffffff
+Bluloco Light (Gogh)|#383a42|#f9f9f9|#d5d6dd|#d52753|#23974a|#df631c|#275fe4|#823ff1|#27618d|#000000|#e4e5ed|#ff6480|#3cbc66|#c5a332|#0099e1|#ce33c0|#6d93bb|#26272d
+Bluloco Zsh Light (Gogh)|#383a42|#f9f9f9|#e4e5f1|#d52753|#23974a|#df631c|#275fe4|#823ff1|#27618d|#000000|#5794de|#ff6480|#3cbc66|#c5a332|#0099e1|#ce33c0|#6d93bb|#26272d
+BlulocoDark|#b9c0cb|#282c34|#41444d|#fc2f52|#25a45c|#ff936a|#3476ff|#7a82da|#4483aa|#cdd4e0|#8f9aae|#ff6480|#3fc56b|#f9c859|#10b1fe|#ff78f8|#5fb9bc|#ffffff
+BlulocoLight|#373a41|#f9f9f9|#373a41|#d52753|#23974a|#df631c|#275fe4|#823ff1|#27618d|#babbc2|#676a77|#ff6480|#3cbc66|#c5a332|#0099e1|#ce33c0|#6d93bb|#d3d3d3
+BlulocoLight (Gogh)|#383a42|#f9f9f9|#d5d6dd|#d52753|#23974a|#df631c|#275fe4|#823ff1|#27618d|#000000|#e4e5ed|#ff6480|#3cbc66|#c5a332|#0099e1|#ce33c0|#6d93bb|#26272d
+BlulocoZshLight (Gogh)|#383a42|#f9f9f9|#e4e5f1|#d52753|#23974a|#df631c|#275fe4|#823ff1|#27618d|#000000|#5794de|#ff6480|#3cbc66|#c5a332|#0099e1|#ce33c0|#6d93bb|#26272d
+Borland|#ffff4e|#0000a4|#4f4f4f|#ff6c60|#a8ff60|#ffffb6|#96cbfe|#ff73fd|#c6c5fe|#eeeeee|#7c7c7c|#ffb6b0|#ceffac|#ffffcc|#b5dcff|#ff9cfe|#dfdffe|#ffffff
+Borland (Gogh)|#ffff4e|#0000a4|#4f4f4f|#ff6c60|#a8ff60|#ffffb6|#96cbfe|#ff73fd|#c6c5fe|#eeeeee|#7c7c7c|#ffb6b0|#ceffac|#ffffcc|#b5dcff|#ff9cfe|#dfdffe|#ffffff
+Breath (Gogh)|#17a88b|#1e2229|#1e2229|#ed1515|#44853a|#f67400|#1d99f3|#9b59b6|#1abc9c|#fcfcfc|#7f8c8d|#c0392b|#55a649|#fdbc4b|#3daee9|#8e44ad|#16a085|#ffffff
+Breath Darker (Gogh)|#17a88b|#080d14|#1e2229|#ed1515|#44853a|#f67400|#1d99f3|#9b59b6|#1abc9c|#fcfcfc|#7f8c8d|#c0392b|#55a649|#fdbc4b|#3daee9|#8e44ad|#16a085|#ffffff
+Breath Light (Gogh)|#292f34|#e8e8e8|#e8e8e8|#ed1515|#c0392b|#f67400|#1d99f3|#9b59b6|#1abc9c|#fcfcfc|#7f8c8d|#c0392b|#55a649|#fdbc4b|#3daee9|#8e44ad|#16a085|#ffffff
+Breath Silverfox (Gogh)|#bbbbbb|#1e2229|#1e2229|#ed1515|#44853a|#f67400|#1d99f3|#9b59b6|#1abc9c|#fcfcfc|#7f8c8d|#c0392b|#55a649|#fdbc4b|#3daee9|#8e44ad|#16a085|#ffffff
+BreathLight (Gogh)|#292f34|#e8e8e8|#e8e8e8|#ed1515|#c0392b|#f67400|#1d99f3|#9b59b6|#1abc9c|#fcfcfc|#7f8c8d|#c0392b|#55a649|#fdbc4b|#3daee9|#8e44ad|#16a085|#ffffff
+BreathSilverfox (Gogh)|#bbbbbb|#1e2229|#1e2229|#ed1515|#44853a|#f67400|#1d99f3|#9b59b6|#1abc9c|#fcfcfc|#7f8c8d|#c0392b|#55a649|#fdbc4b|#3daee9|#8e44ad|#16a085|#ffffff
+Breeze|#eff0f1|#31363b|#31363b|#ed1515|#11d116|#f67400|#1d99f3|#9b59b6|#1abc9c|#eff0f1|#7f8c8d|#c0392b|#1cdc9a|#fdbc4b|#3daee9|#8e44ad|#16a085|#fcfcfc
+Breeze (Gogh)|#fcfcfc|#232627|#232627|#ed1515|#11d116|#f67400|#1d99f3|#9b59b6|#1abc9c|#fcfcfc|#7f8c8d|#c0392b|#1cdc9a|#fdbc4b|#3daee9|#8e44ad|#16a085|#ffffff
+Brewer (base16)|#b7b8b9|#0c0d0e|#0c0d0e|#e31a1c|#31a354|#dca060|#3182bd|#756bb1|#80b1d3|#b7b8b9|#737475|#e31a1c|#31a354|#dca060|#3182bd|#756bb1|#80b1d3|#fcfdfe
+Brewer (dark) (terminal.sexy)|#b7b8b9|#0c0d0e|#0c0d0e|#e31a1c|#31a354|#dca060|#3182bd|#756bb1|#80b1d3|#b7b8b9|#737475|#e31a1c|#31a354|#dca060|#3182bd|#756bb1|#80b1d3|#fcfdfe
+Brewer (light) (terminal.sexy)|#515253|#fcfdfe|#0c0d0e|#e31a1c|#31a354|#dca060|#3182bd|#756bb1|#80b1d3|#b7b8b9|#737475|#e31a1c|#31a354|#dca060|#3182bd|#756bb1|#80b1d3|#fcfdfe
+Bright (base16)|#e0e0e0|#000000|#000000|#fb0120|#a1c659|#fda331|#6fb3d2|#d381c3|#76c7b7|#e0e0e0|#b0b0b0|#fb0120|#a1c659|#fda331|#6fb3d2|#d381c3|#76c7b7|#ffffff
+Bright Lights|#b3c9d7|#191919|#191919|#ff355b|#b7e876|#ffc251|#76d4ff|#ba76e7|#6cbfb5|#c2c8d7|#191919|#ff355b|#b7e876|#ffc251|#76d5ff|#ba76e7|#6cbfb5|#c2c8d7
+Broadcast|#e6e1dc|#2b2b2b|#000000|#da4939|#519f50|#ffd24a|#6d9cbe|#d0d0ff|#6e9cbe|#ffffff|#323232|#ff7b6b|#83d182|#ffff7c|#9fcef0|#ffffff|#a0cef0|#ffffff
+Broadcast (Gogh)|#e6e1dc|#2b2b2b|#000000|#da4939|#519f50|#ffd24a|#6d9cbe|#d0d0ff|#6e9cbe|#ffffff|#323232|#ff7b6b|#83d182|#ffff7c|#9fcef0|#ffffff|#a0cef0|#ffffff
+Brogrammer|#d6dbe5|#131313|#1f1f1f|#f81118|#2dc55e|#ecba0f|#2a84d2|#4e5ab7|#1081d6|#d6dbe5|#d6dbe5|#de352e|#1dd361|#f3bd09|#1081d6|#5350b9|#0f7ddb|#ffffff
+Brogrammer (Gogh)|#d6dbe5|#131313|#1f1f1f|#f81118|#2dc55e|#ecba0f|#2a84d2|#4e5ab7|#1081d6|#d6dbe5|#d6dbe5|#de352e|#1dd361|#f3bd09|#1081d6|#5350b9|#0f7ddb|#ffffff
+Brogrammer (base16)|#4e5ab7|#1f1f1f|#1f1f1f|#d6dbe5|#f3bd09|#1dd361|#5350b9|#0f7ddb|#1081d6|#4e5ab7|#ecba0f|#d6dbe5|#f3bd09|#1dd361|#5350b9|#0f7ddb|#1081d6|#d6dbe5
+Brush Trees (base16)|#6d828e|#e3efef|#e3efef|#b38686|#87b386|#aab386|#868cb3|#b386b2|#86b3b3|#6d828e|#98afb5|#b38686|#87b386|#aab386|#868cb3|#b386b2|#86b3b3|#485867
+Brush Trees Dark (base16)|#b0c5c8|#485867|#485867|#b38686|#87b386|#aab386|#868cb3|#b386b2|#86b3b3|#b0c5c8|#8299a1|#b38686|#87b386|#aab386|#868cb3|#b386b2|#86b3b3|#e3efef
+Builtin Dark|#bbbbbb|#000000|#000000|#bb0000|#00bb00|#bbbb00|#0000bb|#bb00bb|#00bbbb|#bbbbbb|#555555|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#ffffff
+Builtin Light|#000000|#ffffff|#000000|#bb0000|#00bb00|#bbbb00|#0000bb|#bb00bb|#00bbbb|#bbbbbb|#555555|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#ffffff
+Builtin Pastel Dark|#bbbbbb|#000000|#4f4f4f|#ff6c60|#a8ff60|#ffffb6|#96cbfe|#ff73fd|#c6c5fe|#eeeeee|#7c7c7c|#ffb6b0|#ceffac|#ffffcc|#b5dcff|#ff9cfe|#dfdffe|#ffffff
+Builtin Solarized Dark|#839496|#002b36|#073642|#dc322f|#859900|#b58900|#268bd2|#d33682|#2aa198|#eee8d5|#002b36|#cb4b16|#586e75|#657b83|#839496|#6c71c4|#93a1a1|#fdf6e3
+Builtin Solarized Light|#657b83|#fdf6e3|#073642|#dc322f|#859900|#b58900|#268bd2|#d33682|#2aa198|#eee8d5|#002b36|#cb4b16|#586e75|#657b83|#839496|#6c71c4|#93a1a1|#fdf6e3
+Builtin Tango Dark|#ffffff|#000000|#000000|#cc0000|#4e9a06|#c4a000|#3465a4|#75507b|#06989a|#d3d7cf|#555753|#ef2929|#8ae234|#fce94f|#729fcf|#ad7fa8|#34e2e2|#eeeeec
+Builtin Tango Light|#000000|#ffffff|#000000|#cc0000|#4e9a06|#c4a000|#3465a4|#75507b|#06989a|#d3d7cf|#555753|#ef2929|#8ae234|#fce94f|#729fcf|#ad7fa8|#34e2e2|#eeeeec
+C64|#7869c4|#40318d|#090300|#883932|#55a049|#bfce72|#40318d|#8b3f96|#67b6bd|#ffffff|#000000|#883932|#55a049|#bfce72|#40318d|#8b3f96|#67b6bd|#f7f7f7
+C64 (Gogh)|#7869c4|#40318d|#090300|#883932|#55a049|#bfce72|#40318d|#8b3f96|#67b6bd|#ffffff|#000000|#883932|#55a049|#bfce72|#40318d|#8b3f96|#67b6bd|#f7f7f7
+CGA|#aaaaaa|#000000|#000000|#aa0000|#00aa00|#aa5500|#0000aa|#aa00aa|#00aaaa|#aaaaaa|#555555|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#ffffff
+CLRS|#262626|#ffffff|#000000|#f8282a|#328a5d|#fa701d|#135cd0|#9f00bd|#33c3c1|#b3b3b3|#555753|#fb0416|#2cc631|#fdd727|#1670ff|#e900b0|#3ad5ce|#eeeeec
+Cai (Gogh)|#d9e6f2|#09111a|#000000|#ca274d|#4dca27|#caa427|#274dca|#a427ca|#27caa4|#808080|#808080|#e98da3|#a3e98d|#e9d48d|#8da3e9|#d48de9|#8de9d4|#ffffff
+Calamity|#d5ced9|#2f2833|#2f2833|#fc644d|#a5f69c|#e9d7a5|#3b79c7|#f92672|#74d3de|#d5ced9|#7e6c88|#fc644d|#a5f69c|#e9d7a5|#3b79c7|#f92672|#74d3de|#ffffff
+Campbell (Gogh)|#cccccc|#0c0c0c|#0c0c0c|#c50f1f|#13a10e|#c19c00|#0037da|#881798|#3a96dd|#cccccc|#767676|#e74856|#16c60c|#f9f1a5|#3b78ff|#b4009e|#61d6d6|#f2f2f2
+Canvased Pastel (terminal.sexy)|#746c48|#170f0d|#26251c|#323027|#3d4339|#443b2c|#534d35|#646756|#7b8574|#837b61|#999f91|#9b9773|#b2b08c|#c4bb8c|#c4b67a|#cfc995|#d3d4b6|#d6d3ac
+Catch Me If You Can (terminal.sexy)|#f9f9f9|#170f0d|#130f0c|#604c38|#8d7f85|#907256|#aa8d70|#b9a38d|#c4bfbf|#c4ae99|#c69f77|#cab9a8|#d5c6b8|#dcd1c7|#e0e0e2|#e4dad2|#eae3dc|#f6f2f0
+Catppuccin Frappe|#c6d0f5|#303446|#51576d|#e78284|#a6d189|#e5c890|#8caaee|#f4b8e4|#81c8be|#b5bfe2|#626880|#e78284|#a6d189|#e5c890|#8caaee|#f4b8e4|#81c8be|#a5adce
+Catppuccin Frappé (Gogh)|#c6d0f5|#303446|#51576d|#e78284|#a6d189|#e5c890|#8caaee|#f4b8e4|#81c8be|#b5bfe2|#626880|#e78284|#a6d189|#e5c890|#8caaee|#f4b8e4|#81c8be|#a5adce
+Catppuccin Latte|#4c4f69|#eff1f5|#bcc0cc|#d20f39|#40a02b|#df8e1d|#1e66f5|#ea76cb|#179299|#5c5f77|#acb0be|#d20f39|#40a02b|#df8e1d|#1e66f5|#ea76cb|#179299|#6c6f85
+Catppuccin Latte (Gogh)|#4c4f69|#eff1f5|#5c5f77|#d20f39|#40a02b|#df8e1d|#1e66f5|#ea76cb|#179299|#acb0be|#6c6f85|#d20f39|#40a02b|#df8e1d|#1e66f5|#ea76cb|#179299|#bcc0cc
+Catppuccin Macchiato|#cad3f5|#24273a|#494d64|#ed8796|#a6da95|#eed49f|#8aadf4|#f5bde6|#8bd5ca|#b8c0e0|#5b6078|#ed8796|#a6da95|#eed49f|#8aadf4|#f5bde6|#8bd5ca|#a5adcb
+Catppuccin Macchiato (Gogh)|#cad3f5|#24273a|#494d64|#ed8796|#a6da95|#eed49f|#8aadf4|#f5bde6|#8bd5ca|#b8c0e0|#5b6078|#ed8796|#a6da95|#eed49f|#8aadf4|#f5bde6|#8bd5ca|#a5adcb
+Catppuccin Mocha|#cdd6f4|#1e1e2e|#45475a|#f38ba8|#a6e3a1|#f9e2af|#89b4fa|#f5c2e7|#94e2d5|#bac2de|#585b70|#f38ba8|#a6e3a1|#f9e2af|#89b4fa|#f5c2e7|#94e2d5|#a6adc8
+Catppuccin Mocha (Gogh)|#cdd6f4|#1e1e2e|#45475a|#f38ba8|#a6e3a1|#f9e2af|#89b4fa|#f5c2e7|#94e2d5|#bac2de|#585b70|#f38ba8|#a6e3a1|#f9e2af|#89b4fa|#f5c2e7|#94e2d5|#a6adc8
+Chalk|#d2d8d9|#2b2d2e|#7d8b8f|#b23a52|#789b6a|#b9ac4a|#2a7fac|#bd4f5a|#44a799|#d2d8d9|#888888|#f24840|#80c470|#ffeb62|#4196ff|#fc5275|#53cdbd|#d2d8d9
+Chalk (Gogh)|#d4d4d4|#2d2d2d|#646464|#f58e8e|#a9d3ab|#fed37e|#7aabd4|#d6add5|#79d4d5|#d4d4d4|#646464|#f58e8e|#a9d3ab|#fed37e|#7aabd4|#d6add5|#79d4d5|#d4d4d4
+Chalk (base16)|#d0d0d0|#151515|#151515|#fb9fb1|#acc267|#ddb26f|#6fc2ef|#e1a3ee|#12cfc0|#d0d0d0|#505050|#fb9fb1|#acc267|#ddb26f|#6fc2ef|#e1a3ee|#12cfc0|#f5f5f5
+Chalk (dark) (terminal.sexy)|#d0d0d0|#151515|#151515|#fb9fb1|#acc267|#ddb26f|#6fc2ef|#e1a3ee|#12cfc0|#d0d0d0|#505050|#fb9fb1|#acc267|#ddb26f|#6fc2ef|#e1a3ee|#12cfc0|#f5f5f5
+Chalk (light) (terminal.sexy)|#303030|#f5f5f5|#151515|#fb9fb1|#acc267|#ddb26f|#6fc2ef|#e1a3ee|#12cfc0|#d0d0d0|#505050|#fb9fb1|#acc267|#ddb26f|#6fc2ef|#e1a3ee|#12cfc0|#f5f5f5
+Chalkboard|#d9e6f2|#29262f|#000000|#c37372|#72c373|#c2c372|#7372c3|#c372c2|#72c2c3|#d9d9d9|#323232|#dbaaaa|#aadbaa|#dadbaa|#aaaadb|#dbaada|#aadadb|#ffffff
+Chalkboard (Gogh)|#d9e6f2|#29262f|#000000|#c37372|#72c373|#c2c372|#7372c3|#c372c2|#72c2c3|#d9d9d9|#323232|#dbaaaa|#aadbaa|#dadbaa|#aaaadb|#dbaada|#aadadb|#ffffff
+ChallengerDeep|#cbe1e7|#1e1c31|#141228|#ff5458|#62d196|#ffb378|#65b2ff|#906cff|#63f2f1|#a6b3cc|#565575|#ff8080|#95ffa4|#ffe9aa|#91ddff|#c991e1|#aaffe4|#cbe3e7
+Chameleon (Gogh)|#dedede|#2c2c2c|#2c2c2c|#cc231c|#689d69|#d79922|#366b71|#4e5165|#458587|#c8bb97|#777777|#cc231c|#689d69|#d79922|#366b71|#4e5165|#458587|#c8bb97
+Chester|#ffffff|#2c3643|#080200|#fa5e5b|#16c98d|#ffc83f|#288ad6|#d34590|#28ddde|#e7e7e7|#6f6b68|#fa5e5b|#16c98d|#feef6d|#278ad6|#d34590|#27dede|#ffffff
+Ciapre|#aea47a|#191c27|#181818|#810009|#48513b|#cc8b3f|#576d8c|#724d7c|#5c4f4b|#aea47f|#555555|#ac3835|#a6a75d|#dcdf7c|#3097c6|#d33061|#f3dbb2|#f4f4f4
+Ciapre (Gogh)|#aea47a|#191c27|#181818|#810009|#48513b|#cc8b3f|#576d8c|#724d7c|#5c4f4b|#aea47f|#555555|#ac3835|#a6a75d|#dcdf7c|#3097c6|#d33061|#f3dbb2|#f4f4f4
+Circus (base16)|#a7a7a7|#191919|#191919|#dc657d|#84b97c|#c3ba63|#639ee4|#b888e2|#4bb1a7|#a7a7a7|#5f5a60|#dc657d|#84b97c|#c3ba63|#639ee4|#b888e2|#4bb1a7|#ffffff
+City Streets (terminal.sexy)|#d3d3d3|#000000|#201e24|#2d2b30|#3f3d40|#413c3e|#423e41|#4e4a4b|#6e6765|#837e81|#837c78|#89827d|#a7a099|#c2bec1|#c3bcb2|#cbc5ba|#e3ddd2|#efe8dc
+Classic Dark (base16)|#d0d0d0|#151515|#151515|#ac4142|#90a959|#f4bf75|#6a9fb5|#aa759f|#75b5aa|#d0d0d0|#505050|#ac4142|#90a959|#f4bf75|#6a9fb5|#aa759f|#75b5aa|#f5f5f5
+Classic Light (base16)|#303030|#f5f5f5|#f5f5f5|#ac4142|#90a959|#f4bf75|#6a9fb5|#aa759f|#75b5aa|#303030|#b0b0b0|#ac4142|#90a959|#f4bf75|#6a9fb5|#aa759f|#75b5aa|#151515
+Clone Of Ubuntu (Gogh)|#ffffff|#300a24|#2e3436|#cc0000|#4e9a06|#c4a000|#3465a4|#75507b|#06989a|#d3d7cf|#555753|#ef2929|#8ae234|#fce94f|#729fcf|#ad7fa8|#34e2e2|#eeeeec
+CloneofUbuntu (Gogh)|#ffffff|#300a24|#2e3436|#cc0000|#4e9a06|#c4a000|#3465a4|#75507b|#06989a|#d3d7cf|#555753|#ef2929|#8ae234|#fce94f|#729fcf|#ad7fa8|#34e2e2|#eeeeec
+Cloud (terminal.sexy)|#ffffff|#000000|#222827|#d5a8e3|#9c75dd|#9898ae|#654a96|#625566|#a9d1df|#e6ebe5|#5d6f74|#cd749c|#63b0b0|#c0c0dd|#5786bc|#3f3442|#849da2|#d9d6cf
+Clrs (Gogh)|#262626|#ffffff|#000000|#f8282a|#328a5d|#fa701d|#135cd0|#9f00bd|#33c3c1|#b3b3b3|#555753|#fb0416|#2cc631|#fdd727|#1670ff|#e900b0|#3ad5ce|#eeeeec
+Cobalt 2 (Gogh)|#ffffff|#132738|#000000|#ff0000|#38de21|#ffe50a|#1460d2|#ff005d|#00bbbb|#bbbbbb|#555555|#f40e17|#3bd01d|#edc809|#5555ff|#ff55ff|#6ae3fa|#ffffff
+Cobalt Neon|#8ff586|#142838|#142631|#ff2320|#3ba5ff|#e9e75c|#8ff586|#781aa0|#8ff586|#ba46b2|#fff688|#d4312e|#8ff586|#e9f06d|#3c7dd2|#8230a7|#6cbc67|#8ff586
+Cobalt Neon (Gogh)|#8ff586|#142838|#142631|#ff2320|#3ba5ff|#e9e75c|#8ff586|#781aa0|#8ff586|#ba46b2|#fff688|#d4312e|#8ff586|#e9f06d|#3c7dd2|#8230a7|#6cbc67|#8ff586
+Cobalt2|#ffffff|#132738|#000000|#ff0000|#38de21|#ffe50a|#1460d2|#ff005d|#00bbbb|#bbbbbb|#555555|#f40e17|#3bd01d|#edc809|#5555ff|#ff55ff|#6ae3fa|#ffffff
+CobaltNeon (Gogh)|#8ff586|#142838|#142631|#ff2320|#3ba5ff|#e9e75c|#8ff586|#781aa0|#8ff586|#ba46b2|#fff688|#d4312e|#8ff586|#e9f06d|#3c7dd2|#8230a7|#6cbc67|#8ff586
+Codeschool (base16)|#9ea7a6|#232c31|#232c31|#2a5491|#237986|#a03b1e|#484d79|#c59820|#b02f30|#9ea7a6|#3f4944|#2a5491|#237986|#a03b1e|#484d79|#c59820|#b02f30|#b5d8f6
+Codeschool (dark) (terminal.sexy)|#9ea7a6|#232c31|#232c31|#2a5491|#237986|#a03b1e|#484d79|#c59820|#b02f30|#9ea7a6|#3f4944|#2a5491|#237986|#a03b1e|#484d79|#c59820|#b02f30|#b5d8f6
+Codeschool (light) (terminal.sexy)|#2a343a|#b5d8f6|#232c31|#2a5491|#237986|#a03b1e|#484d79|#c59820|#b02f30|#9ea7a6|#3f4944|#2a5491|#237986|#a03b1e|#484d79|#c59820|#b02f30|#b5d8f6
+Color Star (terminal.sexy)|#d3d3d3|#000000|#03010f|#503b43|#353b64|#8c2424|#6067ac|#624d19|#7c83c0|#9a600f|#ab9e9e|#b28930|#bbada9|#c37305|#d0ae58|#d7b559|#f4e199|#f6f4df
+Colorcli (Gogh)|#005f87|#ffffff|#000000|#d70000|#5faf00|#5faf00|#005f87|#d70000|#5f5f5f|#e4e4e4|#5f5f5f|#d70000|#5f5f5f|#ffff00|#0087af|#0087af|#0087af|#ffffff
+Colorful Colors (terminal.sexy)|#ffffff|#000000|#151515|#ff8eaf|#a6e25f|#f8e578|#a6e2f0|#e85b92|#5f868f|#d5f1f2|#696969|#ed4c7a|#a6e179|#ffdf6b|#79d2ff|#bb5d79|#87a8af|#e2f1f6
+Colors (base16)|#bbbbbb|#111111|#111111|#ff4136|#2ecc40|#ffdc00|#0074d9|#b10dc9|#7fdbff|#bbbbbb|#777777|#ff4136|#2ecc40|#ffdc00|#0074d9|#b10dc9|#7fdbff|#ffffff
+Count Von Count (terminal.sexy)|#919191|#000000|#303030|#c10023|#a83334|#b51d2c|#8c4b46|#7d534f|#9a413d|#c6c6c6|#5e5e5e|#ff8781|#ffa095|#ff948b|#feb2aa|#ebbbb5|#ffaaa0|#ffffff
+Crayon Pony Fish (Gogh)|#68525a|#150707|#2b1b1d|#91002b|#579524|#ab311b|#8c87b0|#692f50|#e8a866|#68525a|#3d2b2e|#c5255d|#8dff57|#c8381d|#cfc9ff|#fc6cba|#ffceaf|#b0949d
+CrayonPonyFish|#68525a|#150707|#2b1b1d|#91002b|#579524|#ab311b|#8c87b0|#692f50|#e8a866|#68525a|#3d2b2e|#c5255d|#8dff57|#c8381d|#cfc9ff|#fc6cba|#ffceaf|#b0949d
+Cupcake (base16)|#8b8198|#fbf1f2|#fbf1f2|#d57e85|#a3b367|#dcb16c|#7297b9|#bb99b4|#69a9a7|#8b8198|#bfb9c6|#d57e85|#a3b367|#dcb16c|#7297b9|#bb99b4|#69a9a7|#585062
+Cupertino (base16)|#404040|#ffffff|#ffffff|#c41a15|#007400|#826b28|#0000ff|#a90d91|#318495|#404040|#808080|#c41a15|#007400|#826b28|#0000ff|#a90d91|#318495|#5e5e5e
+Cyberdyne|#00ff92|#151144|#080808|#ff8373|#00c172|#d2a700|#0071cf|#ff90fe|#6bffdd|#f1f1f1|#2e2e2e|#ffc4be|#d6fcba|#fffed5|#c2e3ff|#ffb2fe|#e6e7fe|#ffffff
+DWM rob (terminal.sexy)|#ffffff|#000000|#151515|#bf7979|#97b26b|#cdcda1|#4a5463|#9c3885|#88aadd|#ffffff|#505450|#f4a45f|#c5f779|#ffffaf|#7d8794|#e628ba|#99ccff|#dedede
+DanQing (base16)|#e0f0ef|#2d302f|#2d302f|#f9906f|#8ab361|#f0c239|#b0a4e3|#cca4e3|#30dff3|#e0f0ef|#9da8a3|#f9906f|#8ab361|#f0c239|#b0a4e3|#cca4e3|#30dff3|#fcfefd
+DanQing Light (base16)|#5a605d|#fcfefd|#fcfefd|#f9906f|#8ab361|#f0c239|#b0a4e3|#cca4e3|#30dff3|#5a605d|#cad8d2|#f9906f|#8ab361|#f0c239|#b0a4e3|#cca4e3|#30dff3|#2d302f
+Darcula (base16)|#a9b7c6|#2b2b2b|#2b2b2b|#4eade5|#6a8759|#bbb529|#9876aa|#cc7832|#629755|#a9b7c6|#606366|#4eade5|#6a8759|#bbb529|#9876aa|#cc7832|#629755|#ffffff
+Dark Ocean (terminal.sexy)|#ffffff|#000000|#000000|#571dc2|#14db49|#403d70|#385a70|#384894|#4f3a5e|#999999|#38372c|#7c54b0|#a2e655|#9c6f59|#323f5c|#5e6c99|#667d77|#ffffff
+Dark Pastel|#ffffff|#000000|#000000|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#bbbbbb|#555555|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#ffffff
+Dark Pastel (Gogh)|#ffffff|#000000|#000000|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#bbbbbb|#555555|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#ffffff
+Dark Violet (base16)|#b08ae6|#000000|#000000|#a82ee6|#4595e6|#f29df2|#4136d9|#7e5ce6|#40dfff|#b08ae6|#593380|#a82ee6|#4595e6|#f29df2|#4136d9|#7e5ce6|#40dfff|#a366ff
+Dark+|#cccccc|#1e1e1e|#000000|#cd3131|#0dbc79|#e5e510|#2472c8|#bc3fbc|#11a8cd|#e5e5e5|#666666|#f14c4c|#23d18b|#f5f543|#3b8eea|#d670d6|#29b8db|#e5e5e5
+DarkPastel (Gogh)|#ffffff|#000000|#000000|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#bbbbbb|#555555|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#ffffff
+Darkside|#bababa|#222324|#000000|#e8341c|#68c256|#f2d42c|#1c98e8|#8e69c9|#1c98e8|#bababa|#000000|#e05a4f|#77b869|#efd64b|#387cd3|#957bbe|#3d97e2|#bababa
+Darkside (Gogh)|#bababa|#222324|#000000|#e8341c|#68c256|#f2d42c|#1c98e8|#8e69c9|#1c98e8|#bababa|#000000|#e05a4f|#77b869|#efd64b|#387cd3|#957bbe|#3d97e2|#bababa
+Darktooth (base16)|#a89984|#1d2021|#1d2021|#fb543f|#95c085|#fac03b|#0d6678|#8f4673|#8ba59b|#a89984|#665c54|#fb543f|#95c085|#fac03b|#0d6678|#8f4673|#8ba59b|#fdf4c1
+Dawn (terminal.sexy)|#9b9081|#181b20|#353535|#744b40|#6d6137|#765636|#61564b|#6b4a49|#435861|#b3b3b3|#5f5f5f|#785850|#6f6749|#776049|#696057|#6f5a59|#525f66|#cdcdcd
+DeHydration (Gogh)|#cccccc|#333333|#333333|#ff5555|#5fd38d|#ff9955|#3771c8|#bc5fd3|#5fd3bc|#999999|#666666|#ff8080|#87deaa|#ffb380|#5f8dd3|#cd87de|#87decd|#cccccc
+Deafened (terminal.sexy)|#ffffff|#000000|#3d3e3d|#755a5b|#68755a|#756e5a|#5b6976|#755b76|#465457|#ccccc6|#5a5b5c|#a37679|#87a376|#a39b76|#758ba3|#9f76a3|#899ca1|#f8f8f2
+Decaf (base16)|#cccccc|#2d2d2d|#2d2d2d|#ff7f7b|#beda78|#ffd67c|#90bee1|#efb3f7|#bed6ff|#cccccc|#777777|#ff7f7b|#beda78|#ffd67c|#90bee1|#efb3f7|#bed6ff|#ffffff
+Default (dark) (terminal.sexy)|#d0d0d0|#151515|#151515|#ac4142|#90a959|#f4bf75|#6a9fb5|#aa759f|#75b5aa|#d0d0d0|#505050|#ac4142|#90a959|#f4bf75|#6a9fb5|#aa759f|#75b5aa|#f5f5f5
+Default (light) (terminal.sexy)|#303030|#f5f5f5|#151515|#ac4142|#90a959|#f4bf75|#6a9fb5|#aa759f|#75b5aa|#d0d0d0|#505050|#ac4142|#90a959|#f4bf75|#6a9fb5|#aa759f|#75b5aa|#f5f5f5
+Default Dark (base16)|#d8d8d8|#181818|#181818|#ab4642|#a1b56c|#f7ca88|#7cafc2|#ba8baf|#86c1b9|#d8d8d8|#585858|#ab4642|#a1b56c|#f7ca88|#7cafc2|#ba8baf|#86c1b9|#f8f8f8
+Default Light (base16)|#383838|#f8f8f8|#f8f8f8|#ab4642|#a1b56c|#f7ca88|#7cafc2|#ba8baf|#86c1b9|#383838|#b8b8b8|#ab4642|#a1b56c|#f7ca88|#7cafc2|#ba8baf|#86c1b9|#181818
+Dehydration (Gogh)|#cccccc|#333333|#333333|#ff5555|#5fd38d|#ff9955|#3771c8|#bc5fd3|#5fd3bc|#999999|#666666|#ff8080|#87deaa|#ffb380|#5f8dd3|#cd87de|#87decd|#cccccc
+Derp (terminal.sexy)|#ffffff|#000000|#111111|#d36265|#aece91|#e7e18c|#5297cf|#963c59|#5e7175|#bebebe|#666666|#ef8171|#cfefb3|#fff796|#74b8ef|#b85e7b|#a3babf|#ffffff
+Desert|#ffffff|#333333|#4d4d4d|#ff2b2b|#98fb98|#f0e68c|#cd853f|#ffdead|#ffa0a0|#f5deb3|#555555|#ff5555|#55ff55|#ffff55|#87ceff|#ff55ff|#ffd700|#ffffff
+Desert (Gogh)|#ffffff|#333333|#4d4d4d|#ff2b2b|#98fb98|#f0e68c|#cd853f|#ffdead|#ffa0a0|#f5deb3|#555555|#ff5555|#55ff55|#ffff55|#87ceff|#ff55ff|#ffd700|#ffffff
+Digerati (terminal.sexy)|#ffffff|#000000|#303030|#c03000|#b1d631|#fecf35|#426870|#6d506d|#4bb5c1|#e2e2e5|#5f5f5f|#ff3a78|#a6cd07|#b5c865|#4a7781|#ff3b77|#4bb5c1|#e2e2e5
+Dimmed Monokai (Gogh)|#b9bcba|#1f1f1f|#3a3d43|#be3f48|#879a3b|#c5a635|#4f76a1|#855c8d|#578fa4|#b9bcba|#888987|#fb001f|#0f722f|#c47033|#186de3|#fb0067|#2e706d|#fdffb9
+DimmedMonokai|#b9bcba|#1f1f1f|#3a3d43|#be3f48|#879a3b|#c5a635|#4f76a1|#855c8d|#578fa4|#b9bcba|#888987|#fb001f|#0f722f|#c47033|#186de3|#fb0067|#2e706d|#fdffb9
+Dissonance (Gogh)|#ffffff|#000000|#000000|#dc322f|#56db3a|#ff8400|#0084d4|#b729d9|#ccccff|#ffffff|#d6dbe5|#dc322f|#56db3a|#ff8400|#0084d4|#b729d9|#ccccff|#ffffff
+Django|#f8f8f8|#0b2f20|#000000|#fd6209|#41a83e|#ffe862|#245032|#f8f8f8|#9df39f|#ffffff|#323232|#ff943b|#73da70|#ffff94|#568264|#ffffff|#cfffd1|#ffffff
+DjangoRebornAgain|#dadedc|#051f14|#000000|#fd6209|#41a83e|#ffe862|#245032|#f8f8f8|#9df39f|#ffffff|#323232|#ff943b|#73da70|#ffff94|#568264|#ffffff|#cfffd1|#ffffff
+DjangoSmooth|#f8f8f8|#245032|#000000|#fd6209|#41a83e|#ffe862|#989898|#f8f8f8|#9df39f|#e8e8e7|#323232|#ff943b|#73da70|#ffff94|#cacaca|#ffffff|#cfffd1|#ffffff
+Doom Peacock|#ede0ce|#2b2a27|#1c1f24|#cb4b16|#26a6a6|#bcd42a|#2a6cc6|#a9a1e1|#5699af|#ede0ce|#2b2a27|#ff5d38|#98be65|#e6f972|#51afef|#c678dd|#46d9ff|#dfdfdf
+DoomOne|#bbc2cf|#282c34|#000000|#ff6c6b|#98be65|#ecbe7b|#a9a1e1|#c678dd|#51afef|#bbc2cf|#000000|#ff6655|#99bb66|#ecbe7b|#a9a1e1|#c678dd|#51afef|#bfbfbf
+DotGov|#ebebeb|#262c35|#191919|#bf091d|#3d9751|#f6bb34|#17b2e0|#7830b0|#8bd2ed|#ffffff|#191919|#bf091d|#3d9751|#f6bb34|#17b2e0|#7830b0|#8bd2ed|#ffffff
+Dotshare (terminal.sexy)|#ffffff|#000000|#101010|#e84f4f|#b8d68c|#e1aa5d|#7dc1cf|#9b64fb|#6d878d|#dddddd|#404040|#d23d3d|#a0cf5d|#f39d21|#4e9fb1|#8542ff|#42717b|#dddddd
+Dracula|#f8f8f2|#1e1f29|#000000|#ff5555|#50fa7b|#f1fa8c|#bd93f9|#ff79c6|#8be9fd|#bbbbbb|#555555|#ff5555|#50fa7b|#f1fa8c|#bd93f9|#ff79c6|#8be9fd|#ffffff
+Dracula (Gogh)|#f8f8f2|#282a36|#44475a|#ff5555|#50fa7b|#ffb86c|#8be9fd|#bd93f9|#ff79c6|#f8f8f2|#000000|#ff5555|#50fa7b|#ffb86c|#8be9fd|#bd93f9|#ff79c6|#ffffff
+Dracula (Official)|#f8f8f2|#282a36|#21222c|#ff5555|#50fa7b|#f1fa8c|#bd93f9|#ff79c6|#8be9fd|#f8f8f2|#6272a4|#ff6e6e|#69ff94|#ffffa5|#d6acff|#ff92df|#a4ffff|#ffffff
+Dracula (base16)|#e9e9f4|#282936|#282936|#ea51b2|#ebff87|#00f769|#62d6e8|#b45bcf|#a1efe4|#e9e9f4|#626483|#ea51b2|#ebff87|#00f769|#62d6e8|#b45bcf|#a1efe4|#f7f7fb
+Dracula+|#f8f8f2|#212121|#21222c|#ff5555|#50fa7b|#ffcb6b|#82aaff|#c792ea|#8be9fd|#f8f8f2|#545454|#ff6e6e|#69ff94|#ffcb6b|#d6acff|#ff92df|#a4ffff|#f8f8f2
+Duotone Dark|#b7a1ff|#1f1d27|#1f1d27|#d9393e|#2dcd73|#d9b76e|#ffc284|#de8d40|#2488ff|#b7a1ff|#353147|#d9393e|#2dcd73|#d9b76e|#ffc284|#de8d40|#2488ff|#eae5ff
+ENCOM|#00a595|#000000|#000000|#9f0000|#008b00|#ffd000|#0081ff|#bc00ca|#008b8b|#bbbbbb|#555555|#ff0000|#00ee00|#ffff00|#0000ff|#ff00ff|#00cdcd|#ffffff
+Earthsong|#e5c7a9|#292520|#121418|#c94234|#85c54c|#f5ae2e|#1398b9|#d0633d|#509552|#e5c6aa|#675f54|#ff645a|#98e036|#e0d561|#5fdaff|#ff9269|#84f088|#f6f7ec
+Earthsong (Gogh)|#e5c7a9|#292520|#121418|#c94234|#85c54c|#f5ae2e|#1398b9|#d0633d|#509552|#e5c6aa|#675f54|#ff645a|#98e036|#e0d561|#5fdaff|#ff9269|#84f088|#f6f7ec
+Edge Dark (base16)|#b7bec9|#262729|#262729|#e77171|#a1bf78|#dbb774|#73b3e7|#d390e7|#5ebaa5|#b7bec9|#3e4249|#e77171|#a1bf78|#dbb774|#73b3e7|#d390e7|#5ebaa5|#3e4249
+Edge Light (base16)|#5e646f|#fafafa|#fafafa|#db7070|#7c9f4b|#d69822|#6587bf|#b870ce|#509c93|#5e646f|#5e646f|#db7070|#7c9f4b|#d69822|#6587bf|#b870ce|#509c93|#5e646f
+Ef-Arbutus|#393330|#ffead8|#f0d8cf|#b0000f|#007000|#906200|#375cc6|#a23ea4|#3f69af|#393330|#c7b2ab|#aa184f|#00704f|#8a6340|#265fbf|#6448ca|#0f7688|#6e678f
+Ef-Autumn|#cfbcba|#0f0e06|#26211d|#ef656a|#2fa526|#c48702|#379cf6|#d570af|#4fb0cf|#cfbcba|#56524f|#ff7a7f|#00b066|#df8f6f|#029fff|#af8aff|#3dbbb0|#887c8a
+Ef-Bio|#cfdfd5|#111111|#222522|#ef6560|#3fb83f|#d4aa02|#37aff6|#d38faf|#6fc5ef|#cfdfd5|#505250|#ff778f|#00c089|#cfc04f|#32cfef|#af9fff|#5dc0aa|#808f80
+Ef-Cherie|#d3cfcf|#190a0f|#291f26|#ff7359|#60b444|#e5b76f|#8fa5f6|#ef80bf|#8fbaef|#d3cfcf|#594a4f|#ff78aa|#60bf88|#f59280|#7fa5ff|#df7fff|#8fcfdf|#808898
+Ef-Cyprus|#242521|#fcf7ef|#f0ece0|#9f0d0f|#006f00|#a7601f|#375cc6|#9a456f|#1f70af|#242521|#c5c3b8|#ca3400|#00824f|#a2604f|#065fbf|#8448aa|#007a9f|#59786f
+Ef-Dark|#d0d0d0|#000000|#1a1a1a|#ef6560|#0faa26|#bf9032|#3f95f6|#d369af|#4fbaef|#d0d0d0|#4b4b4b|#ff5a7a|#00a692|#df8a5a|#029fff|#af85ff|#1dbfcf|#857f8f
+Ef-Day|#584141|#fff5ea|#f2e9db|#ba2d2f|#007a0a|#a45a22|#375cc6|#ca3e54|#3f60af|#584141|#c9c0b8|#cf2f4f|#0f7f5f|#aa4f30|#265fbf|#8448aa|#0f7b8f|#63728f
+Ef-Deuteranopia-Dark|#ddddee|#000a1f|#121f34|#cf8560|#3faa26|#aa9f32|#3f90f0|#b379bf|#5faaef|#ddddee|#445165|#cf7a7a|#3fa672|#bfaf7a|#009fff|#9f95ff|#0db0ff|#7f8797
+Ef-Deuteranopia-Light|#1a1a2f|#f5f5ff|#e8e8ea|#d3303a|#217a3c|#805d00|#375cd8|#ba35af|#1f6fbf|#1a1a2f|#b3b3c0|#d50f7f|#008058|#765040|#065fff|#6052cf|#1f77bb|#70627f
+Ef-Duo-Dark|#d0d0d0|#070019|#1d1a26|#ef656a|#1fa526|#c48702|#379cf6|#d369af|#5faaef|#d0d0d0|#4a4759|#ef798f|#00b982|#df805f|#029fff|#af85ff|#0dafdf|#857f8f
+Ef-Duo-Light|#222222|#fff8f0|#f6ece8|#cc3333|#217a3c|#8a5d00|#375cd8|#ba35af|#1f6fbf|#222222|#c7c0ba|#c04440|#008058|#8f5a3a|#065fff|#6052cf|#1f77bb|#63728f
+Ef-Elea-Dark|#eaf2ef|#222524|#303332|#ff656a|#7fc87f|#cac85f|#57aff6|#f59acf|#6fcfd2|#eaf2ef|#5e6160|#fa7f88|#50cf89|#cfb27f|#62cfef|#cfaaff|#60d5c2|#969faf
+Ef-Elea-Light|#221321|#edf5e2|#e3e9d6|#c3303a|#00601f|#9a501f|#375cc6|#80308f|#1f70af|#221321|#b0b7aa|#b02440|#007047|#88541f|#162f8f|#5032aa|#00677f|#676470
+Ef-Frost|#232323|#fcffff|#eaefef|#c42d2f|#008a00|#aa6100|#004fc0|#aa44c5|#1f6fbf|#232323|#b5b8b8|#cf2f4f|#00845f|#996c4f|#065fff|#7f5ae0|#007a85|#66657f
+Ef-Kassio|#201f36|#fff7f7|#efe7e7|#b00234|#217a3c|#9a6012|#3c3bbe|#a01f64|#2f5f9f|#201f36|#c0bbbb|#d5305f|#008358|#a04646|#065fff|#7022bf|#1077ab|#776f79
+Ef-Light|#202020|#ffffff|#efefef|#d3303a|#217a3c|#a45f22|#375cd8|#ba35af|#1f6fbf|#202020|#b3b3b3|#d50f7f|#008858|#b65050|#065fff|#6052cf|#1f77bb|#70627f
+Ef-Maris-Dark|#eaedef|#131c2b|#1d2c39|#ff6f6f|#41bf4f|#d0d24f|#57b0ff|#f59acf|#2fd0db|#eaedef|#4a5664|#ff7788|#30c489|#cab27f|#12b4ff|#cf90ff|#65d5a8|#969faf
+Ef-Maris-Light|#151a27|#edf4f8|#e0e7ef|#c3303a|#007010|#805a1f|#375cc6|#80308f|#1f66af|#151a27|#afb8c3|#b02440|#007047|#78542f|#003faf|#5f2fba|#006f70|#676470
+Ef-Melissa-Dark|#e8e4b1|#352718|#483426|#ff7f7f|#6fd560|#e4b53f|#57aff6|#f0aac5|#6fcad0|#e8e4b1|#79665f|#ff8f98|#65d590|#e7a06f|#62cfef|#c6a2fe|#70e0cf|#90918a
+Ef-Melissa-Light|#484431|#fff6d8|#f5e9cb|#ba2d2f|#007a0a|#a46110|#375cc6|#aa3e74|#3f60af|#484431|#c7b7a6|#c03f3f|#008250|#946830|#265fbf|#6448ca|#0f708a|#68708a
+Ef-Night|#afbcbf|#000e17|#1a202b|#ef656a|#1fa526|#c48502|#379cf6|#d570af|#4fb0cf|#afbcbf|#444e59|#ef798f|#00a972|#df8f6f|#029fff|#af8aff|#3dc0b0|#70819f
+Ef-Rosa|#e4d3e1|#322023|#432e32|#ff707f|#55cb56|#e4c53f|#57aff6|#ffb2d6|#5fc0dc|#e4d3e1|#6a5862|#f0888f|#49d081|#eec26f|#62cff7|#cfb1ff|#80dfbf|#9d9d9d
+Ef-Spring|#34494a|#f6fff9|#e8f0f0|#c42d2f|#1a870f|#a45f22|#375cc6|#d5206f|#1f6fbf|#34494a|#c0c6c3|#cf2f4f|#007f68|#ae5a30|#265fbf|#9435b4|#0f7b8f|#777294
+Ef-Summer|#4f4073|#fff2f3|#f2e4ea|#d3303a|#217a3c|#a45f22|#375ce6|#ba35af|#1f6fbf|#4f4073|#cfb3c4|#d50f7f|#007f68|#b65050|#065fff|#8e44f3|#0f7b8f|#786e74
+Ef-Symbiosis|#d0d0d0|#130911|#221920|#ef6360|#0faa26|#bf9032|#3f95f6|#d369af|#4fbaef|#d0d0d0|#4b3f47|#fe5a7a|#00a692|#df8a5a|#029fff|#af85ff|#1dbfcf|#857f8f
+Ef-Trio-Dark|#d8cfd5|#160f0f|#2a2228|#f48359|#60b444|#d4a052|#7fa5f6|#d37faf|#8fbaff|#d8cfd5|#564f55|#ff85aa|#60bf88|#ef9680|#72afff|#a698ef|#8fcfdf|#908890
+Ef-Trio-Light|#4f3363|#f8f5ff|#ebe7f1|#c3303a|#057800|#a45f22|#375cd6|#ad45ba|#1f6fbf|#4f3363|#c3c0c9|#c01f5f|#007f6f|#b65050|#065fbf|#705ae3|#0f7a9d|#786e74
+Ef-Tritanopia-Dark|#dfd0d5|#15050f|#282026|#cf4f5f|#2fa526|#c48702|#379cf6|#b2608f|#3fafcf|#dfd0d5|#554f4f|#d24f7f|#00b066|#df8f6f|#029fff|#a6699f|#4fafaf|#908890
+Ef-Tritanopia-Light|#1a1a1a|#fff9f9|#efecec|#aa0010|#217a3c|#805d00|#375cd8|#aa357f|#2070af|#1a1a1a|#bdb9b9|#c50f4f|#008058|#765040|#065fff|#af40af|#007faa|#756275
+Ef-Winter|#b8c6d5|#0f0b15|#1d202f|#f47359|#29a444|#b58a52|#3f95f6|#d369af|#4fbaef|#b8c6d5|#4a4f62|#ff6a7a|#00a392|#df9080|#029fff|#af85ea|#35afbf|#807c9f
+Eighties (base16)|#d3d0c8|#2d2d2d|#2d2d2d|#f2777a|#99cc99|#ffcc66|#6699cc|#cc99cc|#66cccc|#d3d0c8|#747369|#f2777a|#99cc99|#ffcc66|#6699cc|#cc99cc|#66cccc|#f2f0ec
+Eighties (dark) (terminal.sexy)|#d3d0c8|#2d2d2d|#2d2d2d|#f2777a|#99cc99|#ffcc66|#6699cc|#cc99cc|#66cccc|#d3d0c8|#747369|#f2777a|#99cc99|#ffcc66|#6699cc|#cc99cc|#66cccc|#f2f0ec
+Eighties (light) (terminal.sexy)|#515151|#f2f0ec|#2d2d2d|#f2777a|#99cc99|#ffcc66|#6699cc|#cc99cc|#66cccc|#d3d0c8|#747369|#f2777a|#99cc99|#ffcc66|#6699cc|#cc99cc|#66cccc|#f2f0ec
+Eldorado dark (terminal.sexy)|#a2a2a2|#292929|#4e4e4e|#a9635d|#468459|#84763d|#5879af|#9c6594|#008592|#cfcfcf|#777777|#ffbbb2|#9ddeaf|#e0ce91|#b3d1ff|#fabdf0|#79e0ed|#ffffff
+Elemental|#807a74|#22211d|#3c3c30|#98290f|#479a43|#7f7111|#497f7d|#7f4e2f|#387f58|#807974|#555445|#e0502a|#61e070|#d69927|#79d9d9|#cd7c54|#59d599|#fff1e9
+Elemental (Gogh)|#807a74|#22211d|#3c3c30|#98290f|#479a43|#7f7111|#497f7d|#7f4e2f|#387f58|#807974|#555445|#e0502a|#61e070|#d69927|#79d9d9|#cd7c54|#59d599|#fff1e9
+Elementary|#efefef|#181818|#242424|#d71c15|#5aa513|#fdb40c|#063b8c|#e40038|#2595e1|#efefef|#4b4b4b|#fc1c18|#6bc219|#fec80e|#0955ff|#fb0050|#3ea8fc|#8c00ec
+Elementary (Gogh)|#f2f2f2|#101010|#303030|#e1321a|#6ab017|#ffc005|#004f9e|#ec0048|#2aa7e7|#f2f2f2|#5d5d5d|#ff361e|#7bc91f|#ffd00a|#0071ff|#ff1d62|#4bb8fd|#a020f0
+Elic (Gogh)|#f2f2f2|#4a453e|#303030|#e1321a|#6ab017|#ffc005|#729fcf|#ec0048|#f2f2f2|#2aa7e7|#5d5d5d|#ff361e|#7bc91f|#ffd00a|#0071ff|#ff1d62|#4bb8fd|#a020f0
+Elio (Gogh)|#f2f2f2|#041a3b|#303030|#e1321a|#6ab017|#ffc005|#729fcf|#ec0048|#2aa7e7|#f2f2f2|#5d5d5d|#ff361e|#7bc91f|#ffd00a|#0071ff|#ff1d62|#4bb8fd|#a020f0
+Embers (base16)|#a39a90|#16130f|#16130f|#826d57|#57826d|#6d8257|#6d5782|#82576d|#576d82|#a39a90|#5a5047|#826d57|#57826d|#6d8257|#6d5782|#82576d|#576d82|#dbd6d1
+Embers (dark) (terminal.sexy)|#a39a90|#16130f|#16130f|#826d57|#57826d|#6d8257|#6d5782|#82576d|#576d82|#a39a90|#5a5047|#826d57|#57826d|#6d8257|#6d5782|#82576d|#576d82|#dbd6d1
+Embers (light) (terminal.sexy)|#433b32|#dbd6d1|#16130f|#826d57|#57826d|#6d8257|#6d5782|#82576d|#576d82|#a39a90|#5a5047|#826d57|#57826d|#6d8257|#6d5782|#82576d|#576d82|#dbd6d1
+Epiphany (terminal.sexy)|#ffffff|#000000|#565656|#ac4f4f|#88ab77|#d0d9ad|#677088|#cdcdb4|#445362|#ffffff|#656565|#e85555|#8ccd6c|#c5d67d|#647396|#cdb4c9|#505b6c|#c0c0c0
+Eqie6 (terminal.sexy)|#cccccc|#111111|#222222|#e84f4f|#b7ce42|#fea63c|#66a9b9|#b7416e|#6d878d|#cccccc|#666666|#d23d3d|#bde077|#ffe863|#aaccbb|#e16a98|#42717b|#ffffff
+Equilibrium Dark (base16)|#afaba2|#0c1118|#0c1118|#f04339|#7f8b00|#bb8801|#008dd1|#6a7fd2|#00948b|#afaba2|#7b776e|#f04339|#7f8b00|#bb8801|#008dd1|#6a7fd2|#00948b|#e7e2d9
+Equilibrium Gray Dark (base16)|#ababab|#111111|#111111|#f04339|#7f8b00|#bb8801|#008dd1|#6a7fd2|#00948b|#ababab|#777777|#f04339|#7f8b00|#bb8801|#008dd1|#6a7fd2|#00948b|#e2e2e2
+Equilibrium Gray Light (base16)|#474747|#f1f1f1|#f1f1f1|#d02023|#637200|#9d6f00|#0073b5|#4e66b6|#007a72|#474747|#777777|#d02023|#637200|#9d6f00|#0073b5|#4e66b6|#007a72|#1b1b1b
+Equilibrium Light (base16)|#43474e|#f5f0e7|#f5f0e7|#d02023|#637200|#9d6f00|#0073b5|#4e66b6|#007a72|#43474e|#73777f|#d02023|#637200|#9d6f00|#0073b5|#4e66b6|#007a72|#181c22
+Erebus (terminal.sexy)|#ffffff|#000000|#757575|#ff5f5f|#de8a36|#d78787|#af5fd7|#ff87d7|#dea3e5|#b8b8b8|#b8b8b8|#d78787|#ff9f6f|#ff5f5f|#dea3e5|#d7afaf|#af5fd7|#757575
+Espresso|#ffffff|#323232|#353535|#d25252|#a5c261|#ffc66d|#6c99bb|#d197d9|#bed6ff|#eeeeec|#535353|#f00c0c|#c2e075|#e1e48b|#8ab7d9|#efb5f7|#dcf4ff|#ffffff
+Espresso (Gogh)|#ffffff|#323232|#353535|#d25252|#a5c261|#ffc66d|#6c99bb|#d197d9|#bed6ff|#eeeeec|#535353|#f00c0c|#c2e075|#e1e48b|#8ab7d9|#efb5f7|#dcf4ff|#ffffff
+Espresso (base16)|#cccccc|#2d2d2d|#2d2d2d|#d25252|#a5c261|#ffc66d|#6c99bb|#d197d9|#bed6ff|#cccccc|#777777|#d25252|#a5c261|#ffc66d|#6c99bb|#d197d9|#bed6ff|#ffffff
+Espresso Libre|#b8a898|#2a211c|#000000|#cc0000|#1a921c|#f0e53a|#0066ff|#c5656b|#06989a|#d3d7cf|#555753|#ef2929|#9aff87|#fffb5c|#43a8ed|#ff818a|#34e2e2|#eeeeec
+Espresso Libre (Gogh)|#b8a898|#2a211c|#000000|#cc0000|#1a921c|#f0e53a|#0066ff|#c5656b|#06989a|#d3d7cf|#555753|#ef2929|#9aff87|#fffb5c|#43a8ed|#ff818a|#34e2e2|#eeeeec
+EspressoLibre (Gogh)|#b8a898|#2a211c|#000000|#cc0000|#1a921c|#f0e53a|#0066ff|#c5656b|#06989a|#d3d7cf|#555753|#ef2929|#9aff87|#fffb5c|#43a8ed|#ff818a|#34e2e2|#eeeeec
+Euphrasia (terminal.sexy)|#1c2027|#cfcfd9|#192033|#a62a3e|#38912b|#b27d12|#355c9a|#7c4f9f|#258f8f|#77858c|#666666|#f04758|#93c724|#ddb62b|#45a3e6|#c953ef|#60c6c8|#c0c0c0
+Eva (base16)|#9fa2a6|#2a3b4d|#2a3b4d|#c4676c|#66ff66|#ffff66|#15f4ee|#9c6cd3|#4b8f77|#9fa2a6|#55799c|#c4676c|#66ff66|#ffff66|#15f4ee|#9c6cd3|#4b8f77|#ffffff
+Eva Dim (base16)|#9fa2a6|#2a3b4d|#2a3b4d|#c4676c|#5de561|#cfd05d|#1ae1dc|#9c6cd3|#4b8f77|#9fa2a6|#55799c|#c4676c|#5de561|#cfd05d|#1ae1dc|#9c6cd3|#4b8f77|#ffffff
+Everblush|#dadada|#141b1e|#232a2d|#e57474|#8ccf7e|#e5c76b|#67b0e8|#c47fd5|#6cbfbf|#b3b9b8|#2d3437|#ef7e7e|#96d988|#f4d67a|#71baf2|#ce89df|#67cbe7|#bdc3c2
+Everblush (Gogh)|#dadada|#141b1e|#232a2d|#e57474|#8ccf7e|#e5c76b|#67b0e8|#c47fd5|#6cbfbf|#b3b9b8|#2d3437|#ef7e7e|#96d988|#f4d67a|#71baf2|#ce89df|#67cbe7|#bdc3c2
+Everforest Dark (Gogh)|#d3c6aa|#2d353b|#4b565c|#e67e80|#a7c080|#dbbc7f|#7fbbb3|#d699b6|#83c092|#d3c6aa|#5c6a72|#f85552|#8da101|#dfa000|#3a94c5|#df69ba|#35a77c|#dfddc8
+Everforest Light (Gogh)|#5c6a72|#fdf6e3|#5c6a72|#f85552|#8da101|#dfa000|#3a94c5|#df69ba|#35a77c|#dfddc8|#4b565c|#e67e80|#a7c080|#dbbc7f|#7fbbb3|#d699b6|#83c092|#d3c6aa
+EverforestDark (Gogh)|#d3c6aa|#2d353b|#4b565c|#e67e80|#a7c080|#dbbc7f|#7fbbb3|#d699b6|#83c092|#d3c6aa|#5c6a72|#f85552|#8da101|#dfa000|#3a94c5|#df69ba|#35a77c|#dfddc8
+EverforestLight (Gogh)|#5c6a72|#fdf6e3|#5c6a72|#f85552|#8da101|#dfa000|#3a94c5|#df69ba|#35a77c|#dfddc8|#4b565c|#e67e80|#a7c080|#dbbc7f|#7fbbb3|#d699b6|#83c092|#d3c6aa
+Fahrenheit|#ffffce|#000000|#1d1d1d|#cda074|#9e744d|#fecf75|#720102|#734c4d|#979797|#ffffce|#000000|#fecea0|#cc734d|#fd9f4d|#cb4a05|#4e739f|#fed04d|#ffffff
+Fairy Floss (Gogh)|#c2ffdf|#5a5475|#42395d|#a8757b|#ff857f|#e6c000|#ae81ff|#716799|#c2ffdf|#f8f8f2|#75507b|#ffb8d1|#f1568e|#d5a425|#c5a3ff|#8077a8|#c2ffff|#f8f8f0
+Fairy Floss Dark (Gogh)|#c2ffdf|#42395d|#42395d|#a8757b|#ff857f|#e6c000|#ae81ff|#716799|#c2ffdf|#f8f8f2|#75507b|#ffb8d1|#f1568e|#d5a425|#c5a3ff|#8077a8|#c2ffff|#f8f8f0
+FairyFloss (Gogh)|#c2ffdf|#5a5475|#42395d|#a8757b|#ff857f|#e6c000|#ae81ff|#716799|#c2ffdf|#f8f8f2|#75507b|#ffb8d1|#f1568e|#d5a425|#c5a3ff|#8077a8|#c2ffff|#f8f8f0
+FairyFlossDark (Gogh)|#c2ffdf|#42395d|#42395d|#a8757b|#ff857f|#e6c000|#ae81ff|#716799|#c2ffdf|#f8f8f2|#75507b|#ffb8d1|#f1568e|#d5a425|#c5a3ff|#8077a8|#c2ffff|#f8f8f0
+Fairyfloss|#f8f8f2|#5a5475|#040303|#f92672|#c2ffdf|#e6c000|#c2ffdf|#ffb8d1|#c5a3ff|#f8f8f0|#6090cb|#ff857f|#c2ffdf|#ffea00|#c2ffdf|#ffb8d1|#c5a3ff|#f8f8f0
+FarSide (terminal.sexy)|#919191|#000000|#303030|#a43261|#006ca5|#007086|#6751a6|#913e88|#0061b1|#c6c6c6|#5e5e5e|#ff9fc9|#3bd6ff|#00ddf4|#d5b8ff|#ffa7f6|#93c9ff|#ffffff
+Fideloper|#dbdae0|#292f33|#292f33|#cb1e2d|#edb8ac|#b7ab9b|#2e78c2|#c0236f|#309186|#eae3ce|#092028|#d4605a|#d4605a|#a86671|#7c85c4|#5c5db2|#819090|#fcf4df
+Firefly Traditional|#f5f5f5|#000000|#000000|#c23720|#33bc26|#afad24|#5a63ff|#d53ad2|#33bbc7|#cccccc|#828282|#ff3b1e|#2ee720|#ecec16|#838dff|#ff5cfe|#29f0f0|#ebebeb
+FirefoxDev|#7c8fa4|#0e1011|#002831|#e63853|#5eb83c|#a57706|#359ddf|#d75cff|#4b73a2|#dcdcdc|#001e27|#e1003f|#1d9000|#cd9409|#006fc0|#a200da|#005794|#e2e2e2
+Firewatch|#9ba2b2|#1e2027|#585f6d|#d95360|#5ab977|#dfb563|#4d89c4|#d55119|#44a8b6|#e6e5ff|#585f6d|#d95360|#5ab977|#dfb563|#4c89c5|#d55119|#44a8b6|#e6e5ff
+FishTank|#ecf0fe|#232537|#03073c|#c6004a|#acf157|#fecd5e|#525fb8|#986f82|#968763|#ecf0fc|#6c5b30|#da4b8a|#dbffa9|#fee6a9|#b2befa|#fda5cd|#a5bd86|#f6ffec
+Fishbone (terminal.sexy)|#ffffff|#000000|#293b3b|#bf5357|#41a551|#aea64f|#416ea5|#bf6053|#714da5|#876868|#344040|#bf6367|#51a55f|#aea75d|#5177a5|#bf6e63|#7859a5|#876f6f
+Fishtank (Gogh)|#ecf0fe|#232537|#03073c|#c6004a|#acf157|#fecd5e|#525fb8|#986f82|#968763|#ecf0fc|#6c5b30|#da4b8a|#dbffa9|#fee6a9|#b2befa|#fda5cd|#a5bd86|#f6ffec
+Flat|#2cc55d|#002240|#222d3f|#a82320|#32a548|#e58d11|#3167ac|#781aa0|#2c9370|#b0b6ba|#212c3c|#d4312e|#2d9440|#e5be0c|#3c7dd2|#8230a7|#35b387|#e7eced
+Flat (Gogh)|#1abc9c|#1f2d3a|#2c3e50|#c0392b|#27ae60|#f39c12|#2980b9|#8e44ad|#16a085|#bdc3c7|#34495e|#e74c3c|#2ecc71|#f1c40f|#3498db|#9b59b6|#2aa198|#ecf0f1
+Flat (base16)|#e0e0e0|#2c3e50|#2c3e50|#e74c3c|#2ecc71|#f1c40f|#3498db|#9b59b6|#1abc9c|#e0e0e0|#95a5a6|#e74c3c|#2ecc71|#f1c40f|#3498db|#9b59b6|#1abc9c|#ecf0f1
+Flat Remix (Gogh)|#ffffff|#272a34|#1f2229|#d41919|#5ebdab|#fea44c|#367bf0|#bf2e5d|#49aee6|#e6e6e6|#8c42ab|#ec0101|#47d4b9|#ff8a18|#277fff|#d71655|#05a1f7|#ffffff
+FlatRemix (Gogh)|#ffffff|#272a34|#1f2229|#d41919|#5ebdab|#fea44c|#367bf0|#bf2e5d|#49aee6|#e6e6e6|#8c42ab|#ec0101|#47d4b9|#ff8a18|#277fff|#d71655|#05a1f7|#ffffff
+Flatland|#b8dbef|#1d1f21|#1d1d19|#f18339|#9fd364|#f4ef6d|#5096be|#695abc|#d63865|#ffffff|#1d1d19|#d22a24|#a7d42c|#ff8949|#61b9d0|#695abc|#d63865|#ffffff
+Flatland (Gogh)|#b8dbef|#1d1f21|#1d1d19|#f18339|#9fd364|#f4ef6d|#5096be|#695abc|#d63865|#ffffff|#1d1d19|#d22a24|#a7d42c|#ff8949|#61b9d0|#695abc|#d63865|#ffffff
+Floraverse|#dbd1b9|#0e0d15|#08002e|#64002c|#5d731a|#cd751c|#1d6da1|#b7077e|#42a38c|#f3e0b8|#331e4d|#d02063|#b4ce59|#fac357|#40a4cf|#f12aae|#62caa8|#fff5db
+ForestBlue|#e2d8cd|#051519|#333333|#f8818e|#92d3a2|#1a8e63|#8ed0ce|#5e468c|#31658c|#e2d8cd|#3d3d3d|#fb3d66|#6bb48d|#30c85a|#39a7a2|#7e62b3|#6096bf|#e2d8cd
+Foxnightly (Gogh)|#d7d7db|#2a2a2e|#2a2a2e|#b98eff|#ff7de9|#729fcf|#66a05b|#75507b|#acacae|#ffffff|#a40000|#bf4040|#66a05b|#ffb86c|#729fcf|#8f5902|#c4a000|#5c3566
+Framer|#777777|#111111|#141414|#ff5555|#98ec65|#ffcc33|#00aaff|#aa88ff|#88ddff|#cccccc|#414141|#ff8888|#b6f292|#ffd966|#33bbff|#cebbff|#bbecff|#ffffff
+Framer (base16)|#d0d0d0|#181818|#181818|#fd886b|#32ccdc|#fecb6e|#20bcfc|#ba8cfc|#acddfd|#d0d0d0|#747474|#fd886b|#32ccdc|#fecb6e|#20bcfc|#ba8cfc|#acddfd|#eeeeee
+Freya (Gogh)|#94a3a5|#252e32|#073642|#dc322f|#859900|#b58900|#268bd2|#ec0048|#2aa198|#94a3a5|#586e75|#cb4b16|#859900|#b58900|#268bd2|#d33682|#2aa198|#6c71c4
+FrontEndDelight|#adadad|#1b1c1d|#242526|#f8511b|#565747|#fa771d|#2c70b7|#f02e4f|#3ca1a6|#adadad|#5fac6d|#f74319|#74ec4c|#fdc325|#3393ca|#e75e4f|#4fbce6|#8c735b
+Frontend Delight (Gogh)|#adadad|#1b1c1d|#242526|#f8511b|#565747|#fa771d|#2c70b7|#f02e4f|#3ca1a6|#adadad|#5fac6d|#f74319|#74ec4c|#fdc325|#3393ca|#e75e4f|#4fbce6|#8c735b
+Frontend Fun Forrest (Gogh)|#dec165|#251200|#000000|#d6262b|#919c00|#be8a13|#4699a3|#8d4331|#da8213|#ddc265|#7f6a55|#e55a1c|#bfc65a|#ffcb1b|#7cc9cf|#d26349|#e6a96b|#ffeaa3
+Frontend Galaxy (Gogh)|#ffffff|#1d2837|#000000|#f9555f|#21b089|#fef02a|#589df6|#944d95|#1f9ee7|#bbbbbb|#555555|#fa8c8f|#35bb9a|#ffff55|#589df6|#e75699|#3979bc|#ffffff
+FrontendDelight (Gogh)|#adadad|#1b1c1d|#242526|#f8511b|#565747|#fa771d|#2c70b7|#f02e4f|#3ca1a6|#adadad|#5fac6d|#f74319|#74ec4c|#fdc325|#3393ca|#e75e4f|#4fbce6|#8c735b
+FrontendFunForrest (Gogh)|#dec165|#251200|#000000|#d6262b|#919c00|#be8a13|#4699a3|#8d4331|#da8213|#ddc265|#7f6a55|#e55a1c|#bfc65a|#ffcb1b|#7cc9cf|#d26349|#e6a96b|#ffeaa3
+FrontendGalaxy (Gogh)|#ffffff|#1d2837|#000000|#f9555f|#21b089|#fef02a|#589df6|#944d95|#1f9ee7|#bbbbbb|#555555|#fa8c8f|#35bb9a|#ffff55|#589df6|#e75699|#3979bc|#ffffff
+Fruit Soda (base16)|#515151|#f1ecf1|#f1ecf1|#fe3e31|#47f74c|#f7e203|#2931df|#611fce|#0f9cfd|#515151|#b5b4b6|#fe3e31|#47f74c|#f7e203|#2931df|#611fce|#0f9cfd|#2d2c2c
+FunForrest|#dec165|#251200|#000000|#d6262b|#919c00|#be8a13|#4699a3|#8d4331|#da8213|#ddc265|#7f6a55|#e55a1c|#bfc65a|#ffcb1b|#7cc9cf|#d26349|#e6a96b|#ffeaa3
+GJM (terminal.sexy)|#c5c5c5|#1c1c1c|#1c1c1c|#ff005b|#cee318|#ffe755|#048ac7|#833c9f|#0ac1cd|#e5e5e5|#666666|#ff00a0|#ccff00|#ff9f00|#48c6ff|#be67e1|#63e7f0|#f3f3f3
+Galaxy|#ffffff|#1d2837|#000000|#f9555f|#21b089|#fef02a|#589df6|#944d95|#1f9ee7|#bbbbbb|#555555|#fa8c8f|#35bb9a|#ffff55|#589df6|#e75699|#3979bc|#ffffff
+Galizur|#ddeeff|#071317|#223344|#aa1122|#33aa11|#ccaa22|#2255cc|#7755aa|#22bbdd|#8899aa|#556677|#ff1133|#33ff11|#ffdd33|#3377ff|#aa77ff|#33ddff|#bbccdd
+GeoHot (Gogh)|#ffffff|#1f1e1f|#f9f5f5|#cc0000|#1f1e1f|#ada110|#ff004e|#75507b|#06919a|#ffffff|#555753|#ef2929|#ff0000|#ada110|#5f4aa6|#b74438|#408f0c|#ffffff
+Geohot (Gogh)|#ffffff|#1f1e1f|#f9f5f5|#cc0000|#1f1e1f|#ada110|#ff004e|#75507b|#06919a|#ffffff|#555753|#ef2929|#ff0000|#ada110|#5f4aa6|#b74438|#408f0c|#ffffff
+Gigavolt (base16)|#e9e7e1|#202126|#202126|#ff661a|#f2e6a9|#ffdc2d|#40bfff|#ae94f9|#fb6acb|#e9e7e1|#a1d2e6|#ff661a|#f2e6a9|#ffdc2d|#40bfff|#ae94f9|#fb6acb|#f2fbff
+GitHub Dark|#8b949e|#101216|#000000|#f78166|#56d364|#e3b341|#6ca4f8|#db61a2|#2b7489|#ffffff|#4d4d4d|#f78166|#56d364|#e3b341|#6ca4f8|#db61a2|#2b7489|#ffffff
+Github|#3e3e3e|#f4f4f4|#3e3e3e|#970b16|#07962a|#f8eec7|#003e8a|#e94691|#89d1ec|#ffffff|#666666|#de0000|#87d5a2|#f1d007|#2e6cba|#ffa29f|#1cfafe|#ffffff
+Github (Gogh)|#3e3e3e|#f4f4f4|#3e3e3e|#970b16|#07962a|#f8eec7|#003e8a|#e94691|#89d1ec|#ffffff|#666666|#de0000|#87d5a2|#f1d007|#2e6cba|#ffa29f|#1cfafe|#ffffff
+Github (base16)|#333333|#ffffff|#ffffff|#ed6a43|#183691|#795da3|#795da3|#a71d5d|#183691|#333333|#969896|#ed6a43|#183691|#795da3|#795da3|#a71d5d|#183691|#ffffff
+Github Dark (Gogh)|#8b949e|#101216|#000000|#f78166|#56d364|#e3b341|#6ca4f8|#db61a2|#2b7489|#ffffff|#4d4d4d|#f78166|#56d364|#e3b341|#6ca4f8|#db61a2|#2b7489|#ffffff
+Github Light (Gogh)|#3e3e3e|#f4f4f4|#3e3e3e|#970b16|#07962a|#f8eec7|#003e8a|#e94691|#89d1ec|#ffffff|#666666|#de0000|#87d5a2|#f1d007|#2e6cba|#ffa29f|#1cfafe|#ffffff
+Glacier|#ffffff|#0c1115|#2e343c|#bd0f2f|#35a770|#fb9435|#1f5872|#bd2523|#778397|#ffffff|#404a55|#bd0f2f|#49e998|#fddf6e|#2a8bc1|#ea4727|#a0b6d3|#ffffff
+Gnometerm (terminal.sexy)|#ffffff|#000000|#000000|#cc0000|#4e9a06|#c4a000|#3465a4|#75507b|#06989a|#d3d7cf|#555753|#ef2929|#8ae234|#fce94f|#729fcf|#ad7fa8|#34e2e2|#eeeeec
+Gogh (Gogh)|#bfc7d5|#292d3e|#292d3e|#f07178|#62de84|#ffcb6b|#75a1ff|#f580ff|#60baec|#abb2bf|#959dcb|#f07178|#c3e88d|#ff5572|#82aaff|#ffcb6b|#676e95|#fffefe
+Gooey (Gogh)|#ebeef9|#0d101b|#000009|#bb4f6c|#72ccae|#c65e3d|#58b6ca|#6488c4|#8d84c6|#858893|#1f222d|#ee829f|#a5ffe1|#f99170|#8be9fd|#97bbf7|#c0b7f9|#ffffff
+Google (dark) (terminal.sexy)|#c5c8c6|#1d1f21|#1d1f21|#cc342b|#198844|#fba922|#3971ed|#a36ac7|#3971ed|#c5c8c6|#969896|#cc342b|#198844|#fba922|#3971ed|#a36ac7|#3971ed|#ffffff
+Google (light) (terminal.sexy)|#373b41|#ffffff|#1d1f21|#cc342b|#198844|#fba922|#3971ed|#a36ac7|#3971ed|#c5c8c6|#969896|#cc342b|#198844|#fba922|#3971ed|#a36ac7|#3971ed|#ffffff
+Google Dark (Gogh)|#e8eaed|#202124|#202124|#ea4335|#34a853|#fbbc04|#4285f4|#a142f4|#24c1e0|#e8eaed|#5f6368|#ea4335|#34a853|#fbbc05|#4285f4|#a142f4|#24c1e0|#ffffff
+Google Dark (base16)|#c5c8c6|#1d1f21|#1d1f21|#cc342b|#198844|#fba922|#3971ed|#a36ac7|#3971ed|#c5c8c6|#969896|#cc342b|#198844|#fba922|#3971ed|#a36ac7|#3971ed|#ffffff
+Google Light (Gogh)|#5f6368|#ffffff|#202124|#ea4335|#34a853|#fbbc04|#4285f4|#a142f4|#24c1e0|#e8eaed|#5f6368|#ea4335|#34a853|#fbbc05|#4285f4|#a142f4|#24c1e0|#ffffff
+Google Light (base16)|#373b41|#ffffff|#ffffff|#cc342b|#198844|#fba922|#3971ed|#a36ac7|#3971ed|#373b41|#b4b7b4|#cc342b|#198844|#fba922|#3971ed|#a36ac7|#3971ed|#1d1f21
+GoogleDark (Gogh)|#e8eaed|#202124|#202124|#ea4335|#34a853|#fbbc04|#4285f4|#a142f4|#24c1e0|#e8eaed|#5f6368|#ea4335|#34a853|#fbbc05|#4285f4|#a142f4|#24c1e0|#ffffff
+GoogleLight (Gogh)|#5f6368|#ffffff|#202124|#ea4335|#34a853|#fbbc04|#4285f4|#a142f4|#24c1e0|#e8eaed|#5f6368|#ea4335|#34a853|#fbbc05|#4285f4|#a142f4|#24c1e0|#ffffff
+Gotham (Gogh)|#98d1ce|#0a0f14|#0a0f14|#c33027|#26a98b|#edb54b|#195465|#4e5165|#33859d|#98d1ce|#10151b|#d26939|#081f2d|#245361|#093748|#888ba5|#599caa|#d3ebe9
+Gotham (terminal.sexy)|#98d1ce|#0a0f14|#0a0f14|#c33027|#26a98b|#edb54b|#195465|#4e5165|#33859d|#98d1ce|#10151b|#d26939|#081f2d|#245361|#093748|#888ba5|#599caa|#d3ebe9
+Grandshell (terminal.sexy)|#bebebe|#000000|#000000|#f25a5a|#77bb33|#efc334|#5555dd|#c350ff|#5af2ee|#bebebe|#222222|#ffbbbb|#dcf692|#f6df92|#b2baf6|#f09fff|#5af2ee|#eeeeee
+Grape|#9f9fa1|#171423|#2d283f|#ed2261|#1fa91b|#8ddc20|#487df4|#8d35c9|#3bdeed|#9e9ea0|#59516a|#f0729a|#53aa5e|#b2dc87|#a9bcec|#ad81c2|#9de3eb|#a288f7
+Grape (Gogh)|#9f9fa1|#171423|#2d283f|#ed2261|#1fa91b|#8ddc20|#487df4|#8d35c9|#3bdeed|#9e9ea0|#59516a|#f0729a|#53aa5e|#b2dc87|#a9bcec|#ad81c2|#9de3eb|#a288f7
+Grass|#fff0a5|#13773d|#000000|#bb0000|#00bb00|#e7b000|#0000a3|#950062|#00bbbb|#bbbbbb|#555555|#bb0000|#00bb00|#e7b000|#0000bb|#ff55ff|#55ffff|#ffffff
+Grass (Gogh)|#fff0a5|#13773d|#000000|#bb0000|#00bb00|#e7b000|#0000a3|#950062|#00bbbb|#bbbbbb|#555555|#bb0000|#00bb00|#e7b000|#0000bb|#ff55ff|#55ffff|#ffffff
+Grayscale (dark) (terminal.sexy)|#b9b9b9|#101010|#101010|#7c7c7c|#8e8e8e|#a0a0a0|#686868|#747474|#868686|#b9b9b9|#525252|#7c7c7c|#8e8e8e|#a0a0a0|#686868|#747474|#868686|#f7f7f7
+Grayscale (light) (terminal.sexy)|#464646|#f7f7f7|#101010|#7c7c7c|#8e8e8e|#a0a0a0|#686868|#747474|#868686|#b9b9b9|#525252|#7c7c7c|#8e8e8e|#a0a0a0|#686868|#747474|#868686|#f7f7f7
+Grayscale Dark (base16)|#b9b9b9|#101010|#101010|#7c7c7c|#8e8e8e|#a0a0a0|#686868|#747474|#868686|#b9b9b9|#525252|#7c7c7c|#8e8e8e|#a0a0a0|#686868|#747474|#868686|#f7f7f7
+Grayscale Light (base16)|#464646|#f7f7f7|#f7f7f7|#7c7c7c|#8e8e8e|#a0a0a0|#686868|#747474|#868686|#464646|#ababab|#7c7c7c|#8e8e8e|#a0a0a0|#686868|#747474|#868686|#101010
+Green Screen (base16)|#00bb00|#001100|#001100|#007700|#00bb00|#007700|#009900|#00bb00|#005500|#00bb00|#007700|#007700|#00bb00|#007700|#009900|#00bb00|#005500|#00ff00
+Greenscreen (dark) (terminal.sexy)|#00bb00|#001100|#001100|#007700|#00bb00|#007700|#009900|#00bb00|#005500|#00bb00|#007700|#007700|#00bb00|#007700|#009900|#00bb00|#005500|#00ff00
+Greenscreen (light) (terminal.sexy)|#005500|#00ff00|#001100|#007700|#00bb00|#007700|#009900|#00bb00|#005500|#00bb00|#007700|#007700|#00bb00|#007700|#009900|#00bb00|#005500|#00ff00
+Grey-green|#ffffff|#002a1a|#000000|#fe1414|#74ff00|#f1ff01|#00deff|#ff00f0|#00ffbc|#ffffff|#666666|#ff3939|#00ff44|#ffd100|#00afff|#ff008a|#00ffd3|#f5ecec
+Gruber (base16)|#f4f4ff|#181818|#181818|#f43841|#73c936|#ffdd33|#96a6c8|#9e95c7|#95a99f|#f4f4ff|#9dae93|#f43841|#73c936|#ffdd33|#96a6c8|#9e95c7|#95a99f|#e4e4ef
+Gruvbox (Gogh)|#3c3836|#fbf1c7|#fbf1c7|#cc241d|#98971a|#d79921|#458588|#b16286|#689d6a|#7c6f64|#928374|#9d0006|#79740e|#b57614|#076678|#8f3f71|#427b58|#3c3836
+Gruvbox Dark (Gogh)|#ebdbb2|#282828|#282828|#cc241d|#98971a|#d79921|#458588|#b16286|#689d6a|#a89984|#928374|#fb4934|#b8bb26|#fabd2f|#83a598|#d3869b|#8ec07c|#ebdbb2
+Gruvbox Light|#282828|#fbf1c7|#fbf1c7|#9d0006|#79740e|#b57614|#076678|#8f3f71|#427b58|#3c3836|#9d8374|#cc241d|#98971a|#d79921|#458588|#b16186|#689d69|#7c6f64
+Gruvbox Material (Gogh)|#d4be98|#282828|#3c3836|#ea6962|#a9b665|#d8a657|#7daea3|#d3869b|#89b482|#d4be98|#3c3836|#ea6962|#a9b665|#d8a657|#7daea3|#d3869b|#89b482|#d4be98
+Gruvbox dark, hard (base16)|#d5c4a1|#1d2021|#1d2021|#fb4934|#b8bb26|#fabd2f|#83a598|#d3869b|#8ec07c|#d5c4a1|#665c54|#fb4934|#b8bb26|#fabd2f|#83a598|#d3869b|#8ec07c|#fbf1c7
+Gruvbox dark, medium (base16)|#d5c4a1|#282828|#282828|#fb4934|#b8bb26|#fabd2f|#83a598|#d3869b|#8ec07c|#d5c4a1|#665c54|#fb4934|#b8bb26|#fabd2f|#83a598|#d3869b|#8ec07c|#fbf1c7
+Gruvbox dark, pale (base16)|#dab997|#262626|#262626|#d75f5f|#afaf00|#ffaf00|#83adad|#d485ad|#85ad85|#dab997|#8a8a8a|#d75f5f|#afaf00|#ffaf00|#83adad|#d485ad|#85ad85|#ebdbb2
+Gruvbox dark, soft (base16)|#d5c4a1|#32302f|#32302f|#fb4934|#b8bb26|#fabd2f|#83a598|#d3869b|#8ec07c|#d5c4a1|#665c54|#fb4934|#b8bb26|#fabd2f|#83a598|#d3869b|#8ec07c|#fbf1c7
+Gruvbox light, hard (base16)|#504945|#f9f5d7|#f9f5d7|#9d0006|#79740e|#b57614|#076678|#8f3f71|#427b58|#504945|#bdae93|#9d0006|#79740e|#b57614|#076678|#8f3f71|#427b58|#282828
+Gruvbox light, medium (base16)|#504945|#fbf1c7|#fbf1c7|#9d0006|#79740e|#b57614|#076678|#8f3f71|#427b58|#504945|#bdae93|#9d0006|#79740e|#b57614|#076678|#8f3f71|#427b58|#282828
+Gruvbox light, soft (base16)|#504945|#f2e5bc|#f2e5bc|#9d0006|#79740e|#b57614|#076678|#8f3f71|#427b58|#504945|#bdae93|#9d0006|#79740e|#b57614|#076678|#8f3f71|#427b58|#282828
+GruvboxDark|#ebdbb2|#282828|#282828|#cc241d|#98971a|#d79921|#458588|#b16286|#689d6a|#a89984|#928374|#fb4934|#b8bb26|#fabd2f|#83a598|#d3869b|#8ec07c|#ebdbb2
+GruvboxDarkHard|#ebdbb2|#1b1b1b|#1b1b1b|#cc241d|#98971a|#d79921|#458588|#b16286|#689d6a|#a89984|#928374|#fb4934|#b8bb26|#fabd2f|#83a598|#d3869b|#8ec07c|#ebdbb2
+GruvboxLight|#282828|#fbf1c7|#fbf1c7|#9d0006|#79740e|#b57614|#076678|#8f3f71|#427b58|#3c3836|#9d8374|#cc241d|#98971a|#d79921|#458588|#b16186|#689d69|#7c6f64
+Guezwhoz|#d0d0d0|#1c1c1c|#080808|#ff5f5f|#87d7af|#d7d787|#5fafd7|#afafff|#5fd7d7|#dadada|#8a8a8a|#d75f5f|#afd7af|#d7d7af|#87afd7|#afafd7|#87d7d7|#dadada
+HaX0R_BLUE|#11b7ff|#010515|#010921|#10b6ff|#10b6ff|#10b6ff|#10b6ff|#10b6ff|#10b6ff|#fafafa|#080117|#00b3f7|#00b3f7|#00b3f7|#00b3f7|#00b3f7|#00b3f7|#fefefe
+HaX0R_GR33N|#16b10e|#020f01|#001f0b|#15d00d|#15d00d|#15d00d|#15d00d|#15d00d|#15d00d|#fafafa|#001510|#19e20e|#19e20e|#19e20e|#19e20e|#19e20e|#19e20e|#fefefe
+HaX0R_R3D|#b10e0e|#200101|#1f0000|#b00d0d|#b00d0d|#b00d0d|#b00d0d|#b00d0d|#b00d0d|#fafafa|#150000|#ff1111|#ff1010|#ff1010|#ff1010|#ff1010|#ff1010|#fefefe
+Hacktober|#c9c9c9|#141414|#191918|#b34538|#587744|#d08949|#206ec5|#864651|#ac9166|#f1eee7|#2c2b2a|#b33323|#42824a|#c75a22|#5389c5|#e795a5|#ebc587|#ffffff
+Hardcore|#a0a0a0|#121212|#1b1d1e|#f92672|#a6e22e|#fd971f|#66d9ef|#9e6ffe|#5e7175|#ccccc6|#505354|#ff669d|#beed5f|#e6db74|#66d9ef|#9e6ffe|#a3babf|#f8f8f2
+Hardcore (Gogh)|#a0a0a0|#121212|#1b1d1e|#f92672|#a6e22e|#fd971f|#66d9ef|#9e6ffe|#5e7175|#ccccc6|#505354|#ff669d|#beed5f|#e6db74|#66d9ef|#9e6ffe|#a3babf|#f8f8f2
+Hardcore (base16)|#cdcdcd|#212121|#212121|#f92672|#a6e22e|#e6db74|#66d9ef|#9e6ffe|#708387|#cdcdcd|#4a4a4a|#f92672|#a6e22e|#e6db74|#66d9ef|#9e6ffe|#708387|#ffffff
+Harmonic16 Dark (base16)|#cbd6e2|#0b1c2c|#0b1c2c|#bf8b56|#56bf8b|#8bbf56|#8b56bf|#bf568b|#568bbf|#cbd6e2|#627e99|#bf8b56|#56bf8b|#8bbf56|#8b56bf|#bf568b|#568bbf|#f7f9fb
+Harmonic16 Light (base16)|#405c79|#f7f9fb|#f7f9fb|#bf8b56|#56bf8b|#8bbf56|#8b56bf|#bf568b|#568bbf|#405c79|#aabcce|#bf8b56|#56bf8b|#8bbf56|#8b56bf|#bf568b|#568bbf|#0b1c2c
+Harper|#a8a49d|#010101|#010101|#f8b63f|#7fb5e1|#d6da25|#489e48|#b296c6|#f5bfd7|#a8a49d|#726e6a|#f8b63f|#7fb5e1|#d6da25|#489e48|#b296c6|#f5bfd7|#fefbea
+Harper (Gogh)|#a8a49d|#010101|#010101|#f8b63f|#7fb5e1|#d6da25|#489e48|#b296c6|#f5bfd7|#a8a49d|#726e6a|#f8b63f|#7fb5e1|#d6da25|#489e48|#b296c6|#f5bfd7|#fefbea
+Heetch Dark (base16)|#bdb6c5|#190134|#190134|#27d9d5|#c33678|#8f6c97|#bd0152|#82034c|#f80059|#bdb6c5|#7b6d8b|#27d9d5|#c33678|#8f6c97|#bd0152|#82034c|#f80059|#feffff
+Heetch Light (base16)|#5a496e|#feffff|#feffff|#27d9d5|#f80059|#5ba2b6|#47f9f5|#bd0152|#c33678|#5a496e|#9c92a8|#27d9d5|#f80059|#5ba2b6|#47f9f5|#bd0152|#c33678|#190134
+Helios (base16)|#d5d5d5|#1d2021|#1d2021|#d72638|#88b92d|#f19d1a|#1e8bac|#be4264|#1ba595|#d5d5d5|#6f7579|#d72638|#88b92d|#f19d1a|#1e8bac|#be4264|#1ba595|#e5e5e5
+Hemisu Dark (Gogh)|#ffffff|#000000|#444444|#ff0054|#b1d630|#9d895e|#67bee3|#b576bc|#569a9f|#ededed|#777777|#d65e75|#baffaa|#ece1c8|#9fd3e5|#deb3df|#b6e0e5|#ffffff
+Hemisu Light (Gogh)|#444444|#efefef|#777777|#ff0055|#739100|#503d15|#538091|#5b345e|#538091|#999999|#999999|#d65e76|#9cc700|#947555|#9db3cd|#a184a4|#85b2aa|#bababa
+HemisuDark (Gogh)|#ffffff|#000000|#444444|#ff0054|#b1d630|#9d895e|#67bee3|#b576bc|#569a9f|#ededed|#777777|#d65e75|#baffaa|#ece1c8|#9fd3e5|#deb3df|#b6e0e5|#ffffff
+HemisuLight (Gogh)|#444444|#efefef|#777777|#ff0055|#739100|#503d15|#538091|#5b345e|#538091|#999999|#999999|#d65e76|#9cc700|#947555|#9db3cd|#a184a4|#85b2aa|#bababa
+Highway|#ededed|#222225|#000000|#d00e18|#138034|#ffcb3e|#006bb3|#6b2775|#384564|#ededed|#5d504a|#f07e18|#b1d130|#fff120|#4fc2fd|#de0071|#5d504a|#ffffff
+Highway (Gogh)|#ededed|#222225|#000000|#d00e18|#138034|#ffcb3e|#006bb3|#6b2775|#384564|#ededed|#5d504a|#f07e18|#b1d130|#fff120|#4fc2fd|#de0071|#5d504a|#ffffff
+Hipster Green|#84c138|#100b05|#000000|#b6214a|#00a600|#bfbf00|#246eb2|#b200b2|#00a6b2|#bfbfbf|#666666|#e50000|#86a93e|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+Hipster Green (Gogh)|#84c138|#100b05|#000000|#b6214a|#00a600|#bfbf00|#246eb2|#b200b2|#00a6b2|#bfbfbf|#666666|#e50000|#86a93e|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+HipsterGreen (Gogh)|#84c138|#100b05|#000000|#b6214a|#00a600|#bfbf00|#246eb2|#b200b2|#00a6b2|#bfbfbf|#666666|#e50000|#86a93e|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+Hivacruz|#ede4e4|#132638|#202746|#c94922|#ac9739|#c08b30|#3d8fd1|#6679cc|#22a2c9|#979db4|#6b7394|#c76b29|#73ad43|#5e6687|#898ea4|#dfe2f1|#9c637a|#f5f7ff
+Homebrew|#00ff00|#000000|#000000|#990000|#00a600|#999900|#0000b2|#b200b2|#00a6b2|#bfbfbf|#666666|#e50000|#00d900|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+Homebrew (Gogh)|#00ff00|#000000|#000000|#990000|#00a600|#999900|#0000b2|#b200b2|#00a6b2|#bfbfbf|#666666|#e50000|#00d900|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+Homebrew Light (Gogh)|#000000|#ffffff|#000000|#990000|#00a600|#999900|#0000b2|#b200b2|#00a6b2|#bfbfbf|#666666|#e50000|#00d900|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+Homebrew Ocean (Gogh)|#ffffff|#224fbc|#000000|#990000|#00a600|#999900|#0000b2|#b200b2|#00a6b2|#bfbfbf|#666666|#e50000|#00d900|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+Hopscotch|#b9b5b8|#322931|#322931|#dd464c|#8fc13e|#fdcc59|#1290bf|#c85e7c|#149b93|#b9b5b8|#797379|#fd8b19|#433b42|#5c545b|#989498|#d5d3d5|#b33508|#ffffff
+Hopscotch (base16)|#b9b5b8|#322931|#322931|#dd464c|#8fc13e|#fdcc59|#1290bf|#c85e7c|#149b93|#b9b5b8|#797379|#dd464c|#8fc13e|#fdcc59|#1290bf|#c85e7c|#149b93|#ffffff
+Hopscotch.256|#b9b5b8|#322931|#322931|#dd464c|#8fc13e|#fdcc59|#1290bf|#c85e7c|#149b93|#b9b5b8|#797379|#dd464c|#8fc13e|#fdcc59|#1290bf|#c85e7c|#149b93|#ffffff
+Horizon Bright (Gogh)|#1c1e26|#fdf0ed|#16161c|#da103f|#1eb980|#f6661e|#26bbd9|#ee64ae|#1d8991|#fadad1|#1a1c23|#f43e5c|#07da8c|#f77d26|#3fc6de|#f075b7|#1eaeae|#fdf0ed
+Horizon Dark (Gogh)|#fdf0ed|#1c1e26|#16161c|#e95678|#29d398|#fab795|#26bbd9|#ee64ae|#59e3e3|#fadad1|#232530|#ec6a88|#3fdaa4|#fbc3a7|#3fc6de|#f075b7|#6be6e6|#fdf0ed
+Horizon Dark (base16)|#cbced0|#1c1e26|#1c1e26|#e95678|#29d398|#fac29a|#26bbd9|#ee64ac|#59e1e3|#cbced0|#6f6f70|#e95678|#29d398|#fac29a|#26bbd9|#ee64ac|#59e1e3|#e3e6ee
+Horizon Light (base16)|#403c3d|#fdf0ed|#fdf0ed|#e95678|#29d398|#fadad1|#26bbd9|#ee64ac|#59e1e3|#403c3d|#bdb3b1|#e95678|#29d398|#fadad1|#26bbd9|#ee64ac|#59e1e3|#201c1d
+HorizonBright (Gogh)|#1c1e26|#fdf0ed|#16161c|#da103f|#1eb980|#f6661e|#26bbd9|#ee64ae|#1d8991|#fadad1|#1a1c23|#f43e5c|#07da8c|#f77d26|#3fc6de|#f075b7|#1eaeae|#fdf0ed
+HorizonDark (Gogh)|#fdf0ed|#1c1e26|#16161c|#e95678|#29d398|#fab795|#26bbd9|#ee64ae|#59e3e3|#fadad1|#232530|#ec6a88|#3fdaa4|#fbc3a7|#3fc6de|#f075b7|#6be6e6|#fdf0ed
+Humanoid dark (base16)|#f8f8f2|#232629|#232629|#f11235|#02d849|#ffb627|#00a6fb|#f15ee3|#0dd9d6|#f8f8f2|#60615d|#f11235|#02d849|#ffb627|#00a6fb|#f15ee3|#0dd9d6|#fcfcfc
+Humanoid light (base16)|#232629|#f8f8f2|#f8f8f2|#b0151a|#388e3c|#ffb627|#0082c9|#700f98|#008e8e|#232629|#c0c0bd|#b0151a|#388e3c|#ffb627|#0082c9|#700f98|#008e8e|#070708
+Hurtado|#dbdbdb|#000000|#575757|#ff1b00|#a5e055|#fbe74a|#496487|#fd5ff1|#86e9fe|#cbcccb|#262626|#d51d00|#a5df55|#fbe84a|#89beff|#c001c1|#86eafe|#dbdbdb
+Hurtado (Gogh)|#dbdbdb|#000000|#575757|#ff1b00|#a5e055|#fbe74a|#496487|#fd5ff1|#86e9fe|#cbcccb|#262626|#d51d00|#a5df55|#fbe84a|#89beff|#c001c1|#86eafe|#dbdbdb
+Hybrid|#b7bcba|#161719|#2a2e33|#b84d51|#b3bf5a|#e4b55e|#6e90b0|#a17eac|#7fbfb4|#b5b9b6|#1d1f22|#8d2e32|#798431|#e58a50|#4b6b88|#6e5079|#4d7b74|#5a626a
+Hybrid (Gogh)|#94a3a5|#141414|#282a2e|#a54242|#8c9440|#de935f|#5f819d|#85678f|#5e8d87|#969896|#373b41|#cc6666|#b5bd68|#f0c674|#81a2be|#b294bb|#8abeb7|#c5c8c6
+Hybrid (terminal.sexy)|#ffffff|#000000|#393939|#da4939|#9acc79|#d0d26b|#6d9cbe|#9f5079|#435d75|#c2c2c2|#474747|#ff6c5c|#8fb676|#c8bc45|#d0d0ff|#a761c2|#6e98a4|#c2c2c2
+IBM3270(HighContrast) (Gogh)|#fdfdfd|#000000|#000000|#ff0000|#00ff00|#ffff00|#00bfff|#ffc0cb|#40e0d0|#bebebe|#414141|#ffa500|#98fb98|#ffff00|#0000cd|#a020f0|#aeeeee|#ffffff
+ICGreenPPL (Gogh)|#d9efd3|#3a3d3f|#1f1f1f|#fb002a|#339c24|#659b25|#149b45|#53b82c|#2cb868|#e0ffef|#032710|#a7ff3f|#9fff6d|#d2ff6d|#72ffb5|#50ff3e|#22ff71|#daefd0
+ICOrangePPL (Gogh)|#ffcb83|#262626|#000000|#c13900|#a4a900|#caaf00|#bd6d00|#fc5e00|#f79500|#ffc88a|#6a4f2a|#ff8c68|#f6ff40|#ffe36e|#ffbe55|#fc874f|#c69752|#fafaff
+IC_Green_PPL|#e0f1dc|#2c2c2c|#014401|#ff2736|#41a638|#76a831|#2ec3b9|#50a096|#3ca078|#e6fef2|#035c03|#b4fa5c|#aefb86|#dafa87|#2efaeb|#50fafa|#3cfac8|#e0f1dc
+IC_Orange_PPL|#ffcb83|#262626|#000000|#c13900|#a4a900|#caaf00|#bd6d00|#fc5e00|#f79500|#ffc88a|#6a4f2a|#ff8c68|#f6ff40|#ffe36e|#ffbe55|#fc874f|#c69752|#fafaff
+IR Black (base16)|#b5b3aa|#000000|#000000|#ff6c60|#a8ff60|#ffffb6|#96cbfe|#ff73fd|#c6c5fe|#b5b3aa|#6c6c66|#ff6c60|#a8ff60|#ffffb6|#96cbfe|#ff73fd|#c6c5fe|#fdfbee
+IR_Black|#f1f1f1|#000000|#4f4f4f|#fa6c60|#a8ff60|#fffeb7|#96cafe|#fa73fd|#c6c5fe|#efedef|#7b7b7b|#fcb6b0|#cfffab|#ffffcc|#b5dcff|#fb9cfe|#e0e0fe|#ffffff
+Ibm 3270 (High Contrast) (Gogh)|#fdfdfd|#000000|#000000|#ff0000|#00ff00|#ffff00|#00bfff|#ffc0cb|#40e0d0|#bebebe|#414141|#ffa500|#98fb98|#ffff00|#0000cd|#a020f0|#aeeeee|#ffffff
+Ibm3270 (Gogh)|#fdfdfd|#000000|#222222|#f01818|#24d830|#f0d824|#7890f0|#f078d8|#54e4e4|#a5a5a5|#888888|#ef8383|#7ed684|#efe28b|#b3bfef|#efb3e3|#9ce2e2|#ffffff
+Ic Green Ppl (Gogh)|#d9efd3|#3a3d3f|#1f1f1f|#fb002a|#339c24|#659b25|#149b45|#53b82c|#2cb868|#e0ffef|#032710|#a7ff3f|#9fff6d|#d2ff6d|#72ffb5|#50ff3e|#22ff71|#daefd0
+Ic Orange Ppl (Gogh)|#ffcb83|#262626|#000000|#c13900|#a4a900|#caaf00|#bd6d00|#fc5e00|#f79500|#ffc88a|#6a4f2a|#ff8c68|#f6ff40|#ffe36e|#ffbe55|#fc874f|#c69752|#fafaff
+Icy Dark (base16)|#095b67|#021012|#021012|#16c1d9|#4dd0e1|#80deea|#00bcd4|#00acc1|#26c6da|#095b67|#052e34|#16c1d9|#4dd0e1|#80deea|#00bcd4|#00acc1|#26c6da|#109cb0
+Idle Toes (Gogh)|#ffffff|#323232|#323232|#d25252|#7fe173|#ffc66d|#4099ff|#f680ff|#bed6ff|#eeeeec|#535353|#f07070|#9dff91|#ffe48b|#5eb7f7|#ff9dff|#dcf4ff|#ffffff
+IdleToes (Gogh)|#ffffff|#323232|#323232|#d25252|#7fe173|#ffc66d|#4099ff|#f680ff|#bed6ff|#eeeeec|#535353|#f07070|#9dff91|#ffe48b|#5eb7f7|#ff9dff|#dcf4ff|#ffffff
+Iiamblack (terminal.sexy)|#ffffff|#000000|#393939|#da4939|#519f50|#cc7833|#6d9cbe|#9f5079|#435d75|#dddddd|#474747|#ff6c5c|#a5c261|#bc9458|#d0d0ff|#a761c2|#6e98a4|#dddddd
+Insignificato (terminal.sexy)|#ffffff|#000000|#3d3e3d|#755a5b|#68755a|#756e5a|#5b6976|#755b76|#5b7674|#808080|#5a5b5c|#a37679|#87a376|#a39b76|#758ba3|#9f76a3|#75a3a1|#aeafb0
+Invisibone (terminal.sexy)|#a0a0a0|#232323|#303030|#d370a3|#6d9e3f|#b58858|#6095c5|#ac7bde|#3ba275|#cfcfcf|#686868|#ffa7da|#a3d572|#efbd8b|#98cbfe|#e5b0ff|#75daa9|#ffffff
+Ir Black (Gogh)|#eeeeee|#000000|#4e4e4e|#ff6c60|#a8ff60|#ffffb6|#69cbfe|#ff73fd|#c6c5fe|#eeeeee|#7c7c7c|#ffb6b0|#ceffac|#ffffcb|#b5dcfe|#ff9cfe|#dfdffe|#ffffff
+IrBlack (Gogh)|#eeeeee|#000000|#4e4e4e|#ff6c60|#a8ff60|#ffffb6|#69cbfe|#ff73fd|#c6c5fe|#eeeeee|#7c7c7c|#ffb6b0|#ceffac|#ffffcb|#b5dcfe|#ff9cfe|#dfdffe|#ffffff
+Isotope (base16)|#d0d0d0|#000000|#000000|#ff0000|#33ff00|#ff0099|#0066ff|#cc00ff|#00ffff|#d0d0d0|#808080|#ff0000|#33ff00|#ff0099|#0066ff|#cc00ff|#00ffff|#ffffff
+Isotope (dark) (terminal.sexy)|#d0d0d0|#000000|#000000|#ff0000|#33ff00|#ff0099|#0066ff|#cc00ff|#00ffff|#d0d0d0|#808080|#ff0000|#33ff00|#ff0099|#0066ff|#cc00ff|#00ffff|#ffffff
+Isotope (light) (terminal.sexy)|#606060|#ffffff|#000000|#ff0000|#33ff00|#ff0099|#0066ff|#cc00ff|#00ffff|#d0d0d0|#808080|#ff0000|#33ff00|#ff0099|#0066ff|#cc00ff|#00ffff|#ffffff
+Ivory Dark (terminal.sexy)|#a4a6ab|#2d2c28|#5b5955|#c4756e|#559a6a|#9b8a4b|#6a8dca|#b577ac|#019baa|#dbdde2|#707277|#f6a299|#82c896|#cab775|#98bbfb|#e5a4db|#53cad9|#f7f9ff
+Ivory Light (terminal.sexy)|#6d727e|#fef9ec|#c5c1b4|#e75c58|#00a250|#a08a00|#208ffb|#d160c4|#00a4c1|#3e424d|#a1a6b2|#b22b31|#007427|#715f00|#0065ca|#a03196|#007693|#282c36
+JWR dark (terminal.sexy)|#ffffff|#000000|#333333|#8c4665|#287373|#7c7c99|#395573|#5e468c|#31658c|#899ca1|#3d3d3d|#bf4d80|#53a6a6|#9e9ecb|#477ab3|#7e62b3|#6096bf|#c0c0c0
+Jackie Brown|#ffcc2f|#2c1d16|#2c1d16|#ef5734|#2baf2b|#bebf00|#246eb2|#d05ec1|#00acee|#bfbfbf|#666666|#e50000|#86a93e|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+Jackie Brown (Gogh)|#ffcc2f|#2c1d16|#2c1d16|#ef5734|#2baf2b|#bebf00|#246eb2|#d05ec1|#00acee|#bfbfbf|#666666|#e50000|#86a93e|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+JackieBrown (Gogh)|#ffcc2f|#2c1d16|#2c1d16|#ef5734|#2baf2b|#bebf00|#246eb2|#d05ec1|#00acee|#bfbfbf|#666666|#e50000|#86a93e|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+Japanesque|#f7f6ec|#1e1e1e|#343935|#cf3f61|#7bb75b|#e9b32a|#4c9ad4|#a57fc4|#389aad|#fafaf6|#595b59|#d18fa6|#767f2c|#78592f|#135979|#604291|#76bbca|#b2b5ae
+Japanesque (Gogh)|#f7f6ec|#1e1e1e|#343935|#cf3f61|#7bb75b|#e9b32a|#4c9ad4|#a57fc4|#389aad|#fafaf6|#595b59|#d18fa6|#767f2c|#78592f|#135979|#604291|#76bbca|#b2b5ae
+Jason Wryan (terminal.sexy)|#ffffff|#000000|#222222|#9e5641|#6c7e55|#caaf2b|#4c8ea1|#956d9d|#7c9aa6|#909090|#454545|#cc896d|#7db37d|#bfb556|#6bc1d0|#c18fcb|#8fadbf|#ffffff
+Jellybeans|#dedede|#121212|#929292|#e27373|#94b979|#ffba7b|#97bedc|#e1c0fa|#00988e|#dedede|#bdbdbd|#ffa1a1|#bddeab|#ffdca0|#b1d8f6|#fbdaff|#1ab2a8|#ffffff
+Jellybeans (Gogh)|#dedede|#121212|#929292|#e27373|#94b979|#ffba7b|#97bedc|#e1c0fa|#00988e|#dedede|#bdbdbd|#ffa1a1|#bddeab|#ffdca0|#b1d8f6|#fbdaff|#1ab2a8|#ffffff
+JetBrains Darcula|#adadad|#202020|#000000|#fa5355|#126e00|#c2c300|#4581eb|#fa54ff|#33c2c1|#adadad|#555555|#fb7172|#67ff4f|#ffff00|#6d9df1|#fb82ff|#60d3d1|#eeeeee
+Jup (Gogh)|#23476a|#758480|#000000|#dd006f|#6fdd00|#dd6f00|#006fdd|#6f00dd|#00dd6f|#f2f2f2|#7d7d7d|#ff74b9|#b9ff74|#ffb974|#74b9ff|#b974ff|#74ffb9|#ffffff
+Kanagawa (Gogh)|#dcd7ba|#1f1f28|#090618|#c34043|#76946a|#c0a36e|#7e9cd8|#957fb8|#6a9589|#dcd7ba|#727169|#e82424|#98bb6c|#e6c384|#7fb4ca|#938aa9|#7aa89f|#c8c093
+Kasugano (terminal.sexy)|#ffffff|#1b1b1b|#3d3d3d|#6673bf|#3ea290|#b0ead9|#31658c|#596196|#8292b2|#c8cacc|#4d4d4d|#899aff|#52ad91|#98c9bb|#477ab3|#7882bf|#95a7cc|#edeff2
+Kibble|#f7f7f7|#0e100a|#4d4d4d|#c70031|#29cf13|#d8e30e|#3449d1|#8400ff|#0798ab|#e2d1e3|#5a5a5a|#f01578|#6ce05c|#f3f79e|#97a4f7|#c495f0|#68f2e0|#ffffff
+Kibble (Gogh)|#f7f7f7|#0e100a|#4d4d4d|#c70031|#29cf13|#d8e30e|#3449d1|#8400ff|#0798ab|#e2d1e3|#5a5a5a|#f01578|#6ce05c|#f3f79e|#97a4f7|#c495f0|#68f2e0|#ffffff
+Kimber (base16)|#dedee7|#222222|#222222|#c88c8c|#99c899|#d8b56d|#537c9c|#86cacd|#78b4b4|#dedee7|#644646|#c88c8c|#99c899|#d8b56d|#537c9c|#86cacd|#78b4b4|#ffffe6
+Kokuban (Gogh)|#d8e2d7|#0d4a08|#2e8744|#d84e4c|#95da5a|#d6e264|#4b9ed7|#945fc5|#d89b25|#d8e2d7|#34934f|#ff4f59|#aff56a|#fcff75|#57aeff|#ae63e9|#ffaa2b|#fffefe
+Kolorit|#efecec|#1d1a1e|#1d1a1e|#ff5b82|#47d7a1|#e8e562|#5db4ee|#da6cda|#57e9eb|#ededed|#1d1a1e|#ff5b82|#47d7a1|#e8e562|#5db4ee|#da6cda|#57e9eb|#ededed
+Konsolas|#c8c1c1|#060606|#000000|#aa1717|#18b218|#ebae1f|#2323a5|#ad1edc|#42b0c8|#c8c1c1|#7b716e|#ff4141|#5fff5f|#ffff55|#4b4bff|#ff54ff|#69ffff|#ffffff
+Lab Fox|#ffffff|#2e2e2e|#2e2e2e|#fc6d26|#3eb383|#fca121|#db3b21|#380d75|#6e49cb|#ffffff|#464646|#ff6517|#53eaa8|#fca013|#db501f|#441090|#7d53e7|#ffffff
+Laser|#f106e3|#030d18|#626262|#ff8373|#b4fb73|#09b4bd|#fed300|#ff90fe|#d1d1fe|#f1f1f1|#8f8f8f|#ffc4be|#d6fcba|#fffed5|#f92883|#ffb2fe|#e6e7fe|#ffffff
+Laserwave (Gogh)|#e0e0e0|#1f1926|#39243a|#eb64b9|#afd686|#feae87|#40b4c4|#b381c5|#215969|#91889b|#716485|#fc2377|#50fa7b|#ffe261|#74dfc4|#6d75e0|#b4dce7|#ffffff
+Later This Evening|#959595|#222222|#2b2b2b|#d45a60|#afba67|#e5d289|#a0bad6|#c092d6|#91bfb7|#3c3d3d|#454747|#d3232f|#aabb39|#e5be39|#6699d6|#ab53d6|#5fc0ae|#c1c2c2
+Later This Evening (Gogh)|#959595|#222222|#2b2b2b|#d45a60|#afba67|#e5d289|#a0bad6|#c092d6|#91bfb7|#3c3d3d|#454747|#d3232f|#aabb39|#e5be39|#6699d6|#ab53d6|#5fc0ae|#c1c2c2
+LaterThisEvening (Gogh)|#959595|#222222|#2b2b2b|#d45a60|#afba67|#e5d289|#a0bad6|#c092d6|#91bfb7|#3c3d3d|#454747|#d3232f|#aabb39|#e5be39|#6699d6|#ab53d6|#5fc0ae|#c1c2c2
+Lavandula|#736e7d|#050014|#230046|#7d1625|#337e6f|#7f6f49|#4f4a7f|#5a3f7f|#58777f|#736e7d|#372d46|#e05167|#52e0c4|#e0c386|#8e87e0|#a776e0|#9ad4e0|#8c91fa
+Lavandula (Gogh)|#736e7d|#050014|#230046|#7d1625|#337e6f|#7f6f49|#4f4a7f|#5a3f7f|#58777f|#736e7d|#372d46|#e05167|#52e0c4|#e0c386|#8e87e0|#a776e0|#9ad4e0|#8c91fa
+Light White (terminal.sexy)|#ffffff|#000000|#808080|#c48980|#8da862|#b29b7a|#809bc4|#aa88b2|#82adad|#bfbfbf|#9c9c9c|#a15048|#4b7508|#916f27|#567cb0|#964e8f|#4e848a|#9c9c9c
+Liquid Carbon (Gogh)|#afc2c2|#303030|#000000|#ff3030|#559a70|#ccac00|#0099cc|#cc69c8|#7ac4cc|#bccccc|#000000|#ff3030|#559a70|#ccac00|#0099cc|#cc69c8|#7ac4cc|#bccccc
+Liquid Carbon Transparent (Gogh)|#afc2c2|#000000|#000000|#ff3030|#559a70|#ccac00|#0099cc|#cc69c8|#7ac4cc|#bccccc|#000000|#ff3030|#559a70|#ccac00|#0099cc|#cc69c8|#7ac4cc|#bccccc
+LiquidCarbon|#afc2c2|#303030|#000000|#ff3030|#559a70|#ccac00|#0099cc|#cc69c8|#7ac4cc|#bccccc|#000000|#ff3030|#559a70|#ccac00|#0099cc|#cc69c8|#7ac4cc|#bccccc
+LiquidCarbonTransparent|#afc2c2|#000000|#000000|#ff3030|#559a70|#ccac00|#0099cc|#cc69c8|#7ac4cc|#bccccc|#000000|#ff3030|#559a70|#ccac00|#0099cc|#cc69c8|#7ac4cc|#bccccc
+LiquidCarbonTransparentInverse|#afc2c2|#000000|#bccccd|#ff3030|#559a70|#ccac00|#0099cc|#cc69c8|#7ac4cc|#000000|#ffffff|#ff3030|#559a70|#ccac00|#0099cc|#cc69c8|#7ac4cc|#000000
+London Tube (base16)|#d9d8d8|#231f20|#231f20|#ee2e24|#00853e|#ffd204|#009ddc|#98005d|#85cebc|#d9d8d8|#737171|#ee2e24|#00853e|#ffd204|#009ddc|#98005d|#85cebc|#ffffff
+Londontube (dark) (terminal.sexy)|#d9d8d8|#231f20|#231f20|#ee2e24|#00853e|#ffd204|#009ddc|#98005d|#85cebc|#d9d8d8|#737171|#ee2e24|#00853e|#ffd204|#009ddc|#98005d|#85cebc|#ffffff
+Londontube (light) (terminal.sexy)|#5a5758|#ffffff|#231f20|#ee2e24|#00853e|#ffd204|#009ddc|#98005d|#85cebc|#d9d8d8|#737171|#ee2e24|#00853e|#ffd204|#009ddc|#98005d|#85cebc|#ffffff
+Lost Woods (terminal.sexy)|#919191|#000000|#303030|#a13a38|#00715d|#006f32|#a43261|#913e88|#007086|#c6c6c6|#5e5e5e|#ffa59a|#24dfc4|#73db95|#ff9fc9|#ffa7f6|#00ddf4|#ffffff
+Low Contrast (terminal.sexy)|#93a1a1|#3c3b37|#5f5f5f|#d96468|#a2d964|#d9c964|#64a2d9|#9a64d9|#64d9d5|#989898|#828282|#d98f93|#b8d98f|#d9cf8f|#8f99d9|#b08fd9|#8fd9d5|#c5c5c5
+Lumifoo (terminal.sexy)|#888a8c|#1e2021|#515151|#bf6382|#65a446|#ad8a43|#6b85c2|#9e6bb8|#5c9d88|#919191|#707172|#eaaec2|#aed49b|#d4c3a0|#afc4e9|#d2b1e2|#a4d0c1|#d0d0d0
+Lunaria Dark (Gogh)|#caced8|#36464e|#36464e|#846560|#809984|#a79a79|#555673|#866c83|#7e98b4|#caced8|#404f56|#bb928b|#bfdcc2|#f1dfb6|#777798|#bf9db9|#bddcff|#dfe2ed
+Lunaria Eclipse (Gogh)|#c9cdd7|#323f46|#323f46|#83615b|#7f9781|#a69875|#53516f|#856880|#7d96b2|#c9cdd7|#3d4950|#ba9088|#bedbc1|#f1dfb4|#767495|#be9cb8|#bcdbff|#dfe2ed
+Lunaria Light (Gogh)|#484646|#ebe4e1|#3e3c3d|#783c1f|#497d46|#8f750b|#3f3566|#793f62|#3778a9|#d5cfcc|#484646|#b06240|#7bc175|#dcb735|#5c4f89|#b56895|#64baff|#ebe4e1
+LunariaDark (Gogh)|#caced8|#36464e|#36464e|#846560|#809984|#a79a79|#555673|#866c83|#7e98b4|#caced8|#404f56|#bb928b|#bfdcc2|#f1dfb6|#777798|#bf9db9|#bddcff|#dfe2ed
+LunariaEclipse (Gogh)|#c9cdd7|#323f46|#323f46|#83615b|#7f9781|#a69875|#53516f|#856880|#7d96b2|#c9cdd7|#3d4950|#ba9088|#bedbc1|#f1dfb4|#767495|#be9cb8|#bcdbff|#dfe2ed
+LunariaLight (Gogh)|#484646|#ebe4e1|#3e3c3d|#783c1f|#497d46|#8f750b|#3f3566|#793f62|#3778a9|#d5cfcc|#484646|#b06240|#7bc175|#dcb735|#5c4f89|#b56895|#64baff|#ebe4e1
+Macintosh (base16)|#c0c0c0|#000000|#000000|#dd0907|#1fb714|#fbf305|#0000d3|#4700a5|#02abea|#c0c0c0|#808080|#dd0907|#1fb714|#fbf305|#0000d3|#4700a5|#02abea|#ffffff
+Maia (Gogh)|#bdc3c7|#31363b|#232423|#ba2922|#7e807e|#4c4f4d|#16a085|#43746a|#00cccc|#e0e0e0|#282928|#cc372c|#8d8f8d|#4e524f|#13bf9d|#487d72|#00d1d1|#e8e8e8
+Man Page|#000000|#fef49c|#000000|#cc0000|#00a600|#999900|#0000b2|#b200b2|#00a6b2|#cccccc|#666666|#e50000|#00d900|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+Man Page (Gogh)|#000000|#fef49c|#000000|#cc0000|#00a600|#999900|#0000b2|#b200b2|#00a6b2|#cccccc|#666666|#e50000|#00d900|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+ManPage (Gogh)|#000000|#fef49c|#000000|#cc0000|#00a600|#999900|#0000b2|#b200b2|#00a6b2|#cccccc|#666666|#e50000|#00d900|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+Mar (Gogh)|#23476a|#ffffff|#000000|#b5407b|#7bb540|#b57b40|#407bb5|#7b40b5|#40b57b|#f8f8f8|#737373|#cd73a0|#a0cd73|#cda073|#73a0cd|#a073cd|#73cda0|#ffffff
+Mariana|#d8dee9|#343d46|#000000|#ec5f66|#99c794|#f9ae58|#6699cc|#c695c6|#5fb4b4|#f7f7f7|#333333|#f97b58|#acd1a8|#fac761|#85add6|#d8b6d8|#82c4c4|#ffffff
+Marrakesh (base16)|#948e48|#201602|#201602|#c35359|#18974e|#a88339|#477ca1|#8868b3|#75a738|#948e48|#6c6823|#c35359|#18974e|#a88339|#477ca1|#8868b3|#75a738|#faf0a5
+Marrakesh (dark) (terminal.sexy)|#948e48|#201602|#201602|#c35359|#18974e|#a88339|#477ca1|#8868b3|#75a738|#948e48|#6c6823|#c35359|#18974e|#a88339|#477ca1|#8868b3|#75a738|#faf0a5
+Marrakesh (light) (terminal.sexy)|#5f5b17|#faf0a5|#201602|#c35359|#18974e|#a88339|#477ca1|#8868b3|#75a738|#948e48|#6c6823|#c35359|#18974e|#a88339|#477ca1|#8868b3|#75a738|#faf0a5
+Mashup Colors (terminal.sexy)|#b2a191|#171717|#202020|#bf3f34|#707d22|#bf7a29|#627a92|#75507b|#757978|#b2a191|#404040|#ff6c5f|#b8ca4b|#c7a551|#95b9de|#ad7fa8|#9fa590|#e8d0c3
+Materia (base16)|#cdd3de|#263238|#263238|#ec5f67|#8bd649|#ffcc00|#89ddff|#82aaff|#80cbc4|#cdd3de|#707880|#ec5f67|#8bd649|#ffcc00|#89ddff|#82aaff|#80cbc4|#ffffff
+Material|#232322|#eaeaea|#212121|#b7141f|#457b24|#f6981e|#134eb2|#560088|#0e717c|#efefef|#424242|#e83b3f|#7aba3a|#ffea2e|#54a4f3|#aa4dbc|#26bbd1|#d9d9d9
+Material (Gogh)|#c3c7d1|#1e282c|#073641|#eb606b|#c3e88d|#f7eb95|#80cbc3|#ff2490|#aeddff|#ffffff|#002b36|#eb606b|#c3e88d|#f7eb95|#7dc6bf|#6c71c3|#34434d|#ffffff
+Material (base16)|#eeffff|#263238|#263238|#f07178|#c3e88d|#ffcb6b|#82aaff|#c792ea|#89ddff|#eeffff|#546e7a|#f07178|#c3e88d|#ffcb6b|#82aaff|#c792ea|#89ddff|#ffffff
+Material (terminal.sexy)|#eceff1|#263238|#263238|#ff9800|#8bc34a|#ffc107|#03a9f4|#e91e63|#009688|#cfd8dc|#37474f|#ffa74d|#9ccc65|#ffa000|#81d4fa|#ad1457|#26a69a|#eceff1
+Material Darker (base16)|#eeffff|#212121|#212121|#f07178|#c3e88d|#ffcb6b|#82aaff|#c792ea|#89ddff|#eeffff|#4a4a4a|#f07178|#c3e88d|#ffcb6b|#82aaff|#c792ea|#89ddff|#ffffff
+Material Lighter (base16)|#80cbc4|#fafafa|#fafafa|#ff5370|#91b859|#ffb62c|#6182b8|#7c4dff|#39adb5|#80cbc4|#ccd7da|#ff5370|#91b859|#ffb62c|#6182b8|#7c4dff|#39adb5|#ffffff
+Material Palenight (base16)|#959dcb|#292d3e|#292d3e|#f07178|#c3e88d|#ffcb6b|#82aaff|#c792ea|#89ddff|#959dcb|#676e95|#f07178|#c3e88d|#ffcb6b|#82aaff|#c792ea|#89ddff|#ffffff
+Material Vivid (base16)|#80868b|#202124|#202124|#f44336|#00e676|#ffeb3b|#2196f3|#673ab7|#00bcd4|#80868b|#44464d|#f44336|#00e676|#ffeb3b|#2196f3|#673ab7|#00bcd4|#ffffff
+MaterialDark|#e5e5e5|#232322|#212121|#b7141f|#457b24|#f6981e|#134eb2|#560088|#0e717c|#efefef|#424242|#e83b3f|#7aba3a|#ffea2e|#54a4f3|#aa4dbc|#26bbd1|#d9d9d9
+MaterialDarker|#eeffff|#212121|#000000|#ff5370|#c3e88d|#ffcb6b|#82aaff|#c792ea|#89ddff|#ffffff|#545454|#ff5370|#c3e88d|#ffcb6b|#82aaff|#c792ea|#89ddff|#ffffff
+MaterialDesignColors|#e7ebed|#1d262a|#435b67|#fc3841|#5cf19e|#fed032|#37b6ff|#fc226e|#59ffd1|#ffffff|#a1b0b8|#fc746d|#adf7be|#fee16c|#70cfff|#fc669b|#9affe6|#ffffff
+MaterialOcean|#8f93a2|#0f111a|#546e7a|#ff5370|#c3e88d|#ffcb6b|#82aaff|#c792ea|#89ddff|#ffffff|#546e7a|#ff5370|#c3e88d|#ffcb6b|#82aaff|#c792ea|#89ddff|#ffffff
+Mathias|#bbbbbb|#000000|#000000|#e52222|#a6e32d|#fc951e|#c48dff|#fa2573|#67d9f0|#f2f2f2|#555555|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#ffffff
+Mathias (Gogh)|#bbbbbb|#000000|#000000|#e52222|#a6e32d|#fc951e|#c48dff|#fa2573|#67d9f0|#f2f2f2|#555555|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#ffffff
+Matrix (terminal.sexy)|#00cc00|#000000|#000000|#55ff55|#00cc00|#00cc00|#005500|#55ff55|#00cc00|#00cc00|#000000|#55ff55|#55ff55|#55ff55|#005500|#55ff55|#55ff55|#00cc00
+Medallion|#cac296|#1d1908|#000000|#b64c00|#7c8b16|#d3bd26|#616bb0|#8c5a90|#916c25|#cac29a|#5e5219|#ff9149|#b2ca3b|#ffe54a|#acb8ff|#ffa0ff|#ffbc51|#fed698
+Medallion (Gogh)|#cac296|#1d1908|#000000|#b64c00|#7c8b16|#d3bd26|#616bb0|#8c5a90|#916c25|#cac29a|#5e5219|#ff9149|#b2ca3b|#ffe54a|#acb8ff|#ffa0ff|#ffbc51|#fed698
+Mellow Purple (base16)|#ffeeff|#1e0528|#1e0528|#00d9e9|#05cb0d|#955ae7|#550068|#8991bb|#b900b1|#ffeeff|#320f55|#00d9e9|#05cb0d|#955ae7|#550068|#8991bb|#b900b1|#f8c0ff
+Mexico Light (base16)|#383838|#f8f8f8|#f8f8f8|#ab4642|#538947|#f79a0e|#7cafc2|#96609e|#4b8093|#383838|#b8b8b8|#ab4642|#538947|#f79a0e|#7cafc2|#96609e|#4b8093|#181818
+Mikado (terminal.sexy)|#ffffff|#000000|#322a2c|#a04363|#9b9329|#bf7a29|#6a8c8c|#856774|#757978|#bcbcaf|#46423b|#ae837a|#b4aa30|#c7a551|#74999e|#9c818e|#9fa590|#c1c4bc
+Mikazuki (terminal.sexy)|#ffffff|#000000|#2a1d17|#da1657|#3ea250|#e3d33d|#3ea290|#ff850d|#8c16da|#e9e9e9|#4f362b|#da4375|#6cb87a|#e3da84|#8ca8a3|#ffa64f|#a167c7|#fdfdfd
+Mirage|#a6b2c0|#1b2738|#011627|#ff9999|#85cc95|#ffd700|#7fb5ff|#ddb3ff|#21c7a8|#ffffff|#575656|#ff9999|#85cc95|#ffd700|#7fb5ff|#ddb3ff|#85cc95|#ffffff
+Misterioso|#e1e1e0|#2d3743|#000000|#ff4242|#74af68|#ffad29|#338f86|#9414e6|#23d7d7|#e1e1e0|#555555|#ff3242|#74cd68|#ffb929|#23d7d7|#ff37ff|#00ede1|#ffffff
+Misterioso (Gogh)|#e1e1e0|#2d3743|#000000|#ff4242|#74af68|#ffad29|#338f86|#9414e6|#23d7d7|#e1e1e0|#555555|#ff3242|#74cd68|#ffb929|#23d7d7|#ff37ff|#00ede1|#ffffff
+Miu (Gogh)|#d9e6f2|#0d1926|#000000|#b87a7a|#7ab87a|#b8b87a|#7a7ab8|#b87ab8|#7ab8b8|#d9d9d9|#262626|#dbbdbd|#bddbbd|#dbdbbd|#bdbddb|#dbbddb|#bddbdb|#ffffff
+Mocha (base16)|#d0c8c6|#3b3228|#3b3228|#cb6077|#beb55b|#f4bc87|#8ab3b5|#a89bb9|#7bbda4|#d0c8c6|#7e705a|#cb6077|#beb55b|#f4bc87|#8ab3b5|#a89bb9|#7bbda4|#f5eeeb
+Mocha (dark) (terminal.sexy)|#d0c8c6|#3b3228|#3b3228|#cb6077|#beb55b|#f4bc87|#8ab3b5|#a89bb9|#7bbda4|#d0c8c6|#7e705a|#cb6077|#beb55b|#f4bc87|#8ab3b5|#a89bb9|#7bbda4|#f5eeeb
+Mocha (light) (terminal.sexy)|#645240|#f5eeeb|#3b3228|#cb6077|#beb55b|#f4bc87|#8ab3b5|#a89bb9|#7bbda4|#d0c8c6|#7e705a|#cb6077|#beb55b|#f4bc87|#8ab3b5|#a89bb9|#7bbda4|#f5eeeb
+Modus-Operandi|#000000|#ffffff|#f2f2f2|#a60000|#006800|#6f5500|#0031a9|#721045|#005e8b|#000000|#c4c4c4|#a0132f|#00663f|#7a4f2f|#0000b0|#531ab6|#005f5f|#595959
+Modus-Operandi-Deuteranopia|#000000|#ffffff|#f2f2f2|#a60000|#006800|#695500|#0031a9|#721045|#005e8b|#000000|#c4c4c4|#a0132f|#00663f|#77492f|#0000b0|#531ab6|#005f5f|#595959
+Modus-Operandi-Tinted|#000000|#fbf7f0|#efe9dd|#a60000|#006800|#6f5500|#0031a9|#721045|#005e8b|#000000|#c9b9b0|#a0132f|#00663f|#7a4f2f|#0000b0|#531ab6|#005f5f|#595959
+Modus-Operandi-Tritanopia|#000000|#ffffff|#f2f2f2|#a60000|#006800|#695500|#0031a9|#721045|#005e8b|#000000|#c4c4c4|#a0132f|#00663f|#77492f|#0000b0|#531ab6|#005f5f|#595959
+Modus-Vivendi|#ffffff|#000000|#1e1e1e|#ff5f59|#44bc44|#d0bc00|#2fafff|#feacd0|#00d3d0|#ffffff|#535353|#ff7f9f|#00c06f|#dfaf7a|#00bcff|#b6a0ff|#6ae4b9|#989898
+Modus-Vivendi-Deuteranopia|#ffffff|#000000|#1e1e1e|#ff5f59|#44bc44|#cabf00|#2fafff|#feacd0|#00d3d0|#ffffff|#535353|#ff7f9f|#00c06f|#d8af7a|#00bcff|#b6a0ff|#6ae4b9|#989898
+Modus-Vivendi-Tinted|#ffffff|#0d0e1c|#1d2235|#ff5f59|#44bc44|#d0bc00|#2fafff|#feacd0|#00d3d0|#ffffff|#4a4f69|#ff7f9f|#00c06f|#dfaf7a|#00bcff|#b6a0ff|#6ae4b9|#989898
+Modus-Vivendi-Tritanopia|#ffffff|#000000|#1e1e1e|#ff5f59|#44bc44|#cabf00|#2fafff|#feacd0|#00d3d0|#ffffff|#535353|#ff6f9f|#00c06f|#d8af7a|#00bcff|#b6a0ff|#6ae4b9|#989898
+Molokai|#bbbbbb|#121212|#121212|#fa2573|#98e123|#dfd460|#1080d0|#8700ff|#43a8d0|#bbbbbb|#555555|#f6669d|#b1e05f|#fff26d|#00afff|#af87ff|#51ceff|#ffffff
+Molokai (Gogh)|#bbbbbb|#1b1d1e|#1b1d1e|#7325fa|#23e298|#60d4df|#d08010|#ff0087|#d0a843|#bbbbbb|#555555|#9d66f6|#5fe0b1|#6df2ff|#ffaf00|#ff87af|#ffce51|#ffffff
+Mona Lisa (Gogh)|#f7d66a|#120b0d|#351b0e|#9b291c|#636232|#c36e28|#515c5d|#9b1d29|#588056|#f7d75c|#874228|#ff4331|#b4b264|#ff9566|#9eb2b4|#ff5b6a|#8acd8f|#ffe598
+MonaLisa|#f7d66a|#120b0d|#351b0e|#9b291c|#636232|#c36e28|#515c5d|#9b1d29|#588056|#f7d75c|#874228|#ff4331|#b4b264|#ff9566|#9eb2b4|#ff5b6a|#8acd8f|#ffe598
+Mono (terminal.sexy)|#ffffff|#000000|#000000|#111111|#222222|#333333|#444444|#555555|#666666|#777777|#090909|#181818|#272727|#393939|#484848|#595959|#707070|#818181
+Mono Amber (Gogh)|#ff9400|#2b1900|#402500|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400
+Mono Cyan (Gogh)|#00ccff|#00222b|#003340|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff
+Mono Green (Gogh)|#0bff00|#022b00|#034000|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00
+Mono Red (Gogh)|#ff3600|#2b0c00|#401200|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600
+Mono Theme (terminal.sexy)|#ffffff|#000000|#000000|#6b6b6b|#c4c4c4|#b3b3b3|#999999|#717171|#8a8a8a|#b5cabb|#202020|#464646|#f8f8f8|#eeeeee|#7c7c7c|#adadad|#c0c0c0|#99ac9e
+Mono White (Gogh)|#fafafa|#262626|#3b3b3b|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa
+Mono Yellow (Gogh)|#ffd300|#2b2400|#403500|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300
+Monokai (base16)|#f8f8f2|#272822|#272822|#f92672|#a6e22e|#f4bf75|#66d9ef|#ae81ff|#a1efe4|#f8f8f2|#75715e|#f92672|#a6e22e|#f4bf75|#66d9ef|#ae81ff|#a1efe4|#f9f8f5
+Monokai (dark) (terminal.sexy)|#f8f8f2|#272822|#272822|#f92672|#a6e22e|#f4bf75|#66d9ef|#ae81ff|#a1efe4|#f8f8f2|#75715e|#f92672|#a6e22e|#f4bf75|#66d9ef|#ae81ff|#a1efe4|#f9f8f5
+Monokai (light) (terminal.sexy)|#49483e|#f9f8f5|#272822|#f92672|#a6e22e|#f4bf75|#66d9ef|#ae81ff|#a1efe4|#f8f8f2|#75715e|#f92672|#a6e22e|#f4bf75|#66d9ef|#ae81ff|#a1efe4|#f9f8f5
+Monokai (terminal.sexy)|#f1ebeb|#272822|#48483e|#dc2566|#8fc029|#d4c96e|#55bcce|#9358fe|#56b7a5|#acada1|#76715e|#fa2772|#a7e22e|#e7db75|#66d9ee|#ae82ff|#66efd5|#cfd0c2
+Monokai Dark (Gogh)|#f8f8f2|#272822|#75715e|#f92672|#a6e22e|#f4bf75|#66d9ef|#ae81ff|#2aa198|#f9f8f5|#272822|#f92672|#a6e22e|#f4bf75|#66d9ef|#ae81ff|#2aa198|#f8f8f2
+Monokai Pro (Gogh)|#fdf9f3|#363537|#363537|#ff6188|#a9dc76|#ffd866|#fc9867|#ab9df2|#78dce8|#fdf9f3|#908e8f|#ff6188|#a9dc76|#ffd866|#fc9867|#ab9df2|#78dce8|#fdf9f3
+Monokai Pro Ristretto (Gogh)|#fbf2f3|#3e3838|#3e3838|#df7484|#bbd87e|#edce73|#dc9373|#a9aae9|#a4d7cc|#fbf2f3|#70696a|#df7484|#bbd87e|#edce73|#dc9373|#a9aae9|#a4d7cc|#fbf2f3
+Monokai Remastered|#d9d9d9|#0c0c0c|#1a1a1a|#f4005f|#98e024|#fd971f|#9d65ff|#f4005f|#58d1eb|#c4c5b5|#625e4c|#f4005f|#98e024|#e0d561|#9d65ff|#f4005f|#58d1eb|#f6f6ef
+Monokai Soda|#c4c5b5|#1a1a1a|#1a1a1a|#f4005f|#98e024|#fa8419|#9d65ff|#f4005f|#58d1eb|#c4c5b5|#625e4c|#f4005f|#98e024|#e0d561|#9d65ff|#f4005f|#58d1eb|#f6f6ef
+Monokai Soda (Gogh)|#c4c5b5|#1a1a1a|#1a1a1a|#f4005f|#98e024|#fa8419|#9d65ff|#f4005f|#58d1eb|#c4c5b5|#625e4c|#f4005f|#98e024|#e0d561|#9d65ff|#f4005f|#58d1eb|#f6f6ef
+Monokai Vivid|#f9f9f9|#121212|#121212|#fa2934|#98e123|#fff30a|#0443ff|#f800f8|#01b6ed|#ffffff|#838383|#f6669d|#b1e05f|#fff26d|#0443ff|#f200f6|#51ceff|#ffffff
+MonokaiDark (Gogh)|#f8f8f2|#272822|#75715e|#f92672|#a6e22e|#f4bf75|#66d9ef|#ae81ff|#2aa198|#f9f8f5|#272822|#f92672|#a6e22e|#f4bf75|#66d9ef|#ae81ff|#2aa198|#f8f8f2
+MonokaiPro (Gogh)|#fdf9f3|#363537|#363537|#ff6188|#a9dc76|#ffd866|#fc9867|#ab9df2|#78dce8|#fdf9f3|#908e8f|#ff6188|#a9dc76|#ffd866|#fc9867|#ab9df2|#78dce8|#fdf9f3
+MonokaiProRistretto (Gogh)|#fbf2f3|#3e3838|#3e3838|#df7484|#bbd87e|#edce73|#dc9373|#a9aae9|#a4d7cc|#fbf2f3|#70696a|#df7484|#bbd87e|#edce73|#dc9373|#a9aae9|#a4d7cc|#fbf2f3
+MonokaiSoda (Gogh)|#c4c5b5|#1a1a1a|#1a1a1a|#f4005f|#98e024|#fa8419|#9d65ff|#f4005f|#58d1eb|#c4c5b5|#625e4c|#f4005f|#98e024|#e0d561|#9d65ff|#f4005f|#58d1eb|#f6f6ef
+Moonfly (Gogh)|#bdbdbd|#080808|#323437|#ff5454|#8cc85f|#e3c78a|#80a0ff|#cf87e8|#79dac8|#c6c6c6|#949494|#ff5189|#36c692|#c2c292|#74b2ff|#ae81ff|#85dc85|#e4e4e4
+Morada (Gogh)|#ffffff|#211f46|#040404|#0f49c4|#48b117|#e87324|#bc0116|#665b93|#70a699|#f5dcbe|#4f7cbf|#1c96c7|#3bff6f|#efc31c|#fb605b|#975b5a|#1eff8e|#f6f5fb
+Mostly Bright (terminal.sexy)|#707070|#f3f3f3|#d3d3d3|#ef6b7b|#a1d569|#f59335|#4ec2e8|#fec7cd|#95c1c0|#707070|#b3b3b3|#ed5466|#afdb80|#f59335|#5dc7ea|#d2a4b4|#75a1a0|#909090
+Muse (terminal.sexy)|#ffffff|#000000|#2e3436|#a31604|#447241|#c1951a|#425387|#965d98|#06989a|#d3d7cf|#555753|#c60001|#27a343|#d5a30e|#4a5a8d|#893c8c|#12bccb|#eeeeec
+N0Tch2K (Gogh)|#a0a0a0|#222222|#383838|#a95551|#666666|#a98051|#657d3e|#767676|#c9c9c9|#d0b8a3|#474747|#a97775|#8c8c8c|#a99175|#98bd5e|#a3a3a3|#dcdcdc|#d8c8bb
+N0tch2k|#a0a0a0|#222222|#383838|#a95551|#666666|#a98051|#657d3e|#767676|#c9c9c9|#d0b8a3|#474747|#a97775|#8c8c8c|#a99175|#98bd5e|#a3a3a3|#dcdcdc|#d8c8bb
+Nancy (terminal.sexy)|#ffffff|#010101|#1b1d1e|#f92672|#82b414|#fd971f|#4e82aa|#8c54fe|#465457|#ccccc6|#505354|#ff5995|#b6e354|#feed6c|#0c73c2|#9e6ffe|#899ca1|#f8f8f2
+Nature Suede (terminal.sexy)|#746c48|#170f0d|#392925|#98724c|#908f32|#aa964c|#7b854e|#6b5644|#5c5142|#c8b55b|#544b2e|#af652f|#c3c13d|#c8b55b|#70a16c|#98724c|#778725|#e4dc8c
+Navy and Ivory (terminal.sexy)|#e8dfd6|#021b21|#032c36|#c2454e|#7cbf9e|#8a7a63|#2e3340|#ff5879|#44b5b1|#f2f1b9|#065f73|#ef5847|#a2d9b1|#beb090|#61778d|#ff99a1|#9ed9d8|#f6f6c9
+Nebula (base16)|#a4a6a9|#22273b|#22273b|#777abc|#6562a8|#4f9062|#4d6bb6|#716cae|#226f68|#a4a6a9|#6e6f72|#777abc|#6562a8|#4f9062|#4d6bb6|#716cae|#226f68|#8dbdaa
+Neon|#00fffc|#14161a|#000000|#ff3045|#5ffa74|#fffc7e|#0208cb|#f924e7|#00fffc|#c7c7c7|#686868|#ff5a5a|#75ff88|#fffd96|#3c40cb|#f15be5|#88fffe|#ffffff
+Neon (terminal.sexy)|#f8f8f8|#171717|#171717|#d81765|#97d01a|#ffa800|#16b1fb|#ff2491|#0fdcb6|#ebebeb|#38252c|#ff0000|#76b639|#e1a126|#289cd5|#ff2491|#0a9b81|#f8f8f8
+Neon Night (Gogh)|#c7c8ff|#20242d|#20242d|#ff8e8e|#7efdd0|#fcad3f|#69b4f9|#dd92f6|#8ce8ff|#c9cccd|#20242d|#ff8e8e|#7efdd0|#fcad3f|#69b4f9|#dd92f6|#8ce8ff|#c9cccd
+Neopolitan|#ffffff|#271f19|#000000|#800000|#61ce3c|#fbde2d|#253b76|#ff0080|#8da6ce|#f8f8f8|#000000|#800000|#61ce3c|#fbde2d|#253b76|#ff0080|#8da6ce|#f8f8f8
+Neopolitan (Gogh)|#ffffff|#271f19|#000000|#800000|#61ce3c|#fbde2d|#253b76|#ff0080|#8da6ce|#f8f8f8|#000000|#800000|#61ce3c|#fbde2d|#253b76|#ff0080|#8da6ce|#f8f8f8
+Nep (Gogh)|#23476a|#758480|#000000|#dd6f00|#00dd6f|#6fdd00|#6f00dd|#dd006f|#006fdd|#f2f2f2|#7d7d7d|#ffb974|#74ffb9|#b9ff74|#b974ff|#ff74b9|#74b9ff|#ffffff
+Neutron|#e6e8ef|#1c1e22|#23252b|#b54036|#5ab977|#deb566|#6a7c93|#a4799d|#3f94a8|#e6e8ef|#23252b|#b54036|#5ab977|#deb566|#6a7c93|#a4799d|#3f94a8|#ebedf2
+Neutron (Gogh)|#e6e8ef|#1c1e22|#23252b|#b54036|#5ab977|#deb566|#6a7c93|#a4799d|#3f94a8|#e6e8ef|#23252b|#b54036|#5ab977|#deb566|#6a7c93|#a4799d|#3f94a8|#ebedf2
+Night Owl (Gogh)|#d6deeb|#011627|#011627|#ef5350|#22da6e|#addb67|#82aaff|#c792ea|#21c7a8|#ffffff|#575656|#ef5350|#22da6e|#ffeb95|#82aaff|#c792ea|#7fdbca|#ffffff
+Night Owlish Light|#403f53|#ffffff|#011627|#d3423e|#2aa298|#daaa01|#4876d6|#403f53|#08916a|#7a8181|#7a8181|#f76e6e|#49d0c5|#dac26b|#5ca7e4|#697098|#00c990|#989fb1
+NightLion v1|#bbbbbb|#000000|#4c4c4c|#bb0000|#5fde8f|#f3f167|#276bd8|#bb00bb|#00dadf|#bbbbbb|#555555|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#ffffff
+NightLion v2|#bbbbbb|#171717|#4c4c4c|#bb0000|#04f623|#f3f167|#64d0f0|#ce6fdb|#00dadf|#bbbbbb|#555555|#ff5555|#7df71d|#ffff55|#62cbe8|#ff9bf5|#00ccd8|#ffffff
+NightOwl (Gogh)|#d6deeb|#011627|#011627|#ef5350|#22da6e|#addb67|#82aaff|#c792ea|#21c7a8|#ffffff|#575656|#ef5350|#22da6e|#ffeb95|#82aaff|#c792ea|#7fdbca|#ffffff
+Nightfly (Gogh)|#bdc1c6|#011627|#1d3b53|#fc514e|#a1cd5e|#e3d18a|#82aaff|#c792ea|#7fdbca|#a1aab8|#7c8f8f|#ff5874|#21c7a8|#ecc48d|#82aaff|#ae81ff|#7fdbca|#d6deeb
+Nightlion V1 (Gogh)|#bbbbbb|#000000|#4c4c4c|#bb0000|#5fde8f|#f3f167|#276bd8|#bb00bb|#00dadf|#bbbbbb|#555555|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#ffffff
+Nightlion V2 (Gogh)|#bbbbbb|#171717|#4c4c4c|#bb0000|#04f623|#f3f167|#64d0f0|#ce6fdb|#00dadf|#bbbbbb|#555555|#ff5555|#7df71d|#ffff55|#62cbe8|#ff9bf5|#00ccd8|#ffffff
+NightlionV1 (Gogh)|#bbbbbb|#000000|#4c4c4c|#bb0000|#5fde8f|#f3f167|#276bd8|#bb00bb|#00dadf|#bbbbbb|#555555|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#ffffff
+NightlionV2 (Gogh)|#bbbbbb|#171717|#4c4c4c|#bb0000|#04f623|#f3f167|#64d0f0|#ce6fdb|#00dadf|#bbbbbb|#555555|#ff5555|#7df71d|#ffff55|#62cbe8|#ff9bf5|#00ccd8|#ffffff
+Nighty (Gogh)|#dfdfdf|#2f2f2f|#373d48|#9b3e46|#095b32|#808020|#1d3e6f|#823065|#3a7458|#828282|#5c6370|#d0555f|#119955|#dfe048|#4674b8|#ed86c9|#70d2a4|#dfdfdf
+Nocturnal Winter|#e6e5e5|#0d0d17|#4d4d4d|#f12d52|#09cd7e|#f5f17a|#3182e0|#ff2b6d|#09c87a|#fcfcfc|#808080|#f16d86|#0ae78d|#fffc67|#6096ff|#ff78a2|#0ae78d|#ffffff
+Nord (Gogh)|#d8dee9|#2e3440|#3b4252|#bf616a|#a3be8c|#ebcb8b|#81a1c1|#b48ead|#88c0d0|#e5e9f0|#4c566a|#bf616a|#a3be8c|#ebcb8b|#81a1c1|#b48ead|#8fbcbb|#eceff4
+Nord (base16)|#e5e9f0|#2e3440|#2e3440|#bf616a|#a3be8c|#ebcb8b|#81a1c1|#b48ead|#88c0d0|#e5e9f0|#4c566a|#bf616a|#a3be8c|#ebcb8b|#81a1c1|#b48ead|#88c0d0|#8fbcbb
+Nord Light (Gogh)|#004f7c|#ebeaf2|#003b4e|#e64569|#069f5f|#dab752|#439ecf|#d961dc|#00b1be|#b3b3b3|#3e89a1|#e4859a|#a2cca1|#e1e387|#6fbbe2|#e586e7|#96dcda|#dedede
+NordLight (Gogh)|#004f7c|#ebeaf2|#003b4e|#e64569|#069f5f|#dab752|#439ecf|#d961dc|#00b1be|#b3b3b3|#3e89a1|#e4859a|#a2cca1|#e1e387|#6fbbe2|#e586e7|#96dcda|#dedede
+Nova (base16)|#c5d4dd|#3c4c55|#3c4c55|#83afe5|#7fc1ca|#a8ce93|#83afe5|#9a93e1|#f2c38f|#c5d4dd|#899ba6|#83afe5|#7fc1ca|#a8ce93|#83afe5|#9a93e1|#f2c38f|#556873
+Novel|#3b2322|#dfdbc3|#000000|#cc0000|#009600|#d06b00|#0000cc|#cc00cc|#0087cc|#cccccc|#808080|#cc0000|#009600|#d06b00|#0000cc|#cc00cc|#0087cc|#ffffff
+Novel (Gogh)|#3b2322|#dfdbc3|#000000|#cc0000|#009600|#d06b00|#0000cc|#cc00cc|#0087cc|#cccccc|#808080|#cc0000|#009600|#d06b00|#0000cc|#cc00cc|#0087cc|#ffffff
+Nucolors (terminal.sexy)|#ffffff|#000000|#393939|#ff9f95|#e2ffc7|#ffffb9|#a8ceea|#e2b5cc|#c2efff|#dddddd|#474747|#ff8d80|#dbffb3|#ffbe64|#7eb6ff|#e296ff|#9ce9ff|#dddddd
+Nudge (terminal.sexy)|#ffffff|#000000|#658280|#822f5d|#184a31|#9d4500|#304465|#330801|#175552|#110005|#8ca8a6|#a24b76|#28634d|#9d5823|#415c77|#532706|#3a6868|#330801
+Numix Darkest (terminal.sexy)|#a2a2a2|#282828|#555555|#9c3528|#61bc3b|#f3b43a|#0d68a8|#744560|#288e9c|#a2a2a2|#888888|#d64937|#86df5d|#fdd75a|#0f75bd|#9e5e83|#37c3d6|#f9f9f9
+Obsidian|#cdcdcd|#283033|#000000|#a60001|#00bb00|#fecd22|#3a9bdb|#bb00bb|#00bbbb|#bbbbbb|#555555|#ff0003|#93c863|#fef874|#a1d7ff|#ff55ff|#55ffff|#ffffff
+Obsidian (Gogh)|#cdcdcd|#283033|#000000|#a60001|#00bb00|#fecd22|#3a9bdb|#bb00bb|#00bbbb|#bbbbbb|#555555|#ff0003|#93c863|#fef874|#a1d7ff|#ff55ff|#55ffff|#ffffff
+Ocean|#ffffff|#224fbc|#000000|#990000|#00a600|#999900|#0000b2|#b200b2|#00a6b2|#bfbfbf|#666666|#e50000|#00d900|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+Ocean (base16)|#c0c5ce|#2b303b|#2b303b|#bf616a|#a3be8c|#ebcb8b|#8fa1b3|#b48ead|#96b5b4|#c0c5ce|#65737e|#bf616a|#a3be8c|#ebcb8b|#8fa1b3|#b48ead|#96b5b4|#eff1f5
+Ocean (dark) (terminal.sexy)|#c0c5ce|#2b303b|#2b303b|#bf616a|#a3be8c|#ebcb8b|#8fa1b3|#b48ead|#96b5b4|#c0c5ce|#65737e|#bf616a|#a3be8c|#ebcb8b|#8fa1b3|#b48ead|#96b5b4|#eff1f5
+Ocean (light) (terminal.sexy)|#4f5b66|#eff1f5|#2b303b|#bf616a|#a3be8c|#ebcb8b|#8fa1b3|#b48ead|#96b5b4|#c0c5ce|#65737e|#bf616a|#a3be8c|#ebcb8b|#8fa1b3|#b48ead|#96b5b4|#eff1f5
+Ocean Dark (Gogh)|#979cac|#1c1f27|#4f4f4f|#af4b57|#afd383|#e5c079|#7d90a4|#a4799d|#85a6a5|#eeedee|#7b7b7b|#af4b57|#ceffab|#fffecc|#b5dcfe|#fb9bfe|#dfdffd|#fefffe
+OceanDark (Gogh)|#979cac|#1c1f27|#4f4f4f|#af4b57|#afd383|#e5c079|#7d90a4|#a4799d|#85a6a5|#eeedee|#7b7b7b|#af4b57|#ceffab|#fffecc|#b5dcfe|#fb9bfe|#dfdffd|#fefffe
+Oceanic Next (Gogh)|#b3b8c3|#121b21|#121c21|#e44754|#89bd82|#f7bd51|#5486c0|#b77eb8|#50a5a4|#ffffff|#52606b|#e44754|#89bd82|#f7bd51|#5486c0|#b77eb8|#50a5a4|#ffffff
+Oceanic-Next|#b3b8c3|#121b21|#121c21|#e44754|#89bd82|#f7bd51|#5486c0|#b77eb8|#50a5a4|#ffffff|#52606b|#e44754|#89bd82|#f7bd51|#5486c0|#b77eb8|#50a5a4|#ffffff
+OceanicMaterial|#c2c8d7|#1c262b|#000000|#ee2b2a|#40a33f|#ffea2e|#1e80f0|#8800a0|#16afca|#a4a4a4|#777777|#dc5c60|#70be71|#fff163|#54a4f3|#aa4dbc|#42c7da|#ffffff
+OceanicNext (Gogh)|#b3b8c3|#121b21|#121c21|#e44754|#89bd82|#f7bd51|#5486c0|#b77eb8|#50a5a4|#ffffff|#52606b|#e44754|#89bd82|#f7bd51|#5486c0|#b77eb8|#50a5a4|#ffffff
+OceanicNext (base16)|#c0c5ce|#1b2b34|#1b2b34|#ec5f67|#99c794|#fac863|#6699cc|#c594c5|#5fb3b3|#c0c5ce|#65737e|#ec5f67|#99c794|#fac863|#6699cc|#c594c5|#5fb3b3|#d8dee9
+Ollie|#8a8dae|#222125|#000000|#ac2e31|#31ac61|#ac4300|#2d57ac|#b08528|#1fa6ac|#8a8eac|#5b3725|#ff3d48|#3bff99|#ff5e1e|#4488ff|#ffc21d|#1ffaff|#5b6ea7
+Ollie (Gogh)|#8a8dae|#222125|#000000|#ac2e31|#31ac61|#ac4300|#2d57ac|#b08528|#1fa6ac|#8a8eac|#5b3725|#ff3d48|#3bff99|#ff5e1e|#4488ff|#ffc21d|#1ffaff|#5b6ea7
+Omni (Gogh)|#abb2bf|#191622|#191622|#e96379|#67e480|#e89e64|#78d1e1|#988bc7|#ff79c6|#abb2bf|#000000|#e96379|#67e480|#e89e64|#78d1e1|#988bc7|#ff79c6|#ffffff
+One Dark (Gogh)|#5c6370|#1e2127|#000000|#e06c75|#98c379|#d19a66|#61afef|#c678dd|#56b6c2|#abb2bf|#5c6370|#e06c75|#98c379|#d19a66|#61afef|#c678dd|#56b6c2|#fffefe
+One Half Black (Gogh)|#dcdfe4|#000000|#282c34|#e06c75|#98c379|#e5c07b|#61afef|#c678dd|#56b6c2|#dcdfe4|#282c34|#e06c75|#98c379|#e5c07b|#61afef|#c678dd|#56b6c2|#dcdfe4
+One Light (Gogh)|#2a2b32|#f8f8f8|#000000|#da3e39|#41933e|#855504|#315eee|#930092|#0e6fad|#8e8f96|#2a2b32|#da3e39|#41933e|#855504|#315eee|#930092|#0e6fad|#fffefe
+One Light (base16)|#383a42|#fafafa|#fafafa|#ca1243|#50a14f|#c18401|#4078f2|#a626a4|#0184bc|#383a42|#a0a1a7|#ca1243|#50a14f|#c18401|#4078f2|#a626a4|#0184bc|#090a0b
+OneDark (Gogh)|#5c6370|#1e2127|#000000|#e06c75|#98c379|#d19a66|#61afef|#c678dd|#56b6c2|#abb2bf|#5c6370|#e06c75|#98c379|#d19a66|#61afef|#c678dd|#56b6c2|#fffefe
+OneDark (base16)|#abb2bf|#282c34|#282c34|#e06c75|#98c379|#e5c07b|#61afef|#c678dd|#56b6c2|#abb2bf|#545862|#e06c75|#98c379|#e5c07b|#61afef|#c678dd|#56b6c2|#c8ccd4
+OneHalfBlack (Gogh)|#dcdfe4|#000000|#282c34|#e06c75|#98c379|#e5c07b|#61afef|#c678dd|#56b6c2|#dcdfe4|#282c34|#e06c75|#98c379|#e5c07b|#61afef|#c678dd|#56b6c2|#dcdfe4
+OneHalfDark|#dcdfe4|#282c34|#282c34|#e06c75|#98c379|#e5c07b|#61afef|#c678dd|#56b6c2|#dcdfe4|#282c34|#e06c75|#98c379|#e5c07b|#61afef|#c678dd|#56b6c2|#dcdfe4
+OneHalfLight|#383a42|#fafafa|#383a42|#e45649|#50a14f|#c18401|#0184bc|#a626a4|#0997b3|#fafafa|#4f525e|#e06c75|#98c379|#e5c07b|#61afef|#c678dd|#56b6c2|#ffffff
+OneLight (Gogh)|#2a2b32|#f8f8f8|#000000|#da3e39|#41933e|#855504|#315eee|#930092|#0e6fad|#8e8f96|#2a2b32|#da3e39|#41933e|#855504|#315eee|#930092|#0e6fad|#fffefe
+Operator Mono Dark|#c3cac2|#191919|#5a5a5a|#ca372d|#4d7b3a|#d4d697|#4387cf|#b86cb4|#72d5c6|#ced4cd|#9a9b99|#c37d62|#83d0a2|#fdfdc5|#89d3f6|#ff2c7a|#82eada|#fdfdf6
+Orangish (terminal.sexy)|#ffffff|#000000|#251f1f|#eb4509|#94e76b|#ffac18|#46aede|#e32c57|#d6dbac|#efefef|#5e5e5e|#eb4509|#95e76b|#ffac18|#46aede|#e32c57|#d6dbac|#efefef
+Outrun Dark (base16)|#d0d0fa|#00002a|#00002a|#ff4242|#59f176|#f3e877|#66b0ff|#f10596|#0ef0f0|#d0d0fa|#50507a|#ff4242|#59f176|#f3e877|#66b0ff|#f10596|#0ef0f0|#f5f5ff
+Overnight Slumber|#ced2d6|#0e1729|#0a1222|#ffa7c4|#85cc95|#ffcb8b|#8dabe1|#c792eb|#78ccf0|#ffffff|#575656|#ffa7c4|#85cc95|#ffcb8b|#8dabe1|#c792eb|#ffa7c4|#ffffff
+Oxocarbon Dark (Gogh)|#ffffff|#161616|#262626|#ee5396|#42be65|#ffe97b|#33b1ff|#ff7eb6|#3ddbd9|#dde1e6|#393939|#ee5396|#42be65|#ffe97b|#33b1ff|#ff7eb6|#3ddbd9|#ffffff
+PaleNightHC|#cccccc|#3e4251|#000000|#f07178|#c3e88d|#ffcb6b|#82aaff|#c792ea|#89ddff|#ffffff|#666666|#f6a9ae|#dbf1ba|#ffdfa6|#b4ccff|#ddbdf2|#b8eaff|#999999
+Palenight (Gogh)|#bfc7d5|#292d3e|#292d3e|#f07178|#c3e88d|#ffcb6b|#82aaff|#c792ea|#60adec|#abb2bf|#959dcb|#f07178|#c3e88d|#ff5572|#82aaff|#ffcb6b|#676e95|#fffefe
+Pali (Gogh)|#d9e6f2|#232e37|#0a0a0a|#ab8f74|#74ab8f|#8fab74|#8f74ab|#ab748f|#748fab|#f2f2f2|#5d5d5d|#ff1d62|#9cc3af|#ffd00a|#af9cc3|#ff1d62|#4bb8fd|#a020f0
+Panda (Gogh)|#f0f0f0|#1d1e20|#1f1f20|#fb055a|#26ffd4|#fdaa5a|#5c9fff|#fc59a6|#26ffd4|#f0f0f0|#5c6370|#fb055a|#26ffd4|#febe7e|#55adff|#fd95d0|#26ffd4|#f0f0f0
+Pandora|#e1e1e1|#141e43|#000000|#ff4242|#74af68|#ffad29|#338f86|#9414e6|#23d7d7|#e2e2e2|#3f5648|#ff3242|#74cd68|#ffb929|#23d7d7|#ff37ff|#00ede1|#ffffff
+Panels (terminal.sexy)|#d3d3d3|#000000|#191927|#282f5e|#2b4593|#344276|#4e3a4f|#61372f|#6b484c|#744537|#905749|#94431c|#9f582a|#a38687|#e1750f|#eaaf25|#fa8e08|#fca806
+PaperColor Dark (base16)|#808080|#1c1c1c|#1c1c1c|#585858|#af87d7|#afd700|#ff5faf|#00afaf|#ffaf00|#808080|#d7af5f|#585858|#af87d7|#afd700|#ff5faf|#00afaf|#ffaf00|#d0d0d0
+PaperColor Light (base16)|#444444|#eeeeee|#eeeeee|#bcbcbc|#8700af|#d70087|#d75f00|#005faf|#d75f00|#444444|#5f8700|#bcbcbc|#8700af|#d70087|#d75f00|#005faf|#d75f00|#878787
+PaperColorDark (Gogh)|#d0d0d0|#1c1c1c|#1c1c1c|#af005f|#5faf00|#d7af5f|#5fafd7|#808080|#d7875f|#d0d0d0|#585858|#5faf5f|#afd700|#af87d7|#ffaf00|#ff5faf|#00afaf|#5f8787
+PaperColorLight (Gogh)|#444444|#eeeeee|#eeeeee|#af0000|#008700|#5f8700|#0087af|#878787|#005f87|#444444|#bcbcbc|#d70000|#d70087|#8700af|#d75f00|#d75f00|#005faf|#005f87
+Papercolor Dark (Gogh)|#d0d0d0|#1c1c1c|#1c1c1c|#af005f|#5faf00|#d7af5f|#5fafd7|#808080|#d7875f|#d0d0d0|#585858|#5faf5f|#afd700|#af87d7|#ffaf00|#ff5faf|#00afaf|#5f8787
+Papercolor Light (Gogh)|#444444|#eeeeee|#eeeeee|#af0000|#008700|#5f8700|#0087af|#878787|#005f87|#444444|#bcbcbc|#d70000|#d70087|#8700af|#d75f00|#d75f00|#005faf|#005f87
+Paraiso (base16)|#a39e9b|#2f1e2e|#2f1e2e|#ef6155|#48b685|#fec418|#06b6ef|#815ba4|#5bc4bf|#a39e9b|#776e71|#ef6155|#48b685|#fec418|#06b6ef|#815ba4|#5bc4bf|#e7e9db
+Paraiso (dark) (terminal.sexy)|#a39e9b|#2f1e2e|#2f1e2e|#ef6155|#48b685|#fec418|#06b6ef|#815ba4|#5bc4bf|#a39e9b|#776e71|#ef6155|#48b685|#fec418|#06b6ef|#815ba4|#5bc4bf|#e7e9db
+Paraiso (light) (terminal.sexy)|#4f424c|#e7e9db|#2f1e2e|#ef6155|#48b685|#fec418|#06b6ef|#815ba4|#5bc4bf|#a39e9b|#776e71|#ef6155|#48b685|#fec418|#06b6ef|#815ba4|#5bc4bf|#e7e9db
+Paraiso Dark|#a39e9b|#2f1e2e|#2f1e2e|#ef6155|#48b685|#fec418|#06b6ef|#815ba4|#5bc4bf|#a39e9b|#776e71|#ef6155|#48b685|#fec418|#06b6ef|#815ba4|#5bc4bf|#e7e9db
+Paraiso Dark (Gogh)|#a39e9b|#2f1e2e|#2f1e2e|#ef6155|#48b685|#fec418|#06b6ef|#815ba4|#5bc4bf|#a39e9b|#776e71|#ef6155|#48b685|#fec418|#06b6ef|#815ba4|#5bc4bf|#e7e9db
+ParaisoDark (Gogh)|#a39e9b|#2f1e2e|#2f1e2e|#ef6155|#48b685|#fec418|#06b6ef|#815ba4|#5bc4bf|#a39e9b|#776e71|#ef6155|#48b685|#fec418|#06b6ef|#815ba4|#5bc4bf|#e7e9db
+Parker Brothers (terminal.sexy)|#ffffff|#000000|#322a2c|#79220e|#344b1b|#b45b00|#434045|#5c1e25|#394745|#ae8842|#46423b|#aa261f|#76550f|#b57f02|#908862|#624a35|#393e38|#a59058
+Pasque (base16)|#dedcdf|#271c3a|#271c3a|#a92258|#c6914b|#804ead|#8e7dc6|#953b9d|#7263aa|#dedcdf|#5d5766|#a92258|#c6914b|#804ead|#8e7dc6|#953b9d|#7263aa|#bbaadd
+Pastel White (terminal.sexy)|#ffffff|#000000|#646e5b|#db7464|#a7e160|#dbd560|#69b2d6|#a073d6|#69e1d3|#9ea894|#88927e|#dba08f|#bde18b|#dbda8b|#95a9d6|#b59fd6|#95e1d2|#c9d0c2
+Paul Millr (Gogh)|#f2f2f2|#000000|#2a2a2a|#ff0000|#79ff0f|#d3bf00|#396bd7|#b449be|#66ccff|#bbbbbb|#666666|#ff0080|#66ff66|#f3d64e|#709aed|#db67e6|#7adff2|#ffffff
+PaulMillr|#f2f2f2|#000000|#2a2a2a|#ff0000|#79ff0f|#e7bf00|#396bd7|#b449be|#66ccff|#bbbbbb|#666666|#ff0080|#66ff66|#f3d64e|#709aed|#db67e6|#7adff2|#ffffff
+PaulMillr (Gogh)|#f2f2f2|#000000|#2a2a2a|#ff0000|#79ff0f|#d3bf00|#396bd7|#b449be|#66ccff|#bbbbbb|#666666|#ff0080|#66ff66|#f3d64e|#709aed|#db67e6|#7adff2|#ffffff
+Pencil Dark (Gogh)|#f1f1f1|#212121|#212121|#c30771|#10a778|#a89c14|#008ec4|#523c79|#20a5ba|#d9d9d9|#424242|#fb007a|#5fd7af|#f3e430|#20bbfc|#6855de|#4fb8cc|#f1f1f1
+Pencil Light (Gogh)|#424242|#f1f1f1|#212121|#c30771|#10a778|#a89c14|#008ec4|#523c79|#20a5ba|#d9d9d9|#424242|#fb007a|#5fd7af|#f3e430|#20bbfc|#6855de|#4fb8cc|#f1f1f1
+PencilDark|#f1f1f1|#212121|#212121|#c30771|#10a778|#a89c14|#008ec4|#523c79|#20a5ba|#d9d9d9|#424242|#fb007a|#5fd7af|#f3e430|#20bbfc|#6855de|#4fb8cc|#f1f1f1
+PencilLight|#424242|#f1f1f1|#212121|#c30771|#10a778|#a89c14|#008ec4|#523c79|#20a5ba|#d9d9d9|#424242|#fb007a|#5fd7af|#f3e430|#20bbfc|#6855de|#4fb8cc|#f1f1f1
+Peppermint|#c8c8c8|#000000|#353535|#e74669|#89d287|#dab853|#449fd0|#da62dc|#65aaaf|#b4b4b4|#535353|#e4859b|#a3cca2|#e1e487|#6fbce2|#e586e7|#96dcdb|#dfdfdf
+Peppermint (Gogh)|#c7c7c7|#000000|#353535|#e64569|#89d287|#dab752|#439ecf|#d961dc|#64aaaf|#b3b3b3|#535353|#e4859a|#a2cca1|#e1e387|#6fbbe2|#e586e7|#96dcda|#dedede
+PhD (base16)|#b8bbc2|#061229|#061229|#d07346|#99bf52|#fbd461|#5299bf|#9989cc|#72b9bf|#b8bbc2|#717885|#d07346|#99bf52|#fbd461|#5299bf|#9989cc|#72b9bf|#ffffff
+Phrak1 (terminal.sexy)|#a8a8a8|#000000|#000000|#a80000|#00a800|#a85400|#0000a8|#a800a8|#00a8a8|#a8a8a8|#545054|#f85450|#50fc50|#f8fc50|#5054f8|#f854f8|#50fcf8|#f8fcf8
+Piatto Light|#414141|#ffffff|#414141|#b23771|#66781e|#cd6f34|#3c5ea8|#a454b2|#66781e|#ffffff|#3f3f3f|#db3365|#829429|#cd6f34|#3c5ea8|#a454b2|#829429|#f2f2f2
+Pico (base16)|#5f574f|#000000|#000000|#ff004d|#00e756|#fff024|#83769c|#ff77a8|#29adff|#5f574f|#008751|#ff004d|#00e756|#fff024|#83769c|#ff77a8|#29adff|#fff1e8
+Pixiefloss (Gogh)|#d1cae8|#241f33|#2f2942|#ff857f|#48b685|#e6c000|#ae81ff|#ef6155|#c2ffdf|#f8f8f2|#75507b|#f1568e|#5adba2|#d5a425|#c5a3ff|#ef6155|#c2ffff|#f8f8f0
+Pnevma|#d0d0d0|#1c1c1c|#2f2e2d|#a36666|#90a57d|#d7af87|#7fa5bd|#c79ec4|#8adbb4|#d0d0d0|#4a4845|#d78787|#afbea2|#e4c9af|#a1bdce|#d7beda|#b1e7dd|#efefef
+Pnevma (Gogh)|#d0d0d0|#1c1c1c|#2f2e2d|#a36666|#90a57d|#d7af87|#7fa5bd|#c79ec4|#8adbb4|#d0d0d0|#4a4845|#d78787|#afbea2|#e4c9af|#a1bdce|#d7beda|#b1e7dd|#efefef
+Poimandres|#e4f0fb|#1b1e28|#171922|#d0679d|#5de4c7|#fffac2|#89ddff|#fcc5e9|#89ddff|#ffffff|#506477|#d0679d|#5de4c7|#fffac2|#add7ff|#fcc5e9|#add7ff|#ffffff
+Poimandres Storm|#e4f0fb|#252b37|#1b1e28|#d0679d|#5de4c7|#fffac2|#89ddff|#fcc5e9|#89ddff|#ffffff|#506477|#d0679d|#5de4c7|#fffac2|#add7ff|#fcc5e9|#add7ff|#ffffff
+Pop (base16)|#d0d0d0|#000000|#000000|#eb008a|#37b349|#f8ca12|#0e5a94|#b31e8d|#00aabb|#d0d0d0|#505050|#eb008a|#37b349|#f8ca12|#0e5a94|#b31e8d|#00aabb|#ffffff
+Popping and Locking|#ebdbb2|#181921|#1d2021|#cc241d|#98971a|#d79921|#458588|#b16286|#689d6a|#a89984|#928374|#f42c3e|#b8bb26|#fabd2f|#99c6ca|#d3869b|#7ec16e|#ebdbb2
+Porple (base16)|#d8d8d8|#292c36|#292c36|#f84547|#95c76f|#efa16b|#8485ce|#b74989|#64878f|#d8d8d8|#65568a|#f84547|#95c76f|#efa16b|#8485ce|#b74989|#64878f|#f8f8f8
+PowerShell (Gogh)|#f6f6f7|#052454|#000000|#7e0008|#098003|#c4a000|#010083|#d33682|#0e807f|#7f7c7f|#808080|#ef2929|#1cfe3c|#fefe45|#268ad2|#fe13fa|#29fffe|#c2c1c3
+Powershell (Gogh)|#f6f6f7|#052454|#000000|#7e0008|#098003|#c4a000|#010083|#d33682|#0e807f|#7f7c7f|#808080|#ef2929|#1cfe3c|#fefe45|#268ad2|#fe13fa|#29fffe|#c2c1c3
+Predawn (Gogh)|#f1f1f1|#282828|#f18260|#b51a20|#a6cc75|#fed33a|#81b2b1|#eb6c4e|#81b2b1|#eaeaea|#666666|#ff000b|#c4ee94|#e8e06d|#a5ebea|#ef8a50|#a5ebea|#ffffff
+Pretty and Pastel (terminal.sexy)|#888888|#151515|#292929|#cf6a4c|#19cb00|#fad07a|#8197bf|#8787af|#668799|#888888|#525252|#ff9d80|#23fd00|#ffefbf|#accaff|#c4c4ff|#80bfaf|#e8e8d3
+Pro|#f2f2f2|#000000|#000000|#990000|#00a600|#999900|#2009db|#b200b2|#00a6b2|#bfbfbf|#666666|#e50000|#00d900|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+Pro (Gogh)|#f2f2f2|#000000|#000000|#990000|#00a600|#999900|#2009db|#b200b2|#00a6b2|#bfbfbf|#666666|#e50000|#00d900|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+Pro Light|#191919|#ffffff|#000000|#e5492b|#50d148|#c6c440|#3b75ff|#ed66e8|#4ed2de|#dcdcdc|#9f9f9f|#ff6640|#61ef57|#f2f156|#0082ff|#ff7eff|#61f7f8|#f2f2f2
+Pulp (terminal.sexy)|#ffffff|#000000|#86817e|#d75756|#688c7d|#ffb365|#68778c|#fdb3b2|#86abd9|#f7f8f2|#86817e|#a63a3a|#688c7d|#ffb365|#68778c|#8c686a|#86abd9|#f7f8f2
+Purple People Eater (Gogh)|#c9d1d9|#161b22|#0d1117|#e34c26|#238636|#ed9a51|#a5d6ff|#6eb0e8|#c09aeb|#c9d1d9|#0d1117|#ff7b72|#3bab4a|#ffa657|#a5d6ff|#79c0ff|#b694df|#c9d1d9
+Purple Rain|#fffbf6|#21084a|#000000|#ff260e|#9be205|#ffc400|#00a2fa|#815bb5|#00deef|#ffffff|#565656|#ff4250|#b8e36e|#ffd852|#00a6ff|#ac7bf0|#74fdf3|#ffffff
+PurplePeopleEater (Gogh)|#c9d1d9|#161b22|#0d1117|#e34c26|#238636|#ed9a51|#a5d6ff|#6eb0e8|#c09aeb|#c9d1d9|#0d1117|#ff7b72|#3bab4a|#ffa657|#a5d6ff|#79c0ff|#b694df|#c9d1d9
+Purpledream (base16)|#ddd0dd|#100510|#100510|#ff1d0d|#14cc64|#f000a0|#00a0f0|#b000d0|#0075b0|#ddd0dd|#605060|#ff1d0d|#14cc64|#f000a0|#00a0f0|#b000d0|#0075b0|#fff0ff
+Qualia (base16)|#c0c0c0|#101010|#101010|#efa6a2|#80c990|#e6a3dc|#50cacd|#e0af85|#c8c874|#c0c0c0|#454545|#efa6a2|#80c990|#e6a3dc|#50cacd|#e0af85|#c8c874|#454545
+Railscasts (base16)|#e6e1dc|#2b2b2b|#2b2b2b|#da4939|#a5c261|#ffc66d|#6d9cbe|#b6b3eb|#519f50|#e6e1dc|#5a647e|#da4939|#a5c261|#ffc66d|#6d9cbe|#b6b3eb|#519f50|#f9f7f3
+Railscasts (dark) (terminal.sexy)|#e6e1dc|#2b2b2b|#2b2b2b|#da4939|#a5c261|#ffc66d|#6d9cbe|#b6b3eb|#519f50|#e6e1dc|#5a647e|#da4939|#a5c261|#ffc66d|#6d9cbe|#b6b3eb|#519f50|#f9f7f3
+Railscasts (light) (terminal.sexy)|#3a4055|#f9f7f3|#2b2b2b|#da4939|#a5c261|#ffc66d|#6d9cbe|#b6b3eb|#519f50|#e6e1dc|#5a647e|#da4939|#a5c261|#ffc66d|#6d9cbe|#b6b3eb|#519f50|#f9f7f3
+Rapture|#c0c9e5|#111e2a|#000000|#fc644d|#7afde1|#fff09b|#6c9bf5|#ff4fa1|#64e0ff|#c0c9e5|#304b66|#fc644d|#7afde1|#fff09b|#6c9bf5|#ff4fa1|#64e0ff|#ffffff
+Rasi (terminal.sexy)|#ffffff|#000000|#1b1d1e|#f92672|#82b414|#fd971f|#4e82aa|#8c54fe|#465457|#ccccc6|#505354|#ff5995|#b6e354|#feed6c|#0c73c2|#9e6ffe|#899ca1|#f8f8f2
+Raycast_Dark|#ffffff|#1a1a1a|#000000|#ff5360|#59d499|#ffc531|#56c2ff|#cf2f98|#52eee5|#ffffff|#000000|#ff6363|#59d499|#ffc531|#56c2ff|#cf2f98|#52eee5|#ffffff
+Raycast_Light|#000000|#ffffff|#000000|#b12424|#006b4f|#f8a300|#138af2|#9a1b6e|#3eb8bf|#ffffff|#000000|#b12424|#006b4f|#f8a300|#138af2|#9a1b6e|#3eb8bf|#ffffff
+Rebecca (base16)|#f1eff8|#292a44|#292a44|#a0a0c5|#6dfedf|#ae81ff|#2de0a7|#7aa5ff|#8eaee0|#f1eff8|#666699|#a0a0c5|#6dfedf|#ae81ff|#2de0a7|#7aa5ff|#8eaee0|#53495d
+Red Alert|#ffffff|#762423|#000000|#d62e4e|#71be6b|#beb86b|#489bee|#e979d7|#6bbeb8|#d6d6d6|#262626|#e02553|#aff08c|#dfddb7|#65aaf1|#ddb7df|#b7dfdd|#ffffff
+Red Alert (Gogh)|#ffffff|#762423|#000000|#d62e4e|#71be6b|#beb86b|#489bee|#e979d7|#6bbeb8|#d6d6d6|#262626|#e02553|#aff08c|#dfddb7|#65aaf1|#ddb7df|#b7dfdd|#ffffff
+Red Phoenix (terminal.sexy)|#ffffff|#111111|#131313|#2d2d2d|#4c3a3d|#4e4e4e|#6f6f6f|#909090|#aaa998|#b1b1b1|#d1d1d1|#d2c3ad|#df9767|#e1e1e1|#ededed|#ed4b19|#f2361e|#fa390f
+Red Planet|#c2b790|#222222|#202020|#8c3432|#728271|#e8bf6a|#69819e|#896492|#5b8390|#b9aa99|#676767|#b55242|#869985|#ebeb91|#60827e|#de4974|#38add8|#d6bfb8
+Red Sands|#d7c9a7|#7a251e|#000000|#ff3f00|#00bb00|#e7b000|#0072ff|#bb00bb|#00bbbb|#bbbbbb|#555555|#bb0000|#00bb00|#e7b000|#0072ae|#ff55ff|#55ffff|#ffffff
+Red Sands (Gogh)|#d7c9a7|#7a251e|#000000|#ff3f00|#00bb00|#e7b000|#0072ff|#bb00bb|#00bbbb|#bbbbbb|#555555|#bb0000|#00bb00|#e7b000|#0072ae|#ff55ff|#55ffff|#ffffff
+RedAlert (Gogh)|#ffffff|#762423|#000000|#d62e4e|#71be6b|#beb86b|#489bee|#e979d7|#6bbeb8|#d6d6d6|#262626|#e02553|#aff08c|#dfddb7|#65aaf1|#ddb7df|#b7dfdd|#ffffff
+RedSands (Gogh)|#d7c9a7|#7a251e|#000000|#ff3f00|#00bb00|#e7b000|#0072ff|#bb00bb|#00bbbb|#bbbbbb|#555555|#bb0000|#00bb00|#e7b000|#0072ae|#ff55ff|#55ffff|#ffffff
+Relaxed|#d9d9d9|#353a44|#151515|#bc5653|#909d63|#ebc17a|#6a8799|#b06698|#c9dfff|#d9d9d9|#636363|#bc5653|#a0ac77|#ebc17a|#7eaac7|#b06698|#acbbd0|#f7f7f7
+Relaxed (Gogh)|#d9d9d9|#353a44|#151515|#bc5653|#909d63|#ebc17a|#6a8799|#b06698|#c9dfff|#d9d9d9|#636363|#bc5653|#a0ac77|#ebc17a|#7eaac7|#b06698|#acbbd0|#f7f7f7
+Retro|#13a10e|#000000|#13a10e|#13a10e|#13a10e|#13a10e|#13a10e|#13a10e|#13a10e|#13a10e|#16ba10|#16ba10|#16ba10|#16ba10|#16ba10|#16ba10|#16ba10|#16ba10
+Rezza (terminal.sexy)|#dddddd|#222222|#191919|#803232|#5b762f|#aa9943|#324c80|#706c9a|#92b19e|#ffffff|#252525|#982b2b|#89b83f|#efef60|#2b4f98|#826ab1|#a1cdcd|#dddddd
+Rippedcasts|#ffffff|#2b2b2b|#000000|#cdaf95|#a8ff60|#bfbb1f|#75a5b0|#ff73fd|#5a647e|#bfbfbf|#666666|#eecbad|#bcee68|#e5e500|#86bdc9|#e500e5|#8c9bc4|#e5e5e5
+Rippedcasts (Gogh)|#ffffff|#2b2b2b|#000000|#cdaf95|#a8ff60|#bfbb1f|#75a5b0|#ff73fd|#5a647e|#bfbfbf|#666666|#eecbad|#bcee68|#e5e500|#86bdc9|#e500e5|#8c9bc4|#e5e5e5
+Rosé Pine (Gogh)|#e0def4|#191724|#26233a|#eb6f92|#9ccfd8|#f6c177|#31748f|#c4a7e7|#ebbcba|#e0def4|#6e6a86|#eb6f92|#9ccfd8|#f6c177|#31748f|#c4a7e7|#ebbcba|#e0def4
+Rosé Pine (base16)|#e0def4|#191724|#191724|#eb6f92|#31748f|#ebbcba|#c4a7e7|#f6c177|#9ccfd8|#e0def4|#6e6a86|#eb6f92|#31748f|#ebbcba|#c4a7e7|#f6c177|#9ccfd8|#524f67
+Rosé Pine Dawn (Gogh)|#575279|#faf4ed|#f2e9e1|#b4637a|#56949f|#ea9d34|#286983|#907aa9|#d7827e|#575279|#9893a5|#b4637a|#56949f|#ea9d34|#286983|#907aa9|#d7827e|#575279
+Rosé Pine Dawn (base16)|#575279|#faf4ed|#faf4ed|#b4637a|#286983|#d7827e|#907aa9|#ea9d34|#56949f|#575279|#9893a5|#b4637a|#286983|#d7827e|#907aa9|#ea9d34|#56949f|#cecacd
+Rosé Pine Moon (Gogh)|#e0def4|#232136|#393552|#eb6f92|#9ccfd8|#f6c177|#3e8fb0|#c4a7e7|#ea9a97|#e0def4|#6e6a86|#eb6f92|#9ccfd8|#f6c177|#3e8fb0|#c4a7e7|#ea9a97|#e0def4
+Rosé Pine Moon (base16)|#e0def4|#232136|#232136|#eb6f92|#3e8fb0|#ea9a97|#c4a7e7|#f6c177|#9ccfd8|#e0def4|#6e6a86|#eb6f92|#3e8fb0|#ea9a97|#c4a7e7|#f6c177|#9ccfd8|#56526e
+RoséPine (Gogh)|#e0def4|#191724|#26233a|#eb6f92|#9ccfd8|#f6c177|#31748f|#c4a7e7|#ebbcba|#e0def4|#6e6a86|#eb6f92|#9ccfd8|#f6c177|#31748f|#c4a7e7|#ebbcba|#e0def4
+RoséPineDawn (Gogh)|#575279|#faf4ed|#f2e9e1|#b4637a|#56949f|#ea9d34|#286983|#907aa9|#d7827e|#575279|#9893a5|#b4637a|#56949f|#ea9d34|#286983|#907aa9|#d7827e|#575279
+RoséPineMoon (Gogh)|#e0def4|#232136|#393552|#eb6f92|#9ccfd8|#f6c177|#3e8fb0|#c4a7e7|#ea9a97|#e0def4|#6e6a86|#eb6f92|#9ccfd8|#f6c177|#3e8fb0|#c4a7e7|#ea9a97|#e0def4
+Rouge 2|#a2a3aa|#17182b|#5d5d6b|#c6797e|#969e92|#dbcdab|#6e94b9|#4c4e78|#8ab6c1|#e8e8ea|#616274|#c6797e|#e6dcc4|#e6dcc4|#98b3cd|#8283a1|#abcbd3|#e8e8ea
+Royal|#514968|#100815|#241f2b|#91284c|#23801c|#b49d27|#6580b0|#674d96|#8aaabe|#524966|#312d3d|#d5356c|#2cd946|#fde83b|#90baf9|#a479e3|#acd4eb|#9e8cbd
+Royal (Gogh)|#514968|#100815|#241f2b|#91284c|#23801c|#b49d27|#6580b0|#674d96|#8aaabe|#524966|#312d3d|#d5356c|#2cd946|#fde83b|#90baf9|#a479e3|#acd4eb|#9e8cbd
+Rydgel (terminal.sexy)|#ffffff|#000000|#303430|#bf7979|#97b26b|#cdcdc1|#86a2be|#d9b798|#a1b5cd|#ffffff|#cdb5cd|#f4a45f|#c5f779|#ffffed|#98afd9|#d7d998|#a1b5cd|#dedede
+Ryuuko|#ececec|#2c3941|#2c3941|#865f5b|#66907d|#b1a990|#6a8e95|#b18a73|#88b2ac|#ececec|#5d7079|#865f5b|#66907d|#b1a990|#6a8e95|#b18a73|#88b2ac|#ececec
+SOS (terminal.sexy)|#78796f|#373b43|#373b43|#fdcd39|#fbfd59|#deac40|#afb171|#b387e7|#63e860|#efdecb|#373b43|#fdcd39|#fbfd59|#deac40|#afb171|#b387e7|#63e860|#efdecb
+Sagelight (base16)|#383838|#f8f8f8|#f8f8f8|#fa8480|#a0d2c8|#ffdc61|#a0a7d2|#c8a0d2|#a2d6f5|#383838|#b8b8b8|#fa8480|#a0d2c8|#ffdc61|#a0a7d2|#c8a0d2|#a2d6f5|#181818
+Sakura|#dd7bdc|#18131e|#000000|#d52370|#41af1a|#bc7053|#6964ab|#c71fbf|#939393|#998eac|#786d69|#f41d99|#22e529|#f59574|#9892f1|#e90cdd|#eeeeee|#cbb6ff
+Sakura (base16)|#564448|#feedf3|#feedf3|#df2d52|#2e916d|#c29461|#006e93|#5e2180|#1d8991|#564448|#755f64|#df2d52|#2e916d|#c29461|#006e93|#5e2180|#1d8991|#33292b
+Sandcastle (base16)|#a89984|#282c34|#282c34|#83a598|#528b8b|#a07e3b|#83a598|#d75f5f|#83a598|#a89984|#665c54|#83a598|#528b8b|#a07e3b|#83a598|#d75f5f|#83a598|#fdf4c1
+Sat (Gogh)|#23476a|#758480|#000000|#dd0007|#07dd00|#ddd600|#0007dd|#d600dd|#00ddd6|#f2f2f2|#7d7d7d|#ff7478|#78ff74|#fffa74|#7478ff|#fa74ff|#74fffa|#ffffff
+Scarlet Protocol|#e41951|#1c153d|#101116|#ff0051|#00dc84|#faf945|#0271b6|#ca30c7|#00c5c7|#c7c7c7|#686868|#ff6e67|#5ffa68|#fffc67|#6871ff|#bd35ec|#60fdff|#ffffff
+Sea Shells (Gogh)|#deb88d|#09141b|#17384c|#d15123|#027c9b|#fca02f|#1e4950|#68d4f1|#50a3b5|#deb88d|#434b53|#d48678|#628d98|#fdd39f|#1bbcdd|#bbe3ee|#87acb4|#fee4ce
+SeaShells|#deb88d|#09141b|#17384c|#d15123|#027c9b|#fca02f|#1e4950|#68d4f1|#50a3b5|#deb88d|#434b53|#d48678|#628d98|#fdd39f|#1bbcdd|#bbe3ee|#87acb4|#fee4ce
+Seafoam Pastel|#d4e7d4|#243435|#757575|#825d4d|#728c62|#ada16d|#4d7b82|#8a7267|#729494|#e0e0e0|#8a8a8a|#cf937a|#98d9aa|#fae79d|#7ac3cf|#d6b2a1|#ade0e0|#e0e0e0
+Seafoam Pastel (Gogh)|#d4e7d4|#243435|#757575|#825d4d|#728c62|#ada16d|#4d7b82|#8a7267|#729494|#e0e0e0|#8a8a8a|#cf937a|#98d9aa|#fae79d|#7ac3cf|#d6b2a1|#ade0e0|#e0e0e0
+SeafoamPastel (Gogh)|#d4e7d4|#243435|#757575|#825d4d|#728c62|#ada16d|#4d7b82|#8a7267|#729494|#e0e0e0|#8a8a8a|#cf937a|#98d9aa|#fae79d|#7ac3cf|#d6b2a1|#ade0e0|#e0e0e0
+Selenized Dark (Gogh)|#adbcbc|#103c48|#103c48|#fa5750|#75b938|#dbb32d|#4695f7|#f275be|#41c7b9|#adbcbc|#184956|#ff665c|#84c747|#ebc13d|#58a3ff|#ff84cd|#53d6c7|#cad8d9
+Selenized Light (Gogh)|#53676d|#fbf3db|#fbf3db|#d2212d|#489100|#ad8900|#0072d4|#ca4898|#009c8f|#53676d|#ece3cc|#cc1729|#428b00|#a78300|#006dce|#c44392|#00978a|#3a4d53
+Sequoia Monochrome|#868690|#0f1014|#131317|#999eb2|#626983|#d3d5de|#7c829d|#e2e4ed|#b6bac8|#868690|#575861|#999eb2|#626983|#d3d5de|#7c829d|#e2e4ed|#b6bac8|#868690
+Sequoia Moonlight|#868690|#0f1014|#131317|#f58ee0|#8eb5f5|#9898a6|#c58fff|#fdfdfe|#ffbb88|#868690|#575861|#f58ee0|#8eb5f5|#9898a6|#c58fff|#fdfdfe|#ffbb88|#868690
+Seti|#cacecd|#111213|#323232|#c22832|#8ec43d|#e0c64f|#43a5d5|#8b57b5|#8ec43d|#eeeeee|#323232|#c22832|#8ec43d|#e0c64f|#43a5d5|#8b57b5|#8ec43d|#ffffff
+Seti (Gogh)|#cacecd|#111213|#323232|#c22832|#8ec43d|#e0c64f|#43a5d5|#8b57b5|#8ec43d|#eeeeee|#323232|#c22832|#8ec43d|#e0c64f|#43a5d5|#8b57b5|#8ec43d|#ffffff
+Seti UI (base16)|#d6d6d6|#151718|#151718|#cd3f45|#9fca56|#e6cd69|#55b5db|#a074c4|#55dbbe|#d6d6d6|#41535b|#cd3f45|#9fca56|#e6cd69|#55b5db|#a074c4|#55dbbe|#ffffff
+Sex Colors (terminal.sexy)|#ffffff|#000000|#252525|#ff9f95|#a6e22e|#fd971f|#435e87|#789ec6|#5e7175|#dbdcdc|#454545|#ff8d80|#b6e354|#fd971f|#587aa4|#46a4ff|#a3babf|#fdfdfd
+Shades of Purple (base16)|#c7c7c7|#1e1e3f|#1e1e3f|#d90429|#3ad900|#ffe700|#6943ff|#ff2c70|#00c5c7|#c7c7c7|#808080|#d90429|#3ad900|#ffe700|#6943ff|#ff2c70|#00c5c7|#ffffff
+Shaman|#405555|#001015|#012026|#b2302d|#00a941|#5e8baa|#449a86|#00599d|#5d7e19|#405555|#384451|#ff4242|#2aea5e|#8ed4fd|#61d5ba|#1298ff|#98d028|#58fbd6
+Shaman (Gogh)|#405555|#001015|#012026|#b2302d|#00a941|#5e8baa|#449a86|#00599d|#5d7e19|#405555|#384451|#ff4242|#2aea5e|#8ed4fd|#61d5ba|#1298ff|#98d028|#58fbd6
+Shapeshifter (base16)|#102015|#f9f9f9|#f9f9f9|#e92f2f|#0ed839|#dddd13|#3b48e3|#f996e2|#23edda|#102015|#555555|#e92f2f|#0ed839|#dddd13|#3b48e3|#f996e2|#23edda|#000000
+Shapeshifter (dark) (terminal.sexy)|#ababab|#000000|#000000|#e92f2f|#0ed839|#dddd13|#3b48e3|#f996e2|#23edda|#ababab|#343434|#e92f2f|#0ed839|#dddd13|#3b48e3|#f996e2|#23edda|#f9f9f9
+Shapeshifter (light) (terminal.sexy)|#102015|#f9f9f9|#000000|#e92f2f|#0ed839|#dddd13|#3b48e3|#f996e2|#23edda|#ababab|#343434|#e92f2f|#0ed839|#dddd13|#3b48e3|#f996e2|#23edda|#f9f9f9
+Shel (Gogh)|#4882cd|#2a201f|#2c2423|#ab2463|#6ca323|#ab6423|#2c64a2|#6c24a2|#2ca363|#918988|#918988|#f588b9|#c2ee86|#f5ba86|#8fbaec|#c288ec|#8feeb9|#f5eeec
+Shic (terminal.sexy)|#ffffff|#000000|#494949|#b9716e|#588f7a|#aaa857|#a0c3c0|#735e74|#695935|#b1b1b1|#484848|#8f5a58|#326f58|#c7c575|#507f7c|#a387a6|#927c4b|#c7c7c7
+Silk Dark (base16)|#c7dbdd|#0e3c46|#0e3c46|#fb6953|#73d8ad|#fce380|#46bddd|#756b8a|#3fb2b9|#c7dbdd|#587073|#fb6953|#73d8ad|#fce380|#46bddd|#756b8a|#3fb2b9|#d2faff
+Silk Light (base16)|#385156|#e9f1ef|#e9f1ef|#cf432e|#6ca38c|#cfad25|#39aac9|#6e6582|#329ca2|#385156|#5c787b|#cf432e|#6ca38c|#cfad25|#39aac9|#6e6582|#329ca2|#d2faff
+Simple Rainbow (terminal.sexy)|#dcdccc|#575757|#666666|#ff8278|#bde077|#eadc84|#77bee0|#dd91f3|#ffc178|#dddddd|#888888|#ff8278|#bde077|#eadc84|#77bee0|#dd91f3|#ffc178|#cccccc
+Slate|#35b1d2|#222222|#222222|#e2a8bf|#81d778|#c4c9c0|#264b49|#a481d3|#15ab9c|#02c5e0|#ffffff|#ffcdd9|#beffa8|#d0ccca|#7ab0d2|#c5a7d9|#8cdfe0|#e0e0e0
+Slate (Gogh)|#35b1d2|#222222|#222222|#e2a8bf|#81d778|#c4c9c0|#264b49|#a481d3|#15ab9c|#02c5e0|#ffffff|#ffcdd9|#beffa8|#d0ccca|#7ab0d2|#c5a7d9|#8cdfe0|#e0e0e0
+SleepyHollow|#af9a91|#121214|#572100|#ba3934|#91773f|#b55600|#5f63b4|#a17c7b|#8faea9|#af9a91|#4e4b61|#d9443f|#d6b04e|#f66813|#8086ef|#e2c2bb|#a4dce7|#d2c7a9
+Smyck|#f7f7f7|#1b1b1b|#000000|#b84131|#7da900|#c4a500|#62a3c4|#ba8acc|#207383|#a1a1a1|#7a7a7a|#d6837c|#c4f137|#fee14d|#8dcff0|#f79aff|#6ad9cf|#f7f7f7
+Smyck (Gogh)|#f7f7f7|#242424|#000000|#c75646|#8eb33b|#d0b03c|#72b3cc|#c8a0d1|#218693|#b0b0b0|#5d5d5d|#e09690|#cdee69|#ffe377|#9cd9f0|#fbb1f9|#77dfd8|#f7f7f7
+Snazzy|#ebece6|#1e1f29|#000000|#fc4346|#50fb7c|#f0fb8c|#49baff|#fc4cb4|#8be9fe|#ededec|#555555|#fc4346|#50fb7c|#f0fb8c|#49baff|#fc4cb4|#8be9fe|#ededec
+Snazzy (Gogh)|#eff0eb|#282a36|#282a36|#ff5c57|#5af78e|#f3f99d|#57c7ff|#ff6ac1|#9aedfe|#f1f1f0|#686868|#ff5c57|#5af78e|#f3f99d|#57c7ff|#ff6ac1|#9aedfe|#eff0eb
+Snazzy (base16)|#e2e4e5|#282a36|#282a36|#ff5c57|#5af78e|#f3f99d|#57c7ff|#ff6ac1|#9aedfe|#e2e4e5|#78787e|#ff5c57|#5af78e|#f3f99d|#57c7ff|#ff6ac1|#9aedfe|#f1f1f0
+Soft Server (Gogh)|#99a3a2|#242626|#000000|#a2686a|#9aa56a|#a3906a|#6b8fa3|#6a71a3|#6ba58f|#99a3a2|#666c6c|#dd5c60|#bfdf55|#deb360|#62b1df|#606edf|#64e39c|#d2e0de
+SoftServer|#99a3a2|#242626|#000000|#a2686a|#9aa56a|#a3906a|#6b8fa3|#6a71a3|#6ba58f|#99a3a2|#666c6c|#dd5c60|#bfdf55|#deb360|#62b1df|#606edf|#64e39c|#d2e0de
+Solar Flare (base16)|#a6afb8|#18262f|#18262f|#ef5253|#7cc844|#e4b51c|#33b5e1|#a363d5|#52cbb0|#a6afb8|#667581|#ef5253|#7cc844|#e4b51c|#33b5e1|#a363d5|#52cbb0|#f5f7fa
+Solar Flare Light (base16)|#586875|#f5f7fa|#f5f7fa|#ef5253|#7cc844|#e4b51c|#33b5e1|#a363d5|#52cbb0|#586875|#85939e|#ef5253|#7cc844|#e4b51c|#33b5e1|#a363d5|#52cbb0|#18262f
+Solarized (dark) (terminal.sexy)|#93a1a1|#002b36|#002b36|#dc322f|#859900|#b58900|#268bd2|#6c71c4|#2aa198|#93a1a1|#657b83|#dc322f|#859900|#b58900|#268bd2|#6c71c4|#2aa198|#fdf6e3
+Solarized (light) (terminal.sexy)|#586e75|#fdf6e3|#002b36|#dc322f|#859900|#b58900|#268bd2|#6c71c4|#2aa198|#93a1a1|#657b83|#dc322f|#859900|#b58900|#268bd2|#6c71c4|#2aa198|#fdf6e3
+Solarized Darcula|#d2d8d9|#3d3f41|#25292a|#f24840|#629655|#b68800|#2075c7|#797fd4|#15968d|#d2d8d9|#25292a|#f24840|#629655|#b68800|#2075c7|#797fd4|#15968d|#d2d8d9
+Solarized Darcula (Gogh)|#d2d8d9|#3d3f41|#25292a|#f24840|#629655|#b68800|#2075c7|#797fd4|#15968d|#d2d8d9|#25292a|#f24840|#629655|#b68800|#2075c7|#797fd4|#15968d|#d2d8d9
+Solarized Dark (Gogh)|#839496|#002b36|#073642|#dc322f|#859900|#cf9a6b|#268bd2|#d33682|#2aa198|#eee8d5|#657b83|#d87979|#88cf76|#657b83|#2699ff|#d33682|#43b8c3|#fdf6e3
+Solarized Dark - Patched|#708284|#001e27|#002831|#d11c24|#738a05|#a57706|#2176c7|#c61c6f|#259286|#eae3cb|#475b62|#bd3613|#475b62|#536870|#708284|#5956ba|#819090|#fcf4dc
+Solarized Dark Higher Contrast|#9cc2c3|#001e27|#002831|#d11c24|#6cbe6c|#a57706|#2176c7|#c61c6f|#259286|#eae3cb|#006488|#f5163b|#51ef84|#b27e28|#178ec8|#e24d8e|#00b39e|#fcf4dc
+Solarized Dark Higher Contrast (Gogh)|#9cc2c3|#001e27|#002831|#d11c24|#6cbe6c|#a57706|#2176c7|#c61c6f|#259286|#eae3cb|#006488|#f5163b|#51ef84|#b27e28|#178ec8|#e24d8e|#00b39e|#fcf4dc
+Solarized Light (Gogh)|#657b83|#fdf6e3|#073642|#dc322f|#859900|#b58900|#268bd2|#d33682|#2aa198|#eee8d5|#002b36|#cb4b16|#586e75|#657b83|#839496|#6c71c4|#93a1a1|#fdf6e3
+SolarizedDarcula (Gogh)|#d2d8d9|#3d3f41|#25292a|#f24840|#629655|#b68800|#2075c7|#797fd4|#15968d|#d2d8d9|#25292a|#f24840|#629655|#b68800|#2075c7|#797fd4|#15968d|#d2d8d9
+SolarizedDark (Gogh)|#839496|#002b36|#073642|#dc322f|#859900|#cf9a6b|#268bd2|#d33682|#2aa198|#eee8d5|#657b83|#d87979|#88cf76|#657b83|#2699ff|#d33682|#43b8c3|#fdf6e3
+SolarizedDarkHigherContrast (Gogh)|#9cc2c3|#001e27|#002831|#d11c24|#6cbe6c|#a57706|#2176c7|#c61c6f|#259286|#eae3cb|#006488|#f5163b|#51ef84|#b27e28|#178ec8|#e24d8e|#00b39e|#fcf4dc
+SolarizedLight (Gogh)|#657b83|#fdf6e3|#073642|#dc322f|#859900|#b58900|#268bd2|#d33682|#2aa198|#eee8d5|#002b36|#cb4b16|#586e75|#657b83|#839496|#6c71c4|#93a1a1|#fdf6e3
+Sonokai (Gogh)|#e2e2e3|#2c2e34|#2c2e34|#fc5d7c|#9ed072|#e7c664|#f39660|#b39df3|#76cce0|#e2e2e3|#7f8490|#fc5d7c|#9ed072|#e7c664|#f39660|#b39df3|#76cce0|#e2e2e3
+SpaceGray|#b3b8c3|#20242d|#000000|#b04b57|#87b379|#e5c179|#7d8fa4|#a47996|#85a7a5|#b3b8c3|#000000|#b04b57|#87b379|#e5c179|#7d8fa4|#a47996|#85a7a5|#ffffff
+SpaceGray Eighties|#bdbaae|#222222|#15171c|#ec5f67|#81a764|#fec254|#5486c0|#bf83c1|#57c2c1|#efece7|#555555|#ff6973|#93d493|#ffd256|#4d84d1|#ff55ff|#83e9e4|#ffffff
+SpaceGray Eighties Dull|#c9c6bc|#222222|#15171c|#b24a56|#92b477|#c6735a|#7c8fa5|#a5789e|#80cdcb|#b3b8c3|#555555|#ec5f67|#89e986|#fec254|#5486c0|#bf83c1|#58c2c1|#ffffff
+SpaceGrayEighties (Gogh)|#bdbaae|#222222|#15171c|#ec5f67|#81a764|#fec254|#5486c0|#bf83c1|#57c2c1|#efece7|#555555|#ff6973|#93d493|#ffd256|#4d84d1|#ff55ff|#83e9e4|#ffffff
+SpaceGrayEightiesDull (Gogh)|#c9c6bc|#222222|#15171c|#b24a56|#92b477|#c6735a|#7c8fa5|#a5789e|#80cdcb|#b3b8c3|#555555|#ec5f67|#89e986|#fec254|#5486c0|#bf83c1|#58c2c1|#ffffff
+Spacedust|#ecf0c1|#0a1e24|#6e5346|#e35b00|#5cab96|#e3cd7b|#0f548b|#e35b00|#06afc7|#f0f1ce|#684c31|#ff8a3a|#aecab8|#ffc878|#67a0ce|#ff8a3a|#83a7b4|#fefff1
+Spacedust (Gogh)|#ecf0c1|#0a1e24|#6e5346|#e35b00|#5cab96|#e3cd7b|#0f548b|#e35b00|#06afc7|#f0f1ce|#684c31|#ff8a3a|#aecab8|#ffc878|#67a0ce|#ff8a3a|#83a7b4|#fefff1
+Spacegray (Gogh)|#b3b8c3|#20242d|#000000|#b04b57|#87b379|#e5c179|#7d8fa4|#a47996|#85a7a5|#b3b8c3|#000000|#b04b57|#87b379|#e5c179|#7d8fa4|#a47996|#85a7a5|#ffffff
+Spacegray Eighties (Gogh)|#bdbaae|#222222|#15171c|#ec5f67|#81a764|#fec254|#5486c0|#bf83c1|#57c2c1|#efece7|#555555|#ff6973|#93d493|#ffd256|#4d84d1|#ff55ff|#83e9e4|#ffffff
+Spacegray Eighties Dull (Gogh)|#c9c6bc|#222222|#15171c|#b24a56|#92b477|#c6735a|#7c8fa5|#a5789e|#80cdcb|#b3b8c3|#555555|#ec5f67|#89e986|#fec254|#5486c0|#bf83c1|#58c2c1|#ffffff
+Spacemacs (base16)|#a3a3a3|#1f2022|#1f2022|#f2241f|#67b11d|#b1951d|#4f97d7|#a31db1|#2d9574|#a3a3a3|#585858|#f2241f|#67b11d|#b1951d|#4f97d7|#a31db1|#2d9574|#f8f8f8
+Spiderman|#e3e3e3|#1b1d1e|#1b1d1e|#e60813|#e22928|#e24756|#2c3fff|#2435db|#3256ff|#fffef6|#505354|#ff0325|#ff3338|#fe3a35|#1d50ff|#747cff|#6184ff|#fffff9
+Splurge (terminal.sexy)|#ffffff|#000000|#4a4b4a|#d7699a|#80d468|#d7a169|#6985d7|#c86ad4|#6fccd1|#dbdcdc|#696969|#f5a2b5|#a3f2a0|#f5cda2|#a2c1f5|#d2a2f5|#a0e9f2|#fdfdfd
+Spring|#4d4d4c|#ffffff|#000000|#ff4d83|#1f8c3b|#1fc95b|#1dd3ee|#8959a8|#3e999f|#ffffff|#000000|#ff0021|#1fc231|#d5b807|#15a9fd|#8959a8|#3e999f|#ffffff
+Spring (Gogh)|#ecf0c1|#0a1e24|#000000|#ff4d83|#1f8c3b|#1fc95b|#1dd3ee|#8959a8|#3e999f|#ffffff|#000000|#ff0021|#1fc231|#d5b807|#15a9fd|#8959a8|#3e999f|#ffffff
+Square|#acacab|#1a1a1a|#050505|#e9897c|#b6377d|#ecebbe|#a9cdeb|#75507b|#c9caec|#f2f2f2|#141414|#f99286|#c3f786|#fcfbcc|#b6defb|#ad7fa8|#d7d9fc|#e2e2e2
+Square (Gogh)|#a1a1a1|#0a1e24|#050505|#e9897c|#b6377d|#ecebbe|#a9cdeb|#75507b|#c9caec|#f2f2f2|#141414|#f99286|#c3f786|#fcfbcc|#b6defb|#ad7fa8|#d7d9fc|#e2e2e2
+Srcery (Gogh)|#fce8c3|#1c1b19|#1c1b19|#ef2f27|#519f50|#fbb829|#2c78bf|#e02c6d|#0aaeb3|#baa67f|#918175|#f75341|#98bc37|#fed06e|#68a8e4|#ff5c8f|#2be4d0|#fce8c3
+Sublette|#ccced0|#202535|#253045|#ee5577|#55ee77|#ffdd88|#5588ff|#ff77cc|#44eeee|#f5f5da|#405570|#ee6655|#99ee77|#ffff77|#77bbff|#aa88ff|#55ffbb|#ffffee
+Subliminal|#d4d4d4|#282c35|#7f7f7f|#e15a60|#a9cfa4|#ffe2a9|#6699cc|#f1a5ab|#5fb3b3|#d4d4d4|#7f7f7f|#e15a60|#a9cfa4|#ffe2a9|#6699cc|#f1a5ab|#5fb3b3|#d4d4d4
+Summer Pop (Gogh)|#ffffff|#272822|#666666|#ff1e8e|#8eff1e|#fffb00|#1e8eff|#e500e5|#00e5e5|#e5e5e5|#666666|#ff1e8e|#8eff1e|#fffb00|#1e8eff|#e500e5|#00e5e5|#e5e5e5
+Summerfruit Dark (base16)|#d0d0d0|#151515|#151515|#ff0086|#00c918|#aba800|#3777e6|#ad00a1|#1faaaa|#d0d0d0|#505050|#ff0086|#00c918|#aba800|#3777e6|#ad00a1|#1faaaa|#ffffff
+Summerfruit Light (base16)|#101010|#ffffff|#ffffff|#ff0086|#00c918|#aba800|#3777e6|#ad00a1|#1faaaa|#101010|#b0b0b0|#ff0086|#00c918|#aba800|#3777e6|#ad00a1|#1faaaa|#202020
+Sundried|#c9c9c9|#1a1818|#302b2a|#a7463d|#587744|#9d602a|#485b98|#864651|#9c814f|#c9c9c9|#4d4e48|#aa000c|#128c21|#fc6a21|#7999f7|#fd8aa1|#fad484|#ffffff
+Sundried (Gogh)|#c9c9c9|#1a1818|#302b2a|#a7463d|#587744|#9d602a|#485b98|#864651|#9c814f|#c9c9c9|#4d4e48|#aa000c|#128c21|#fc6a21|#7999f7|#fd8aa1|#fad484|#ffffff
+Swayr (terminal.sexy)|#c2b9a1|#1c1709|#1c1709|#8e4317|#787200|#945c00|#315094|#5c2e40|#00617d|#c2b9a1|#4f4939|#f07935|#d9d138|#ffab26|#8aa9ed|#ff8cb8|#43bfe0|#f2e8c9
+Sweet Eliverlara (Gogh)|#c3c7d1|#282c34|#282c34|#ed254e|#71f79f|#f9dc5c|#7cb7ff|#c74ded|#00c1e4|#dcdfe4|#282c34|#ed254e|#71f79f|#f9dc5c|#7cb7ff|#c74ded|#00c1e4|#dcdfe4
+Sweet Love (terminal.sexy)|#c0b18b|#1f1f1f|#4a3637|#d17b49|#7b8748|#af865a|#535c5c|#775759|#6d715e|#c0b18b|#402e2e|#ac5d2f|#647035|#8f6840|#444b4b|#614445|#585c49|#978965
+Sweet Terminal (Gogh)|#ffffff|#222235|#3f3f54|#f60055|#06c993|#9700be|#f69154|#ec89cb|#60adec|#abb2bf|#959dcb|#f60055|#06c993|#9700be|#f69154|#ec89cb|#00dded|#ffffff
+SweetTerminal (Gogh)|#ffffff|#222235|#3f3f54|#f60055|#06c993|#9700be|#f69154|#ec89cb|#60adec|#abb2bf|#959dcb|#f60055|#06c993|#9700be|#f69154|#ec89cb|#00dded|#ffffff
+Symfonic|#ffffff|#000000|#000000|#dc322f|#56db3a|#ff8400|#0084d4|#b729d9|#ccccff|#ffffff|#1b1d21|#dc322f|#56db3a|#ff8400|#0084d4|#b729d9|#ccccff|#ffffff
+Symphonic (Gogh)|#ffffff|#000000|#000000|#dc322f|#56db3a|#ff8400|#0084d4|#b729d9|#ccccff|#ffffff|#1b1d21|#dc322f|#56db3a|#ff8400|#0084d4|#b729d9|#ccccff|#ffffff
+Synth Midnight Terminal Dark (base16)|#c1c3c4|#050608|#050608|#b53b50|#06ea61|#c9d364|#03aeff|#ea5ce2|#42fff9|#c1c3c4|#474849|#b53b50|#06ea61|#c9d364|#03aeff|#ea5ce2|#42fff9|#dddfe0
+Synth Midnight Terminal Light (base16)|#28292a|#dddfe0|#dddfe0|#b53b50|#06ea61|#c9d364|#03aeff|#ea5ce2|#42fff9|#28292a|#a3a5a6|#b53b50|#06ea61|#c9d364|#03aeff|#ea5ce2|#42fff9|#050608
+SynthWave (Gogh)|#ffffff|#262335|#011627|#fe4450|#72f1b8|#fede5d|#03edf9|#ff7edb|#03edf9|#ffffff|#575656|#fe4450|#72f1b8|#fede5d|#03edf9|#ff7edb|#03edf9|#ffffff
+Synthwave (Gogh)|#ffffff|#262335|#011627|#fe4450|#72f1b8|#fede5d|#03edf9|#ff7edb|#03edf9|#ffffff|#575656|#fe4450|#72f1b8|#fede5d|#03edf9|#ff7edb|#03edf9|#ffffff
+Synthwave Alpha (Gogh)|#f2f2e3|#241b30|#241b30|#9a0048|#00986c|#adad3e|#6e29ad|#b300ad|#00b0b1|#b9b1bc|#7f7094|#e60a70|#0ae4a4|#f9f972|#aa54f9|#ff00f6|#00fbfd|#f2f2e3
+SynthwaveAlpha|#f2f2e3|#241b30|#241b30|#e60a70|#00986c|#adad3e|#6e29ad|#b300ad|#00b0b1|#b9b1bc|#7f7094|#e60a70|#0ae4a4|#f9f972|#aa54f9|#ff00f6|#00fbfd|#f2f2e3
+SynthwaveAlpha (Gogh)|#f2f2e3|#241b30|#241b30|#9a0048|#00986c|#adad3e|#6e29ad|#b300ad|#00b0b1|#b9b1bc|#7f7094|#e60a70|#0ae4a4|#f9f972|#aa54f9|#ff00f6|#00fbfd|#f2f2e3
+Tango (base16)|#d3d7cf|#2e3436|#2e3436|#cc0000|#4e9a06|#c4a000|#3465a4|#75507b|#06989a|#d3d7cf|#555753|#cc0000|#4e9a06|#c4a000|#3465a4|#75507b|#06989a|#eeeeec
+Tango (terminal.sexy)|#babdb6|#000000|#2e3436|#cc0000|#4e9a06|#c4a000|#3465a4|#75507b|#06989a|#d3d7cf|#555753|#ef2929|#8ae234|#fce94f|#729fcf|#ad7fa8|#34e2e2|#eeeeec
+Tango Adapted|#000000|#ffffff|#000000|#ff0000|#59d600|#f0cb00|#00a2ff|#c17ecc|#00d0d6|#e6ebe1|#8f928b|#ff0013|#93ff00|#fff121|#88c9ff|#e9a7e1|#00feff|#f6f6f4
+Tango Half Adapted|#000000|#ffffff|#000000|#ff0000|#4cc300|#e2c000|#008ef6|#a96cb3|#00bdc3|#e0e5db|#797d76|#ff0013|#8af600|#ffec00|#76bfff|#d898d1|#00f6fa|#f4f4f2
+Tangoesque (terminal.sexy)|#aaaaaa|#000000|#202020|#ff6565|#93d44f|#eab93d|#204a87|#ce5c00|#89b6e2|#cccccc|#606060|#ff8d8d|#c8e7a8|#ffc123|#3465a4|#f57900|#46a4ff|#ffffff
+Tartan (terminal.sexy)|#dedede|#2b2b2b|#2e3436|#cc0000|#4e9a06|#c4a000|#3465a4|#75507b|#06989a|#d3d7cf|#555753|#ef2929|#8ae234|#fce94f|#729fcf|#ad7fa8|#34e2e2|#eeeeec
+Teerb|#d0d0d0|#262626|#1c1c1c|#d68686|#aed686|#d7af87|#86aed6|#d6aed6|#8adbb4|#d0d0d0|#1c1c1c|#d68686|#aed686|#e4c9af|#86aed6|#d6aed6|#b1e7dd|#efefef
+Teerb (Gogh)|#d0d0d0|#262626|#1c1c1c|#d68686|#aed686|#d7af87|#86aed6|#d6aed6|#8adbb4|#d0d0d0|#1c1c1c|#d68686|#aed686|#e4c9af|#86aed6|#d6aed6|#b1e7dd|#efefef
+Tender (Gogh)|#eeeeee|#282828|#1d1d1d|#c5152f|#c9d05c|#ffc24b|#b3deef|#d3b987|#73cef4|#eeeeee|#323232|#f43753|#d9e066|#facc72|#c0eafb|#efd093|#a1d6ec|#ffffff
+Terminal Basic|#000000|#ffffff|#000000|#990000|#00a600|#999900|#0000b2|#b200b2|#00a6b2|#bfbfbf|#666666|#e50000|#00d900|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+Terminal Basic (Gogh)|#000000|#ffffff|#000000|#990000|#00a600|#999900|#0000b2|#b200b2|#00a6b2|#bfbfbf|#666666|#e50000|#00d900|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+TerminalBasic (Gogh)|#000000|#ffffff|#000000|#990000|#00a600|#999900|#0000b2|#b200b2|#00a6b2|#bfbfbf|#666666|#e50000|#00d900|#e5e500|#0000ff|#e500e5|#00e5e5|#e5e5e5
+Terminix Dark (Gogh)|#868a8c|#091116|#282a2e|#a54242|#a1b56c|#de935f|#225555|#85678f|#5e8d87|#777777|#373b41|#c63535|#608360|#fa805a|#449da1|#ba8baf|#86c1b9|#c5c8c6
+TerminixDark (Gogh)|#868a8c|#091116|#282a2e|#a54242|#a1b56c|#de935f|#225555|#85678f|#5e8d87|#777777|#373b41|#c63535|#608360|#fa805a|#449da1|#ba8baf|#86c1b9|#c5c8c6
+Teva (terminal.sexy)|#746c48|#170f0d|#191f31|#282e39|#303844|#3b444a|#3c4435|#4e534f|#5d5d35|#66695d|#706d56|#8b7852|#909581|#91703a|#948658|#a19662|#ad9152|#c6a13f
+Thayer Bright|#f8f8f8|#1b1d1e|#1b1d1e|#f92672|#4df840|#f4fd22|#2757d6|#8c54fe|#38c8b5|#ccccc6|#505354|#ff5995|#b6e354|#feed6c|#3f78ff|#9e6ffe|#23cfd5|#f8f8f2
+Thayer Bright (Gogh)|#f8f8f8|#1b1d1e|#1b1d1e|#f92672|#4df840|#f4fd22|#2757d6|#8c54fe|#38c8b5|#ccccc6|#505354|#ff5995|#b6e354|#feed6c|#3f78ff|#9e6ffe|#23cfd5|#f8f8f2
+ThayerBright (Gogh)|#f8f8f8|#1b1d1e|#1b1d1e|#f92672|#4df840|#f4fd22|#2757d6|#8c54fe|#38c8b5|#ccccc6|#505354|#ff5995|#b6e354|#feed6c|#3f78ff|#9e6ffe|#23cfd5|#f8f8f2
+The Hulk|#b5b5b5|#1b1d1e|#1b1d1e|#269d1b|#13ce30|#63e457|#2525f5|#641f74|#378ca9|#d9d8d1|#505354|#8dff2a|#48ff77|#3afe16|#506b95|#72589d|#4085a6|#e5e6e1
+Tin (Gogh)|#ffffff|#2e2e35|#000000|#8d534e|#4e8d53|#888d4e|#534e8d|#8d4e88|#4e888d|#ffffff|#000000|#b57d78|#78b57d|#b0b578|#7d78b5|#b578b0|#78b0b5|#ffffff
+Tinacious Design (Dark)|#cbcbf0|#1d1d26|#1d1d26|#ff3399|#00d364|#ffcc66|#00cbff|#cc66ff|#00ceca|#cbcbf0|#636667|#ff2f92|#00d364|#ffd479|#00cbff|#d783ff|#00d5d4|#d5d6f3
+Tinacious Design (Light)|#1d1d26|#f8f8ff|#1d1d26|#ff3399|#00d364|#ffcc66|#00cbff|#cc66ff|#00ceca|#cbcbf0|#636667|#ff2f92|#00d364|#ffd479|#00cbff|#d783ff|#00d5d4|#d5d6f3
+Tokyo Night|#c0caf5|#1a1b26|#15161e|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#a9b1d6|#414868|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#c0caf5
+Tokyo Night (Gogh)|#c0caf5|#1a1b26|#414868|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#a9b1d6|#414868|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#c0caf5
+Tokyo Night Day|#3760bf|#e1e2e7|#e9e9ed|#f52a65|#587539|#8c6c3e|#2e7de9|#9854f1|#007197|#6172b0|#a1a6c5|#f52a65|#587539|#8c6c3e|#2e7de9|#9854f1|#007197|#3760bf
+Tokyo Night Light (Gogh)|#565a6e|#d5d6db|#0f0f14|#8c4351|#485e30|#8f5e15|#34548a|#5a4a78|#0f4b6e|#343b58|#9699a3|#8c4351|#485e30|#8f5e15|#34548a|#5a4a78|#0f4b6e|#343b58
+Tokyo Night Moon|#c8d3f5|#222436|#1b1d2b|#ff757f|#c3e88d|#ffc777|#82aaff|#c099ff|#86e1fc|#828bb8|#444a73|#ff757f|#c3e88d|#ffc777|#82aaff|#c099ff|#86e1fc|#c8d3f5
+Tokyo Night Storm|#c0caf5|#24283b|#1d202f|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#a9b1d6|#414868|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#c0caf5
+Tokyo Night Storm (Gogh)|#c0caf5|#24283b|#414868|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#c0caf5|#414868|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#c0caf5
+TokyoNight (Gogh)|#c0caf5|#1a1b26|#414868|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#a9b1d6|#414868|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#c0caf5
+TokyoNightLight (Gogh)|#565a6e|#d5d6db|#0f0f14|#8c4351|#485e30|#8f5e15|#34548a|#5a4a78|#0f4b6e|#343b58|#9699a3|#8c4351|#485e30|#8f5e15|#34548a|#5a4a78|#0f4b6e|#343b58
+TokyoNightStorm (Gogh)|#c0caf5|#24283b|#414868|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#c0caf5|#414868|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#c0caf5
+Tomorrow|#4d4d4c|#ffffff|#000000|#c82829|#718c00|#eab700|#4271ae|#8959a8|#3e999f|#ffffff|#000000|#c82829|#718c00|#eab700|#4271ae|#8959a8|#3e999f|#ffffff
+Tomorrow (Gogh)|#4d4d4c|#ffffff|#000000|#c82828|#718c00|#eab700|#4171ae|#8959a8|#3e999f|#fffefe|#000000|#c82828|#708b00|#e9b600|#4170ae|#8958a7|#3d999f|#fffefe
+Tomorrow (dark) (terminal.sexy)|#c5c8c6|#1d1f21|#1d1f21|#cc6666|#b5bd68|#f0c674|#81a2be|#b294bb|#8abeb7|#c5c8c6|#969896|#cc6666|#b5bd68|#f0c674|#81a2be|#b294bb|#8abeb7|#ffffff
+Tomorrow (light) (terminal.sexy)|#373b41|#ffffff|#1d1f21|#cc6666|#b5bd68|#f0c674|#81a2be|#b294bb|#8abeb7|#c5c8c6|#969896|#cc6666|#b5bd68|#f0c674|#81a2be|#b294bb|#8abeb7|#ffffff
+Tomorrow Night|#c5c8c6|#1d1f21|#000000|#cc6666|#b5bd68|#f0c674|#81a2be|#b294bb|#8abeb7|#ffffff|#000000|#cc6666|#b5bd68|#f0c674|#81a2be|#b294bb|#8abeb7|#ffffff
+Tomorrow Night (Gogh)|#c5c8c6|#1d1f21|#000000|#cc6666|#b5bd68|#f0c674|#81a2be|#b293bb|#8abeb7|#fffefe|#808080|#cc6666|#b5bd68|#f0c574|#80a1bd|#b294ba|#8abdb6|#fffefe
+Tomorrow Night Blue|#ffffff|#002451|#000000|#ff9da4|#d1f1a9|#ffeead|#bbdaff|#ebbbff|#99ffff|#ffffff|#000000|#ff9da4|#d1f1a9|#ffeead|#bbdaff|#ebbbff|#99ffff|#ffffff
+Tomorrow Night Blue (Gogh)|#fffefe|#002451|#000000|#ff9da3|#d1f1a9|#ffeead|#bbdaff|#ebbbff|#99ffff|#fffefe|#000000|#ff9ca3|#d0f0a8|#ffedac|#badaff|#ebbaff|#99ffff|#fffefe
+Tomorrow Night Bright|#eaeaea|#000000|#000000|#d54e53|#b9ca4a|#e7c547|#7aa6da|#c397d8|#70c0b1|#ffffff|#000000|#d54e53|#b9ca4a|#e7c547|#7aa6da|#c397d8|#70c0b1|#ffffff
+Tomorrow Night Bright (Gogh)|#e9e9e9|#000000|#000000|#d54e53|#b9ca49|#e7c547|#79a6da|#c397d8|#70c0b1|#fffefe|#000000|#d44d53|#b9c949|#e6c446|#79a6da|#c396d7|#70c0b1|#fffefe
+Tomorrow Night Burns|#a1b0b8|#151515|#252525|#832e31|#a63c40|#d3494e|#fc595f|#df9395|#ba8586|#f5f5f5|#5d6f71|#832e31|#a63c40|#d2494e|#fc595f|#df9395|#ba8586|#f5f5f5
+Tomorrow Night Eighties|#cccccc|#2d2d2d|#000000|#f2777a|#99cc99|#ffcc66|#6699cc|#cc99cc|#66cccc|#ffffff|#000000|#f2777a|#99cc99|#ffcc66|#6699cc|#cc99cc|#66cccc|#ffffff
+Tomorrow Night Eighties (Gogh)|#cccccc|#2c2c2c|#000000|#f27779|#99cc99|#ffcc66|#6699cc|#cc99cc|#66cccc|#fffefe|#000000|#f17779|#99cc99|#ffcc66|#6699cc|#cc99cc|#66cccc|#fffefe
+TomorrowNight (Gogh)|#c5c8c6|#1d1f21|#000000|#cc6666|#b5bd68|#f0c674|#81a2be|#b293bb|#8abeb7|#fffefe|#808080|#cc6666|#b5bd68|#f0c574|#80a1bd|#b294ba|#8abdb6|#fffefe
+TomorrowNightBlue (Gogh)|#fffefe|#002451|#000000|#ff9da3|#d1f1a9|#ffeead|#bbdaff|#ebbbff|#99ffff|#fffefe|#000000|#ff9ca3|#d0f0a8|#ffedac|#badaff|#ebbaff|#99ffff|#fffefe
+TomorrowNightBright (Gogh)|#e9e9e9|#000000|#000000|#d54e53|#b9ca49|#e7c547|#79a6da|#c397d8|#70c0b1|#fffefe|#000000|#d44d53|#b9c949|#e6c446|#79a6da|#c396d7|#70c0b1|#fffefe
+TomorrowNightEighties (Gogh)|#cccccc|#2c2c2c|#000000|#f27779|#99cc99|#ffcc66|#6699cc|#cc99cc|#66cccc|#fffefe|#000000|#f17779|#99cc99|#ffcc66|#6699cc|#cc99cc|#66cccc|#fffefe
+Toy Chest (Gogh)|#31d07b|#24364b|#2c3f58|#be2d26|#1a9172|#db8e27|#325d96|#8a5edc|#35a08f|#23d183|#336889|#dd5944|#31d07b|#e7d84b|#34a6da|#ae6bdc|#42c3ae|#d5d5d5
+ToyChest|#31d07b|#24364b|#2c3f58|#be2d26|#1a9172|#db8e27|#325d96|#8a5edc|#35a08f|#23d183|#336889|#dd5944|#31d07b|#e7d84b|#34a6da|#ae6bdc|#42c3ae|#d5d5d5
+Treehouse|#786b53|#191919|#321300|#b2270e|#44a900|#aa820c|#58859a|#97363d|#b25a1e|#786b53|#433626|#ed5d20|#55f238|#f2b732|#85cfed|#e14c5a|#f07d14|#ffc800
+Treehouse (Gogh)|#786b53|#191919|#321300|#b2270e|#44a900|#aa820c|#58859a|#97363d|#b25a1e|#786b53|#433626|#ed5d20|#55f238|#f2b732|#85cfed|#e14c5a|#f07d14|#ffc800
+Trim Yer Beard (terminal.sexy)|#daba8b|#191716|#0f0e0d|#845336|#57553c|#a17e3e|#43454f|#604848|#5c6652|#a18b62|#383332|#8c4f4a|#898471|#c8b491|#65788f|#755e4a|#718062|#bc9d66
+Twilight|#ffffd4|#141414|#141414|#c06d44|#afb97a|#c2a86c|#44474a|#b4be7c|#778385|#ffffd4|#262626|#de7c4c|#ccd88c|#e2c47e|#5a5e62|#d0dc8e|#8a989b|#ffffd4
+Twilight (Gogh)|#ffffd4|#141414|#141414|#c06d44|#afb97a|#c2a86c|#44474a|#b4be7c|#778385|#ffffd4|#262626|#de7c4c|#ccd88c|#e2c47e|#5a5e62|#d0dc8e|#8a989b|#ffffd4
+Twilight (base16)|#a7a7a7|#1e1e1e|#1e1e1e|#cf6a4c|#8f9d6a|#f9ee98|#7587a6|#9b859d|#afc4db|#a7a7a7|#5f5a60|#cf6a4c|#8f9d6a|#f9ee98|#7587a6|#9b859d|#afc4db|#ffffff
+Twilight (dark) (terminal.sexy)|#a7a7a7|#1e1e1e|#1e1e1e|#cf6a4c|#8f9d6a|#f9ee98|#7587a6|#9b859d|#afc4db|#a7a7a7|#5f5a60|#cf6a4c|#8f9d6a|#f9ee98|#7587a6|#9b859d|#afc4db|#ffffff
+Twilight (light) (terminal.sexy)|#464b50|#ffffff|#1e1e1e|#cf6a4c|#8f9d6a|#f9ee98|#7587a6|#9b859d|#afc4db|#a7a7a7|#5f5a60|#cf6a4c|#8f9d6a|#f9ee98|#7587a6|#9b859d|#afc4db|#ffffff
+Ubuntu|#eeeeec|#300a24|#2e3436|#cc0000|#4e9a06|#c4a000|#3465a4|#75507b|#06989a|#d3d7cf|#555753|#ef2929|#8ae234|#fce94f|#729fcf|#ad7fa8|#34e2e2|#eeeeec
+UltraDark|#ffffff|#000000|#000000|#f07178|#c3e88d|#ffcb6b|#82aaff|#c792ea|#89ddff|#cccccc|#333333|#f6a9ae|#dbf1ba|#ffdfa6|#b4ccff|#ddbdf2|#b8eaff|#ffffff
+UltraViolent|#c1c1c1|#242728|#242728|#ff0090|#b6ff00|#fff727|#47e0fb|#d731ff|#0effbb|#e1e1e1|#636667|#fb58b4|#deff8c|#ebe087|#7fecff|#e681ff|#69fcd3|#f9f9f5
+UnderTheSea|#ffffff|#011116|#022026|#b2302d|#00a941|#59819c|#459a86|#00599d|#5d7e19|#405555|#384451|#ff4242|#2aea5e|#8ed4fd|#61d5ba|#1298ff|#98d028|#58fbd6
+Unikitty|#0b0b0b|#ff8cd9|#0c0c0c|#a80f20|#bafc8b|#eedf4b|#145fcd|#ff36a2|#6bd1bc|#e2d7e1|#434343|#d91329|#d3ffaf|#ffef50|#0075ea|#fdd5e5|#79ecd5|#fff3fe
+Unikitty Dark (base16)|#bcbabe|#2e2a31|#2e2a31|#d8137f|#17ad98|#dc8a0e|#796af5|#bb60ea|#149bda|#bcbabe|#838085|#d8137f|#17ad98|#dc8a0e|#796af5|#bb60ea|#149bda|#f5f4f7
+Unikitty Light (base16)|#6c696e|#ffffff|#ffffff|#d8137f|#17ad98|#dc8a0e|#775dff|#aa17e6|#149bda|#6c696e|#a7a5a8|#d8137f|#17ad98|#dc8a0e|#775dff|#aa17e6|#149bda|#322d34
+Unikitty Reversible (base16)|#c3c2c4|#2e2a31|#2e2a31|#d8137f|#17ad98|#dc8a0e|#7864fa|#b33ce8|#149bda|#c3c2c4|#878589|#d8137f|#17ad98|#dc8a0e|#7864fa|#b33ce8|#149bda|#ffffff
+Unsifted Wheat (terminal.sexy)|#d3d3d3|#111111|#382c2f|#48393a|#65534d|#79665a|#836e5e|#8e7766|#917781|#9a846d|#ac9377|#baa17e|#bca282|#c1a67e|#cfb48e|#d1baa3|#dfc39b|#eed8c4
+Ura (Gogh)|#23476a|#feffee|#000000|#c21b6f|#6fc21b|#c26f1b|#1b6fc2|#6f1bc2|#1bc26f|#808080|#808080|#ee84b9|#b9ee84|#eeb984|#84b9ee|#b984ee|#84eeb9|#e5e5e5
+Urple|#877a9b|#1b1b23|#000000|#b0425b|#37a415|#ad5c42|#564d9b|#6c3ca1|#808080|#87799c|#5d3225|#ff6388|#29e620|#f08161|#867aed|#a05eee|#eaeaea|#bfa3ff
+Urple (Gogh)|#877a9b|#1b1b23|#000000|#b0425b|#37a415|#ad5c42|#564d9b|#6c3ca1|#808080|#87799c|#5d3225|#ff6388|#29e620|#f08161|#867aed|#a05eee|#eaeaea|#bfa3ff
+VSCodeDark+ (Gogh)|#cccccc|#1e1e1e|#6a787a|#e9653b|#39e9a8|#e5b684|#44aae6|#e17599|#3dd5e7|#c3dde1|#598489|#e65029|#00ff9a|#e89440|#009afb|#ff578f|#5fffff|#d9fbff
+VSCodeLight+ (Gogh)|#020202|#f9f9f9|#020202|#cd3232|#00bc00|#a5a900|#0752a8|#bc05bc|#0598bc|#343434|#5e5e5e|#cd3333|#1bce1a|#adbb5b|#0752a8|#c451ce|#52a8c7|#a6a3a6
+VWbug (terminal.sexy)|#746c48|#170f0d|#261e26|#312c38|#4d353b|#503b43|#57403e|#665453|#6e5450|#8e7266|#906756|#927e7e|#ad6042|#b48b6f|#c4ab98|#d9c9b6|#e7ddd1|#faf7f2
+Vacuous 2 (terminal.sexy)|#d2c5bc|#101010|#202020|#b91e2e|#81957c|#f9bb80|#356579|#2d2031|#0b3452|#909090|#606060|#d14548|#a7b79a|#fae3a0|#7491a1|#87314e|#0f829d|#fff0f0
+Vag (Gogh)|#d9e6f2|#191f1d|#303030|#a87139|#39a871|#71a839|#7139a8|#a83971|#3971a8|#8a8a8a|#494949|#b0763b|#3bb076|#76b03b|#763bb0|#b03b76|#3b76b0|#cfcfcf
+Vaughn|#dcdccc|#25234f|#25234f|#705050|#60b48a|#dfaf8f|#5555ff|#f08cc3|#8cd0d3|#709080|#709080|#dca3a3|#60b48a|#f0dfaf|#5555ff|#ec93d3|#93e0e3|#ffffff
+Vaughn (Gogh)|#dcdccc|#25234f|#25234f|#705050|#60b48a|#dfaf8f|#5555ff|#f08cc3|#8cd0d3|#709080|#709080|#dca3a3|#60b48a|#f0dfaf|#5555ff|#ec93d3|#93e0e3|#ffffff
+Vibrant Ink (Gogh)|#ffffff|#000000|#878787|#ff6600|#ccff04|#ffcc00|#44b4cc|#9933cc|#44b4cc|#f5f5f5|#555555|#ff0000|#00ff00|#ffff00|#0000ff|#ff00ff|#00ffff|#e5e5e5
+VibrantInk|#ffffff|#000000|#878787|#ff6600|#ccff04|#ffcc00|#44b4cc|#9933cc|#44b4cc|#f5f5f5|#555555|#ff0000|#00ff00|#ffff00|#0000ff|#ff00ff|#00ffff|#e5e5e5
+Vice Alt (base16)|#555555|#1c1c1c|#1c1c1c|#ff3d81|#44ffdd|#ffff73|#2fb1d4|#8265ff|#00caff|#555555|#323232|#ff3d81|#44ffdd|#ffff73|#2fb1d4|#8265ff|#00caff|#d1d1d1
+Vice Dark (base16)|#818181|#181818|#181818|#ff29a8|#0badff|#f0ffaa|#00eaff|#00f6d9|#8265ff|#818181|#3f3f3f|#ff29a8|#0badff|#f0ffaa|#00eaff|#00f6d9|#8265ff|#e9e9e9
+Violet Dark|#708284|#1c1d1f|#56595c|#c94c22|#85981c|#b4881d|#2e8bce|#d13a82|#32a198|#c9c6bd|#45484b|#bd3613|#738a04|#a57705|#2176c7|#c61c6f|#259286|#c9c6bd
+Violet Light|#536870|#fcf4dc|#56595c|#c94c22|#85981c|#b4881d|#2e8bce|#d13a82|#32a198|#d3d0c9|#45484b|#bd3613|#738a04|#a57705|#2176c7|#c61c6f|#259286|#c9c6bd
+VisiBlue (terminal.sexy)|#666699|#000000|#333366|#6666cc|#0099cc|#3366cc|#006699|#0066ff|#669999|#99cccc|#333399|#9999ff|#00ccff|#6699ff|#0099cc|#0099ff|#66cccc|#ccffff
+VisiBone (terminal.sexy)|#ffffff|#000000|#666666|#cc6666|#66cc99|#cc9966|#6699cc|#cc6699|#66cccc|#cccccc|#999999|#ff9999|#99ffcc|#ffcc99|#99ccff|#ff99cc|#99ffff|#ffffff
+Visibone Alt. 2 (terminal.sexy)|#cccccc|#333333|#666666|#cc6699|#99cc66|#cc9966|#6699cc|#9966cc|#66cc99|#cccccc|#999999|#ff99cc|#ccff99|#ffcc99|#99ccff|#cc99ff|#99ffcc|#ffffff
+Vs Code Dark+ (Gogh)|#cccccc|#1e1e1e|#6a787a|#e9653b|#39e9a8|#e5b684|#44aae6|#e17599|#3dd5e7|#c3dde1|#598489|#e65029|#00ff9a|#e89440|#009afb|#ff578f|#5fffff|#d9fbff
+Vs Code Light+ (Gogh)|#020202|#f9f9f9|#020202|#cd3232|#00bc00|#a5a900|#0752a8|#bc05bc|#0598bc|#343434|#5e5e5e|#cd3333|#1bce1a|#adbb5b|#0752a8|#c451ce|#52a8c7|#a6a3a6
+Warm Neon (Gogh)|#afdab6|#404040|#000000|#e24346|#39b13a|#dae145|#4261c5|#f920fb|#2abbd4|#d0b8a3|#fefcfc|#e97071|#9cc090|#ddda7a|#7b91d6|#f674ba|#5ed1e5|#d8c8bb
+WarmNeon|#afdab6|#404040|#000000|#e24346|#39b13a|#dae145|#4261c5|#f920fb|#2abbd4|#d0b8a3|#fefcfc|#e97071|#9cc090|#ddda7a|#7b91d6|#f674ba|#5ed1e5|#d8c8bb
+Website (Gogh)|#d1b890|#132f35|#183c44|#da4949|#bcca15|#ffb02e|#35a6e6|#d343a2|#38c995|#ffe8c1|#235662|#ff5757|#ecff14|#ffd694|#4cbfff|#ff4cc2|#35ffb6|#ffd48f
+Wez|#b3b3b3|#000000|#000000|#cc5555|#55cc55|#cdcd55|#5555cc|#cc55cc|#7acaca|#cccccc|#555555|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#ffffff
+Wez (Gogh)|#b3b3b3|#000000|#000000|#cc5555|#55cc55|#cdcd55|#5555cc|#cc55cc|#7acaca|#cccccc|#555555|#ff5555|#55ff55|#ffff55|#5555ff|#ff55ff|#55ffff|#ffffff
+Whimsy|#b3b0d6|#29283b|#535178|#ef6487|#5eca89|#fdd877|#65aef7|#aa7ff0|#43c1be|#ffffff|#535178|#ef6487|#5eca89|#fdd877|#65aef7|#aa7ff0|#43c1be|#ffffff
+Wild Cherry (Gogh)|#dafaff|#1f1726|#000507|#d94085|#2ab250|#ffd16f|#883cdc|#ececec|#c1b8b7|#fff8de|#009cc9|#da6bac|#f4dca5|#eac066|#308cba|#ae636b|#ff919d|#e4838d
+WildCherry|#dafaff|#1f1726|#000507|#d94085|#2ab250|#ffd16f|#883cdc|#ececec|#c1b8b7|#fff8de|#009cc9|#da6bac|#f4dca5|#eac066|#308cba|#ae636b|#ff919d|#e4838d
+Windows 10 (base16)|#cccccc|#0c0c0c|#0c0c0c|#e74856|#16c60c|#f9f1a5|#3b78ff|#b4009e|#61d6d6|#cccccc|#767676|#e74856|#16c60c|#f9f1a5|#3b78ff|#b4009e|#61d6d6|#f2f2f2
+Windows 10 Light (base16)|#767676|#f2f2f2|#f2f2f2|#c50f1f|#13a10e|#c19c00|#0037da|#881798|#3a96dd|#767676|#cccccc|#c50f1f|#13a10e|#c19c00|#0037da|#881798|#3a96dd|#0c0c0c
+Windows 95 (base16)|#a8a8a8|#000000|#000000|#fc5454|#54fc54|#fcfc54|#5454fc|#fc54fc|#54fcfc|#a8a8a8|#545454|#fc5454|#54fc54|#fcfc54|#5454fc|#fc54fc|#54fcfc|#fcfcfc
+Windows 95 Light (base16)|#545454|#fcfcfc|#fcfcfc|#a80000|#00a800|#a85400|#0000a8|#a800a8|#00a8a8|#545454|#a8a8a8|#a80000|#00a800|#a85400|#0000a8|#a800a8|#00a8a8|#000000
+Windows High Contrast (base16)|#c0c0c0|#000000|#000000|#fc5454|#54fc54|#fcfc54|#5454fc|#fc54fc|#54fcfc|#c0c0c0|#545454|#fc5454|#54fc54|#fcfc54|#5454fc|#fc54fc|#54fcfc|#fcfcfc
+Windows High Contrast Light (base16)|#545454|#fcfcfc|#fcfcfc|#800000|#008000|#808000|#000080|#800080|#008080|#545454|#c0c0c0|#800000|#008000|#808000|#000080|#800080|#008080|#000000
+Windows NT (base16)|#c0c0c0|#000000|#000000|#ff0000|#00ff00|#ffff00|#0000ff|#ff00ff|#00ffff|#c0c0c0|#808080|#ff0000|#00ff00|#ffff00|#0000ff|#ff00ff|#00ffff|#ffffff
+Windows NT Light (base16)|#808080|#ffffff|#ffffff|#800000|#008000|#808000|#000080|#800080|#008080|#808080|#c0c0c0|#800000|#008000|#808000|#000080|#800080|#008080|#000000
+Wombat|#dedacf|#171717|#000000|#ff615a|#b1e969|#ebd99c|#5da9f6|#e86aff|#82fff7|#dedacf|#313131|#f58c80|#ddf88f|#eee5b2|#a5c7ff|#ddaaff|#b7fff9|#ffffff
+Wombat (Gogh)|#dedacf|#171717|#000000|#ff615a|#b1e969|#ebd99c|#5da9f6|#e86aff|#82fff7|#dedacf|#313131|#f58c80|#ddf88f|#eee5b2|#a5c7ff|#ddaaff|#b7fff9|#ffffff
+Woodland (base16)|#cabcb1|#231e18|#231e18|#d35c5c|#b7ba53|#e0ac16|#88a4d3|#bb90e2|#6eb958|#cabcb1|#9d8b70|#d35c5c|#b7ba53|#e0ac16|#88a4d3|#bb90e2|#6eb958|#e4d4c8
+Wryan|#999993|#101010|#333333|#8c4665|#287373|#7c7c99|#395573|#5e468c|#31658c|#899ca1|#3d3d3d|#bf4d80|#53a6a6|#9e9ecb|#477ab3|#7e62b3|#6096bf|#c0c0c0
+Wryan (Gogh)|#999993|#101010|#333333|#8c4665|#287373|#7c7c99|#395573|#5e468c|#31658c|#899ca1|#3d3d3d|#bf4d80|#53a6a6|#9e9ecb|#477ab3|#7e62b3|#6096bf|#c0c0c0
+Wzoreck (Gogh)|#fcfcfa|#424043|#2e3436|#fc6386|#424043|#fce94f|#fb976b|#75507b|#34e2e2|#ffffff|#989595|#fc6386|#a9dc76|#fce94f|#fb976b|#ab9df2|#34e2e2|#d1d1c0
+X::DotShare (terminal.sexy)|#d7d0c7|#151515|#101010|#e84f4f|#b8d68c|#e1aa5d|#7dc1cf|#9b64fb|#6d878d|#dddddd|#404040|#d23d3d|#a0cf5d|#f39d21|#4e9fb1|#8542ff|#42717b|#dddddd
+X::Erosion (terminal.sexy)|#bea492|#181512|#332d29|#8c644c|#746c48|#908a66|#646a6d|#605655|#4b5c5e|#504339|#817267|#9f7155|#857b52|#9c956e|#71777a|#656565|#556d70|#9a875f
+XCode Dusk (base16)|#939599|#282b35|#282b35|#b21889|#df0002|#438288|#790ead|#b21889|#00a0be|#939599|#686a71|#b21889|#df0002|#438288|#790ead|#b21889|#00a0be|#bebfc2
+Yousai (terminal.sexy)|#34302d|#f5e7de|#666661|#992e2e|#4c3226|#a67c53|#4c7399|#bf9986|#d97742|#34302d|#7f7f7a|#b23636|#664233|#bf8f60|#5986b2|#d9ae98|#f2854a|#4c4742
+Zenburn|#dcdccc|#3f3f3f|#4d4d4d|#705050|#60b48a|#f0dfaf|#506070|#dc8cc3|#8cd0d3|#dcdccc|#709080|#dca3a3|#c3bf9f|#e0cf9f|#94bff3|#ec93d3|#93e0e3|#ffffff
+Zenburn (Gogh)|#dcdccc|#3f3f3f|#4d4d4d|#705050|#60b48a|#f0dfaf|#506070|#dc8cc3|#8cd0d3|#dcdccc|#709080|#dca3a3|#c3bf9f|#e0cf9f|#94bff3|#ec93d3|#93e0e3|#ffffff
+Zenburn (base16)|#dcdccc|#383838|#383838|#dca3a3|#5f7f5f|#e0cf9f|#7cb8bb|#dc8cc3|#93e0e3|#dcdccc|#6f6f6f|#dca3a3|#5f7f5f|#e0cf9f|#7cb8bb|#dc8cc3|#93e0e3|#ffffff
+aikofog (terminal.sexy)|#b2b3b8|#f1eee9|#757475|#936a6f|#668462|#7f7b62|#6e7291|#846887|#637e7b|#9a9a9a|#4a4a4a|#d76572|#4fae42|#a8981f|#7782cf|#b754c4|#2ea89a|#c4c4c4
+alacritty||||||||||||||||||
+arcoiris|#eee4d9|#201f1e|#333333|#da2700|#12c258|#ffc656|#518bfc|#e37bd9|#63fad5|#bab2b2|#777777|#ffb9b9|#e3f6aa|#ffddaa|#b3e8f3|#cbbaf9|#bcffc7|#efefef
+astromouse (terminal.sexy)|#ffffff|#000000|#1c1c1c|#d770af|#9acc79|#d0d26b|#77b6c5|#a488d9|#7fcab3|#8d8d8d|#3d3a3a|#d28abf|#8fb676|#c8bc45|#8fa7b9|#bd89de|#6ec2a8|#dad3d3
+ayu|#e6e1cf|#0f1419|#000000|#ff3333|#b8cc52|#e7c547|#36a3d9|#f07178|#95e6cb|#ffffff|#323232|#ff6565|#eafe84|#fff779|#68d5ff|#ffa3aa|#c7fffd|#ffffff
+ayu_light|#5c6773|#fafafa|#000000|#ff3333|#86b300|#f29718|#41a6d9|#f07178|#4dbf99|#ffffff|#323232|#ff6565|#b8e532|#ffc94a|#73d8ff|#ffa3aa|#7ff1cb|#ffffff
+carbonfox|#f2f4f8|#161616|#282828|#ee5396|#25be6a|#08bdba|#78a9ff|#be95ff|#33b1ff|#dfdfe0|#484848|#f16da6|#46c880|#2dc7c4|#8cb6ff|#c8a5ff|#52bdff|#e4e4e5
+catppuccin-frappe|#c6d0f5|#303446|#51576d|#e78284|#a6d189|#e5c890|#8caaee|#f4b8e4|#81c8be|#b5bfe2|#626880|#e78284|#a6d189|#e5c890|#8caaee|#f4b8e4|#81c8be|#a5adce
+catppuccin-latte|#4c4f69|#eff1f5|#5c5f77|#d20f39|#40a02b|#df8e1d|#1e66f5|#ea76cb|#179299|#acb0be|#6c6f85|#d20f39|#40a02b|#df8e1d|#1e66f5|#ea76cb|#179299|#bcc0cc
+catppuccin-macchiato|#cad3f5|#24273a|#494d64|#ed8796|#a6da95|#eed49f|#8aadf4|#f5bde6|#8bd5ca|#b8c0e0|#5b6078|#ed8796|#a6da95|#eed49f|#8aadf4|#f5bde6|#8bd5ca|#a5adcb
+catppuccin-mocha|#cdd6f4|#1e1e2e|#45475a|#f38ba8|#a6e3a1|#f9e2af|#89b4fa|#f5c2e7|#94e2d5|#bac2de|#585b70|#f38ba8|#a6e3a1|#f9e2af|#89b4fa|#f5c2e7|#94e2d5|#a6adc8
+coffee_theme|#000000|#f5deb3|#000000|#c91b00|#00c200|#c7c400|#0225c7|#ca30c7|#00c5c7|#c7c7c7|#686868|#ff6e67|#5ffa68|#fffc67|#6871ff|#ff77ff|#60fdff|#ffffff
+cyberpunk|#e6e6e6|#332a57|#000000|#ff7092|#00fbac|#fffa6a|#00bfff|#df95ff|#86cbfe|#ffffff|#000000|#ff8aa4|#21f6bc|#fff787|#1bccfd|#e6aefe|#99d6fc|#ffffff
+darkermatrix|#28380d|#070c0e|#091013|#002e18|#6fa64c|#595900|#00cb6b|#412a4d|#125459|#002e19|#333333|#00381d|#90d762|#e2e500|#00ff87|#412a4d|#176c73|#00381e
+darkmatrix|#3e5715|#070c0e|#091013|#006536|#6fa64c|#7e8000|#2c9a84|#452d53|#114d53|#006536|#333333|#00733d|#90d762|#e2e500|#46d8b8|#4a3059|#12545a|#006536
+darkmoss (base16)|#c7c7a5|#171e1f|#171e1f|#ff4658|#499180|#fdb11f|#498091|#9bc0c8|#66d9ef|#c7c7a5|#555e5f|#ff4658|#499180|#fdb11f|#498091|#9bc0c8|#66d9ef|#e1eaef
+dawnfox|#575279|#faf4ed|#575279|#b4637a|#618774|#ea9d34|#286983|#907aa9|#56949f|#e5e9f0|#5f5695|#c26d85|#629f81|#eea846|#2d81a3|#9a80b9|#5ca7b4|#e6ebf3
+dayfox|#3d2b5a|#f6f2ee|#352c24|#a5222f|#396847|#ac5402|#2848a9|#6e33ce|#287980|#f2e9e1|#534c45|#b3434e|#577f63|#b86e28|#4863b6|#8452d5|#488d93|#f4ece6
+deep|#cdcdcd|#090909|#000000|#d70005|#1cd915|#d9bd26|#5665ff|#b052da|#50d2da|#e0e0e0|#535353|#fb0007|#22ff18|#fedc2b|#9fa9ff|#e09aff|#8df9ff|#ffffff
+dirtysea (base16)|#000000|#e0e0e0|#e0e0e0|#840000|#730073|#755b00|#007300|#000090|#755b00|#000000|#707070|#840000|#730073|#755b00|#007300|#000090|#755b00|#c4d9c4
+duckbones|#ebefc0|#0e101a|#0e101a|#e03600|#5dcd97|#e39500|#00a3cb|#795ccc|#00a3cb|#ebefc0|#2b2f46|#ff4821|#58db9e|#f6a100|#00b4e0|#b3a1e6|#00b4e0|#b3b692
+duskfox|#e0def4|#232136|#393552|#eb6f92|#a3be8c|#f6c177|#569fba|#c4a7e7|#9ccfd8|#e0def4|#47407d|#f083a2|#b1d196|#f9cb8c|#65b1cd|#ccb1ed|#a6dae3|#e2e0f7
+farmhouse-dark|#e8e4e1|#1d2027|#1d2027|#ba0004|#549d00|#c87300|#0049e6|#9f1b61|#1fb65c|#e8e4e1|#394047|#eb0009|#7ac100|#ea9a00|#006efe|#bf3b7f|#19e062|#f4eef0
+farmhouse-light|#1d2027|#e8e4e1|#1d2027|#8d0003|#3a7d00|#a95600|#092ccd|#820046|#229256|#e8e4e1|#394047|#eb0009|#7ac100|#ea9a00|#006efe|#bf3b7f|#19e062|#f4eef0
+flexoki-dark|#cecdc3|#1c1b1a|#1c1b1a|#d14d41|#879a39|#d0a215|#4385be|#ce5d97|#3aa99f|#b7b5ac|#575653|#d14d41|#879a39|#d0a215|#4385be|#ce5d97|#3aa99f|#cecdc3
+flexoki-light|#100f0f|#fffcf0|#100f0f|#af3029|#66800b|#ad8301|#205ea6|#a02f6f|#24837b|#f2f0e5|#575653|#d14d41|#879a39|#d0a215|#4385be|#ce5d97|#3aa99f|#fffcf0
+gooey (Gogh)|#ebeef9|#0d101b|#000009|#bb4f6c|#72ccae|#c65e3d|#58b6ca|#6488c4|#8d84c6|#858893|#1f222d|#ee829f|#a5ffe1|#f99170|#8be9fd|#97bbf7|#c0b7f9|#ffffff
+gotham (Gogh)|#98d1ce|#0a0f14|#0a0f14|#c33027|#26a98b|#edb54b|#195465|#4e5165|#33859d|#98d1ce|#10151b|#d26939|#081f2d|#245361|#093748|#888ba5|#599caa|#d3ebe9
+hardhacker|#eee9fc|#282433|#282433|#e965a5|#b1f2a7|#ebde76|#b1baf4|#e192ef|#b3f4f3|#eee9fc|#3f3951|#e965a5|#b1f2a7|#ebde76|#b1baf4|#e192ef|#b3f4f3|#eee9fc
+hund (terminal.sexy)|#ffffff|#161616|#222222|#e84f4f|#b7ce42|#fea63c|#66aabb|#b7416e|#6d878d|#dddddd|#666666|#d23d3d|#bde077|#ffe863|#aaccbb|#e16a98|#42717b|#cccccc
+iTerm2 Dark Background|#c7c7c7|#000000|#000000|#c91b00|#00c200|#c7c400|#0225c7|#ca30c7|#00c5c7|#c7c7c7|#686868|#ff6e67|#5ffa68|#fffc67|#6871ff|#ff77ff|#60fdff|#ffffff
+iTerm2 Default|#ffffff|#000000|#000000|#c91b00|#00c200|#c7c400|#2225c4|#ca30c7|#00c5c7|#ffffff|#686868|#ff6e67|#5ffa68|#fffc67|#6871ff|#ff77ff|#60fdff|#ffffff
+iTerm2 Light Background|#000000|#ffffff|#000000|#c91b00|#00c200|#c7c400|#0225c7|#ca30c7|#00c5c7|#c7c7c7|#686868|#ff6e67|#5ffa68|#fffc67|#6871ff|#ff77ff|#60fdff|#ffffff
+iTerm2 Pastel Dark Background|#c7c7c7|#000000|#626262|#ff8373|#b4fb73|#fffdc3|#a5d5fe|#ff90fe|#d1d1fe|#f1f1f1|#8f8f8f|#ffc4be|#d6fcba|#fffed5|#c2e3ff|#ffb2fe|#e6e6fe|#ffffff
+iTerm2 Smoooooth|#dcdcdc|#15191f|#14191e|#b43c2a|#00c200|#c7c400|#2744c7|#c040be|#00c5c7|#c7c7c7|#686868|#dd7975|#58e790|#ece100|#a7abf2|#e17ee1|#60fdff|#ffffff
+iTerm2 Solarized Dark|#839496|#002b36|#073642|#dc322f|#859900|#b58900|#268bd2|#d33682|#2aa198|#eee8d5|#002b36|#cb4b16|#586e75|#657b83|#839496|#6c71c4|#93a1a1|#fdf6e3
+iTerm2 Solarized Light|#657b83|#fdf6e3|#073642|#dc322f|#859900|#b58900|#268bd2|#d33682|#2aa198|#eee8d5|#002b36|#cb4b16|#586e75|#657b83|#839496|#6c71c4|#93a1a1|#fdf6e3
+iTerm2 Tango Dark|#ffffff|#000000|#000000|#d81e00|#5ea702|#cfae00|#427ab3|#89658e|#00a7aa|#dbded8|#686a66|#f54235|#99e343|#fdeb61|#84b0d8|#bc94b7|#37e6e8|#f1f1f0
+iTerm2 Tango Light|#000000|#ffffff|#000000|#d81e00|#5ea702|#cfae00|#427ab3|#89658e|#00a7aa|#dbded8|#686a66|#f54235|#99e343|#fdeb61|#84b0d8|#bc94b7|#37e6e8|#f1f1f0
+ibm3270 (Gogh)|#fdfdfd|#000000|#222222|#f01818|#24d830|#f0d824|#7890f0|#f078d8|#54e4e4|#a5a5a5|#888888|#ef8383|#7ed684|#efe28b|#b3bfef|#efb3e3|#9ce2e2|#ffffff
+iceberg-dark|#c6c8d1|#161821|#1e2132|#e27878|#b4be82|#e2a478|#84a0c6|#a093c7|#89b8c2|#c6c8d1|#6b7089|#e98989|#c0ca8e|#e9b189|#91acd1|#ada0d3|#95c4ce|#d2d4de
+iceberg-light|#33374c|#e8e9ec|#dcdfe7|#cc517a|#668e3d|#c57339|#2d539e|#7759b4|#3f83a6|#33374c|#8389a3|#cc3768|#598030|#b6662d|#22478e|#6845ad|#327698|#262a3f
+idea|#adadad|#202020|#adadad|#fc5256|#98b61c|#ccb444|#437ee7|#9d74b0|#248887|#181818|#ffffff|#fc7072|#98b61c|#ffff0b|#6c9ced|#fc7eff|#248887|#181818
+idleToes|#ffffff|#323232|#323232|#d25252|#7fe173|#ffc66d|#4099ff|#f680ff|#bed6ff|#eeeeec|#535353|#f07070|#9dff91|#ffe48b|#5eb7f7|#ff9dff|#dcf4ff|#ffffff
+jmbi (terminal.sexy)|#ffffff|#1e1e1e|#5a7260|#8f423c|#bbbb88|#f9d25b|#e0ba69|#709289|#d13516|#efe2e0|#8da691|#eeaa88|#ccc68d|#eedd99|#c9b957|#ffcbab|#c25431|#f9f1ed
+jubi|#c3d3de|#262b33|#3b3750|#cf7b98|#90a94b|#6ebfc0|#576ea6|#bc4f68|#75a7d2|#c3d3de|#a874ce|#de90ab|#bcdd61|#87e9ea|#8c9fcd|#e16c87|#b7c9ef|#d5e5f1
+kanagawa (Gogh)|#dcd7ba|#1f1f28|#090618|#c34043|#76946a|#c0a36e|#7e9cd8|#957fb8|#6a9589|#dcd7ba|#727169|#e82424|#98bb6c|#e6c384|#7fb4ca|#938aa9|#7aa89f|#c8c093
+kanagawabones|#ddd8bb|#1f1f28|#1f1f28|#e46a78|#98bc6d|#e5c283|#7eb3c9|#957fb8|#7eb3c9|#ddd8bb|#3c3c51|#ec818c|#9ec967|#f1c982|#7bc2df|#a98fd2|#7bc2df|#a8a48d
+kokuban (Gogh)|#d8e2d7|#0d4a08|#2e8744|#d84e4c|#95da5a|#d6e264|#4b9ed7|#945fc5|#d89b25|#d8e2d7|#34934f|#ff4f59|#aff56a|#fcff75|#57aeff|#ae63e9|#ffaa2b|#fffefe
+laserwave (Gogh)|#e0e0e0|#1f1926|#39243a|#eb64b9|#afd686|#feae87|#40b4c4|#b381c5|#215969|#91889b|#716485|#fc2377|#50fa7b|#ffe261|#74dfc4|#6d75e0|#b4dce7|#ffffff
+lovelace|#fdfdfd|#1d1f28|#282a36|#f37f97|#5adecd|#f2a272|#8897f4|#c574dd|#79e6f3|#fdfdfd|#414458|#ff4971|#18e3c8|#ff8037|#556fff|#b043d1|#3fdcee|#bebec1
+matrix|#426644|#0f191c|#0f191c|#23755a|#82d967|#ffd700|#3f5242|#409931|#50b45a|#507350|#688060|#2fc079|#90d762|#faff00|#4f7e7e|#11ff25|#c1ff8a|#678c61
+midnight-in-mojave|#ffffff|#1e1e1e|#1e1e1e|#ff453a|#32d74b|#ffd60a|#0a84ff|#bf5af2|#5ac8fa|#ffffff|#1e1e1e|#ff453a|#32d74b|#ffd60a|#0a84ff|#bf5af2|#5ac8fa|#ffffff
+mono-amber (Gogh)|#ff9400|#2b1900|#402500|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400|#ff9400
+mono-cyan (Gogh)|#00ccff|#00222b|#003340|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff|#00ccff
+mono-green (Gogh)|#0bff00|#022b00|#034000|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00|#0bff00
+mono-red (Gogh)|#ff3600|#2b0c00|#401200|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600|#ff3600
+mono-white (Gogh)|#fafafa|#262626|#3b3b3b|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa|#fafafa
+mono-yellow (Gogh)|#ffd300|#2b2400|#403500|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300|#ffd300
+neobones_dark|#c6d5cf|#0f191f|#0f191f|#de6e7c|#90ff6b|#b77e64|#8190d4|#b279a7|#66a5ad|#c6d5cf|#263945|#e8838f|#a0ff85|#d68c67|#92a0e2|#cf86c1|#65b8c1|#98a39e
+neobones_light|#202e18|#e5ede6|#e5ede6|#a8334c|#567a30|#944927|#286486|#88507d|#3b8992|#202e18|#b3c6b6|#94253e|#3f5a22|#803d1c|#1d5573|#7b3b70|#2b747c|#415934
+neon-night (Gogh)|#c7c8ff|#20242d|#20242d|#ff8e8e|#7efdd0|#fcad3f|#69b4f9|#dd92f6|#8ce8ff|#c9cccd|#20242d|#ff8e8e|#7efdd0|#fcad3f|#69b4f9|#dd92f6|#8ce8ff|#c9cccd
+nightfox|#cdcecf|#192330|#393b44|#c94f6d|#81b29a|#dbc074|#719cd6|#9d79d6|#63cdcf|#dfdfe0|#575860|#d16983|#8ebaa4|#e0c989|#86abdc|#baa1e2|#7ad5d6|#e4e4e5
+nighty (Gogh)|#dfdfdf|#2f2f2f|#373d48|#9b3e46|#095b32|#808020|#1d3e6f|#823065|#3a7458|#828282|#5c6370|#d0555f|#119955|#dfe048|#4674b8|#ed86c9|#70d2a4|#dfdfdf
+niji|#ffffff|#141515|#333333|#d23e08|#54ca74|#fff700|#2ab9ff|#ff50da|#1ef9f5|#ddd0c4|#515151|#ffb7b7|#c1ffae|#fcffb8|#8efff3|#ffa2ed|#bcffc7|#ffffff
+nord|#d8dee9|#2e3440|#3b4252|#bf616a|#a3be8c|#ebcb8b|#81a1c1|#b48ead|#88c0d0|#e5e9f0|#4c566a|#bf616a|#a3be8c|#ebcb8b|#81a1c1|#b48ead|#8fbcbb|#eceff4
+nord-light|#414858|#e5e9f0|#3b4252|#bf616a|#a3be8c|#ebcb8b|#81a1c1|#b48ead|#88c0d0|#d8dee9|#4c566a|#bf616a|#a3be8c|#ebcb8b|#81a1c1|#b48ead|#8fbcbb|#eceff4
+nordfox|#cdcecf|#2e3440|#3b4252|#bf616a|#a3be8c|#ebcb8b|#81a1c1|#b48ead|#88c0d0|#e5e9f0|#465780|#d06f79|#b1d196|#f0d399|#8cafd2|#c895bf|#93ccdc|#e7ecf4
+palenight (Gogh)|#bfc7d5|#292d3e|#292d3e|#f07178|#c3e88d|#ffcb6b|#82aaff|#c792ea|#60adec|#abb2bf|#959dcb|#f07178|#c3e88d|#ff5572|#82aaff|#ffcb6b|#676e95|#fffefe
+pinky (base16)|#f5f5f5|#171517|#171517|#ffa600|#ff0066|#20df6c|#00ffff|#007fff|#6600ff|#f5f5f5|#383338|#ffa600|#ff0066|#20df6c|#00ffff|#007fff|#6600ff|#f7f3f7
+primary|#000000|#ffffff|#000000|#db4437|#0f9d58|#f4b400|#4285f4|#db4437|#4285f4|#ffffff|#000000|#db4437|#0f9d58|#f4b400|#4285f4|#4285f4|#0f9d58|#ffffff
+purplepeter|#ece7fa|#2a1a4a|#0a0520|#ff796d|#99b481|#efdfac|#66d9ef|#e78fcd|#ba8cff|#ffba81|#100b23|#f99f92|#b4be8f|#f2e9bf|#79daed|#ba91d4|#a0a0d6|#b9aed3
+rebecca|#e8e6ed|#292a44|#12131e|#dd7755|#04dbb5|#f2e7b7|#7aa5ff|#bf9cf9|#56d3c2|#e4e3e9|#666699|#ff92cd|#01eac0|#fffca8|#69c0fa|#c17ff8|#8bfde1|#f4f2f9
+rose-pine|#e0def4|#191724|#26233a|#eb6f92|#9ccfd8|#f6c177|#31748f|#c4a7e7|#ebbcba|#e0def4|#6e6a86|#eb6f92|#9ccfd8|#f6c177|#31748f|#c4a7e7|#ebbcba|#e0def4
+rose-pine-dawn|#575279|#faf4ed|#f2e9e1|#b4637a|#56949f|#ea9d34|#286983|#907aa9|#d7827e|#575279|#9893a5|#b4637a|#56949f|#ea9d34|#286983|#907aa9|#d7827e|#575279
+rose-pine-moon|#e0def4|#232136|#393552|#eb6f92|#9ccfd8|#f6c177|#3e8fb0|#c4a7e7|#ea9a97|#e0def4|#6e6a86|#eb6f92|#9ccfd8|#f6c177|#3e8fb0|#c4a7e7|#ea9a97|#e0def4
+s3r0 modified (terminal.sexy)|#c0b18b|#1f1f1f|#4a3637|#d17b49|#7b8748|#af865a|#535c5c|#775759|#6d715e|#c0b18b|#4a3637|#d17b49|#7b8748|#af865a|#535c5c|#775759|#6d715e|#c0b18b
+seoulbones_dark|#dddddd|#4b4b4b|#4b4b4b|#e388a3|#98bd99|#ffdf9b|#97bdde|#a5a6c5|#6fbdbe|#dddddd|#6c6465|#eb99b1|#8fcd92|#ffe5b3|#a2c8e9|#b2b3da|#6bcacb|#a8a8a8
+seoulbones_light|#555555|#e2e2e2|#e2e2e2|#dc5284|#628562|#c48562|#0084a3|#896788|#008586|#555555|#bfbabb|#be3c6d|#487249|#a76b48|#006f89|#7f4c7e|#006f70|#777777
+shades-of-purple|#ffffff|#1e1d40|#000000|#d90429|#3ad900|#ffe700|#6943ff|#ff2c70|#00c5c7|#c7c7c7|#686868|#f92a1c|#43d426|#f1d000|#6871ff|#ff77ff|#79e8fb|#ffffff
+summer-pop (Gogh)|#ffffff|#272822|#666666|#ff1e8e|#8eff1e|#fffb00|#1e8eff|#e500e5|#00e5e5|#e5e5e5|#666666|#ff1e8e|#8eff1e|#fffb00|#1e8eff|#e500e5|#00e5e5|#e5e5e5
+summercamp (base16)|#736e55|#1c1810|#1c1810|#e35142|#5ceb5a|#f2ff27|#489bf0|#ff8080|#5aebbc|#736e55|#504b38|#e35142|#5ceb5a|#f2ff27|#489bf0|#ff8080|#5aebbc|#f8f5de
+sweet-eliverlara (Gogh)|#c3c7d1|#282c34|#282c34|#ed254e|#71f79f|#f9dc5c|#7cb7ff|#c74ded|#00c1e4|#dcdfe4|#282c34|#ed254e|#71f79f|#f9dc5c|#7cb7ff|#c74ded|#00c1e4|#dcdfe4
+synthwave|#dad9c7|#000000|#000000|#f6188f|#1ebb2b|#fdf834|#2186ec|#f85a21|#12c3e2|#ffffff|#000000|#f841a0|#25c141|#fdf454|#2f9ded|#f97137|#19cde6|#ffffff
+synthwave-everything|#f0eff1|#2a2139|#fefefe|#f97e72|#72f1b8|#fede5d|#6d77b3|#c792ea|#f772e0|#fefefe|#fefefe|#f88414|#72f1b8|#fff951|#36f9f6|#e1acff|#f92aad|#fefefe
+tender (base16)|#eeeeee|#282828|#282828|#f43753|#c9d05c|#ffc24b|#b3deef|#d3b987|#73cef4|#eeeeee|#4c4c4c|#f43753|#c9d05c|#ffc24b|#b3deef|#d3b987|#73cef4|#feffff
+terafox|#e6eaea|#152528|#2f3239|#e85c51|#7aa4a1|#fda47f|#5a93aa|#ad5c7c|#a1cdd8|#ebebeb|#4e5157|#eb746b|#8eb2af|#fdb292|#73a3b7|#b97490|#afd4de|#eeeeee
+theme2 (terminal.sexy)|#ffffff|#000000|#191919|#eb3d51|#66b61a|#d98e1d|#23ffa8|#ff00da|#68a783|#eaeaea|#484848|#be6262|#4b8a10|#e5d95e|#23aaff|#ab005b|#bbcd81|#bbbbbb
+thwump (terminal.sexy)|#ffffff|#000000|#202020|#a07070|#70a070|#a0a070|#7070a0|#a070a0|#70a0a0|#a0a0a0|#505050|#d07070|#70d070|#d0d070|#7070d0|#d070d0|#70d0d0|#f0f0f0
+tlh (terminal.sexy)|#66ff66|#101010|#1c1c1c|#d81860|#60ff60|#f9fd75|#4695c8|#a78edb|#43afce|#f3ebe2|#4d4d4d|#f00060|#70ff70|#f9fd80|#5a9dc8|#b29fdb|#69b8ce|#eeeeee
+tokyonight|#c0caf5|#1a1b26|#15161e|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#a9b1d6|#414868|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#c0caf5
+tokyonight-day|#3760bf|#e1e2e7|#e9e9ed|#f52a65|#587539|#8c6c3e|#2e7de9|#9854f1|#007197|#6172b0|#a1a6c5|#f52a65|#587539|#8c6c3e|#2e7de9|#9854f1|#007197|#3760bf
+tokyonight-storm|#c0caf5|#24283b|#1d202f|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#a9b1d6|#414868|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#c0caf5
+tokyonight_day|#3760bf|#e1e2e7|#e9e9ed|#f52a65|#587539|#8c6c3e|#2e7de9|#9854f1|#007197|#6172b0|#a1a6c5|#f52a65|#587539|#8c6c3e|#2e7de9|#9854f1|#007197|#3760bf
+tokyonight_moon|#c8d3f5|#222436|#1b1d2b|#ff757f|#c3e88d|#ffc777|#82aaff|#c099ff|#86e1fc|#828bb8|#444a73|#ff757f|#c3e88d|#ffc777|#82aaff|#c099ff|#86e1fc|#c8d3f5
+tokyonight_night|#c0caf5|#1a1b26|#15161e|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#a9b1d6|#414868|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#c0caf5
+tokyonight_storm|#c0caf5|#24283b|#1d202f|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#a9b1d6|#414868|#f7768e|#9ece6a|#e0af68|#7aa2f7|#bb9af7|#7dcfff|#c0caf5
+vimbones|#353535|#f0f0ca|#f0f0ca|#a8334c|#4f6c31|#944927|#286486|#88507d|#3b8992|#353535|#c6c6a3|#94253e|#3f5a22|#803d1c|#1d5573|#7b3b70|#2b747c|#5c5c5c
+vulcan (base16)|#5b778c|#041523|#041523|#818591|#977d7c|#adb4b9|#977d7c|#9198a3|#977d7c|#5b778c|#7a5759|#818591|#977d7c|#adb4b9|#977d7c|#9198a3|#977d7c|#214d68
+wilmersdorf|#c6c6c6|#282b33|#34373e|#e06383|#7ebebd|#cccccc|#a6c1e0|#e1c1ee|#5b94ab|#ababab|#434750|#fa7193|#8fd7d6|#d1dfff|#b2cff0|#efccfd|#69abc5|#d3d3d3
+zenbones|#2c363c|#f0edec|#f0edec|#a8334c|#4f6c31|#944927|#286486|#88507d|#3b8992|#2c363c|#cfc1ba|#94253e|#3f5a22|#803d1c|#1d5573|#7b3b70|#2b747c|#4f5e68
+zenbones_dark|#b4bdc3|#1c1917|#1c1917|#de6e7c|#819b69|#b77e64|#6099c0|#b279a7|#66a5ad|#b4bdc3|#403833|#e8838f|#8bae68|#d68c67|#61abda|#cf86c1|#65b8c1|#888f94
+zenbones_light|#2c363c|#f0edec|#f0edec|#a8334c|#4f6c31|#944927|#286486|#88507d|#3b8992|#2c363c|#cfc1ba|#94253e|#3f5a22|#803d1c|#1d5573|#7b3b70|#2b747c|#4f5e68
+zenburn (terminal.sexy)|#ffffff|#000000|#1e2320|#705050|#60b48a|#dfaf8f|#506070|#dc8cc3|#8cd0d3|#dcdccc|#709080|#dca3a3|#c3bf9f|#f0dfaf|#94bff3|#ec93d3|#93e0e3|#ffffff
+zenburned|#f0e4cf|#404040|#404040|#e3716e|#819b69|#b77e64|#6099c0|#b279a7|#66a5ad|#f0e4cf|#625a5b|#ec8685|#8bae68|#d68c67|#61abda|#cf86c1|#65b8c1|#c0ab86
+zenwritten_dark|#bbbbbb|#191919|#191919|#de6e7c|#819b69|#b77e64|#6099c0|#b279a7|#66a5ad|#bbbbbb|#3d3839|#e8838f|#8bae68|#d68c67|#61abda|#cf86c1|#65b8c1|#8e8e8e
+zenwritten_light|#353535|#eeeeee|#eeeeee|#a8334c|#4f6c31|#944927|#286486|#88507d|#3b8992|#353535|#c6c3c3|#94253e|#3f5a22|#803d1c|#1d5573|#7b3b70|#2b747c|#5c5c5c

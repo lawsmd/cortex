@@ -90,6 +90,8 @@ pub enum ThemeKind {
     PinkCity,
     #[schemars(description = "Marble")]
     Marble,
+    #[schemars(description = "A bundled theme imported from the WezTerm color scheme corpus.")]
+    Wezterm(String),
     #[schemars(description = "A user-provided custom theme loaded from a file.")]
     Custom(CustomTheme),
     /// Base16 themes are a special case of custom themes with their own semantics for ANSI colors that override "bright" color variants.
@@ -135,6 +137,7 @@ impl std::fmt::Display for ThemeKind {
             ThemeKind::Adeberry => "Adeberry",
             ThemeKind::SentReferralReward => "Warp Referral",
             ThemeKind::ReceivedReferralReward => "Referred to Warp",
+            ThemeKind::Wezterm(name) => name.as_str(),
             ThemeKind::Custom(custom_theme) => custom_theme.name.as_str(),
             ThemeKind::CustomBase16(custom_theme) => custom_theme.name.as_str(),
             ThemeKind::InMemory(in_memory_theme) => in_memory_theme.name.as_str(),
@@ -322,7 +325,9 @@ impl WarpThemeConfig {
             (ThemeKind::SolarFlare, solar_flare()),
             (ThemeKind::Adeberry, adeberry()),
         ]);
-        WarpThemeConfig { theme_map }
+        let mut config = WarpThemeConfig { theme_map };
+        super::wezterm_bundle::register(&mut config);
+        config
     }
 
     pub fn add_new_theme(&mut self, theme_name: ThemeKind, theme: WarpTheme) {

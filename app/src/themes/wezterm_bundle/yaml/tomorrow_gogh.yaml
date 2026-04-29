@@ -1,0 +1,24 @@
+name: 'Tomorrow (Gogh)'
+accent: '#4170ae'
+background: '#ffffff'
+foreground: '#4d4d4c'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#c82828'
+    green: '#718c00'
+    yellow: '#eab700'
+    blue: '#4171ae'
+    magenta: '#8959a8'
+    cyan: '#3e999f'
+    white: '#fffefe'
+  bright:
+    black: '#000000'
+    red: '#c82828'
+    green: '#708b00'
+    yellow: '#e9b600'
+    blue: '#4170ae'
+    magenta: '#8958a7'
+    cyan: '#3d999f'
+    white: '#fffefe'

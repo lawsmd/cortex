@@ -1,0 +1,24 @@
+name: 'Website (Gogh)'
+accent: '#4cbfff'
+background: '#132f35'
+foreground: '#d1b890'
+details: darker
+terminal_colors:
+  normal:
+    black: '#183c44'
+    red: '#da4949'
+    green: '#bcca15'
+    yellow: '#ffb02e'
+    blue: '#35a6e6'
+    magenta: '#d343a2'
+    cyan: '#38c995'
+    white: '#ffe8c1'
+  bright:
+    black: '#235662'
+    red: '#ff5757'
+    green: '#ecff14'
+    yellow: '#ffd694'
+    blue: '#4cbfff'
+    magenta: '#ff4cc2'
+    cyan: '#35ffb6'
+    white: '#ffd48f'

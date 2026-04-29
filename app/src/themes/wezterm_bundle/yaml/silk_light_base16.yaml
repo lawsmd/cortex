@@ -1,0 +1,24 @@
+name: 'Silk Light (base16)'
+accent: '#39aac9'
+background: '#e9f1ef'
+foreground: '#385156'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#e9f1ef'
+    red: '#cf432e'
+    green: '#6ca38c'
+    yellow: '#cfad25'
+    blue: '#39aac9'
+    magenta: '#6e6582'
+    cyan: '#329ca2'
+    white: '#385156'
+  bright:
+    black: '#5c787b'
+    red: '#cf432e'
+    green: '#6ca38c'
+    yellow: '#cfad25'
+    blue: '#39aac9'
+    magenta: '#6e6582'
+    cyan: '#329ca2'
+    white: '#d2faff'

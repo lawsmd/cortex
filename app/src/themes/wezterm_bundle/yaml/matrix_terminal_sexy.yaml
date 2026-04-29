@@ -1,0 +1,24 @@
+name: 'Matrix (terminal.sexy)'
+accent: '#005500'
+background: '#000000'
+foreground: '#00cc00'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#55ff55'
+    green: '#00cc00'
+    yellow: '#00cc00'
+    blue: '#005500'
+    magenta: '#55ff55'
+    cyan: '#00cc00'
+    white: '#00cc00'
+  bright:
+    black: '#000000'
+    red: '#55ff55'
+    green: '#55ff55'
+    yellow: '#55ff55'
+    blue: '#005500'
+    magenta: '#55ff55'
+    cyan: '#55ff55'
+    white: '#00cc00'

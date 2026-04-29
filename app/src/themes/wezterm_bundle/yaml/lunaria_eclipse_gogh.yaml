@@ -1,0 +1,24 @@
+name: 'Lunaria Eclipse (Gogh)'
+accent: '#767495'
+background: '#323f46'
+foreground: '#c9cdd7'
+details: darker
+terminal_colors:
+  normal:
+    black: '#323f46'
+    red: '#83615b'
+    green: '#7f9781'
+    yellow: '#a69875'
+    blue: '#53516f'
+    magenta: '#856880'
+    cyan: '#7d96b2'
+    white: '#c9cdd7'
+  bright:
+    black: '#3d4950'
+    red: '#ba9088'
+    green: '#bedbc1'
+    yellow: '#f1dfb4'
+    blue: '#767495'
+    magenta: '#be9cb8'
+    cyan: '#bcdbff'
+    white: '#dfe2ed'

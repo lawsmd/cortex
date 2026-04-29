@@ -1,0 +1,24 @@
+name: 'Ef-Maris-Light'
+accent: '#003faf'
+background: '#edf4f8'
+foreground: '#151a27'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#e0e7ef'
+    red: '#c3303a'
+    green: '#007010'
+    yellow: '#805a1f'
+    blue: '#375cc6'
+    magenta: '#80308f'
+    cyan: '#1f66af'
+    white: '#151a27'
+  bright:
+    black: '#afb8c3'
+    red: '#b02440'
+    green: '#007047'
+    yellow: '#78542f'
+    blue: '#003faf'
+    magenta: '#5f2fba'
+    cyan: '#006f70'
+    white: '#676470'

@@ -1,0 +1,24 @@
+name: 'hardhacker'
+accent: '#b1baf4'
+background: '#282433'
+foreground: '#eee9fc'
+details: darker
+terminal_colors:
+  normal:
+    black: '#282433'
+    red: '#e965a5'
+    green: '#b1f2a7'
+    yellow: '#ebde76'
+    blue: '#b1baf4'
+    magenta: '#e192ef'
+    cyan: '#b3f4f3'
+    white: '#eee9fc'
+  bright:
+    black: '#3f3951'
+    red: '#e965a5'
+    green: '#b1f2a7'
+    yellow: '#ebde76'
+    blue: '#b1baf4'
+    magenta: '#e192ef'
+    cyan: '#b3f4f3'
+    white: '#eee9fc'

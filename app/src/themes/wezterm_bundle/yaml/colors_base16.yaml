@@ -1,0 +1,24 @@
+name: 'Colors (base16)'
+accent: '#0074d9'
+background: '#111111'
+foreground: '#bbbbbb'
+details: darker
+terminal_colors:
+  normal:
+    black: '#111111'
+    red: '#ff4136'
+    green: '#2ecc40'
+    yellow: '#ffdc00'
+    blue: '#0074d9'
+    magenta: '#b10dc9'
+    cyan: '#7fdbff'
+    white: '#bbbbbb'
+  bright:
+    black: '#777777'
+    red: '#ff4136'
+    green: '#2ecc40'
+    yellow: '#ffdc00'
+    blue: '#0074d9'
+    magenta: '#b10dc9'
+    cyan: '#7fdbff'
+    white: '#ffffff'

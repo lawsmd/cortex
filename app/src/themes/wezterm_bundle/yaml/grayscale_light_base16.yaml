@@ -1,0 +1,24 @@
+name: 'Grayscale Light (base16)'
+accent: '#686868'
+background: '#f7f7f7'
+foreground: '#464646'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#f7f7f7'
+    red: '#7c7c7c'
+    green: '#8e8e8e'
+    yellow: '#a0a0a0'
+    blue: '#686868'
+    magenta: '#747474'
+    cyan: '#868686'
+    white: '#464646'
+  bright:
+    black: '#ababab'
+    red: '#7c7c7c'
+    green: '#8e8e8e'
+    yellow: '#a0a0a0'
+    blue: '#686868'
+    magenta: '#747474'
+    cyan: '#868686'
+    white: '#101010'

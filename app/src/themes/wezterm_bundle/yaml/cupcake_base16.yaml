@@ -1,0 +1,24 @@
+name: 'Cupcake (base16)'
+accent: '#7297b9'
+background: '#fbf1f2'
+foreground: '#8b8198'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#fbf1f2'
+    red: '#d57e85'
+    green: '#a3b367'
+    yellow: '#dcb16c'
+    blue: '#7297b9'
+    magenta: '#bb99b4'
+    cyan: '#69a9a7'
+    white: '#8b8198'
+  bright:
+    black: '#bfb9c6'
+    red: '#d57e85'
+    green: '#a3b367'
+    yellow: '#dcb16c'
+    blue: '#7297b9'
+    magenta: '#bb99b4'
+    cyan: '#69a9a7'
+    white: '#585062'

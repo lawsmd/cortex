@@ -1,0 +1,24 @@
+name: 'Invisibone (terminal.sexy)'
+accent: '#98cbfe'
+background: '#232323'
+foreground: '#a0a0a0'
+details: darker
+terminal_colors:
+  normal:
+    black: '#303030'
+    red: '#d370a3'
+    green: '#6d9e3f'
+    yellow: '#b58858'
+    blue: '#6095c5'
+    magenta: '#ac7bde'
+    cyan: '#3ba275'
+    white: '#cfcfcf'
+  bright:
+    black: '#686868'
+    red: '#ffa7da'
+    green: '#a3d572'
+    yellow: '#efbd8b'
+    blue: '#98cbfe'
+    magenta: '#e5b0ff'
+    cyan: '#75daa9'
+    white: '#ffffff'

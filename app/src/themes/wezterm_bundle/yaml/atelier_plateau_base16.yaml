@@ -1,0 +1,24 @@
+name: 'Atelier Plateau (base16)'
+accent: '#7272ca'
+background: '#1b1818'
+foreground: '#8a8585'
+details: darker
+terminal_colors:
+  normal:
+    black: '#1b1818'
+    red: '#ca4949'
+    green: '#4b8b8b'
+    yellow: '#a06e3b'
+    blue: '#7272ca'
+    magenta: '#8464c4'
+    cyan: '#5485b6'
+    white: '#8a8585'
+  bright:
+    black: '#655d5d'
+    red: '#ca4949'
+    green: '#4b8b8b'
+    yellow: '#a06e3b'
+    blue: '#7272ca'
+    magenta: '#8464c4'
+    cyan: '#5485b6'
+    white: '#f4ecec'

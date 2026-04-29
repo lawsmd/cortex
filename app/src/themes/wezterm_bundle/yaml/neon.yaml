@@ -1,0 +1,24 @@
+name: 'Neon'
+accent: '#3c40cb'
+background: '#14161a'
+foreground: '#00fffc'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#ff3045'
+    green: '#5ffa74'
+    yellow: '#fffc7e'
+    blue: '#0208cb'
+    magenta: '#f924e7'
+    cyan: '#00fffc'
+    white: '#c7c7c7'
+  bright:
+    black: '#686868'
+    red: '#ff5a5a'
+    green: '#75ff88'
+    yellow: '#fffd96'
+    blue: '#3c40cb'
+    magenta: '#f15be5'
+    cyan: '#88fffe'
+    white: '#ffffff'

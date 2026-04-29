@@ -1,0 +1,24 @@
+name: 'Atelierseaside (dark) (terminal.sexy)'
+accent: '#3d62f5'
+background: '#131513'
+foreground: '#8ca68c'
+details: darker
+terminal_colors:
+  normal:
+    black: '#131513'
+    red: '#e6193c'
+    green: '#29a329'
+    yellow: '#c3c322'
+    blue: '#3d62f5'
+    magenta: '#ad2bee'
+    cyan: '#1999b3'
+    white: '#8ca68c'
+  bright:
+    black: '#687d68'
+    red: '#e6193c'
+    green: '#29a329'
+    yellow: '#c3c322'
+    blue: '#3d62f5'
+    magenta: '#ad2bee'
+    cyan: '#1999b3'
+    white: '#f0fff0'

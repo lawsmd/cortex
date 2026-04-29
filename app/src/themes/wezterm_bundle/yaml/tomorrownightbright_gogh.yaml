@@ -1,0 +1,24 @@
+name: 'TomorrowNightBright (Gogh)'
+accent: '#79a6da'
+background: '#000000'
+foreground: '#e9e9e9'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#d54e53'
+    green: '#b9ca49'
+    yellow: '#e7c547'
+    blue: '#79a6da'
+    magenta: '#c397d8'
+    cyan: '#70c0b1'
+    white: '#fffefe'
+  bright:
+    black: '#000000'
+    red: '#d44d53'
+    green: '#b9c949'
+    yellow: '#e6c446'
+    blue: '#79a6da'
+    magenta: '#c396d7'
+    cyan: '#70c0b1'
+    white: '#fffefe'

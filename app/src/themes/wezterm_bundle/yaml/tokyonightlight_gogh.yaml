@@ -1,0 +1,24 @@
+name: 'TokyoNightLight (Gogh)'
+accent: '#34548a'
+background: '#d5d6db'
+foreground: '#565a6e'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#0f0f14'
+    red: '#8c4351'
+    green: '#485e30'
+    yellow: '#8f5e15'
+    blue: '#34548a'
+    magenta: '#5a4a78'
+    cyan: '#0f4b6e'
+    white: '#343b58'
+  bright:
+    black: '#9699a3'
+    red: '#8c4351'
+    green: '#485e30'
+    yellow: '#8f5e15'
+    blue: '#34548a'
+    magenta: '#5a4a78'
+    cyan: '#0f4b6e'
+    white: '#343b58'

@@ -1,0 +1,24 @@
+name: 'Shades of Purple (base16)'
+accent: '#6943ff'
+background: '#1e1e3f'
+foreground: '#c7c7c7'
+details: darker
+terminal_colors:
+  normal:
+    black: '#1e1e3f'
+    red: '#d90429'
+    green: '#3ad900'
+    yellow: '#ffe700'
+    blue: '#6943ff'
+    magenta: '#ff2c70'
+    cyan: '#00c5c7'
+    white: '#c7c7c7'
+  bright:
+    black: '#808080'
+    red: '#d90429'
+    green: '#3ad900'
+    yellow: '#ffe700'
+    blue: '#6943ff'
+    magenta: '#ff2c70'
+    cyan: '#00c5c7'
+    white: '#ffffff'

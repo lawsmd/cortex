@@ -1,0 +1,24 @@
+name: 'Purpledream (base16)'
+accent: '#00a0f0'
+background: '#100510'
+foreground: '#ddd0dd'
+details: darker
+terminal_colors:
+  normal:
+    black: '#100510'
+    red: '#ff1d0d'
+    green: '#14cc64'
+    yellow: '#f000a0'
+    blue: '#00a0f0'
+    magenta: '#b000d0'
+    cyan: '#0075b0'
+    white: '#ddd0dd'
+  bright:
+    black: '#605060'
+    red: '#ff1d0d'
+    green: '#14cc64'
+    yellow: '#f000a0'
+    blue: '#00a0f0'
+    magenta: '#b000d0'
+    cyan: '#0075b0'
+    white: '#fff0ff'

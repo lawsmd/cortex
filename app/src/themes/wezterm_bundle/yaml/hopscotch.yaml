@@ -1,0 +1,24 @@
+name: 'Hopscotch'
+accent: '#989498'
+background: '#322931'
+foreground: '#b9b5b8'
+details: darker
+terminal_colors:
+  normal:
+    black: '#322931'
+    red: '#dd464c'
+    green: '#8fc13e'
+    yellow: '#fdcc59'
+    blue: '#1290bf'
+    magenta: '#c85e7c'
+    cyan: '#149b93'
+    white: '#b9b5b8'
+  bright:
+    black: '#797379'
+    red: '#fd8b19'
+    green: '#433b42'
+    yellow: '#5c545b'
+    blue: '#989498'
+    magenta: '#d5d3d5'
+    cyan: '#b33508'
+    white: '#ffffff'

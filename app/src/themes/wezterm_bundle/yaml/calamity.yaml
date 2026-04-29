@@ -1,0 +1,24 @@
+name: 'Calamity'
+accent: '#3b79c7'
+background: '#2f2833'
+foreground: '#d5ced9'
+details: darker
+terminal_colors:
+  normal:
+    black: '#2f2833'
+    red: '#fc644d'
+    green: '#a5f69c'
+    yellow: '#e9d7a5'
+    blue: '#3b79c7'
+    magenta: '#f92672'
+    cyan: '#74d3de'
+    white: '#d5ced9'
+  bright:
+    black: '#7e6c88'
+    red: '#fc644d'
+    green: '#a5f69c'
+    yellow: '#e9d7a5'
+    blue: '#3b79c7'
+    magenta: '#f92672'
+    cyan: '#74d3de'
+    white: '#ffffff'

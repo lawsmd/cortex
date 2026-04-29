@@ -1,0 +1,24 @@
+name: 'Pop (base16)'
+accent: '#0e5a94'
+background: '#000000'
+foreground: '#d0d0d0'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#eb008a'
+    green: '#37b349'
+    yellow: '#f8ca12'
+    blue: '#0e5a94'
+    magenta: '#b31e8d'
+    cyan: '#00aabb'
+    white: '#d0d0d0'
+  bright:
+    black: '#505050'
+    red: '#eb008a'
+    green: '#37b349'
+    yellow: '#f8ca12'
+    blue: '#0e5a94'
+    magenta: '#b31e8d'
+    cyan: '#00aabb'
+    white: '#ffffff'

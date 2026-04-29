@@ -1,0 +1,24 @@
+name: 'Cobalt 2 (Gogh)'
+accent: '#5555ff'
+background: '#132738'
+foreground: '#ffffff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#ff0000'
+    green: '#38de21'
+    yellow: '#ffe50a'
+    blue: '#1460d2'
+    magenta: '#ff005d'
+    cyan: '#00bbbb'
+    white: '#bbbbbb'
+  bright:
+    black: '#555555'
+    red: '#f40e17'
+    green: '#3bd01d'
+    yellow: '#edc809'
+    blue: '#5555ff'
+    magenta: '#ff55ff'
+    cyan: '#6ae3fa'
+    white: '#ffffff'

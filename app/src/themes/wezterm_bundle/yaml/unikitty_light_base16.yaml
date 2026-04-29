@@ -1,0 +1,24 @@
+name: 'Unikitty Light (base16)'
+accent: '#775dff'
+background: '#ffffff'
+foreground: '#6c696e'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#ffffff'
+    red: '#d8137f'
+    green: '#17ad98'
+    yellow: '#dc8a0e'
+    blue: '#775dff'
+    magenta: '#aa17e6'
+    cyan: '#149bda'
+    white: '#6c696e'
+  bright:
+    black: '#a7a5a8'
+    red: '#d8137f'
+    green: '#17ad98'
+    yellow: '#dc8a0e'
+    blue: '#775dff'
+    magenta: '#aa17e6'
+    cyan: '#149bda'
+    white: '#322d34'

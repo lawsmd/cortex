@@ -1,0 +1,24 @@
+name: 'Grey-green'
+accent: '#00afff'
+background: '#002a1a'
+foreground: '#ffffff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#fe1414'
+    green: '#74ff00'
+    yellow: '#f1ff01'
+    blue: '#00deff'
+    magenta: '#ff00f0'
+    cyan: '#00ffbc'
+    white: '#ffffff'
+  bright:
+    black: '#666666'
+    red: '#ff3939'
+    green: '#00ff44'
+    yellow: '#ffd100'
+    blue: '#00afff'
+    magenta: '#ff008a'
+    cyan: '#00ffd3'
+    white: '#f5ecec'

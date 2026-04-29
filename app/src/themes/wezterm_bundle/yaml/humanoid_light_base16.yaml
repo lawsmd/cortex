@@ -1,0 +1,24 @@
+name: 'Humanoid light (base16)'
+accent: '#0082c9'
+background: '#f8f8f2'
+foreground: '#232629'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#f8f8f2'
+    red: '#b0151a'
+    green: '#388e3c'
+    yellow: '#ffb627'
+    blue: '#0082c9'
+    magenta: '#700f98'
+    cyan: '#008e8e'
+    white: '#232629'
+  bright:
+    black: '#c0c0bd'
+    red: '#b0151a'
+    green: '#388e3c'
+    yellow: '#ffb627'
+    blue: '#0082c9'
+    magenta: '#700f98'
+    cyan: '#008e8e'
+    white: '#070708'

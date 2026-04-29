@@ -1,0 +1,24 @@
+name: 'ayu_light'
+accent: '#73d8ff'
+background: '#fafafa'
+foreground: '#5c6773'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#ff3333'
+    green: '#86b300'
+    yellow: '#f29718'
+    blue: '#41a6d9'
+    magenta: '#f07178'
+    cyan: '#4dbf99'
+    white: '#ffffff'
+  bright:
+    black: '#323232'
+    red: '#ff6565'
+    green: '#b8e532'
+    yellow: '#ffc94a'
+    blue: '#73d8ff'
+    magenta: '#ffa3aa'
+    cyan: '#7ff1cb'
+    white: '#ffffff'

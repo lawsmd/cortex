@@ -1,0 +1,24 @@
+name: 'Morada (Gogh)'
+accent: '#fb605b'
+background: '#211f46'
+foreground: '#ffffff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#040404'
+    red: '#0f49c4'
+    green: '#48b117'
+    yellow: '#e87324'
+    blue: '#bc0116'
+    magenta: '#665b93'
+    cyan: '#70a699'
+    white: '#f5dcbe'
+  bright:
+    black: '#4f7cbf'
+    red: '#1c96c7'
+    green: '#3bff6f'
+    yellow: '#efc31c'
+    blue: '#fb605b'
+    magenta: '#975b5a'
+    cyan: '#1eff8e'
+    white: '#f6f5fb'

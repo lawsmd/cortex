@@ -1,0 +1,24 @@
+name: 'Foxnightly (Gogh)'
+accent: '#729fcf'
+background: '#2a2a2e'
+foreground: '#d7d7db'
+details: darker
+terminal_colors:
+  normal:
+    black: '#2a2a2e'
+    red: '#b98eff'
+    green: '#ff7de9'
+    yellow: '#729fcf'
+    blue: '#66a05b'
+    magenta: '#75507b'
+    cyan: '#acacae'
+    white: '#ffffff'
+  bright:
+    black: '#a40000'
+    red: '#bf4040'
+    green: '#66a05b'
+    yellow: '#ffb86c'
+    blue: '#729fcf'
+    magenta: '#8f5902'
+    cyan: '#c4a000'
+    white: '#5c3566'

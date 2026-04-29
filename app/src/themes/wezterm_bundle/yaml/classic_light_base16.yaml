@@ -1,0 +1,24 @@
+name: 'Classic Light (base16)'
+accent: '#6a9fb5'
+background: '#f5f5f5'
+foreground: '#303030'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#f5f5f5'
+    red: '#ac4142'
+    green: '#90a959'
+    yellow: '#f4bf75'
+    blue: '#6a9fb5'
+    magenta: '#aa759f'
+    cyan: '#75b5aa'
+    white: '#303030'
+  bright:
+    black: '#b0b0b0'
+    red: '#ac4142'
+    green: '#90a959'
+    yellow: '#f4bf75'
+    blue: '#6a9fb5'
+    magenta: '#aa759f'
+    cyan: '#75b5aa'
+    white: '#151515'

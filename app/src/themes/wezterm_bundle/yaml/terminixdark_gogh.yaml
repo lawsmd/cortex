@@ -1,0 +1,24 @@
+name: 'TerminixDark (Gogh)'
+accent: '#449da1'
+background: '#091116'
+foreground: '#868a8c'
+details: darker
+terminal_colors:
+  normal:
+    black: '#282a2e'
+    red: '#a54242'
+    green: '#a1b56c'
+    yellow: '#de935f'
+    blue: '#225555'
+    magenta: '#85678f'
+    cyan: '#5e8d87'
+    white: '#777777'
+  bright:
+    black: '#373b41'
+    red: '#c63535'
+    green: '#608360'
+    yellow: '#fa805a'
+    blue: '#449da1'
+    magenta: '#ba8baf'
+    cyan: '#86c1b9'
+    white: '#c5c8c6'

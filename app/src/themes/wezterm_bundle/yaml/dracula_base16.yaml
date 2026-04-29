@@ -1,0 +1,24 @@
+name: 'Dracula (base16)'
+accent: '#62d6e8'
+background: '#282936'
+foreground: '#e9e9f4'
+details: darker
+terminal_colors:
+  normal:
+    black: '#282936'
+    red: '#ea51b2'
+    green: '#ebff87'
+    yellow: '#00f769'
+    blue: '#62d6e8'
+    magenta: '#b45bcf'
+    cyan: '#a1efe4'
+    white: '#e9e9f4'
+  bright:
+    black: '#626483'
+    red: '#ea51b2'
+    green: '#ebff87'
+    yellow: '#00f769'
+    blue: '#62d6e8'
+    magenta: '#b45bcf'
+    cyan: '#a1efe4'
+    white: '#f7f7fb'

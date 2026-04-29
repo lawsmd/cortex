@@ -1,0 +1,24 @@
+name: 'Nucolors (terminal.sexy)'
+accent: '#7eb6ff'
+background: '#000000'
+foreground: '#ffffff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#393939'
+    red: '#ff9f95'
+    green: '#e2ffc7'
+    yellow: '#ffffb9'
+    blue: '#a8ceea'
+    magenta: '#e2b5cc'
+    cyan: '#c2efff'
+    white: '#dddddd'
+  bright:
+    black: '#474747'
+    red: '#ff8d80'
+    green: '#dbffb3'
+    yellow: '#ffbe64'
+    blue: '#7eb6ff'
+    magenta: '#e296ff'
+    cyan: '#9ce9ff'
+    white: '#dddddd'

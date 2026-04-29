@@ -1,0 +1,24 @@
+name: 'Bitmute (terminal.sexy)'
+accent: '#73718f'
+background: '#000000'
+foreground: '#ffffff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#282828'
+    red: '#b76969'
+    green: '#719d72'
+    yellow: '#909858'
+    blue: '#68668f'
+    magenta: '#966894'
+    cyan: '#688891'
+    white: '#8e8e8e'
+  bright:
+    black: '#494949'
+    red: '#b87e7e'
+    green: '#839d84'
+    yellow: '#919864'
+    blue: '#73718f'
+    magenta: '#987397'
+    cyan: '#758c93'
+    white: '#aeaeae'

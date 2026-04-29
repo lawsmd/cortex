@@ -1,0 +1,24 @@
+name: 'darkermatrix'
+accent: '#00ff87'
+background: '#070c0e'
+foreground: '#28380d'
+details: darker
+terminal_colors:
+  normal:
+    black: '#091013'
+    red: '#002e18'
+    green: '#6fa64c'
+    yellow: '#595900'
+    blue: '#00cb6b'
+    magenta: '#412a4d'
+    cyan: '#125459'
+    white: '#002e19'
+  bright:
+    black: '#333333'
+    red: '#00381d'
+    green: '#90d762'
+    yellow: '#e2e500'
+    blue: '#00ff87'
+    magenta: '#412a4d'
+    cyan: '#176c73'
+    white: '#00381e'

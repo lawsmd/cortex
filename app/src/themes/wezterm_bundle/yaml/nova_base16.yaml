@@ -1,0 +1,24 @@
+name: 'Nova (base16)'
+accent: '#83afe5'
+background: '#3c4c55'
+foreground: '#c5d4dd'
+details: darker
+terminal_colors:
+  normal:
+    black: '#3c4c55'
+    red: '#83afe5'
+    green: '#7fc1ca'
+    yellow: '#a8ce93'
+    blue: '#83afe5'
+    magenta: '#9a93e1'
+    cyan: '#f2c38f'
+    white: '#c5d4dd'
+  bright:
+    black: '#899ba6'
+    red: '#83afe5'
+    green: '#7fc1ca'
+    yellow: '#a8ce93'
+    blue: '#83afe5'
+    magenta: '#9a93e1'
+    cyan: '#f2c38f'
+    white: '#556873'

@@ -1,0 +1,24 @@
+name: 'Atelier Seaside Light (base16)'
+accent: '#3d62f5'
+background: '#f4fbf4'
+foreground: '#5e6e5e'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#f4fbf4'
+    red: '#e6193c'
+    green: '#29a329'
+    yellow: '#98981b'
+    blue: '#3d62f5'
+    magenta: '#ad2bee'
+    cyan: '#1999b3'
+    white: '#5e6e5e'
+  bright:
+    black: '#809980'
+    red: '#e6193c'
+    green: '#29a329'
+    yellow: '#98981b'
+    blue: '#3d62f5'
+    magenta: '#ad2bee'
+    cyan: '#1999b3'
+    white: '#131513'

@@ -1,0 +1,24 @@
+name: 'Mostly Bright (terminal.sexy)'
+accent: '#5dc7ea'
+background: '#f3f3f3'
+foreground: '#707070'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#d3d3d3'
+    red: '#ef6b7b'
+    green: '#a1d569'
+    yellow: '#f59335'
+    blue: '#4ec2e8'
+    magenta: '#fec7cd'
+    cyan: '#95c1c0'
+    white: '#707070'
+  bright:
+    black: '#b3b3b3'
+    red: '#ed5466'
+    green: '#afdb80'
+    yellow: '#f59335'
+    blue: '#5dc7ea'
+    magenta: '#d2a4b4'
+    cyan: '#75a1a0'
+    white: '#909090'

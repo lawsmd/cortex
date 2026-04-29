@@ -1,0 +1,24 @@
+name: 'RoséPineDawn (Gogh)'
+accent: '#286983'
+background: '#faf4ed'
+foreground: '#575279'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#f2e9e1'
+    red: '#b4637a'
+    green: '#56949f'
+    yellow: '#ea9d34'
+    blue: '#286983'
+    magenta: '#907aa9'
+    cyan: '#d7827e'
+    white: '#575279'
+  bright:
+    black: '#9893a5'
+    red: '#b4637a'
+    green: '#56949f'
+    yellow: '#ea9d34'
+    blue: '#286983'
+    magenta: '#907aa9'
+    cyan: '#d7827e'
+    white: '#575279'

@@ -1,0 +1,24 @@
+name: 'Sakura (base16)'
+accent: '#006e93'
+background: '#feedf3'
+foreground: '#564448'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#feedf3'
+    red: '#df2d52'
+    green: '#2e916d'
+    yellow: '#c29461'
+    blue: '#006e93'
+    magenta: '#5e2180'
+    cyan: '#1d8991'
+    white: '#564448'
+  bright:
+    black: '#755f64'
+    red: '#df2d52'
+    green: '#2e916d'
+    yellow: '#c29461'
+    blue: '#006e93'
+    magenta: '#5e2180'
+    cyan: '#1d8991'
+    white: '#33292b'

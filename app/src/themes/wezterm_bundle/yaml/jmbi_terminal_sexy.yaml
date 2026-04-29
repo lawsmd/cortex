@@ -1,0 +1,24 @@
+name: 'jmbi (terminal.sexy)'
+accent: '#c9b957'
+background: '#1e1e1e'
+foreground: '#ffffff'
+details: darker
+terminal_colors:
+  normal:
+    black: '#5a7260'
+    red: '#8f423c'
+    green: '#bbbb88'
+    yellow: '#f9d25b'
+    blue: '#e0ba69'
+    magenta: '#709289'
+    cyan: '#d13516'
+    white: '#efe2e0'
+  bright:
+    black: '#8da691'
+    red: '#eeaa88'
+    green: '#ccc68d'
+    yellow: '#eedd99'
+    blue: '#c9b957'
+    magenta: '#ffcbab'
+    cyan: '#c25431'
+    white: '#f9f1ed'

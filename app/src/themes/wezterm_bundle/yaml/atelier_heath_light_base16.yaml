@@ -1,0 +1,24 @@
+name: 'Atelier Heath Light (base16)'
+accent: '#516aec'
+background: '#f7f3f7'
+foreground: '#695d69'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#f7f3f7'
+    red: '#ca402b'
+    green: '#918b3b'
+    yellow: '#bb8a35'
+    blue: '#516aec'
+    magenta: '#7b59c0'
+    cyan: '#159393'
+    white: '#695d69'
+  bright:
+    black: '#9e8f9e'
+    red: '#ca402b'
+    green: '#918b3b'
+    yellow: '#bb8a35'
+    blue: '#516aec'
+    magenta: '#7b59c0'
+    cyan: '#159393'
+    white: '#1b181b'

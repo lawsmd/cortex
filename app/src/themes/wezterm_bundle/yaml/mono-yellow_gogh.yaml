@@ -1,0 +1,24 @@
+name: 'mono-yellow (Gogh)'
+accent: '#ffd300'
+background: '#2b2400'
+foreground: '#ffd300'
+details: darker
+terminal_colors:
+  normal:
+    black: '#403500'
+    red: '#ffd300'
+    green: '#ffd300'
+    yellow: '#ffd300'
+    blue: '#ffd300'
+    magenta: '#ffd300'
+    cyan: '#ffd300'
+    white: '#ffd300'
+  bright:
+    black: '#ffd300'
+    red: '#ffd300'
+    green: '#ffd300'
+    yellow: '#ffd300'
+    blue: '#ffd300'
+    magenta: '#ffd300'
+    cyan: '#ffd300'
+    white: '#ffd300'

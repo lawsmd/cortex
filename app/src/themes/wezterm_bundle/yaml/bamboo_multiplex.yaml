@@ -1,0 +1,24 @@
+name: 'Bamboo Multiplex'
+accent: '#5692c4'
+background: '#232923'
+foreground: '#ece1c0'
+details: darker
+terminal_colors:
+  normal:
+    black: '#171f17'
+    red: '#dc4f62'
+    green: '#81af58'
+    yellow: '#cebe69'
+    blue: '#5692c4'
+    magenta: '#ae93e0'
+    cyan: '#71ada2'
+    white: '#ece1c0'
+  bright:
+    black: '#5a5e5a'
+    red: '#dc4f62'
+    green: '#81af58'
+    yellow: '#cebe69'
+    blue: '#5692c4'
+    magenta: '#ae93e0'
+    cyan: '#71ada2'
+    white: '#fff8f0'

@@ -1,0 +1,24 @@
+name: 'PaperColor Light (base16)'
+accent: '#d75f00'
+background: '#eeeeee'
+foreground: '#444444'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#eeeeee'
+    red: '#bcbcbc'
+    green: '#8700af'
+    yellow: '#d70087'
+    blue: '#d75f00'
+    magenta: '#005faf'
+    cyan: '#d75f00'
+    white: '#444444'
+  bright:
+    black: '#5f8700'
+    red: '#bcbcbc'
+    green: '#8700af'
+    yellow: '#d70087'
+    blue: '#d75f00'
+    magenta: '#005faf'
+    cyan: '#d75f00'
+    white: '#878787'

@@ -1,0 +1,24 @@
+name: 'Heetch Light (base16)'
+accent: '#47f9f5'
+background: '#feffff'
+foreground: '#5a496e'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#feffff'
+    red: '#27d9d5'
+    green: '#f80059'
+    yellow: '#5ba2b6'
+    blue: '#47f9f5'
+    magenta: '#bd0152'
+    cyan: '#c33678'
+    white: '#5a496e'
+  bright:
+    black: '#9c92a8'
+    red: '#27d9d5'
+    green: '#f80059'
+    yellow: '#5ba2b6'
+    blue: '#47f9f5'
+    magenta: '#bd0152'
+    cyan: '#c33678'
+    white: '#190134'

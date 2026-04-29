@@ -1,0 +1,24 @@
+name: 'Harmonic16 Dark (base16)'
+accent: '#8b56bf'
+background: '#0b1c2c'
+foreground: '#cbd6e2'
+details: darker
+terminal_colors:
+  normal:
+    black: '#0b1c2c'
+    red: '#bf8b56'
+    green: '#56bf8b'
+    yellow: '#8bbf56'
+    blue: '#8b56bf'
+    magenta: '#bf568b'
+    cyan: '#568bbf'
+    white: '#cbd6e2'
+  bright:
+    black: '#627e99'
+    red: '#bf8b56'
+    green: '#56bf8b'
+    yellow: '#8bbf56'
+    blue: '#8b56bf'
+    magenta: '#bf568b'
+    cyan: '#568bbf'
+    white: '#f7f9fb'

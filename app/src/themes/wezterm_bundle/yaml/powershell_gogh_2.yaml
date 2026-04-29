@@ -1,0 +1,24 @@
+name: 'Powershell (Gogh)'
+accent: '#268ad2'
+background: '#052454'
+foreground: '#f6f6f7'
+details: darker
+terminal_colors:
+  normal:
+    black: '#000000'
+    red: '#7e0008'
+    green: '#098003'
+    yellow: '#c4a000'
+    blue: '#010083'
+    magenta: '#d33682'
+    cyan: '#0e807f'
+    white: '#7f7c7f'
+  bright:
+    black: '#808080'
+    red: '#ef2929'
+    green: '#1cfe3c'
+    yellow: '#fefe45'
+    blue: '#268ad2'
+    magenta: '#fe13fa'
+    cyan: '#29fffe'
+    white: '#c2c1c3'

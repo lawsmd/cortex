@@ -1,0 +1,24 @@
+name: 'Breath Light (Gogh)'
+accent: '#3daee9'
+background: '#e8e8e8'
+foreground: '#292f34'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#e8e8e8'
+    red: '#ed1515'
+    green: '#c0392b'
+    yellow: '#f67400'
+    blue: '#1d99f3'
+    magenta: '#9b59b6'
+    cyan: '#1abc9c'
+    white: '#fcfcfc'
+  bright:
+    black: '#7f8c8d'
+    red: '#c0392b'
+    green: '#55a649'
+    yellow: '#fdbc4b'
+    blue: '#3daee9'
+    magenta: '#8e44ad'
+    cyan: '#16a085'
+    white: '#ffffff'

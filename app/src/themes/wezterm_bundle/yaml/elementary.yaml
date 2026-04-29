@@ -1,0 +1,24 @@
+name: 'Elementary'
+accent: '#0955ff'
+background: '#181818'
+foreground: '#efefef'
+details: darker
+terminal_colors:
+  normal:
+    black: '#242424'
+    red: '#d71c15'
+    green: '#5aa513'
+    yellow: '#fdb40c'
+    blue: '#063b8c'
+    magenta: '#e40038'
+    cyan: '#2595e1'
+    white: '#efefef'
+  bright:
+    black: '#4b4b4b'
+    red: '#fc1c18'
+    green: '#6bc219'
+    yellow: '#fec80e'
+    blue: '#0955ff'
+    magenta: '#fb0050'
+    cyan: '#3ea8fc'
+    white: '#8c00ec'

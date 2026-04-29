@@ -1,0 +1,24 @@
+name: 'Equilibrium Gray Light (base16)'
+accent: '#0073b5'
+background: '#f1f1f1'
+foreground: '#474747'
+details: lighter
+terminal_colors:
+  normal:
+    black: '#f1f1f1'
+    red: '#d02023'
+    green: '#637200'
+    yellow: '#9d6f00'
+    blue: '#0073b5'
+    magenta: '#4e66b6'
+    cyan: '#007a72'
+    white: '#474747'
+  bright:
+    black: '#777777'
+    red: '#d02023'
+    green: '#637200'
+    yellow: '#9d6f00'
+    blue: '#0073b5'
+    magenta: '#4e66b6'
+    cyan: '#007a72'
+    white: '#1b1b1b'
