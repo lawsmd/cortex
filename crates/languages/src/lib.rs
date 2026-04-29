@@ -297,7 +297,7 @@ fn load_language(lang: &str) -> Option<Language> {
     let arborium_name = to_arborium_name(lang);
     let grammar = arborium::get_language(arborium_name)?;
 
-    let config_path = [lang, "config.yaml"].join("\\");
+    let config_path = [lang, "config.yaml"].join("/");
     let config = load_yaml(&config_path);
     let indent_unit = config.indent_unit;
     let comment_prefix = config.comment_prefix;
@@ -316,10 +316,10 @@ fn load_language(lang: &str) -> Option<Language> {
     let highlight_query = Query::new(&grammar, highlight_query_str)
         .expect("arborium highlight query should be valid");
 
-    let indents_query_path = [lang, "indents.scm"].join("\\");
+    let indents_query_path = [lang, "indents.scm"].join("/");
     let indents_query = load_query(&indents_query_path, &grammar);
 
-    let symbols_query_path = [lang, "identifiers.scm"].join("\\");
+    let symbols_query_path = [lang, "identifiers.scm"].join("/");
     let symbols_query = load_query(&symbols_query_path, &grammar);
 
     Some(Language {
