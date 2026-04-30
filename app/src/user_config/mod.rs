@@ -54,6 +54,9 @@ lazy_static! {
 #[derive(Clone)]
 pub enum WarpConfigUpdateEvent {
     Themes,
+    /// The user's pinned theme favorites changed (toggled in the picker, or
+    /// `favorite_themes.json` was edited / replaced on disk).
+    Favorites,
     #[cfg_attr(not(feature = "local_fs"), expect(dead_code))]
     LocalUserWorkflows,
     LaunchConfigs,
@@ -88,6 +91,7 @@ pub struct WarpConfig {
     tab_config_errors: Vec<TabConfigError>,
     theme_config: WarpThemeConfig,
     local_user_workflows: Vec<Workflow>,
+    favorite_themes: Vec<ThemeKind>,
 }
 
 /// Platform-independent parts of WarpConfig.
@@ -118,6 +122,43 @@ impl WarpConfig {
     pub fn local_user_workflows(&self) -> &Vec<Workflow> {
         &self.local_user_workflows
     }
+
+    pub fn favorite_themes(&self) -> &[ThemeKind] {
+        &self.favorite_themes
+    }
+
+    pub fn is_favorite_theme(&self, kind: &ThemeKind) -> bool {
+        crate::themes::favorites::is_favorite(&self.favorite_themes, kind)
+    }
+
+    /// Toggle a theme's favorite state. Persists to `favorite_themes.json`
+    /// and emits `WarpConfigUpdateEvent::Favorites` so the picker rebuilds.
+    /// On Wasm builds (no filesystem) this is a no-op.
+    pub fn toggle_favorite_theme(
+        &mut self,
+        kind: ThemeKind,
+        ctx: &mut ModelContext<Self>,
+    ) {
+        let changed = if crate::themes::favorites::is_favorite(&self.favorite_themes, &kind) {
+            crate::themes::favorites::remove(&mut self.favorite_themes, &kind)
+        } else {
+            crate::themes::favorites::add(&mut self.favorite_themes, kind)
+        };
+        if !changed {
+            return;
+        }
+        #[cfg(not(target_family = "wasm"))]
+        {
+            let path = favorite_themes_path();
+            if let Err(err) =
+                crate::themes::favorites::save_favorites(&path, &self.favorite_themes)
+            {
+                log::warn!("favorites: failed to persist {}: {err:?}", path.display());
+            }
+        }
+        ctx.emit(WarpConfigUpdateEvent::Favorites);
+    }
+
 
     /// Saving the newly created launch configuration to the WarpConfig that we currently
     /// have.
@@ -173,6 +214,13 @@ fn base_dir() -> PathBuf {
 /// Returns the path to the directory containing the user's custom themes.
 pub fn themes_dir() -> PathBuf {
     warp_core::paths::themes_dir()
+}
+
+/// Returns the path to the user's theme-favorites file. Sibling of the
+/// other file-backed user data directories (`themes/`, `launch_configurations/`,
+/// …) — see `docs/themes/favorites.md` for the format.
+pub fn favorite_themes_path() -> PathBuf {
+    base_dir().join("favorite_themes.json")
 }
 
 /// Returns the path to the directory containing the user's custom workflows.

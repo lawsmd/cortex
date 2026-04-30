@@ -83,6 +83,25 @@ const HINT_ROW_PADDING: f32 = 4.;
 // How many recently-selected themes the "Recents" section surfaces.
 const MAX_RECENT_THEMES: usize = 5;
 
+// Star toggle (Favorites). Rendered on every row except those that live
+// inside the Favorites section itself (where the section header already
+// communicates the favorited status — a per-row star there is just noise,
+// especially when the same theme also shows up starred in Recents).
+// Anchored to the right edge of the panel just inside the scrollbar.
+// Hollow when not favorited (dim by default, brighter on hover) and
+// filled when favorited.
+const FAVORITE_STAR_SIZE: f32 = 14.;
+const FAVORITE_STAR_MARGIN_RIGHT: f32 = 12.;
+const FAVORITE_STAR_DIM_OPACITY: f32 = 0.35;
+const FAVORITE_STAR_HOVER_OPACITY: f32 = 0.85;
+const FAVORITE_STAR_OUTLINE_SVG: &str = "bundled/svg/star-outline.svg";
+const FAVORITE_STAR_FILLED_SVG: &str = "bundled/svg/star-filled.svg";
+// Star glyph rendered next to the "Favorites" section header so the
+// section title carries its own visual identity.
+const FAVORITES_HEADER_LABEL: &str = "Favorites";
+const FAVORITES_HEADER_STAR_SIZE: f32 = 11.;
+const FAVORITES_HEADER_STAR_GAP: f32 = 5.;
+
 #[derive(Default)]
 struct MouseStateHandles {
     create_theme_button_hover_state: MouseStateHandle,
@@ -183,6 +202,11 @@ pub enum ThemeChooserAction {
     Down,
     OpenThemeCreator,
     OpenThemeDeletionModal(ThemeKind),
+    ToggleFavorite(ThemeKind),
+    /// Toggle the focused row's favorite state — bound to `f` in the picker.
+    /// Resolves the focused row at dispatch time since the keybinding has no
+    /// payload to carry a `ThemeKind`.
+    ToggleFavoriteFocused,
 }
 
 pub fn init(app: &mut AppContext) {
@@ -193,6 +217,15 @@ pub fn init(app: &mut AppContext) {
         FixedBinding::new("down", ThemeChooserAction::Down, id!("ThemeChooser")),
         FixedBinding::new("escape", ThemeChooserAction::Close, id!("ThemeChooser")),
         FixedBinding::new("enter", ThemeChooserAction::Enter, id!("ThemeChooser")),
+        // ⌘D / Ctrl+D toggles the focused row's favorite. Plain letter
+        // hotkeys would collide with typing into the search box, so we
+        // gate behind a modifier (mnemonic: "bookmark", matching browser
+        // bookmark shortcuts).
+        FixedBinding::new(
+            "cmdorctrl-d",
+            ThemeChooserAction::ToggleFavoriteFocused,
+            id!("ThemeChooser"),
+        ),
     ]);
 }
 
@@ -254,14 +287,35 @@ fn item_for(kind: &ThemeKind, theme_config: &WarpThemeConfig) -> ThemeChooserIte
     ThemeChooserItem::new(kind.clone(), theme_config.theme(kind))
 }
 
-/// Build the layered default view (no search): Recents → Your themes →
-/// Cortex built-ins → "browse the library" hint row.
+/// Build the layered default view (no search): Favorites → Recents →
+/// Your themes → Cortex built-ins → "browse the library" hint row.
 fn build_default_rows(
     referral: &ReferralThemeStatus,
     theme_config: &WarpThemeConfig,
     recents: &[ThemeKind],
+    favorites: &[ThemeKind],
 ) -> Vec<ThemeChooserRow> {
     let mut rows: Vec<ThemeChooserRow> = Vec::new();
+
+    // Favorites section sits at the top so user-pinned themes are always one
+    // glance away. Skip the section entirely when nothing is pinned. Filter
+    // out inactive referral kinds the same way Recents does, just in case
+    // they got pinned and then deactivated. Items here render with
+    // `hide_star` so the section title carries the star instead.
+    let favorite_items: Vec<ThemeChooserItem> = favorites
+        .iter()
+        .filter(|kind| match kind {
+            ThemeKind::SentReferralReward => referral.sent_referral_theme_active(),
+            ThemeKind::ReceivedReferralReward => referral.received_referral_theme_active(),
+            _ => true,
+        })
+        .filter(|kind| theme_config.contains_theme(kind))
+        .map(|kind| item_for(kind, theme_config).with_star_hidden())
+        .collect();
+    if !favorite_items.is_empty() {
+        rows.push(ThemeChooserRow::Header(FAVORITES_HEADER_LABEL));
+        rows.extend(favorite_items.into_iter().map(ThemeChooserRow::Item));
+    }
 
     let mut already_in_recents: HashSet<ThemeKind> = HashSet::new();
     let recents_items: Vec<ThemeChooserItem> = recents
@@ -324,13 +378,45 @@ fn build_default_rows(
     rows
 }
 
-/// Build the search-mode flat list: every theme that fuzzy-matches the query,
-/// ranked by score descending, plus a count footer.
+/// Build the search-mode rows: the Favorites section stays pinned at the
+/// top (unfiltered, so newly favorited rows visibly anchor there even when
+/// they don't match the query) and the fuzzy-ranked match list below
+/// excludes anything already shown in Favorites to avoid duplicates.
 fn build_search_rows(
     query: &str,
     referral: &ReferralThemeStatus,
     theme_config: &WarpThemeConfig,
+    favorites: &[ThemeKind],
 ) -> Vec<ThemeChooserRow> {
+    let mut rows: Vec<ThemeChooserRow> = Vec::new();
+
+    // Favorites pinned at the top, unfiltered. This is the key UX
+    // difference from build_default_rows-only: when the user favorites a
+    // row mid-search, they need to see it land somewhere. Filtering by
+    // query would hide favorites that don't match the current search,
+    // breaking that visual continuity.
+    let visible_favorites: Vec<ThemeChooserItem> = favorites
+        .iter()
+        .filter(|kind| match kind {
+            ThemeKind::SentReferralReward => referral.sent_referral_theme_active(),
+            ThemeKind::ReceivedReferralReward => referral.received_referral_theme_active(),
+            _ => true,
+        })
+        .filter(|kind| theme_config.contains_theme(kind))
+        .map(|kind| item_for(kind, theme_config).with_star_hidden())
+        .collect();
+    if !visible_favorites.is_empty() {
+        rows.push(ThemeChooserRow::Header(FAVORITES_HEADER_LABEL));
+        rows.extend(
+            visible_favorites
+                .iter()
+                .cloned()
+                .map(ThemeChooserRow::Item),
+        );
+    }
+
+    let favorite_set: HashSet<ThemeKind> = favorites.iter().cloned().collect();
+
     let total_count = theme_config
         .theme_items()
         .filter(|(kind, _)| match kind {
@@ -347,6 +433,7 @@ fn build_search_rows(
             ThemeKind::ReceivedReferralReward => referral.received_referral_theme_active(),
             _ => true,
         })
+        .filter(|(kind, _)| !favorite_set.contains(kind))
         .filter_map(|(kind, theme)| {
             let name = kind.to_string();
             match_indices_case_insensitive(&name, query)
@@ -360,10 +447,11 @@ fn build_search_rows(
     });
 
     let match_count = scored.len();
-    let mut rows: Vec<ThemeChooserRow> = scored
-        .into_iter()
-        .map(|(_, item)| ThemeChooserRow::Item(item))
-        .collect();
+    rows.extend(
+        scored
+            .into_iter()
+            .map(|(_, item)| ThemeChooserRow::Item(item)),
+    );
 
     if match_count > 0 {
         rows.push(ThemeChooserRow::HintRow(format!(
@@ -438,9 +526,12 @@ impl ThemeChooser {
 
         let warp_config_handle = WarpConfig::handle(ctx);
         ctx.subscribe_to_model(&warp_config_handle, |me, _, event, ctx| {
-            if let WarpConfigUpdateEvent::Themes = event {
-                me.update_themes(ctx);
-                ctx.notify();
+            match event {
+                WarpConfigUpdateEvent::Themes | WarpConfigUpdateEvent::Favorites => {
+                    me.update_themes(ctx);
+                    ctx.notify();
+                }
+                _ => {}
             }
         });
 
@@ -458,10 +549,13 @@ impl ThemeChooser {
         });
 
         let recents = ThemeSettings::as_ref(ctx).recent_themes.value().clone();
+        let warp_config_ref = WarpConfig::as_ref(ctx);
+        let favorites = warp_config_ref.favorite_themes().to_vec();
         let rows = build_default_rows(
             referral_theme_status.as_ref(ctx),
-            WarpConfig::as_ref(ctx).theme_config(),
+            warp_config_ref.theme_config(),
             &recents,
+            &favorites,
         );
 
         Self {
@@ -553,10 +647,13 @@ impl ThemeChooser {
                 *self.filtered_rows = if search_term.is_empty() {
                     None
                 } else {
+                    let warp_config_ref = WarpConfig::as_ref(ctx);
+                    let favorites = warp_config_ref.favorite_themes().to_vec();
                     Some(build_search_rows(
                         &search_term,
                         self.referral_theme_status.as_ref(ctx),
-                        WarpConfig::as_ref(ctx).theme_config(),
+                        warp_config_ref.theme_config(),
+                        &favorites,
                     ))
                 };
                 // Finding the position of the selected theme to adjust the scroll position of the
@@ -766,11 +863,26 @@ impl ThemeChooser {
 
     fn update_themes(&mut self, ctx: &mut ViewContext<Self>) {
         let recents = ThemeSettings::as_ref(ctx).recent_themes.value().clone();
+        let search_term = self.search_editor.as_ref(ctx).buffer_text(ctx);
+        let warp_config_ref = WarpConfig::as_ref(ctx);
+        let favorites = warp_config_ref.favorite_themes().to_vec();
         *self.rows = build_default_rows(
             self.referral_theme_status.as_ref(ctx),
-            WarpConfig::as_ref(ctx).theme_config(),
+            warp_config_ref.theme_config(),
             &recents,
+            &favorites,
         );
+        // If a search is active, the filtered rows also need to refresh —
+        // otherwise toggling a favorite mid-search wouldn't visibly move
+        // the row into / out of the pinned Favorites section.
+        if !search_term.is_empty() {
+            *self.filtered_rows = Some(build_search_rows(
+                &search_term,
+                self.referral_theme_status.as_ref(ctx),
+                warp_config_ref.theme_config(),
+                &favorites,
+            ));
+        }
     }
 
     fn up(&mut self, ctx: &mut ViewContext<Self>) {
@@ -835,6 +947,23 @@ impl ThemeChooser {
     fn click(&mut self, kind: ThemeKind, ctx: &mut ViewContext<Self>) {
         self.select_and_save_theme(&kind, ctx);
         ctx.emit(ThemeChooserEvent::Click);
+    }
+
+    /// Pin or unpin a theme as a favorite. The picker rebuilds via the
+    /// `WarpConfigUpdateEvent::Favorites` subscription, so we don't have to
+    /// touch `self.rows` here. No effect on the focused row, the search
+    /// state, or the picker visibility — toggling is non-destructive.
+    fn toggle_favorite(&mut self, kind: ThemeKind, ctx: &mut ViewContext<Self>) {
+        let warp_config = WarpConfig::handle(ctx);
+        warp_config.update(ctx, |warp_config, ctx| {
+            warp_config.toggle_favorite_theme(kind, ctx);
+        });
+    }
+
+    fn toggle_favorite_focused(&mut self, ctx: &mut ViewContext<Self>) {
+        if let Some(kind) = self.selected_theme.as_ref().cloned() {
+            self.toggle_favorite(kind, ctx);
+        }
     }
 
     fn render_header(
@@ -1014,8 +1143,9 @@ impl ThemeChooser {
             let list = UniformList::new(self.list_state.clone(), list_len, move |range, ctx| {
                 let appearance = Appearance::as_ref(ctx);
                 let font_family = appearance.ui_font_family();
-                let text_color = appearance.theme().active_ui_text_color().into();
+                let text_color: ColorU = appearance.theme().active_ui_text_color().into();
                 let selected_background_color = appearance.theme().surface_2();
+                let warp_config = WarpConfig::as_ref(ctx);
 
                 rows.clone()
                     .into_iter()
@@ -1028,8 +1158,10 @@ impl ThemeChooser {
                                 Some(selected_kind) => selected_kind == &item.kind,
                                 None => false,
                             };
+                            let is_favorite = warp_config.is_favorite_theme(&item.kind);
                             let element = item.render(
                                 selected,
+                                is_favorite,
                                 font_family,
                                 text_color,
                                 selected_background_color.into(),
@@ -1082,23 +1214,50 @@ fn render_section_header_row(
     font_family: FamilyId,
     appearance: &Appearance,
 ) -> Box<dyn Element> {
-    let header = Container::new(
-        appearance
-            .ui_builder()
-            .span(label.to_string())
-            .with_style(UiComponentStyles {
-                font_family_id: Some(font_family),
-                font_size: Some(SECTION_HEADER_FONT_SIZE),
-                font_weight: Some(Weight::Semibold),
-                ..Default::default()
-            })
-            .build()
+    let label_span = appearance
+        .ui_builder()
+        .span(label.to_string())
+        .with_style(UiComponentStyles {
+            font_family_id: Some(font_family),
+            font_size: Some(SECTION_HEADER_FONT_SIZE),
+            font_weight: Some(Weight::Semibold),
+            ..Default::default()
+        })
+        .build()
+        .finish();
+
+    // The "Favorites" header carries a filled star so the section title is
+    // self-describing — and so per-row stars inside the section can be
+    // suppressed without the section losing its visual identity.
+    let header_content: Box<dyn Element> = if label == FAVORITES_HEADER_LABEL {
+        let star = ConstrainedBox::new(
+            Icon::new(
+                FAVORITE_STAR_FILLED_SVG,
+                appearance.theme().active_ui_text_color(),
+            )
             .finish(),
-    )
-    .with_padding_top(SECTION_HEADER_MARGIN_TOP)
-    .with_padding_bottom(SECTION_HEADER_MARGIN_BOTTOM)
-    .with_padding_left(THEME_NAME_MARGIN_LEFT)
-    .finish();
+        )
+        .with_width(FAVORITES_HEADER_STAR_SIZE)
+        .with_height(FAVORITES_HEADER_STAR_SIZE)
+        .finish();
+        Flex::row()
+            .with_cross_axis_alignment(CrossAxisAlignment::Center)
+            .with_child(star)
+            .with_child(
+                Container::new(label_span)
+                    .with_margin_left(FAVORITES_HEADER_STAR_GAP)
+                    .finish(),
+            )
+            .finish()
+    } else {
+        label_span
+    };
+
+    let header = Container::new(header_content)
+        .with_padding_top(SECTION_HEADER_MARGIN_TOP)
+        .with_padding_bottom(SECTION_HEADER_MARGIN_BOTTOM)
+        .with_padding_left(THEME_NAME_MARGIN_LEFT)
+        .finish();
 
     // Pad to item-row height so UniformList's first-item height measurement
     // produces a row that comfortably fits both items and headers.
@@ -1164,6 +1323,8 @@ impl TypedActionView for ThemeChooser {
             Enter => self.enter(ctx),
             OpenThemeCreator => self.open_theme_creator_modal(ctx),
             OpenThemeDeletionModal(kind) => self.open_theme_deletion_modal(kind.clone(), ctx),
+            ToggleFavorite(kind) => self.toggle_favorite(kind.clone(), ctx),
+            ToggleFavoriteFocused => self.toggle_favorite_focused(ctx),
         }
     }
 }
@@ -1209,6 +1370,10 @@ struct ThemeChooserItem {
     pub kind: ThemeKind,
     warp_theme: WarpTheme,
     mouse_state: MouseStateHandle,
+    /// When true the right-side star is suppressed for this row. Set on
+    /// items that live inside the Favorites section, where the section
+    /// header already communicates favorited status.
+    hide_star: bool,
 }
 
 impl ThemeChooserItem {
@@ -1217,7 +1382,13 @@ impl ThemeChooserItem {
             kind,
             warp_theme,
             mouse_state: MouseStateHandle::default(),
+            hide_star: false,
         }
+    }
+
+    pub fn with_star_hidden(mut self) -> Self {
+        self.hide_star = true;
+        self
     }
 
     /// Compact palette preview: 16 small colored rects, one per ANSI color.
@@ -1262,12 +1433,14 @@ impl ThemeChooserItem {
     pub fn render(
         &self,
         is_selected: bool,
+        is_favorite: bool,
         font_family: FamilyId,
         text_color: ColorU,
         selected_background_color: ColorU,
     ) -> Box<dyn Element> {
         Hoverable::new(self.mouse_state.clone(), |state| {
             let swatches = self.render_swatch_strip();
+            let row_hovered = state.is_hovered();
 
             let name_text = Shrinkable::new(
                 1.,
@@ -1281,15 +1454,29 @@ impl ThemeChooserItem {
             )
             .finish();
 
-            let mut row = Flex::row()
-                .with_cross_axis_alignment(CrossAxisAlignment::Center)
-                .with_main_axis_size(MainAxisSize::Max)
-                .with_main_axis_alignment(MainAxisAlignment::Start)
-                .with_child(swatches)
-                .with_child(name_text);
+            // Left group: swatches + name. Wrapped in a row so the outer
+            // SpaceBetween row can push the star anchor to the far right.
+            // Made flexible so the outer row passes a bounded main-axis
+            // constraint — `name_text` is itself a Shrinkable, and a flex
+            // with flexible children panics under an infinite constraint.
+            let left_group = Shrinkable::new(
+                1.,
+                Flex::row()
+                    .with_cross_axis_alignment(CrossAxisAlignment::Center)
+                    .with_child(swatches)
+                    .with_child(name_text)
+                    .finish(),
+            )
+            .finish();
 
-            // Custom themes get a delete circle on hover, on the far right.
-            if matches!(self.kind, ThemeKind::Custom(_)) && state.is_hovered() {
+            // Right group: optional delete (custom themes on hover) and the
+            // ever-present star toggle. Building as a row keeps both controls
+            // anchored together at the right edge.
+            let mut right_group = Flex::row().with_cross_axis_alignment(CrossAxisAlignment::Center);
+
+            // Custom themes get a delete circle on hover, immediately left
+            // of the star.
+            if matches!(self.kind, ThemeKind::Custom(_)) && row_hovered {
                 let horizontal_line = ConstrainedBox::new(
                     Rect::new()
                         .with_background_color(ColorU::from_u32(0x000000ff))
@@ -1321,7 +1508,7 @@ impl ThemeChooserItem {
                 );
 
                 let theme_kind = self.kind.clone();
-                row = row.with_child(
+                right_group = right_group.with_child(
                     EventHandler::new(
                         Container::new(stack.finish())
                             .with_margin_right(DELETE_BUTTON_MARGIN_RIGHT)
@@ -1336,6 +1523,57 @@ impl ThemeChooserItem {
                     .finish(),
                 );
             }
+
+            // Star is rendered on every row except those inside the
+            // Favorites section (where the header already conveys it).
+            // States:
+            // - favorited → filled (full opacity)
+            // - not favorited, row not hovered → hollow (dim)
+            // - not favorited, row hovered → hollow (brighter)
+            if !self.hide_star {
+                let star_svg = if is_favorite {
+                    FAVORITE_STAR_FILLED_SVG
+                } else {
+                    FAVORITE_STAR_OUTLINE_SVG
+                };
+                let star_opacity = if is_favorite {
+                    1.0
+                } else if row_hovered {
+                    FAVORITE_STAR_HOVER_OPACITY
+                } else {
+                    FAVORITE_STAR_DIM_OPACITY
+                };
+                let kind_for_star = self.kind.clone();
+                let star = Container::new(
+                    ConstrainedBox::new(
+                        Icon::new(star_svg, text_color)
+                            .with_opacity(star_opacity)
+                            .finish(),
+                    )
+                    .with_width(FAVORITE_STAR_SIZE)
+                    .with_height(FAVORITE_STAR_SIZE)
+                    .finish(),
+                )
+                .with_margin_right(FAVORITE_STAR_MARGIN_RIGHT)
+                .finish();
+                right_group = right_group.with_child(
+                    EventHandler::new(star)
+                        .on_left_mouse_down(move |ctx, _, _| {
+                            ctx.dispatch_typed_action(ThemeChooserAction::ToggleFavorite(
+                                kind_for_star.clone(),
+                            ));
+                            DispatchEventResult::StopPropagation
+                        })
+                        .finish(),
+                );
+            }
+
+            let row = Flex::row()
+                .with_cross_axis_alignment(CrossAxisAlignment::Center)
+                .with_main_axis_size(MainAxisSize::Max)
+                .with_main_axis_alignment(MainAxisAlignment::SpaceBetween)
+                .with_child(left_group)
+                .with_child(right_group.finish());
 
             let mut container = Container::new(row.finish())
                 .with_padding_top(THEME_CHOOSER_ITEM_PADDING)

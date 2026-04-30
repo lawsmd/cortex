@@ -23,9 +23,10 @@ use super::util::{
     parse_multi_workflow_dir_entry, parse_single_theme_dir_entry, parse_tab_config_dir_entry,
 };
 use super::{
-    launch_configs_dir, tab_configs_dir, themes_dir, workflows_dir, WarpConfigUpdateEvent,
-    LAUNCH_CONFIG_COMMENT,
+    favorite_themes_path, launch_configs_dir, tab_configs_dir, themes_dir, workflows_dir,
+    WarpConfigUpdateEvent, LAUNCH_CONFIG_COMMENT,
 };
+use crate::themes::favorites;
 
 impl super::WarpConfig {
     pub fn new(ctx: &mut ModelContext<Self>) -> Self {
@@ -67,8 +68,12 @@ impl super::WarpConfig {
             Self::handle_warp_managed_paths_event,
         );
 
+        let theme_config = load_theme_configs(&themes_dir());
+        let favorite_themes = load_and_prune_favorites(&theme_config);
+
         Self {
-            theme_config: load_theme_configs(&themes_dir()),
+            theme_config,
+            favorite_themes,
             ..Default::default()
         }
     }
@@ -87,6 +92,47 @@ impl super::WarpConfig {
                 |me, theme_config, ctx| {
                     me.theme_config = theme_config;
                     ctx.emit(WarpConfigUpdateEvent::Themes);
+                    // A custom theme that was favorited may have been
+                    // deleted; prune the favorites against the new registry
+                    // and persist if anything dropped.
+                    if favorites::prune_orphans(&mut me.favorite_themes, &me.theme_config) {
+                        let path = favorite_themes_path();
+                        if let Err(err) =
+                            favorites::save_favorites(&path, &me.favorite_themes)
+                        {
+                            log::warn!(
+                                "favorites: failed to persist after theme prune ({}): {err:?}",
+                                path.display()
+                            );
+                        }
+                        ctx.emit(WarpConfigUpdateEvent::Favorites);
+                    }
+                },
+            );
+        }
+
+        if update_touches_path(update, &favorite_themes_path()) {
+            let _ = ctx.spawn(
+                async move {
+                    let path = favorite_themes_path();
+                    (path.clone(), favorites::load_favorites(&path))
+                },
+                |me, (path, mut loaded), ctx| {
+                    let pruned = favorites::prune_orphans(&mut loaded, &me.theme_config);
+                    if me.favorite_themes != loaded {
+                        me.favorite_themes = loaded;
+                        ctx.emit(WarpConfigUpdateEvent::Favorites);
+                    }
+                    if pruned {
+                        if let Err(err) =
+                            favorites::save_favorites(&path, &me.favorite_themes)
+                        {
+                            log::warn!(
+                                "favorites: failed to persist after watcher prune ({}): {err:?}",
+                                path.display()
+                            );
+                        }
+                    }
                 },
             );
         }
@@ -171,6 +217,25 @@ pub fn load_theme_configs(theme_path: &Path) -> WarpThemeConfig {
         .into_iter()
         .for_each(|(theme_name, theme)| theme_configs.add_new_theme(theme_name, theme));
     theme_configs
+}
+
+/// Read favorites from disk, prune orphans against `theme_config`, and write
+/// the pruned list back if anything was dropped. Returns the in-memory list
+/// to seed `WarpConfig::favorite_themes`.
+fn load_and_prune_favorites(
+    theme_config: &WarpThemeConfig,
+) -> Vec<crate::themes::theme::ThemeKind> {
+    let path = favorite_themes_path();
+    let mut favorites = favorites::load_favorites(&path);
+    if favorites::prune_orphans(&mut favorites, theme_config) {
+        if let Err(err) = favorites::save_favorites(&path, &favorites) {
+            log::warn!(
+                "favorites: failed to persist after startup prune ({}): {err:?}",
+                path.display()
+            );
+        }
+    }
+    favorites
 }
 
 /// Loads all workflows relative to the `workflow_path`.  A YAML file might
