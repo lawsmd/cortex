@@ -12,7 +12,7 @@ use warp_core::ui::theme::Fill;
 use warpui::{
     elements::{
         ChildView, Clipped, ConstrainedBox, Container, CrossAxisAlignment, Element, Flex,
-        MainAxisAlignment, MouseStateHandle, Padding, ParentElement, Rect, Shrinkable,
+        MainAxisAlignment, MouseStateHandle, Padding, ParentElement, Rect, Shrinkable, Text,
     },
     text_layout::ClipConfig,
     ui_components::{
@@ -26,6 +26,13 @@ use crate::appearance::Appearance;
 use crate::cortex_settings::action::{CortexSettingsAction, CortexSettingsSection};
 use crate::cortex_settings::appearance_page::{
     appearance_page_search_terms, render_appearance_page, AppearancePageState,
+};
+use crate::cortex_settings::brand::{
+    BRAND_HEADER_ICON_TO_TITLE_FONT_RATIO, BRAND_HEADER_TITLE_TO_FONT_RATIO,
+    BRAND_MENU_ICON_LABEL_GAP_RATIO,
+};
+use crate::cortex_settings::tabs_panes_page::{
+    render_tabs_panes_page, tabs_panes_page_search_terms, TabsPanesPageState,
 };
 use crate::editor::{
     EditorView, Event as EditorEvent, PropagateAndNoOpNavigationKeys, SingleLineEditorOptions,
@@ -46,8 +53,6 @@ const SIDEBAR_ITEM_HORIZONTAL_MARGIN: f32 = 6.0;
 const SEARCH_BAR_VERTICAL_MARGIN: f32 = 6.0;
 const SEARCH_BAR_HORIZONTAL_MARGIN: f32 = 8.0;
 const SEARCH_ICON_SIZE: f32 = 14.0;
-const HEADER_BRAIN_ICON_SIZE: f32 = 16.0;
-const HEADER_BRAIN_ICON_RIGHT_MARGIN: f32 = 6.0;
 const CONTENT_AREA_PADDING: f32 = 20.0;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -69,6 +74,7 @@ pub struct CortexSettingsView {
     current_section: CortexSettingsSection,
     sidebar_states: Vec<(CortexSettingsSection, MouseStateHandle)>,
     appearance_state: AppearancePageState,
+    tabs_panes_state: TabsPanesPageState,
     search_editor: ViewHandle<EditorView>,
 }
 
@@ -106,6 +112,7 @@ impl CortexSettingsView {
             current_section: CortexSettingsSection::default(),
             sidebar_states,
             appearance_state: AppearancePageState::default(),
+            tabs_panes_state: TabsPanesPageState::default(),
             search_editor,
         }
     }
@@ -139,6 +146,98 @@ impl CortexSettingsView {
             // nothing useful to do at this call site beyond re-rendering with
             // the new state on the next frame.
             let _ = settings.hide_pane_separators.toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_tabs_panel_matches_terminal_bg(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .tabs_panel_matches_terminal_bg
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_tabs_inverse_fill_on_selection(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .tabs_inverse_fill_on_selection
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn set_tabs_selected_title_alignment(
+        &mut self,
+        value: crate::settings::TabsSelectedTitleAlignment,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        use crate::settings::CortexSettings;
+        use settings::Setting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.tabs_selected_title_alignment.set_value(value, ctx);
+        });
+        ctx.notify();
+    }
+
+    fn set_tabs_selected_metadata_alignment(
+        &mut self,
+        value: crate::settings::TabsSelectedMetadataAlignment,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        use crate::settings::CortexSettings;
+        use settings::Setting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .tabs_selected_metadata_alignment
+                .set_value(value, ctx);
+        });
+        ctx.notify();
+    }
+
+    fn set_tabs_unselected_title_alignment(
+        &mut self,
+        value: crate::settings::TabsUnselectedTitleAlignment,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        use crate::settings::CortexSettings;
+        use settings::Setting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .tabs_unselected_title_alignment
+                .set_value(value, ctx);
+        });
+        ctx.notify();
+    }
+
+    fn set_tabs_unselected_metadata_alignment(
+        &mut self,
+        value: crate::settings::TabsUnselectedMetadataAlignment,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        use crate::settings::CortexSettings;
+        use settings::Setting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .tabs_unselected_metadata_alignment
+                .set_value(value, ctx);
         });
         ctx.notify();
     }
@@ -260,6 +359,9 @@ impl CortexSettingsView {
             CortexSettingsSection::Appearance => {
                 render_appearance_page(&self.appearance_state, appearance, app)
             }
+            CortexSettingsSection::TabsPanes => {
+                render_tabs_panes_page(&self.tabs_panes_state, appearance, app)
+            }
         }
     }
 }
@@ -297,6 +399,24 @@ impl warpui::TypedActionView for CortexSettingsView {
         match action {
             CortexSettingsAction::SelectSection(section) => self.select_section(*section, ctx),
             CortexSettingsAction::ToggleHidePaneSeparators => self.toggle_hide_pane_separators(ctx),
+            CortexSettingsAction::ToggleTabsPanelMatchesTerminalBg => {
+                self.toggle_tabs_panel_matches_terminal_bg(ctx)
+            }
+            CortexSettingsAction::ToggleTabsInverseFillOnSelection => {
+                self.toggle_tabs_inverse_fill_on_selection(ctx)
+            }
+            CortexSettingsAction::SetTabsSelectedTitleAlignment(value) => {
+                self.set_tabs_selected_title_alignment(*value, ctx)
+            }
+            CortexSettingsAction::SetTabsSelectedMetadataAlignment(value) => {
+                self.set_tabs_selected_metadata_alignment(*value, ctx)
+            }
+            CortexSettingsAction::SetTabsUnselectedTitleAlignment(value) => {
+                self.set_tabs_unselected_title_alignment(*value, ctx)
+            }
+            CortexSettingsAction::SetTabsUnselectedMetadataAlignment(value) => {
+                self.set_tabs_unselected_metadata_alignment(*value, ctx)
+            }
         }
     }
 }
@@ -330,33 +450,58 @@ impl BackingView for CortexSettingsView {
         let appearance = Appearance::as_ref(app);
         let theme = appearance.theme();
 
-        // Brain glyph tinted to `theme.foreground()`. The icon shader's
-        // red-channel-as-alpha rule means the SVG itself just needs non-zero
-        // red pixels (white-stroked); the call-site color wins. See
-        // docs/branding.md. Never the U+1F9E0 emoji.
-        let brain_color: Fill = theme.foreground().into();
+        // The Cortex Settings header reads as a section heading, so the title
+        // is bumped above the standard pane-title font size and the brain
+        // glyph above the avatar-menu's icon-to-text ratio — both via the
+        // header-specific brand ratios in `brand.rs`. Glyph and title share
+        // `theme.accent()` so the brand mark renders as one tinted unit. The
+        // icon shader's red-channel-as-alpha rule means the SVG itself just
+        // needs non-zero red pixels (white-stroked); the call-site color
+        // wins. See docs/branding.md. Never the U+1F9E0 emoji.
+        //
+        // The framework's `StandardHeader` hard-codes the title text size to
+        // `ui_font_size()` (see `app/src/pane_group/pane/view/header/mod.rs`)
+        // and `Properties` carries weight/style only — no font-size lever.
+        // Rather than fork that upstream file, we render glyph + title as a
+        // single flex row passed via `left_of_title` and leave the framework's
+        // `title` slot empty.
+        let base_font = appearance.ui_font_size();
+        let title_font = base_font * BRAND_HEADER_TITLE_TO_FONT_RATIO;
+        let icon_size = title_font * BRAND_HEADER_ICON_TO_TITLE_FONT_RATIO;
+        let icon_label_gap = icon_size * BRAND_MENU_ICON_LABEL_GAP_RATIO;
+        let accent_color: Fill = theme.accent().into();
+
         let brain = ConstrainedBox::new(
-            Container::new(Icon::Brain.to_warpui_icon(brain_color).finish())
-                .with_margin_right(HEADER_BRAIN_ICON_RIGHT_MARGIN)
+            Container::new(Icon::Brain.to_warpui_icon(accent_color).finish())
+                .with_margin_right(icon_label_gap)
                 .finish(),
         )
-        .with_width(HEADER_BRAIN_ICON_SIZE)
-        .with_height(HEADER_BRAIN_ICON_SIZE)
+        .with_width(icon_size)
+        .with_height(icon_size)
         .finish();
 
-        // Render the title in the theme's accent color so the Cortex Settings
-        // header visually distinguishes itself from regular pane headers
-        // (which use the default sub-text color).
-        let title_color: Fill = theme.accent().into();
+        let title_text = Text::new_inline(
+            CORTEX_SETTINGS_HEADER_TEXT.to_string(),
+            appearance.ui_font_family(),
+            title_font,
+        )
+        .with_color(accent_color.into())
+        .finish();
+
+        let header_row = Flex::row()
+            .with_cross_axis_alignment(CrossAxisAlignment::Center)
+            .with_child(brain)
+            .with_child(title_text)
+            .finish();
 
         HeaderContent::Standard(StandardHeader {
-            title: CORTEX_SETTINGS_HEADER_TEXT.to_string(),
+            title: String::new(),
             title_secondary: None,
             title_style: None,
-            title_color: Some(title_color),
+            title_color: None,
             title_clip_config: ClipConfig::start(),
             title_max_width: None,
-            left_of_title: Some(brain),
+            left_of_title: Some(header_row),
             right_of_title: None,
             left_of_overflow: None,
             options: StandardHeaderOptions {
@@ -377,7 +522,8 @@ impl BackingView for CortexSettingsView {
 #[allow(dead_code)]
 pub fn cortex_settings_search_terms() -> String {
     format!(
-        "cortex settings {}",
-        appearance_page_search_terms().join(" ")
+        "cortex settings {} {}",
+        appearance_page_search_terms().join(" "),
+        tabs_panes_page_search_terms().join(" ")
     )
 }
