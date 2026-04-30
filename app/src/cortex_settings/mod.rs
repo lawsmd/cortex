@@ -20,7 +20,9 @@
 //! to `pub(super)` items in the pane-group module hierarchy.
 pub mod action;
 pub mod appearance_page;
+pub mod brand;
 pub mod pane_manager;
+pub mod tabs_panes_page;
 pub mod view;
 
 pub use action::{CortexSettingsAction, CortexSettingsSection};
