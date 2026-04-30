@@ -15,6 +15,7 @@ impl super::WarpConfig {
             tab_config_errors: Default::default(),
             theme_config: WarpThemeConfig::new(),
             local_user_workflows: Default::default(),
+            favorite_themes: Default::default(),
         }
     }
 }

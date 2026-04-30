@@ -345,6 +345,10 @@ impl WarpThemeConfig {
     pub fn theme(&self, name: &ThemeKind) -> WarpTheme {
         self.theme_map.get(name).cloned().unwrap_or_else(dark_theme)
     }
+
+    pub fn contains_theme(&self, name: &ThemeKind) -> bool {
+        self.theme_map.contains_key(name)
+    }
 }
 
 impl Default for WarpThemeConfig {
