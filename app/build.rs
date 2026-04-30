@@ -26,6 +26,15 @@ fn main() -> Result<()> {
     println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_OS");
     println!("cargo:rerun-if-env-changed=CARGO_CFG_TARGET_FAMILY");
 
+    // RustEmbed (in `app/src/lib.rs`) embeds these directories at compile time,
+    // but doesn't itself emit `cargo:rerun-if-changed` declarations. Without
+    // these lines, editing an embedded asset (e.g. `app/assets/cortex/brain.svg`)
+    // does not invalidate the `warp` crate, so a rebuild silently re-uses the
+    // stale embedded bytes from the prior build. Watch the dirs explicitly so
+    // asset edits trigger re-embedding.
+    println!("cargo:rerun-if-changed=assets/bundled");
+    println!("cargo:rerun-if-changed=assets/cortex");
+
     let target_os = env::var("CARGO_CFG_TARGET_OS")?;
     let target_family = env::var("CARGO_CFG_TARGET_FAMILY")?;
 
@@ -428,23 +437,19 @@ fn copy_windows_assets(target_dir: &Path) {
         .join(target_arch);
 
     // Copy conpty.dll into target directory.
-    fs::copy(
-        windows_asset_dir.join(CONPTY_DLL_FILE),
-        target_dir.join(CONPTY_DLL_FILE),
-    )
-    .unwrap_or_else(|err| {
-        panic!("Could not copy conpty.dll from {windows_asset_dir:?} to {target_dir:?}: {err:#}")
-    });
+    copy_if_changed(
+        &windows_asset_dir.join(CONPTY_DLL_FILE),
+        &target_dir.join(CONPTY_DLL_FILE),
+        CONPTY_DLL_FILE,
+    );
 
     // Copy the DXC DLLs into the target directory.
     for dxc_file in [DXCOMPILER_DLL_FILE, DXIL_DLL_FILE] {
-        fs::copy(
-            windows_asset_dir.join(dxc_file),
-            target_dir.join(dxc_file),
-        )
-        .unwrap_or_else(|err| {
-            panic!("Could not copy {dxc_file} from {windows_asset_dir:?} to {target_dir:?}: {err:#}")
-        });
+        copy_if_changed(
+            &windows_asset_dir.join(dxc_file),
+            &target_dir.join(dxc_file),
+            dxc_file,
+        );
     }
 
     // Copy OpenConsole.exe into {target_directory}/{arch}.
@@ -452,8 +457,46 @@ fn copy_windows_assets(target_dir: &Path) {
     let new_platform_dir = target_dir.join(target_arch);
     let new_open_console_exe = new_platform_dir.join(OPEN_CONSOLE_EXE_FILE);
     fs::create_dir_all(&new_platform_dir).expect("Could not create new platform directory");
-    fs::copy(old_open_console_exe, new_open_console_exe)
-        .expect("Could not copy platform OpenConsole.exe");
+    copy_if_changed(
+        &old_open_console_exe,
+        &new_open_console_exe,
+        OPEN_CONSOLE_EXE_FILE,
+    );
+}
+
+/// Copy `src` to `dst` only when needed, with a Windows-friendly fallback.
+///
+/// Goal: rebuilds shouldn't fail just because the running app holds the
+/// destination file open. The vendored DLLs/exes change only when an upstream
+/// asset is bumped, so most builds can skip the copy entirely.
+///
+/// Behavior:
+/// 1. If `dst` exists and its mtime is at least as new as `src`'s, return
+///    without doing anything (the common incremental-build path).
+/// 2. Otherwise, attempt `fs::copy`.
+/// 3. If the copy fails *and* a previous `dst` is still in place (Windows
+///    sharing-violation case), emit a `cargo:warning` and continue. The build
+///    proceeds with the existing copy, which is byte-identical when the
+///    source hasn't changed.
+/// 4. If the copy fails and `dst` doesn't exist, panic — there's no fallback.
+fn copy_if_changed(src: &Path, dst: &Path, label: &str) {
+    if let (Ok(src_meta), Ok(dst_meta)) = (fs::metadata(src), fs::metadata(dst)) {
+        if let (Ok(src_t), Ok(dst_t)) = (src_meta.modified(), dst_meta.modified()) {
+            if dst_t >= src_t {
+                return;
+            }
+        }
+    }
+    if let Err(err) = fs::copy(src, dst) {
+        if dst.exists() {
+            println!(
+                "cargo:warning=could not refresh {label} ({err}). Reusing existing copy at \
+                 {dst:?}. Close the running app and rebuild if {label} has been updated upstream."
+            );
+        } else {
+            panic!("Could not copy {label} from {src:?} to {dst:?}: {err:#}");
+        }
+    }
 }
 
 #[cfg(windows)]
@@ -470,8 +513,12 @@ fn embed_resource_file(target_dir: &Path) {
         .join("no-padding")
         .join("icon.ico");
 
-    fs::copy(icon_path, target_dir.join("icon.ico"))
-        .unwrap_or_else(|err| panic!("Could not copy icon: {err:#}"));
+    // Cortex: re-run the build script when the channel icon changes so icon swaps
+    // don't require `cargo clean -p warp`. See docs/branding.md "Why two channels?"
+    // for why bin_name resolves to "local" during build-script execution.
+    println!("cargo:rerun-if-changed={}", icon_path.display());
+
+    copy_if_changed(&icon_path, &target_dir.join("icon.ico"), "icon.ico");
 
     let resource_file_path = target_dir.join("resource.rc");
     let mut rcfile = fs::File::create(&resource_file_path).unwrap();

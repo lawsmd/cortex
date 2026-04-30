@@ -326,6 +326,13 @@ pub enum Icon {
     JsonLang,
     PhpLang,
     KotlinLang,
+    /// Cortex brand glyph. Loads `app/assets/cortex/brain.svg` (Lucide-derived,
+    /// monochrome, `stroke="currentColor"` so it tints to the active text/accent
+    /// color). See `docs/branding.md` for canonical usage rules — this is the
+    /// only correct way to render the Cortex brain in-app; never use the U+1F9E0
+    /// codepoint, which the system emoji font paints as a multicolor glyph that
+    /// won't tint with the theme.
+    Brain,
 }
 
 impl From<Icon> for &'static str {
@@ -648,6 +655,7 @@ impl From<Icon> for &'static str {
             Icon::JsonLang => "bundled/svg/file_type/json.svg",
             Icon::PhpLang => "bundled/svg/file_type/php.svg",
             Icon::KotlinLang => "bundled/svg/file_type/kotlin.svg",
+            Icon::Brain => "cortex/brain.svg",
         }
     }
 }

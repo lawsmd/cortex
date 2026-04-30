@@ -1,0 +1,23 @@
+<!--
+  Cortex brain glyph (filled silhouette).
+
+  History: this used to be Lucide's stroke-only brain (https://lucide.dev/icons/brain)
+  with `stroke="currentColor"`, then `stroke="#000"`. Both rendered as fully transparent
+  through warpui's `Icon` rasterizer — the rasterizer apparently does not produce
+  opaque pixels for stroked-only paths. The runtime `draw_icon` tint then has no
+  pixels to recolor, so nothing is visible.
+
+  Fix: keep the two closed hemisphere paths from the Lucide source (left + right
+  halves of the brain), drop the open detail strokes, and fill the result. Each
+  hemisphere is a closed shape (ends with `Z`) so `fill="#000"` produces a
+  recognizable filled brain silhouette. `Icon` re-tints all opaque pixels at
+  paint time via `ctx.scene.draw_icon(..., color)`, so the literal `#000` is just
+  a placeholder for "render an opaque pixel here" — the runtime color wins.
+
+  Source: Lucide (https://lucide.dev/icons/brain) — ISC License.
+  Copyright (c) Lucide Contributors. Original Feather portions (c) Cole Bemis.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#000">
+  <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
+  <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/>
+</svg>

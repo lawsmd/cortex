@@ -34,7 +34,7 @@ Then CMD+Q the running Cortex and relaunch via Raycast (or Spotlight). The scrip
 Branding (display name "Cortex", bundle id `dev.lawsmd.Cortex`, icon) is baked into:
 
 - `app/Cargo.toml`'s `[package.metadata.bundle.bin.warp-oss]` section — `name` and `identifier`
-- `app/channels/oss/icon/no-padding/512x512.png` — the source PNG `cargo bundle` reads (regenerate from `scripts/cortex-icon.icns` via `sips` if the icon ever changes)
+- `app/channels/oss/icon/no-padding/512x512.png` — the source PNG `cargo bundle` reads. Regenerate from the master at `app/assets/cortex/CortexIcon.png` per `docs/branding.md` if the icon ever changes.
 
 Edit those to change Cortex's identity. **Don't** post-process the built bundle — the build output is already correctly branded.
 
@@ -103,7 +103,7 @@ Full pre-flight checklist for going public: `docs/fork-management.md § Public-r
 
 ## Note on the `docs/` directory
 
-`docs/` is **gitignored** (see `.gitignore` line 61). It contains personal reference material — roadmaps, architecture notes, restyle plans, the full operational tutorials. The user Syncthing's `~/cortex/docs/` directly across machines, so the docs sync without going through git.
+`docs/` is **gitignored** (see `.gitignore` line 65). It contains personal reference material — roadmaps, architecture notes, restyle plans, the full operational tutorials. The user Syncthing's `~/cortex/docs/` directly across machines, so the docs sync without going through git.
 
 What this means in practice:
 
