@@ -1,3 +1,13 @@
 *.pdb filter=lfs diff=lfs merge=lfs -text
 crates/input_classifier/models/** filter=lfs diff=lfs merge=lfs -text
 crates/input_classifier/models/**/*tokenizer.json -filter -diff -merge text linguist-generated=true
+
+# Normalize line endings for text files: store LF in the repo regardless of
+# the contributor's local core.autocrlf setting. Keeps Rust sources LF-clean
+# when working from Windows machines that have core.autocrlf=true.
+* text=auto
+
+# cmd.exe needs CRLF for reliable parsing of `||`, `&&`, and multi-line scripts.
+# Cortex-side; not upstream Warp.
+*.bat text eol=crlf
+*.cmd text eol=crlf

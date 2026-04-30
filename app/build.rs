@@ -517,6 +517,9 @@ fn embed_resource_file(target_dir: &Path) {
     // don't require `cargo clean -p warp`. See docs/branding.md "Why two channels?"
     // for why bin_name resolves to "local" during build-script execution.
     println!("cargo:rerun-if-changed={}", icon_path.display());
+    // Cortex: re-run when WARP_APP_NAME flips so prod ("Cortex") and dev
+    // ("Cortex Dev") builds get distinct embedded resources without `cargo clean`.
+    println!("cargo:rerun-if-env-changed=WARP_APP_NAME");
 
     copy_if_changed(&icon_path, &target_dir.join("icon.ico"), "icon.ico");
 
