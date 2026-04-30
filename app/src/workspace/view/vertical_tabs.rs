@@ -2663,6 +2663,7 @@ enum TypedPane<'a> {
     AIFact,
     AIDocument,
     ExecutionProfileEditor,
+    CortexSettings,
     Other,
 }
 
@@ -2699,6 +2700,7 @@ impl TypedPane<'_> {
             TypedPane::AIFact => SummaryPaneKind::AIFact,
             TypedPane::AIDocument => SummaryPaneKind::AIDocument,
             TypedPane::ExecutionProfileEditor => SummaryPaneKind::ExecutionProfileEditor,
+            TypedPane::CortexSettings => SummaryPaneKind::Other,
             TypedPane::Other => SummaryPaneKind::Other,
         }
     }
@@ -2725,6 +2727,7 @@ impl TypedPane<'_> {
             TypedPane::AIFact => "Rules",
             TypedPane::AIDocument => "Plan",
             TypedPane::ExecutionProfileEditor => "Execution Profile",
+            TypedPane::CortexSettings => "Cortex Settings",
             TypedPane::Other => "Other",
         }
     }
@@ -2747,6 +2750,7 @@ impl TypedPane<'_> {
             | TypedPane::AIFact
             | TypedPane::AIDocument
             | TypedPane::ExecutionProfileEditor
+            | TypedPane::CortexSettings
             | TypedPane::Other => None,
         }
     }
@@ -2768,6 +2772,7 @@ impl TypedPane<'_> {
             TypedPane::AIFact => WarpIcon::BookOpen,
             TypedPane::AIDocument => WarpIcon::Compass,
             TypedPane::ExecutionProfileEditor => WarpIcon::Lightning,
+            TypedPane::CortexSettings => WarpIcon::Brain,
             TypedPane::Other => WarpIcon::File,
         }
     }
@@ -2910,6 +2915,7 @@ fn build_vertical_tabs_summary_data(
             | TypedPane::AIFact
             | TypedPane::AIDocument
             | TypedPane::ExecutionProfileEditor
+            | TypedPane::CortexSettings
             | TypedPane::Other => {
                 push_normalized_unique_summary_label(
                     &mut primary_labels,
@@ -3036,6 +3042,7 @@ impl<'a> PaneProps<'a> {
             | TypedPane::AIFact
             | TypedPane::AIDocument
             | TypedPane::ExecutionProfileEditor
+            | TypedPane::CortexSettings
             | TypedPane::Other => {
                 non_terminal_search_text_fragments(self.generated_or_tab_title(), &self.subtitle)
             }
@@ -3347,6 +3354,7 @@ impl PaneGroup {
             IPaneType::AIFact => TypedPane::AIFact,
             IPaneType::AIDocument => TypedPane::AIDocument,
             IPaneType::ExecutionProfileEditor => TypedPane::ExecutionProfileEditor,
+            IPaneType::CortexSettings => TypedPane::CortexSettings,
             IPaneType::GetStarted
             | IPaneType::NetworkLog
             | IPaneType::Welcome
@@ -5968,6 +5976,7 @@ fn typed_pane_warp_drive_object_type(typed: &TypedPane<'_>) -> Option<DriveObjec
         | TypedPane::Settings
         | TypedPane::EnvironmentManagement
         | TypedPane::ExecutionProfileEditor
+        | TypedPane::CortexSettings
         | TypedPane::Other => None,
     }
 }
@@ -5995,6 +6004,7 @@ fn render_detail_section(
         | TypedPane::Settings
         | TypedPane::EnvironmentManagement
         | TypedPane::ExecutionProfileEditor
+        | TypedPane::CortexSettings
         | TypedPane::Other => Empty::new().finish(),
     }
 }

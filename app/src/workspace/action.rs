@@ -193,6 +193,8 @@ pub enum WorkspaceAction {
         search_query: String,
         section: Option<SettingsSection>,
     },
+    /// Cortex fork: open the Cortex Settings pane (parallel to ShowSettings).
+    ShowCortexSettings,
     ShowThemeChooser(ThemeChooserMode),
     ShowThemeChooserForActiveTheme,
     IncreaseFontSize,
@@ -813,6 +815,7 @@ impl WorkspaceAction {
             | ConfigureKeybindingSettings { .. }
             | ExportAllWarpDriveObjects
             | ShowSettings
+            | ShowCortexSettings
             | ShowSettingsPage(_)
             | ShowSettingsPageWithSearch { .. }
             | ShowThemeChooser(_)

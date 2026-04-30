@@ -22,6 +22,7 @@ pub(super) mod get_started_view;
 #[cfg(not(target_family = "wasm"))]
 pub(super) mod local_harness_launch;
 pub(super) mod network_log_pane;
+pub(super) mod cortex_settings_pane;
 pub(super) mod notebook_pane;
 pub(super) mod settings_pane;
 pub(super) mod terminal_pane;
@@ -45,6 +46,7 @@ use crate::{
     drive::sharing::ShareableObject,
     env_vars::view::env_var_collection::EnvVarCollectionView,
     menu::MenuItem,
+    cortex_settings::CortexSettingsView,
     notebooks::{file::FileNotebookView, notebook::NotebookView},
     server::network_log_view::NetworkLogView,
     server::telemetry::SharingDialogSource,
@@ -150,6 +152,8 @@ pub(crate) enum IPaneType {
     ExecutionProfileEditor,
     GetStarted,
     NetworkLog,
+    /// Cortex fork: the Cortex Settings pane.
+    CortexSettings,
     Welcome,
     DeferredPlaceholder,
     /// A pane type only for tests.
@@ -174,6 +178,7 @@ impl Display for IPaneType {
             IPaneType::ExecutionProfileEditor => write!(f, "Execution Profile Editor"),
             IPaneType::GetStarted => write!(f, "GetStarted"),
             IPaneType::NetworkLog => write!(f, "Network Log"),
+            IPaneType::CortexSettings => write!(f, "Cortex Settings"),
             IPaneType::Welcome => write!(f, "Welcome"),
             IPaneType::DeferredPlaceholder => write!(f, "Placeholder"),
             #[cfg(test)]
@@ -276,6 +281,13 @@ impl PaneId {
         Self::new_from_ctx(IPaneType::NetworkLog, ctx)
     }
 
+    /// Creates a [`PaneId`] from a [`ViewContext<PaneView<CortexSettingsView>>`].
+    pub fn from_cortex_settings_pane_ctx(
+        ctx: &ViewContext<PaneView<CortexSettingsView>>,
+    ) -> Self {
+        Self::new_from_ctx(IPaneType::CortexSettings, ctx)
+    }
+
     /// Creates a [`PaneId`] from a [`PaneView<TerminalView>`] entity ID.
     pub fn from_terminal_pane_view(
         terminal_pane_view: &ViewHandle<terminal_pane::TerminalPaneView>,
@@ -375,6 +387,13 @@ impl PaneId {
         network_log_pane_view: &ViewHandle<PaneView<NetworkLogView>>,
     ) -> Self {
         Self::new(IPaneType::NetworkLog, network_log_pane_view)
+    }
+
+    /// Creates a [`PaneId`] from a [`PaneView<CortexSettingsView>`] entity ID.
+    pub fn from_cortex_settings_pane_view(
+        cortex_settings_pane_view: &ViewHandle<PaneView<CortexSettingsView>>,
+    ) -> Self {
+        Self::new(IPaneType::CortexSettings, cortex_settings_pane_view)
     }
 
     #[cfg_attr(not(feature = "local_fs"), allow(dead_code))]
@@ -491,6 +510,9 @@ impl PaneId {
             }
             IPaneType::NetworkLog => {
                 ChildView::<PaneView<NetworkLogView>>::with_id(self.0.pane_view_id).finish()
+            }
+            IPaneType::CortexSettings => {
+                ChildView::<PaneView<CortexSettingsView>>::with_id(self.0.pane_view_id).finish()
             }
             IPaneType::Welcome => {
                 ChildView::<PaneView<WelcomeView>>::with_id(self.0.pane_view_id).finish()

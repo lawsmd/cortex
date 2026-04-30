@@ -1703,6 +1703,7 @@ impl BackingView for ExecutionProfileEditorView {
             title: HEADER_TEXT.into(),
             title_secondary: None,
             title_style: None,
+            title_color: None,
             title_clip_config: warpui::text_layout::ClipConfig::start(),
             title_max_width: None,
             left_of_title: None,

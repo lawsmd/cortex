@@ -228,6 +228,15 @@ impl Input {
             styles::default_border_color(appearance.theme())
         };
 
+        // Cortex fork: width is 0 when `hide_pane_separators` is on so the
+        // top border vanishes (border element preserved to avoid layout shift).
+        let agent_input_border_width =
+            if *crate::settings::CortexSettings::as_ref(app).hide_pane_separators {
+                0.
+            } else {
+                1.
+            };
+
         let mut input = Container::new(
             Hoverable::new(self.hoverable_handle.clone(), |_| drop_target)
                 .on_hover(|is_hovered, ctx, _app, _position| {
@@ -238,7 +247,7 @@ impl Input {
                 })
                 .finish(),
         )
-        .with_border(Border::top(1.).with_border_color(border_color))
+        .with_border(Border::top(agent_input_border_width).with_border_color(border_color))
         .with_padding_bottom(4.);
 
         if self.agent_view_controller.as_ref(app).is_inline() {

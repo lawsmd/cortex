@@ -133,6 +133,11 @@ pub enum LeafContents {
     /// The in-app network log pane. Not persisted across restarts because the
     /// backing log is an in-memory ring buffer that starts empty on launch.
     NetworkLog,
+    /// The Cortex Settings pane (Cortex fork). Not persisted across restarts:
+    /// the pane has no transient state worth preserving (selected section
+    /// resets to default; setting values are persisted by the settings system
+    /// independently of pane lifetime).
+    CortexSettings,
     /// An entrypoint pane type to launch other pane types from a search palette. The default view
     /// when creating a tab.
     Welcome {
@@ -161,7 +166,11 @@ impl LeafContents {
             LeafContents::NetworkLog
             // Environment management panes are opened on-demand via workspace
             // actions and have no persistable state.
-            | LeafContents::EnvironmentManagement(_) => false,
+            | LeafContents::EnvironmentManagement(_)
+            // Cortex Settings: same rationale as NetworkLog — no transient
+            // pane state worth restoring; setting values themselves persist
+            // through the settings system, not through this pane.
+            | LeafContents::CortexSettings => false,
             LeafContents::Terminal(_)
             | LeafContents::Notebook(_)
             | LeafContents::AIDocument(_)
