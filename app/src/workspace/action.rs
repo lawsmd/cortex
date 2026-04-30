@@ -171,6 +171,13 @@ pub enum WorkspaceAction {
     ToggleNewSessionMenu {
         position: Vector2F,
     },
+    /// Cortex: opens the saved-projects picker anchored to the bottom "+"
+    /// button on the vertical tab panel. Distinct from `ToggleNewSessionMenu`
+    /// so the bottom-button popup stays project-only and doesn't bleed into
+    /// Warp's tab-configs menu.
+    ToggleProjectsPickerMenu {
+        position: Vector2F,
+    },
     SelectNewSessionMenuItem(NewSessionMenuItem),
     AutoupdateFailureLink,
     ApplyUpdate,
@@ -835,6 +842,7 @@ impl WorkspaceAction {
             | OpenNewSessionMenu { .. }
             | ToggleTabConfigsMenu
             | ToggleNewSessionMenu { .. }
+            | ToggleProjectsPickerMenu { .. }
             | SelectNewSessionMenuItem(_)
             | ToggleTabBarOverflowMenu
             | CheckForUpdate

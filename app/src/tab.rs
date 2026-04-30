@@ -113,9 +113,19 @@ pub enum TabTelemetryAction {
 }
 #[derive(Debug, Clone)]
 pub enum NewSessionMenuItem {
+    /// Cortex: opens a tab in the cwd of a saved project entry from
+    /// `~/.warp-oss/projects.json`. Triggered by the bottom "+" button on the
+    /// vertical tab panel.
+    OpenProject(crate::saved_projects::Project),
     OpenLaunchConfig(LaunchConfig),
     OpenLaunchConfigDocs,
     CreateNewTabConfig,
+    // TODO(cortex,reskin-vertical-tabs-step-2): add OpenAdHocPath that
+    // launches a directory navigator (file-picker UI), opens a tab in the
+    // chosen directory with a neutral default color (#cccccc-ish), and
+    // pushes the path onto a future recents list. Tracked separately from
+    // the saved-project flow because UX (file browser) and styling
+    // (default color) differ.
 }
 
 #[derive(Clone, Copy)]
