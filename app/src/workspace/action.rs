@@ -285,11 +285,17 @@ pub enum WorkspaceAction {
     SetVerticalTabsDisplayGranularity(VerticalTabsDisplayGranularity),
     SetVerticalTabsTabItemMode(VerticalTabsTabItemMode),
     SetVerticalTabsViewMode(VerticalTabsViewMode),
+    /// Cortex: set the vertical spacing (px) between tab rows in the vertical tab panel.
+    SetVerticalTabsRowSpacing(f32),
     SetVerticalTabsPrimaryInfo(VerticalTabsPrimaryInfo),
     SetVerticalTabsCompactSubtitle(VerticalTabsCompactSubtitle),
     ToggleVerticalTabsShowPrLink,
     ToggleVerticalTabsShowDiffStats,
     ToggleVerticalTabsShowDetailsOnHover,
+    /// Cortex: hide the leading icon (and its border) in each vertical-tab row.
+    ToggleCortexHideTabIcon,
+    /// Cortex: hide the per-tab metadata subtitle in each vertical-tab row.
+    ToggleCortexHideTabMetadata,
     /// Closes the focused panel. This happens as an explicit action from the user.
     ClosePanel,
     CopyTextToClipboard(String),
@@ -887,11 +893,14 @@ impl WorkspaceAction {
             | SetVerticalTabsDisplayGranularity(_)
             | SetVerticalTabsTabItemMode(_)
             | SetVerticalTabsViewMode(_)
+            | SetVerticalTabsRowSpacing(_)
             | SetVerticalTabsPrimaryInfo(_)
             | SetVerticalTabsCompactSubtitle(_)
             | ToggleVerticalTabsShowPrLink
             | ToggleVerticalTabsShowDiffStats
             | ToggleVerticalTabsShowDetailsOnHover
+            | ToggleCortexHideTabIcon
+            | ToggleCortexHideTabMetadata
             | ToggleWelcomeTips
             | CopyTextToClipboard(_)
             | CopyAccessTokenToClipboard

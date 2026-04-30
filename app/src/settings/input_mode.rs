@@ -6,9 +6,10 @@ use settings::{
 define_settings_group!(InputModeSettings, settings: [
     input_mode: InputModeState {
         type: InputMode,
-        // Note that for new users, we now override this default value in SettingsInitializer
-        // to set it to InputMode::Waterfall.
-        default: InputMode::PinnedToBottom,
+        // Cortex default: Waterfall ("Start at the top / Classic mode") instead
+        // of upstream Warp's PinnedToBottom. Users can still switch via
+        // Settings → Appearance → Input → Input Position.
+        default: InputMode::Waterfall,
         supported_platforms: SupportedPlatforms::ALL,
         sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
         private: false,

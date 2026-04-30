@@ -1946,13 +1946,24 @@ impl PaneGroup {
                 ))
             }
             LeafContents::CortexSettings => {
-                // Cortex Settings panes are intentionally not restored — see
-                // `LeafContents::is_persisted` and `save_pane_state` for the
-                // skip path. Reaching this arm indicates the persistence side
-                // failed to filter the variant out and is a programmer error.
-                Err(anyhow::anyhow!(
-                    "Cortex Settings pane should not have been persisted, as it cannot be restored"
-                ))
+                // Cortex Settings panes are non-persisted (see
+                // `LeafContents::is_persisted` and `save_pane_state`), so this
+                // arm is never reached from cold-start restoration. It IS
+                // reached at runtime from `Workspace::show_cortex_settings`,
+                // which builds a fresh `PanesLayout::Snapshot` to open the
+                // pane as its own tab. Construct a fresh pane the same way
+                // `LeafContents::GetStarted` does — there's no transient state
+                // to recover, since settings values are persisted by the
+                // settings system independently of the pane.
+                let pane: Box<dyn AnyPaneContent + 'static> =
+                    Box::new(CortexSettingsPane::new(ctx));
+                let pane_id = pane.as_pane().id();
+                pane_contents.insert(pane_id, pane);
+                let focus = InitialFocus {
+                    focused_pane: leaf.is_focused.then_some(pane_id),
+                    active_session: None,
+                };
+                Ok((PaneData::new(pane_id), focus))
             }
             LeafContents::GetStarted => {
                 if !FeatureFlag::GetStartedTab.is_enabled() {

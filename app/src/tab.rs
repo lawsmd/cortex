@@ -152,6 +152,13 @@ pub struct TabData {
     pub default_directory_color: Option<AnsiColorIdentifier>,
     /// Color chosen manually by the user (e.g. right-click menu).
     pub selected_color: SelectedTabColor,
+    /// Cortex-only: hex accent color carried from a saved project (or any
+    /// future Cortex-fork source that needs an arbitrary RGB tint, beyond the
+    /// 8 ANSI choices `selected_color` is restricted to). Takes precedence
+    /// over `selected_color` / `default_directory_color` in the
+    /// vertical-tabs accent-color resolution path. `None` means "no Cortex
+    /// override — fall through to the existing color logic."
+    pub cortex_accent: Option<ColorU>,
     pub indicator_hover_state: MouseStateHandle,
     // Used by a later drag-tab branch to distinguish tabs that have moved into detached windows.
     pub detached: bool,
@@ -170,6 +177,7 @@ impl TabData {
             draggable_state: Default::default(),
             default_directory_color: None,
             selected_color: SelectedTabColor::Unset,
+            cortex_accent: None,
             indicator_hover_state: Default::default(),
             detached: false,
         }

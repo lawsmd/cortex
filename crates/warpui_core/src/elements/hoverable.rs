@@ -14,6 +14,17 @@ use std::mem;
 use std::sync::{Arc, Mutex, MutexGuard};
 use std::time::Duration;
 
+// Cortex: rate-limit the back-to-back-synthetic-events warning per
+// `MouseState` pointer. Upstream emits one warning per occurrence, which fires
+// at frame rate (~40 Hz) when popup-internal hover state oscillates due to a
+// notify-storm in the vertical-tabs settings popup. Per-pointer rate-limiting
+// preserves the warning's signal for new bugs while capping the noise from
+// the known-oscillating popup. See
+// `docs/logging/postmortems/2026-04-30-hoverable-spam.md`.
+static CORTEX_HOVERABLE_WARN_LAST: std::sync::LazyLock<
+    Mutex<std::collections::HashMap<usize, Instant>>,
+> = std::sync::LazyLock::new(|| Mutex::new(std::collections::HashMap::new()));
+
 /// First arg is is_hovered. True when hovering in, false when hovering out.
 type HoverHandler = Box<dyn FnMut(bool, &mut EventContext, &AppContext, Vector2F)>;
 type ClickHandler = Box<dyn FnMut(&mut EventContext, &AppContext, Vector2F)>;
@@ -510,9 +521,24 @@ impl Hoverable {
             is_synthetic,
         );
         if was_synthetic && is_synthetic {
-            log::warn!(
-                "Not handling MouseMoved event in Hoverable due to back-to-back synthetic events."
-            );
+            // Cortex: rate-limit at 1/sec per MouseState pointer. The warning
+            // is a real signal for hover-coupling bugs but, in the vertical-
+            // tabs settings popup, the popup's underlying notify-storm causes
+            // many paint-only Hoverables to flip every frame. See
+            // `docs/logging/postmortems/2026-04-30-hoverable-spam.md`.
+            let ptr = Arc::as_ptr(&self.state) as usize;
+            let now = Instant::now();
+            let mut last = CORTEX_HOVERABLE_WARN_LAST.lock().unwrap();
+            let should_warn = last
+                .get(&ptr)
+                .is_none_or(|prev| now.duration_since(*prev) >= Duration::from_secs(1));
+            if should_warn {
+                last.insert(ptr, now);
+                drop(last);
+                log::warn!(
+                    "Not handling MouseMoved event in Hoverable due to back-to-back synthetic events."
+                );
+            }
             return false;
         }
 

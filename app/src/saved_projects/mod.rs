@@ -77,3 +77,20 @@ fn expand_tilde(path: &Path) -> Option<PathBuf> {
     let home = dirs::home_dir()?;
     Some(home.join(rest))
 }
+
+/// Returns the saved project whose `cwd` is the longest prefix of `path`,
+/// or `None` if no project covers it. Used at session-restore time to
+/// reapply a project's accent color to a restored tab whose persisted cwd
+/// lives under (or at) the project root, since `cortex_accent` is not part
+/// of the persisted `TabSnapshot`.
+pub fn project_for_path<'a>(path: &Path, projects: &'a [Project]) -> Option<&'a Project> {
+    let needle = canonicalize_or_self(path);
+    projects
+        .iter()
+        .filter(|p| needle.starts_with(canonicalize_or_self(&p.cwd)))
+        .max_by_key(|p| canonicalize_or_self(&p.cwd).as_os_str().len())
+}
+
+fn canonicalize_or_self(p: &Path) -> PathBuf {
+    dunce::canonicalize(p).unwrap_or_else(|_| p.to_path_buf())
+}
