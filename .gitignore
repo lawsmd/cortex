@@ -70,5 +70,13 @@ __pycache__/
 .note/
 
 # Personal Cortex docs — Syncthing-synced across Michael's machines, not for the public repo.
-# See ./CLAUDE.md "Note on the docs/ directory" for the rationale.
+# See docs/CLAUDE.md "Note on the docs/ directory" for the rationale.
 /docs/
+
+# CLAUDE.md is a personal agent-collaboration playbook, not project documentation.
+# Lives in docs/CLAUDE.md (Syncthing-synced); the root path is a hardlink so
+# Claude Code auto-loads it. See docs/development/agent-workflow.md for setup.
+/CLAUDE.md
+
+# Dev-loop session logs from scripts\launch-cortex-dev.bat. See CLAUDE.md "Live dev-session logs".
+/.cortex-logs/
