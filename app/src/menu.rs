@@ -429,6 +429,9 @@ pub struct MenuItemFields<A: Action + Clone> {
     /// [`MenuItemLabel::Text`] labels — multiline/stacked/labeled/icon/custom
     /// variants ignore this field.
     clip_config: Option<ClipConfig>,
+    /// Optional override (in logical pixels) for the gap between the leading
+    /// icon and the label. When `None`, the gap is `icon_size / 2`.
+    icon_label_gap_override: Option<f32>,
 }
 
 impl<A: Action + Clone> std::fmt::Debug for MenuItemFields<A> {
@@ -470,6 +473,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: None,
             icon_size_override: None,
             clip_config: None,
+            icon_label_gap_override: None,
         }
     }
 
@@ -500,6 +504,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: None,
             icon_size_override: None,
             clip_config: None,
+            icon_label_gap_override: None,
         }
     }
 
@@ -533,6 +538,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: None,
             icon_size_override: None,
             clip_config: None,
+            icon_label_gap_override: None,
         }
     }
 
@@ -569,6 +575,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: None,
             icon_size_override: None,
             clip_config: None,
+            icon_label_gap_override: None,
         }
     }
 
@@ -603,6 +610,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: None,
             icon_size_override: None,
             clip_config: None,
+            icon_label_gap_override: None,
         }
     }
 
@@ -636,6 +644,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: None,
             icon_size_override: None,
             clip_config: None,
+            icon_label_gap_override: None,
         }
     }
 
@@ -666,6 +675,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: None,
             icon_size_override: None,
             clip_config: None,
+            icon_label_gap_override: None,
         }
     }
 
@@ -712,6 +722,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: self.override_hover_background_color,
             icon_size_override: self.icon_size_override,
             clip_config: self.clip_config,
+            icon_label_gap_override: self.icon_label_gap_override,
         }
     }
 
@@ -773,6 +784,13 @@ impl<A: Action + Clone> MenuItemFields<A> {
     /// The default is `appearance.ui_font_size()`.
     pub fn with_icon_size_override(mut self, size: f32) -> Self {
         self.icon_size_override = Some(size);
+        self
+    }
+
+    /// Overrides the gap (in logical pixels) between the leading icon and
+    /// the label. The default is `icon_size / 2`.
+    pub fn with_icon_label_gap_override(mut self, gap: f32) -> Self {
+        self.icon_label_gap_override = Some(gap);
         self
     }
 
@@ -907,6 +925,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
                 .icon_size_override
                 .unwrap_or_else(|| appearance.ui_font_size());
             let icon_color = self.override_icon_color.unwrap_or(color);
+            let gap = self.icon_label_gap_override.unwrap_or(icon_size / 2.);
             Some(
                 Shrinkable::new(
                     1.,
@@ -916,7 +935,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
                             .with_height(icon_size)
                             .finish(),
                     )
-                    .with_margin_right(icon_size / 2.)
+                    .with_margin_right(gap)
                     .finish(),
                 )
                 .finish(),

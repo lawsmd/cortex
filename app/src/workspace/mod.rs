@@ -1372,7 +1372,7 @@ fn add_open_setting_pages_as_editable_binding(app: &mut AppContext) {
         EditableBinding::new(
             "workspace:show_settings",
             BindingDescription::new("Open Settings")
-                .with_custom_description(bindings::MAC_MENUS_CONTEXT, "Settings"),
+                .with_custom_description(bindings::MAC_MENUS_CONTEXT, "Warp Settings"),
             WorkspaceAction::ShowSettings,
         )
         .with_context_predicate(id!("Workspace"))

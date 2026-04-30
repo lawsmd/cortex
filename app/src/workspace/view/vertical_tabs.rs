@@ -1,5 +1,7 @@
+mod content_sized_editor;
 pub mod telemetry;
 
+use self::content_sized_editor::ContentSizedEditor;
 use crate::ai::agent::conversation::{ConversationStatus, StatusColorStyle};
 use crate::ai::agent_management::AgentNotificationsModel;
 use crate::ai::cloud_environments::CloudAmbientAgentEnvironment;
@@ -82,8 +84,20 @@ use warpui::platform::Cursor;
 use warpui::prelude::Align;
 use warpui::text_layout::ClipConfig;
 use warpui::ui_components::components::{UiComponent, UiComponentStyles};
+use warpui::ui_components::slider::SliderStateHandle;
 use warpui::ui_components::text_input::TextInput;
 use warpui::{AppContext, EntityId, SingletonEntity, ViewHandle, WindowId};
+
+/// Theme-independent gray used for the 1px border on every unselected vertical
+/// tab in the Cortex appearance. Sits between Warp's existing 100-gray (used
+/// elsewhere in the panel) and white so it reads on both dark and light themes
+/// without being claimable by either.
+const VERTICAL_TAB_UNSELECTED_BORDER_GRAY: ColorU = ColorU {
+    r: 140,
+    g: 140,
+    b: 140,
+    a: 255,
+};
 
 const PANEL_WIDTH: f32 = 248.;
 const MIN_PANEL_WIDTH: f32 = 200.;
@@ -93,8 +107,6 @@ const DETAIL_SIDECAR_SECTION_GAP: f32 = 4.;
 const GROUP_HEADER_VERTICAL_PADDING: f32 = 4.;
 const GROUP_HORIZONTAL_PADDING: f32 = 8.;
 const GROUP_BODY_BOTTOM_PADDING: f32 = 8.;
-const GROUP_ITEM_SPACING: f32 = 4.;
-const TABS_MODE_ITEM_SPACING: f32 = 4.;
 const GROUP_ACTION_BUTTON_ICON_SIZE: f32 = 12.;
 const GROUP_ACTION_BUTTON_PADDING: f32 = 2.;
 const GROUP_ACTION_BUTTON_GAP: f32 = 2.;
@@ -106,7 +118,6 @@ const DETAIL_SIDECAR_CORNER_RADIUS: f32 = 4.;
 /// Fixed height of the metadata row (line 3 in expanded mode). Matches the passive badge height
 /// so the row doesn't resize when badges are toggled.
 const METADATA_ROW_HEIGHT: f32 = BADGE_ICON_SIZE + 2.;
-const TAB_COLOR_OPACITY: Opacity = 15;
 const TAB_COLOR_HOVER_OPACITY: Opacity = 50;
 
 // Circular icon constants
@@ -276,21 +287,99 @@ fn pane_row_background(
     is_selected: bool,
     is_hovered: bool,
     is_being_dragged: bool,
+    cortex_inverse_fill: bool,
     theme: &WarpTheme,
 ) -> Option<ThemeFill> {
+    // Cortex unselected: no background fill regardless of toggles. Hover still
+    // shows a subtle fg_overlay_1 for affordance, matching Warp's behavior.
+    if !is_selected {
+        if is_being_dragged || is_hovered {
+            return Some(internal_colors::fg_overlay_1(theme));
+        }
+        return None;
+    }
+    // Selected with Cortex inverse-fill ON: tab fills with its accent color
+    // (or white when no per-tab tint), at full opacity.
+    if cortex_inverse_fill {
+        return Some(pane_color.unwrap_or_else(ThemeFill::white));
+    }
+    // Selected with inverse-fill OFF: existing Warp selected look.
     if let Some(color) = pane_color {
-        let opacity = if is_selected || is_hovered {
-            TAB_COLOR_HOVER_OPACITY
-        } else {
-            TAB_COLOR_OPACITY
-        };
-        Some(color.with_opacity(opacity))
-    } else if is_selected {
-        Some(internal_colors::fg_overlay_2(theme))
-    } else if is_being_dragged || is_hovered {
-        Some(internal_colors::fg_overlay_1(theme))
+        Some(color.with_opacity(TAB_COLOR_HOVER_OPACITY))
     } else {
-        None
+        Some(internal_colors::fg_overlay_2(theme))
+    }
+}
+
+/// Cortex-specific per-row appearance: text colors and per-line alignments.
+///
+/// Computed once at the top of each row-render fn (`render_pane_row`,
+/// `render_terminal_row_content`, `render_compact_pane_row`) and threaded into
+/// the per-line text builders so each line doesn't re-read settings or
+/// recompute the accent fallback. The "always-on Cortex chrome" rules
+/// (gray unselected border, accent text, dimmed metadata) are baked in here;
+/// the toggle-gated rules (inverse-fill on selection, per-alignment) read
+/// from `CortexSettings` so callers only need to know about this struct.
+struct CortexRowAppearance {
+    /// Color for the title text. Either the tab's accent color (white default
+    /// or per-tab tint) or `theme.background()` when the row is selected and
+    /// inverse-fill is on (so the text reads as negative space against the
+    /// accent fill).
+    title_color: ThemeFill,
+    /// Color for the metadata/subtitle line. Always 70% of the title color.
+    metadata_color: ThemeFill,
+    /// Color for the title-row indicator dot (badge / unread). Matches the
+    /// title color so it visually belongs with that line.
+    indicator_color: ThemeFill,
+    /// `true` when the title line should be horizontally centered in the tab.
+    title_centered: bool,
+    /// `true` when the metadata line should be horizontally centered in the tab.
+    metadata_centered: bool,
+}
+
+fn cortex_row_appearance(
+    pane_color: Option<&ThemeFill>,
+    is_selected: bool,
+    theme: &WarpTheme,
+    app: &AppContext,
+) -> CortexRowAppearance {
+    let cortex = crate::settings::CortexSettings::as_ref(app);
+    let accent_fill: ThemeFill = pane_color.cloned().unwrap_or_else(ThemeFill::white);
+    let inverse_fill_active = is_selected && *cortex.tabs_inverse_fill_on_selection.value();
+    let title_color: ThemeFill = if inverse_fill_active {
+        theme.background()
+    } else {
+        accent_fill
+    };
+    let metadata_color = title_color.with_opacity(70);
+    let title_centered = if is_selected {
+        matches!(
+            *cortex.tabs_selected_title_alignment.value(),
+            crate::settings::TabsSelectedTitleAlignment::Centered
+        )
+    } else {
+        matches!(
+            *cortex.tabs_unselected_title_alignment.value(),
+            crate::settings::TabsUnselectedTitleAlignment::Centered
+        )
+    };
+    let metadata_centered = if is_selected {
+        matches!(
+            *cortex.tabs_selected_metadata_alignment.value(),
+            crate::settings::TabsSelectedMetadataAlignment::Centered
+        )
+    } else {
+        matches!(
+            *cortex.tabs_unselected_metadata_alignment.value(),
+            crate::settings::TabsUnselectedMetadataAlignment::Centered
+        )
+    };
+    CortexRowAppearance {
+        title_color,
+        metadata_color,
+        indicator_color: title_color,
+        title_centered,
+        metadata_centered,
     }
 }
 
@@ -300,6 +389,7 @@ fn render_pane_row_element(
     defer_events_to_children: bool,
     content: Box<dyn Element>,
     theme: &WarpTheme,
+    app: &AppContext,
 ) -> Box<dyn Element> {
     let detail_target = supports_vertical_tabs_detail_sidecar(&props.typed).then(|| {
         detail_target_for_hovered_row(
@@ -309,6 +399,9 @@ fn render_pane_row_element(
         )
     });
     let row_position_id = vtab_pane_row_position_id(props.pane_group_id, props.pane_id);
+    let cortex_inverse_fill = *crate::settings::CortexSettings::as_ref(app)
+        .tabs_inverse_fill_on_selection
+        .value();
     let PaneProps {
         pane_id,
         pane_group_id,
@@ -340,21 +433,34 @@ fn render_pane_row_element(
             .with_corner_radius(CornerRadius::with_all(Radius::Pixels(ROW_CORNER_RADIUS)));
 
         if let Some(background) = pane_row_background(
-            pane_color,
+            pane_color.clone(),
             is_selected,
             state.is_hovered(),
             is_being_dragged,
+            cortex_inverse_fill,
             theme,
         ) {
             container = container.with_background(background);
         }
 
+        // Cortex border policy:
+        //   - Selected + inverse-fill ON  → no border (the accent fill carries
+        //     the selection chrome).
+        //   - Selected + inverse-fill OFF → Warp's existing 15% fg-overlay
+        //     border on top of the overlay fill.
+        //   - Unselected (always)         → 1px gray, theme-independent. The
+        //     gray border is the unconditional Cortex outline; there is no
+        //     toggle to disable it.
+        let border_fill: ElementFill = if !is_selected {
+            ThemeFill::Solid(VERTICAL_TAB_UNSELECTED_BORDER_GRAY).into()
+        } else if cortex_inverse_fill {
+            ElementFill::None
+        } else {
+            internal_colors::fg_overlay_3(theme).into()
+        };
+
         container
-            .with_border(Border::all(1.).with_border_fill(if is_selected {
-                internal_colors::fg_overlay_3(theme).into()
-            } else {
-                ElementFill::None
-            }))
+            .with_border(Border::all(1.).with_border_fill(border_fill))
             .finish()
     })
     .on_click(move |ctx, _, _| {
@@ -587,6 +693,12 @@ pub(super) struct VerticalTabsPanelState {
     show_pr_link_info_tooltip_mouse_state: MouseStateHandle,
     show_diff_stats_mouse_state: MouseStateHandle,
     show_details_on_hover_mouse_state: MouseStateHandle,
+    /// Cortex: hover state for the "Hide tab icon" toggle in the settings popup.
+    cortex_hide_tab_icon_mouse_state: MouseStateHandle,
+    /// Cortex: hover state for the "Hide tab metadata" toggle in the settings popup.
+    cortex_hide_tab_metadata_mouse_state: MouseStateHandle,
+    /// Cortex: drag state for the "Tab spacing" slider in the settings popup.
+    tab_spacing_slider_state: SliderStateHandle,
     pub(super) show_settings_popup: bool,
 }
 
@@ -624,6 +736,9 @@ impl Default for VerticalTabsPanelState {
             show_pr_link_info_tooltip_mouse_state: Default::default(),
             show_diff_stats_mouse_state: Default::default(),
             show_details_on_hover_mouse_state: Default::default(),
+            cortex_hide_tab_icon_mouse_state: Default::default(),
+            cortex_hide_tab_metadata_mouse_state: Default::default(),
+            tab_spacing_slider_state: Default::default(),
             show_settings_popup: false,
         }
     }
@@ -1625,9 +1740,20 @@ fn render_vertical_tabs_panel(
         super::PanelPosition::Left => DragBarSide::Right,
         super::PanelPosition::Right => DragBarSide::Left,
     };
-    let inner = Container::new(panel_with_popup)
-        .with_background(theme.background())
-        .finish();
+    // Cortex: the panel background normally tracks the terminal background so
+    // tabs render against the same surface as the terminal beneath them. The
+    // user can flip "Bar/Panel Background Matches Terminal Background" off in
+    // Cortex Settings, in which case the panel inherits whatever the parent
+    // (window) paints for the surrounding chrome.
+    let cortex_panel_matches_terminal_bg =
+        *crate::settings::CortexSettings::as_ref(app)
+            .tabs_panel_matches_terminal_bg
+            .value();
+    let mut inner_container = Container::new(panel_with_popup);
+    if cortex_panel_matches_terminal_bg {
+        inner_container = inner_container.with_background(theme.background());
+    }
+    let inner = inner_container.finish();
 
     Resizable::new(state.resizable_state.clone(), inner)
         .with_dragbar_side(drag_side)
@@ -1795,11 +1921,15 @@ fn render_groups(
     // Ghost state for cross-window drag hovering over this window's vertical tabs panel.
     let ghost_state = CrossWindowTabDrag::as_ref(app).ghost_state_for_window(workspace.window_id);
     let ghost_insertion_index = ghost_state.as_ref().map(|g| g.insertion_index);
+    let cortex_tab_row_spacing = (*crate::settings::CortexSettings::as_ref(app)
+        .tabs_panel_row_spacing
+        .value())
+    .clamp(0.0, 16.0);
     let mut groups = Flex::column()
         .with_main_axis_size(MainAxisSize::Min)
         .with_cross_axis_alignment(CrossAxisAlignment::Stretch);
     if !uses_outer_group_container {
-        groups = groups.with_spacing(TABS_MODE_ITEM_SPACING);
+        groups = groups.with_spacing(cortex_tab_row_spacing);
     }
 
     for (visible_tab_index, (tab_index, filtered_pane_ids)) in visible_tabs.iter().enumerate() {
@@ -1978,13 +2108,17 @@ fn render_tab_group_internal(
         pane_group_id,
         pane_id: pane_group.focused_pane_id(app),
     };
+    let tab_row_spacing = (*crate::settings::CortexSettings::as_ref(app)
+        .tabs_panel_row_spacing
+        .value())
+    .clamp(0.0, 16.0);
 
     let mut group_element = Hoverable::new(group_mouse_state, move |group_state| {
         let build_rows = || {
             let mut rows = Flex::column()
                 .with_main_axis_size(MainAxisSize::Min)
                 .with_cross_axis_alignment(CrossAxisAlignment::Stretch)
-                .with_spacing(GROUP_ITEM_SPACING);
+                .with_spacing(tab_row_spacing);
             if matches!(resolved_mode, VerticalTabsResolvedMode::Summary) {
                 let Some((pane_id, row_mouse_state)) = row_mouse_states.first() else {
                     return Empty::new().finish();
@@ -2543,15 +2677,68 @@ fn has_unread_activity(typed: &TypedPane<'_>, app: &AppContext) -> bool {
 
 const INDICATOR_DOT_SIZE: f32 = 8.;
 
-fn render_title_indicator(theme: &WarpTheme) -> Box<dyn Element> {
-    ConstrainedBox::new(
-        WarpIcon::CircleFilled
-            .to_warpui_icon(theme.accent())
-            .finish(),
-    )
-    .with_width(INDICATOR_DOT_SIZE)
-    .with_height(INDICATOR_DOT_SIZE)
-    .finish()
+/// Matches the static-title font size used in `render_pane_row` /
+/// `render_terminal_row_content` / `render_compact_pane_row` (12pt) — and the
+/// font size the tab/pane rename editor is constructed with in
+/// `Workspace::tab_rename_editor` / `Workspace::pane_rename_editor` when
+/// granularity is `Tabs`. Used by `ContentSizedEditor` to measure the rename
+/// editor's current text so the input box matches the static title's width.
+const RENAME_EDITOR_FONT_SIZE: f32 = 12.;
+
+fn render_title_indicator(color: ThemeFill) -> Box<dyn Element> {
+    ConstrainedBox::new(WarpIcon::CircleFilled.to_warpui_icon(color).finish())
+        .with_width(INDICATOR_DOT_SIZE)
+        .with_height(INDICATOR_DOT_SIZE)
+        .finish()
+}
+
+/// Build the title row's horizontal layout. When `centered`, the title sits at
+/// the row's optical center: a left-edge spacer the same width as the
+/// (real-or-empty) right-edge indicator slot keeps the title from drifting
+/// when the indicator is present. When not centered, falls back to Warp's
+/// SpaceBetween layout with the title left and indicator pinned right.
+///
+/// `Align::new` centers a child within its allocation only when the child
+/// reports a smaller intrinsic width — `Text::new_inline` does, but a
+/// `TextInput` whose editor expands to fill its constraint does not, which
+/// pinned the rename caret to the row's left edge. The rename-input builder
+/// (`render_inline_tab_rename_editor`) caps its own width via
+/// `with_max_width`, so by the time the input arrives here it reports a
+/// content-sized box that this `Align::new` wrapper centers correctly.
+fn render_title_row_layout(
+    title_slot: Box<dyn Element>,
+    indicator: Option<Box<dyn Element>>,
+    centered: bool,
+) -> Box<dyn Element> {
+    if centered {
+        let has_indicator = indicator.is_some();
+        let spacer_width = INDICATOR_DOT_SIZE + 4.;
+        let mut row = Flex::row()
+            .with_main_axis_size(MainAxisSize::Max)
+            .with_cross_axis_alignment(CrossAxisAlignment::Center);
+        if has_indicator {
+            row = row.with_child(
+                ConstrainedBox::new(Empty::new().finish())
+                    .with_width(spacer_width)
+                    .finish(),
+            );
+        }
+        row = row.with_child(Shrinkable::new(1., Align::new(title_slot).finish()).finish());
+        if let Some(indicator) = indicator {
+            row = row.with_child(Container::new(indicator).with_margin_left(4.).finish());
+        }
+        row.finish()
+    } else {
+        let mut row = Flex::row()
+            .with_main_axis_size(MainAxisSize::Max)
+            .with_main_axis_alignment(MainAxisAlignment::SpaceBetween)
+            .with_cross_axis_alignment(CrossAxisAlignment::Center)
+            .with_child(Shrinkable::new(1., title_slot).finish());
+        if let Some(indicator) = indicator {
+            row = row.with_child(Container::new(indicator).with_margin_left(4.).finish());
+        }
+        row.finish()
+    }
 }
 
 fn render_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn Element> {
@@ -2559,20 +2746,29 @@ fn render_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn Element> {
     let appearance = Appearance::as_ref(app);
     let theme = appearance.theme();
     let font_family = appearance.ui_font_family();
+    let cortex_hide_tab_icon = *crate::settings::CortexSettings::as_ref(app).hide_tab_icon.value();
+    let cortex_hide_tab_metadata = *crate::settings::CortexSettings::as_ref(app)
+        .hide_tab_metadata
+        .value();
+    let is_selected = props.is_active_tab && props.is_focused;
+    let cortex = cortex_row_appearance(props.pane_color.as_ref(), is_selected, theme, app);
 
     let icon = render_pane_icon_with_status(
         resolve_icon_with_status_variant(&props.typed, &props.title, appearance, app),
         theme,
     );
 
+    let has_visible_subtitle = !cortex_hide_tab_metadata && !effective_subtitle.is_empty();
     // Top-align the icon when there are multiple lines of content so it sits next to
     // the first line; center it for single-line rows (Settings, Notebook with no subtitle, etc.).
-    let icon_alignment =
-        if matches!(props.typed, TypedPane::Terminal(_)) || !effective_subtitle.is_empty() {
-            CrossAxisAlignment::Start
-        } else {
-            CrossAxisAlignment::Center
-        };
+    // Terminal rows are multi-line unless `hide_tab_metadata` strips both metadata rows.
+    let terminal_has_metadata =
+        matches!(props.typed, TypedPane::Terminal(_)) && !cortex_hide_tab_metadata;
+    let icon_alignment = if terminal_has_metadata || has_visible_subtitle {
+        CrossAxisAlignment::Start
+    } else {
+        CrossAxisAlignment::Center
+    };
 
     let text_content = if let TypedPane::Terminal(terminal_pane) = &props.typed {
         render_terminal_row_content(
@@ -2584,45 +2780,35 @@ fn render_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn Element> {
     } else {
         let has_indicator =
             props.typed.badge(app).is_some() || has_unread_activity(&props.typed, app);
-        let mut title_row = Flex::row()
-            .with_main_axis_size(MainAxisSize::Max)
-            .with_main_axis_alignment(MainAxisAlignment::SpaceBetween)
-            .with_cross_axis_alignment(CrossAxisAlignment::Center);
-        title_row.add_child(
-            Shrinkable::new(
-                1.,
-                render_pane_title_slot(
-                    &props,
-                    || {
-                        Text::new_inline(props.displayed_title().to_string(), font_family, 12.)
-                            .with_clip(ClipConfig::ellipsis())
-                            .with_color(theme.main_text_color(theme.background()).into())
-                            .finish()
-                    },
-                    12.,
-                    theme.main_text_color(theme.background()),
-                    ClipConfig::ellipsis(),
-                    appearance,
-                    app,
-                ),
-            )
-            .finish(),
+        let title_slot = render_pane_title_slot(
+            &props,
+            || {
+                Text::new_inline(props.displayed_title().to_string(), font_family, 12.)
+                    .with_clip(ClipConfig::ellipsis())
+                    .with_color(cortex.title_color.into())
+                    .finish()
+            },
+            12.,
+            cortex.title_color,
+            ClipConfig::ellipsis(),
+            appearance,
+            app,
         );
-        if has_indicator {
-            title_row.add_child(
-                Container::new(render_title_indicator(theme))
-                    .with_margin_left(4.)
-                    .finish(),
-            );
-        }
+        let indicator = has_indicator.then(|| render_title_indicator(cortex.indicator_color));
+        let title_row = render_title_row_layout(title_slot, indicator, cortex.title_centered);
 
+        let metadata_cross_axis = if cortex.metadata_centered {
+            CrossAxisAlignment::Center
+        } else {
+            CrossAxisAlignment::Start
+        };
         let mut content_col = Flex::column()
             .with_main_axis_size(MainAxisSize::Min)
-            .with_cross_axis_alignment(CrossAxisAlignment::Start)
+            .with_cross_axis_alignment(metadata_cross_axis)
             .with_spacing(2.)
-            .with_child(title_row.finish());
+            .with_child(title_row);
 
-        if !effective_subtitle.is_empty() {
+        if has_visible_subtitle {
             let subtitle_clip = if matches!(props.typed, TypedPane::Code(_)) {
                 ClipConfig::start()
             } else {
@@ -2631,7 +2817,7 @@ fn render_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn Element> {
             content_col.add_child(
                 Text::new_inline(effective_subtitle, font_family, 12.)
                     .with_clip(subtitle_clip)
-                    .with_color(theme.sub_text_color(theme.background()).into())
+                    .with_color(cortex.metadata_color.into())
                     .finish(),
             );
         }
@@ -2639,15 +2825,27 @@ fn render_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn Element> {
         content_col.finish()
     };
 
-    let content = Flex::row()
+    let mut row = Flex::row()
         .with_main_axis_size(MainAxisSize::Max)
         .with_cross_axis_alignment(icon_alignment)
-        .with_spacing(ICON_WITH_STATUS_GAP)
-        .with_child(icon)
+        .with_spacing(ICON_WITH_STATUS_GAP);
+    if !cortex_hide_tab_icon {
+        row = row.with_child(icon);
+    }
+    let content = row
         .with_child(Shrinkable::new(1., text_content).finish())
         .finish();
 
-    render_pane_row_element(props, Padding::uniform(8.), true, content, theme)
+    // When expanded-mode content collapses to a single line (Cortex hides
+    // metadata + no subtitle), bump the row padding so the row stays visibly
+    // taller than a compact row — the Density toggle keeps a visible delta
+    // even when there's no metadata content to differentiate the two modes.
+    let row_padding = if terminal_has_metadata || has_visible_subtitle {
+        Padding::uniform(8.)
+    } else {
+        Padding::uniform(14.)
+    };
+    render_pane_row_element(props, row_padding, true, content, theme, app)
 }
 
 enum TypedPane<'a> {
@@ -3413,8 +3611,10 @@ fn render_terminal_row_content(
     app: &AppContext,
 ) -> Box<dyn Element> {
     let theme = appearance.theme();
-    let main_text_color = theme.main_text_color(theme.background());
-    let sub_text_color = theme.sub_text_color(theme.background());
+    let is_selected = props.is_active_tab && props.is_focused;
+    let cortex = cortex_row_appearance(props.pane_color.as_ref(), is_selected, theme, app);
+    let main_text_color = cortex.title_color;
+    let sub_text_color = cortex.metadata_color;
     let primary_info = *TabSettings::as_ref(app).vertical_tabs_primary_info.value();
 
     let title_text = terminal_view.terminal_title_from_shell();
@@ -3512,41 +3712,43 @@ fn render_terminal_row_content(
         }
     };
 
-    let first_line_element = if has_unread_activity(&props.typed, app) {
-        Flex::row()
-            .with_main_axis_size(MainAxisSize::Max)
-            .with_cross_axis_alignment(CrossAxisAlignment::Center)
-            .with_main_axis_alignment(MainAxisAlignment::SpaceBetween)
-            .with_child(Shrinkable::new(1., first_line).finish())
-            .with_child(
-                Container::new(render_title_indicator(theme))
-                    .with_margin_left(4.)
-                    .finish(),
-            )
-            .finish()
+    let indicator = has_unread_activity(&props.typed, app)
+        .then(|| render_title_indicator(cortex.indicator_color));
+    let first_line_element = if cortex.title_centered || indicator.is_some() {
+        render_title_row_layout(first_line, indicator, cortex.title_centered)
     } else {
         first_line
     };
 
+    let cortex_hide_tab_metadata = *crate::settings::CortexSettings::as_ref(app)
+        .hide_tab_metadata
+        .value();
+    let metadata_cross_axis = if cortex.metadata_centered {
+        CrossAxisAlignment::Center
+    } else {
+        CrossAxisAlignment::Start
+    };
     let mut content = Flex::column()
         .with_main_axis_size(MainAxisSize::Min)
-        .with_cross_axis_alignment(CrossAxisAlignment::Start);
+        .with_cross_axis_alignment(metadata_cross_axis);
     content.add_child(first_line_element);
-    content.add_child(Container::new(second_line).with_margin_top(2.).finish());
-    content.add_child(
-        Container::new(render_terminal_metadata_line(
-            terminal_view,
-            props.pane_group_id,
-            props.pane_id,
-            metadata_left,
-            chip_entrypoint_for_granularity(props.display_granularity),
-            &props.badge_mouse_states,
-            appearance,
-            app,
-        ))
-        .with_margin_top(2.)
-        .finish(),
-    );
+    if !cortex_hide_tab_metadata {
+        content.add_child(Container::new(second_line).with_margin_top(2.).finish());
+        content.add_child(
+            Container::new(render_terminal_metadata_line(
+                terminal_view,
+                props.pane_group_id,
+                props.pane_id,
+                metadata_left,
+                chip_entrypoint_for_granularity(props.display_granularity),
+                &props.badge_mouse_states,
+                appearance,
+                app,
+            ))
+            .with_margin_top(2.)
+            .finish(),
+        );
+    }
     content.finish()
 }
 
@@ -3633,7 +3835,14 @@ fn render_inline_tab_rename_editor(
     let editor_line_height = rename_editor
         .as_ref(app)
         .line_height(app.font_cache(), appearance);
-    TextInput::new(
+    // Wrap the `TextInput` in a `ContentSizedEditor` that measures the
+    // editor's current text on every layout pass and constrains the input
+    // box to that exact width (plus a few px of caret room). The outer
+    // `Align::new(...)` wrapper in `render_title_row_layout` then centers
+    // the now-content-sized input the same way it centers a static
+    // `Text::new_inline`, keeping the typed text glued to the row's
+    // horizontal center as the user types.
+    let inner = TextInput::new(
         rename_editor.clone(),
         UiComponentStyles::default()
             .set_height(editor_line_height)
@@ -3642,6 +3851,13 @@ fn render_inline_tab_rename_editor(
             .set_border_width(0.),
     )
     .build()
+    .finish();
+    ContentSizedEditor::new(
+        rename_editor.clone(),
+        inner,
+        appearance.ui_font_family(),
+        RENAME_EDITOR_FONT_SIZE,
+    )
     .finish()
 }
 
@@ -3880,7 +4096,7 @@ fn render_summary_tab_item(
         .with_child(Shrinkable::new(1., text_col.finish()).finish())
         .finish();
 
-    render_pane_row_element(props, Padding::uniform(8.), true, content, theme)
+    render_pane_row_element(props, Padding::uniform(8.), true, content, theme, app)
 }
 
 fn render_summary_primary_label_line(
@@ -4568,6 +4784,13 @@ fn compute_tab_group_color_mode(
     theme: &WarpTheme,
     app: &AppContext,
 ) -> TabGroupColorMode {
+    // Cortex saved-project tint takes precedence over every other source.
+    // Saved projects carry an arbitrary hex color (not constrained to the 8
+    // ANSI choices `selected_color` is limited to), threaded onto the tab at
+    // creation time in `Workspace::open_launch_config_from_menu`.
+    if let Some(coloru) = tab.cortex_accent {
+        return TabGroupColorMode::Uniform(ThemeFill::Solid(coloru));
+    }
     // Manual override applies to the whole group.
     if !matches!(tab.selected_color, SelectedTabColor::Unset) {
         return match tab.color() {
@@ -4733,6 +4956,10 @@ pub(super) fn render_settings_popup(
     let show_details_on_hover = *TabSettings::as_ref(app)
         .vertical_tabs_show_details_on_hover
         .value();
+    let cortex_hide_tab_icon = *crate::settings::CortexSettings::as_ref(app).hide_tab_icon.value();
+    let cortex_hide_tab_metadata = *crate::settings::CortexSettings::as_ref(app)
+        .hide_tab_metadata
+        .value();
     let show_tab_item_section = matches!(current_granularity, VerticalTabsDisplayGranularity::Tabs)
         && FeatureFlag::VerticalTabsSummaryMode.is_enabled();
     let show_focused_session_controls = !matches!(
@@ -4761,10 +4988,10 @@ pub(super) fn render_settings_popup(
                 Expanded::new(
                     1.,
                     render_popup_text_segment(
-                        "Panes",
-                        matches!(current_granularity, VerticalTabsDisplayGranularity::Panes),
-                        state.panes_segment_mouse_state.clone(),
-                        VerticalTabsDisplayGranularity::Panes,
+                        "Tabs",
+                        matches!(current_granularity, VerticalTabsDisplayGranularity::Tabs),
+                        state.tabs_segment_mouse_state.clone(),
+                        VerticalTabsDisplayGranularity::Tabs,
                         appearance,
                         theme,
                     ),
@@ -4775,10 +5002,10 @@ pub(super) fn render_settings_popup(
                 Expanded::new(
                     1.,
                     render_popup_text_segment(
-                        "Tabs",
-                        matches!(current_granularity, VerticalTabsDisplayGranularity::Tabs),
-                        state.tabs_segment_mouse_state.clone(),
-                        VerticalTabsDisplayGranularity::Tabs,
+                        "Panes",
+                        matches!(current_granularity, VerticalTabsDisplayGranularity::Panes),
+                        state.panes_segment_mouse_state.clone(),
+                        VerticalTabsDisplayGranularity::Panes,
                         appearance,
                         theme,
                     ),
@@ -4898,6 +5125,42 @@ pub(super) fn render_settings_popup(
         .with_padding_bottom(4.)
         .finish();
 
+    // Cortex: "Tab spacing" header + slider, sits directly under the Density buttons.
+    let tab_spacing_header = Container::new(
+        Text::new_inline(
+            "Tab spacing".to_string(),
+            appearance.ui_font_family(),
+            SETTINGS_POPUP_MENU_ITEM_FONT_SIZE,
+        )
+        .with_color(sub_text.into())
+        .finish(),
+    )
+    .with_horizontal_padding(16.)
+    .with_margin_top(8.)
+    .with_margin_bottom(4.)
+    .finish();
+
+    let current_tab_spacing = (*crate::settings::CortexSettings::as_ref(app)
+        .tabs_panel_row_spacing
+        .value())
+    .clamp(0.0, 16.0);
+
+    let tab_spacing_slider = Container::new(
+        appearance
+            .ui_builder()
+            .slider(state.tab_spacing_slider_state.clone())
+            .with_range(0.0..16.0)
+            .with_default_value(current_tab_spacing)
+            .on_change(|ctx, _, val| {
+                ctx.dispatch_typed_action(WorkspaceAction::SetVerticalTabsRowSpacing(val));
+            })
+            .build()
+            .finish(),
+    )
+    .with_horizontal_padding(16.)
+    .with_padding_bottom(4.)
+    .finish();
+
     // Divider between toggle and "Pane title as" section
     let make_divider = |theme: &WarpTheme| {
         Container::new(
@@ -4976,6 +5239,8 @@ pub(super) fn render_settings_popup(
         popup_col.add_child(make_divider(theme));
         popup_col.add_child(density_header);
         popup_col.add_child(segmented_control_row);
+        popup_col.add_child(tab_spacing_header);
+        popup_col.add_child(tab_spacing_slider);
         popup_col.add_child(make_divider(theme));
         popup_col.add_child(pane_title_header);
         popup_col.add_child(command_option);
@@ -5075,6 +5340,62 @@ pub(super) fn render_settings_popup(
         appearance,
         theme,
     ));
+
+    // Cortex Settings section — brain glyph + section header, then Cortex-fork-only toggles.
+    // The brand mark uses the same icon + ratios as the user-menu's "Cortex Settings" entry; see
+    // `app/src/cortex_settings/brand.rs` for the canonical sizing.
+    popup_col.add_child(make_divider(theme));
+    let cortex_icon_size =
+        SETTINGS_POPUP_MENU_ITEM_FONT_SIZE * crate::cortex_settings::brand::BRAND_MENU_ICON_TO_FONT_RATIO;
+    let cortex_icon_gap =
+        cortex_icon_size * crate::cortex_settings::brand::BRAND_MENU_ICON_LABEL_GAP_RATIO;
+    let cortex_settings_header = Container::new(
+        Flex::row()
+            .with_cross_axis_alignment(CrossAxisAlignment::Center)
+            .with_child(
+                ConstrainedBox::new(WarpIcon::Brain.to_warpui_icon(sub_text).finish())
+                    .with_width(cortex_icon_size)
+                    .with_height(cortex_icon_size)
+                    .finish(),
+            )
+            .with_child(
+                Container::new(
+                    Text::new_inline(
+                        "Cortex Settings".to_string(),
+                        appearance.ui_font_family(),
+                        SETTINGS_POPUP_MENU_ITEM_FONT_SIZE,
+                    )
+                    .with_color(sub_text.into())
+                    .finish(),
+                )
+                .with_margin_left(cortex_icon_gap)
+                .finish(),
+            )
+            .finish(),
+    )
+    .with_horizontal_padding(16.)
+    .with_margin_bottom(4.)
+    .finish();
+    popup_col.add_child(cortex_settings_header);
+    popup_col.add_child(render_show_toggle_option(
+        "Hide tab icon",
+        cortex_hide_tab_icon,
+        state.cortex_hide_tab_icon_mouse_state.clone(),
+        WorkspaceAction::ToggleCortexHideTabIcon,
+        None,
+        appearance,
+        theme,
+    ));
+    popup_col.add_child(render_show_toggle_option(
+        "Hide tab metadata",
+        cortex_hide_tab_metadata,
+        state.cortex_hide_tab_metadata_mouse_state.clone(),
+        WorkspaceAction::ToggleCortexHideTabMetadata,
+        None,
+        appearance,
+        theme,
+    ));
+
     EventHandler::new(
         ConstrainedBox::new(
             Container::new(popup_col.finish())
@@ -5091,6 +5412,12 @@ pub(super) fn render_settings_popup(
         .finish(),
     )
     .on_left_mouse_down(|_, _, _| DispatchEventResult::StopPropagation)
+    // Cortex: also stop MouseMoved propagation so synthetic mouse moves over
+    // the popup don't ALSO get dispatched to the tab rows underneath (they
+    // share a parent Stack with this popup overlay). Reduces the synthetic-
+    // event surface that drives the back-to-back-synthetic warning loop.
+    // See `docs/logging/postmortems/2026-04-30-hoverable-spam.md`.
+    .on_mouse_in(|_, _, _| DispatchEventResult::StopPropagation, None)
     .finish()
 }
 
@@ -6182,10 +6509,16 @@ fn render_compact_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn El
     let effective_subtitle = props.subtitle.clone();
     let appearance = Appearance::as_ref(app);
     let theme = appearance.theme();
-    let main_text_color = theme.main_text_color(theme.background());
-    let sub_text_color = theme.sub_text_color(theme.background());
+    let is_selected = props.is_active_tab && props.is_focused;
+    let cortex = cortex_row_appearance(props.pane_color.as_ref(), is_selected, theme, app);
+    let main_text_color = cortex.title_color;
+    let sub_text_color = cortex.metadata_color;
     let font_family = appearance.ui_font_family();
     let has_indicator = props.typed.badge(app).is_some() || has_unread_activity(&props.typed, app);
+    let cortex_hide_tab_icon = *crate::settings::CortexSettings::as_ref(app).hide_tab_icon.value();
+    let cortex_hide_tab_metadata = *crate::settings::CortexSettings::as_ref(app)
+        .hide_tab_metadata
+        .value();
 
     let icon = render_pane_icon_with_status(
         resolve_icon_with_status_variant(&props.typed, &props.title, appearance, app),
@@ -6330,19 +6663,18 @@ fn render_compact_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn El
             (title, subtitle)
         };
 
-    // Title row with optional indicator
-    let title_row = if has_indicator {
-        Flex::row()
-            .with_main_axis_size(MainAxisSize::Max)
-            .with_main_axis_alignment(MainAxisAlignment::SpaceBetween)
-            .with_cross_axis_alignment(CrossAxisAlignment::Center)
-            .with_child(Shrinkable::new(1., title_element).finish())
-            .with_child(
-                Container::new(render_title_indicator(theme))
-                    .with_margin_left(4.)
-                    .finish(),
-            )
-            .finish()
+    let subtitle_element = if cortex_hide_tab_metadata {
+        None
+    } else {
+        subtitle_element
+    };
+
+    // Title row with optional indicator. Cortex centers the title by default;
+    // user can flip "Title Alignment" → Warp Default to restore left-aligned.
+    let indicator =
+        has_indicator.then(|| render_title_indicator(cortex.indicator_color));
+    let title_row = if cortex.title_centered || indicator.is_some() {
+        render_title_row_layout(title_element, indicator, cortex.title_centered)
     } else {
         title_element
     };
@@ -6355,9 +6687,14 @@ fn render_compact_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn El
         CrossAxisAlignment::Center
     };
 
+    let metadata_cross_axis = if cortex.metadata_centered {
+        CrossAxisAlignment::Center
+    } else {
+        CrossAxisAlignment::Start
+    };
     let mut text_col = Flex::column()
         .with_main_axis_size(MainAxisSize::Min)
-        .with_cross_axis_alignment(CrossAxisAlignment::Start)
+        .with_cross_axis_alignment(metadata_cross_axis)
         .with_spacing(1.);
     text_col.add_child(title_row);
 
@@ -6365,15 +6702,18 @@ fn render_compact_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn El
         text_col.add_child(subtitle);
     }
 
-    let content = Flex::row()
+    let mut row = Flex::row()
         .with_main_axis_size(MainAxisSize::Max)
         .with_cross_axis_alignment(icon_alignment)
-        .with_spacing(ICON_WITH_STATUS_GAP)
-        .with_child(icon)
+        .with_spacing(ICON_WITH_STATUS_GAP);
+    if !cortex_hide_tab_icon {
+        row = row.with_child(icon);
+    }
+    let content = row
         .with_child(Shrinkable::new(1., text_col.finish()).finish())
         .finish();
 
-    render_pane_row_element(props, Padding::uniform(8.), true, content, theme)
+    render_pane_row_element(props, Padding::uniform(8.), true, content, theme, app)
 }
 
 impl Workspace {

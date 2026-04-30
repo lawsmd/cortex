@@ -184,14 +184,13 @@ use crate::drive::settings::WarpDriveSettings;
 use crate::launch_configs::launch_config::WindowTemplate;
 use crate::pane_group::{
     AIFactPane, ChildAgentOrigin, CodeReviewPanelArg, CortexSettingsPane,
-    Direction as PaneGroupDirection,
-    EnvironmentManagementPane, ExecutionProfileEditorPane, NetworkLogPane, PaneGroup, PaneId,
-    TerminalPaneId,
+    Direction as PaneGroupDirection, EnvironmentManagementPane, ExecutionProfileEditorPane,
+    NetworkLogPane, PaneGroup, PaneId, TerminalPaneId,
 };
 use crate::quit_warning::UnsavedStateSummary;
 use crate::search::command_palette::view::NavigationMode;
 use crate::search::slash_command_menu::static_commands::commands;
-use crate::cortex_settings::CortexSettingsPaneManager;
+use crate::cortex_settings::{self, CortexSettingsPaneManager};
 use crate::server::network_log_pane_manager::NetworkLogPaneManager;
 use crate::server::server_api::ai::AIClient;
 use crate::server::server_api::auth::AuthClient;
@@ -444,7 +443,7 @@ use super::auto_handoff::AutoCloudHandoffController;
 use crate::ai::blocklist::{BlocklistAIHistoryEvent, PendingQueryState, SerializedBlockListItem};
 use crate::editor::{
     EditorView, Event as EditorEvent, PropagateAndNoOpNavigationKeys, SingleLineEditorOptions,
-    TextOptions,
+    TextColors, TextOptions,
 };
 use crate::persistence::ModelEvent;
 
@@ -1144,6 +1143,23 @@ pub struct Workspace {
     create_auth_secret_modal: Option<ViewHandle<Modal<AuthSecretFtuxView>>>,
 }
 
+/// Returns the cwd of the first terminal leaf reachable from a snapshot tree,
+/// or `None` if no leaf has one (e.g. non-terminal panes, or a terminal that
+/// hadn't reported a cwd before shutdown). Used to reconcile a restored tab
+/// against the saved-projects list.
+fn primary_terminal_cwd(node: &PaneNodeSnapshot) -> Option<&str> {
+    match node {
+        PaneNodeSnapshot::Leaf(leaf) => match &leaf.contents {
+            LeafContents::Terminal(t) => t.cwd.as_deref(),
+            _ => None,
+        },
+        PaneNodeSnapshot::Branch(b) => b
+            .children
+            .iter()
+            .find_map(|(_, child)| primary_terminal_cwd(child)),
+    }
+}
+
 impl Workspace {
     pub fn is_tab_drag_preview(&self) -> bool {
         self.is_tab_drag_preview
@@ -1167,6 +1183,33 @@ impl Workspace {
             }
         } else {
             appearance.ui_font_size()
+        }
+    }
+
+    /// Text colors for the inline tab/pane rename editor. Mirrors the
+    /// inverse-fill branch of `cortex_row_appearance` in `vertical_tabs.rs`:
+    /// when "Inverse fill on selection" is on the active tab paints its fill
+    /// in the accent color and the static title uses `theme.background()`
+    /// to read as negative space, so the rename editor needs to do the same
+    /// or its (default white) text is invisible on a white tab and washed
+    /// out on a yellow one. When inverse fill is off, the static title uses
+    /// the accent color, so the rename editor falls back to the theme
+    /// default — close enough for the common "white accent" case and the
+    /// only sensible per-tab-tint behavior we can reproduce without
+    /// duplicating `cortex_row_appearance`'s pane-color resolution.
+    fn cortex_rename_editor_text_colors(ctx: &AppContext) -> TextColors {
+        let inverse_fill_active = *crate::settings::CortexSettings::as_ref(ctx)
+            .tabs_inverse_fill_on_selection
+            .value();
+        if inverse_fill_active {
+            let title_fill = Appearance::as_ref(ctx).theme().background();
+            TextColors {
+                default_color: title_fill,
+                disabled_color: title_fill,
+                hint_color: title_fill,
+            }
+        } else {
+            TextColors::from_appearance(Appearance::as_ref(ctx))
         }
     }
 
@@ -3651,6 +3694,14 @@ impl Workspace {
                 let active_tab_index = window_snapshot.active_tab_index;
                 let restored_left_panel_open = window_snapshot.left_panel_open;
 
+                // Cortex: `cortex_accent` (saved-project hex color) is not part
+                // of `TabSnapshot`, so it doesn't survive a restart on its own.
+                // Reconcile each restored tab's persisted cwd against the
+                // saved-projects list and reapply the matched project's color.
+                // See `Workspace::open_launch_config_from_menu` for the
+                // initial-open counterpart.
+                let saved_projects = crate::saved_projects::load_projects();
+
                 window_snapshot
                     .tabs
                     .iter()
@@ -3666,6 +3717,23 @@ impl Workspace {
                         self.tabs[tab_index].default_directory_color =
                             saved_tab.default_directory_color;
                         self.tabs[tab_index].selected_color = saved_tab.selected_color;
+
+                        if !saved_projects.is_empty() {
+                            if let Some(cwd) = primary_terminal_cwd(&saved_tab.root) {
+                                if let Some(project) = crate::saved_projects::project_for_path(
+                                    std::path::Path::new(cwd),
+                                    &saved_projects,
+                                ) {
+                                    if let Ok(coloru) =
+                                        warp_core::ui::color::hex_color::coloru_from_hex_string(
+                                            &project.color,
+                                        )
+                                    {
+                                        self.tabs[tab_index].cortex_accent = Some(coloru);
+                                    }
+                                }
+                            }
+                        }
 
                         let pane_group = self.tabs[tab_index].pane_group.clone();
 
@@ -5168,8 +5236,10 @@ impl Workspace {
         // Clear the tab name editor to handle the case when another tab is already being renamed
         self.clear_tab_name_editor(ctx);
         let font_size = Self::tab_rename_editor_font_size(ctx, Appearance::as_ref(ctx));
+        let text_colors = Self::cortex_rename_editor_text_colors(ctx);
 
         self.tab_rename_editor.update(ctx, move |editor, ctx| {
+            editor.set_text_colors(text_colors, ctx);
             editor.set_font_size(font_size, ctx);
             editor.insert_selected_text(title, ctx);
         });
@@ -5417,7 +5487,9 @@ impl Workspace {
         self.set_active_tab_index(index, ctx);
         self.current_workspace_state.set_pane_being_renamed(locator);
         self.clear_pane_name_editor(ctx);
+        let text_colors = Self::cortex_rename_editor_text_colors(ctx);
         self.pane_rename_editor.update(ctx, move |editor, ctx| {
+            editor.set_text_colors(text_colors, ctx);
             editor.insert_selected_text(&title, ctx);
         });
         ctx.focus(&self.pane_rename_editor);
@@ -6545,6 +6617,17 @@ impl Workspace {
                     Some(project.name.clone()),
                     ctx,
                 );
+                // Cortex: carry the saved project's hex color through to the
+                // new tab so vertical-tab rendering can use it as the tab's
+                // accent (border / fill / title text). Mirrors the pattern in
+                // `open_tab_config_with_params` for ANSI tab-config colors.
+                if let Ok(coloru) =
+                    warp_core::ui::color::hex_color::coloru_from_hex_string(&project.color)
+                {
+                    if let Some(tab) = self.tabs.get_mut(self.active_tab_index) {
+                        tab.cortex_accent = Some(coloru);
+                    }
+                }
             }
             NewSessionMenuItem::OpenLaunchConfig(launch_config) => ctx.dispatch_global_action(
                 "root_view:open_launch_config",
@@ -7431,7 +7514,7 @@ impl Workspace {
         self.add_tab_with_pane_layout(
             panes_layout,
             Arc::new(HashMap::new()),
-            Some("Settings".to_owned()),
+            Some("Warp Settings".to_owned()),
             ctx,
         );
     }
@@ -8585,23 +8668,15 @@ impl Workspace {
             }
         }
 
-        // Cortex fork: Cortex Settings entry at the top of the menu, with a
-        // leading brain glyph + "Cortex Settings" text. Both the icon and the
-        // label are tinted to `theme.accent()` (matching the Cortex Settings
-        // pane header) so the entry visually stands out from Warp's regular
-        // menu items. Icon is sized 40% above the menu's font size so the
-        // OpenMoji silhouette reads at the same visual weight as the label.
-        // The icon-tint mechanic is the shader-rule covered in
-        // docs/branding.md. Never use the U+1F9E0 emoji codepoint here. A
-        // divider follows so the Cortex entry is visually separated from
-        // Warp's own menu items.
-        let cortex_accent: Fill = appearance.theme().accent();
+        // Cortex fork: Cortex Settings entry, marked with the canonical
+        // brand mark (brain glyph + label, ratios in
+        // `cortex_settings::brand`). Sizing/spacing intentionally matches
+        // every other Cortex-branded surface; text and hover styling are
+        // left at the menu's defaults so the entry sits visually flush with
+        // surrounding rows. A divider follows so the Cortex entry is
+        // separated from Warp's own menu items.
         items.push(
-            MenuItemFields::new("Cortex Settings")
-                .with_icon(icons::Icon::Brain)
-                .with_icon_size_override(appearance.ui_font_size() * 1.4)
-                .with_override_icon_color(cortex_accent)
-                .with_override_text_color(cortex_accent)
+            cortex_settings::brand::cortex_brand_menu_item("Cortex Settings", appearance)
                 .with_on_select_action(WorkspaceAction::ShowCortexSettings)
                 .into_item(),
         );
@@ -8611,7 +8686,7 @@ impl Workspace {
             MenuItemFields::new("What's new")
                 .with_on_select_action(WorkspaceAction::ViewLatestChangelog)
                 .into_item(),
-            MenuItemFields::new("Settings")
+            MenuItemFields::new("Warp Settings")
                 .with_on_select_action(WorkspaceAction::ShowSettings)
                 .into_item(),
             MenuItemFields::new("Keyboard shortcuts")
@@ -16769,8 +16844,17 @@ impl Workspace {
         self.show_settings_with_section(None, ctx);
     }
 
-    /// Cortex fork: open the Cortex Settings pane (or focus the existing one
-    /// if it's already open in this window).
+    /// Cortex fork: open Cortex Settings as its own dedicated tab (or focus
+    /// the existing one if it's already open in this window).
+    ///
+    /// Mirrors `Workspace::open_settings_pane` for Warp's main Settings — a
+    /// fresh tab with the brain glyph as tab icon (wired via
+    /// `TypedPane::CortexSettings` in `vertical_tabs.rs`) and "Cortex Settings"
+    /// as title. The actual pane is constructed by `restore_pane_leaf`'s
+    /// `LeafContents::CortexSettings` arm in `pane_group/mod.rs`; non-
+    /// persistence is preserved by `LeafContents::is_persisted` and the sqlite
+    /// save filters, so this snapshot is only ever materialized at runtime
+    /// from this call site.
     fn show_cortex_settings(&mut self, ctx: &mut ViewContext<Self>) {
         self.close_all_overlays(ctx);
 
@@ -16780,15 +16864,17 @@ impl Workspace {
             return;
         }
 
-        let pane = CortexSettingsPane::new(ctx);
-        self.active_tab_pane_group().update(ctx, |pane_group, ctx| {
-            pane_group.add_pane_with_direction(
-                PaneGroupDirection::Right,
-                pane,
-                true, /* focus_new_pane */
-                ctx,
-            );
-        });
+        let panes_layout = PanesLayout::Snapshot(Box::new(PaneNodeSnapshot::Leaf(LeafSnapshot {
+            is_focused: true,
+            custom_vertical_tabs_title: None,
+            contents: LeafContents::CortexSettings,
+        })));
+        self.add_tab_with_pane_layout(
+            panes_layout,
+            Arc::new(HashMap::new()),
+            Some("Cortex Settings".to_owned()),
+            ctx,
+        );
     }
 
     fn show_settings_with_section(
@@ -19351,7 +19437,7 @@ impl Workspace {
                 icons::Icon::Gear,
                 &self.mouse_states.settings_icon,
                 WorkspaceAction::ShowSettings,
-                "Settings".to_string(),
+                "Warp Settings".to_string(),
                 self.cached_keybindings[SHOW_SETTINGS_KEYBINDING_NAME].clone(),
                 false,
                 false,
@@ -19590,31 +19676,38 @@ impl Workspace {
     }
 
     /// Cortex-fork brand button at the top-left of the header toolbar. The
-    /// brain glyph is sized 30% larger than `render_tab_bar_icon_button` (so
-    /// OpenMoji's stroked silhouette reads at the same visual weight as
-    /// neighboring filled glyphs) and tinted to `theme.foreground()` instead
-    /// of `sub_text_color` (so it matches the other toolbar buttons'
-    /// brightness rather than appearing grayed out). Hover/click chrome and
-    /// tooltip mirror `render_tab_bar_icon_button`'s — the Cortex button is a
-    /// brand mark, not a tab-bar button, so it intentionally never enters an
+    /// brain glyph is drawn at [`cortex_settings::brand::TOOLBAR_BRAIN_ICON_SIZE`]
+    /// — the canonical brand-mark size, kept in sync across every Cortex-
+    /// branded surface — and tinted to `theme.foreground()` instead of
+    /// `sub_text_color` (so it matches the other toolbar buttons' brightness
+    /// rather than appearing grayed out). Hover/click chrome and tooltip
+    /// mirror `render_tab_bar_icon_button`'s — the Cortex button is a brand
+    /// mark, not a tab-bar button, so it intentionally never enters an
     /// "active" state.
     fn render_cortex_brain_button(&self, appearance: &Appearance) -> Hoverable {
-        const BRAIN_BUTTON_ICON_SIZE: f32 = 25.0;
-
         let theme = appearance.theme();
         let icon_color: Fill = theme.foreground();
 
         let sized_brain = ConstrainedBox::new(
             icons::Icon::Brain.to_warpui_icon(icon_color).finish(),
         )
-        .with_width(BRAIN_BUTTON_ICON_SIZE)
-        .with_height(BRAIN_BUTTON_ICON_SIZE)
+        .with_width(cortex_settings::brand::TOOLBAR_BRAIN_ICON_SIZE)
+        .with_height(cortex_settings::brand::TOOLBAR_BRAIN_ICON_SIZE)
         .finish();
 
         // `icon_button_with_color` constructs the right base styles + button
         // chrome; `with_custom_label` then replaces the auto-sized icon with
         // our explicitly-sized one. The `Icon::Brain` argument is consumed
         // only by the discarded initial label.
+        //
+        // The `with_style` call overrides the button's outer width/height,
+        // which default to `ICON_DIMENSIONS = 24px`. Without it, the button
+        // wraps its label in a `ConstrainedBox(24, 24)` (button.rs:380-383)
+        // and our larger icon gets clamped invisibly to 24px regardless of
+        // the inner ConstrainedBox above.
+        let button_outer = UiComponentStyles::default()
+            .set_width(cortex_settings::brand::TOOLBAR_BRAIN_BUTTON_OUTER_SIZE)
+            .set_height(cortex_settings::brand::TOOLBAR_BRAIN_BUTTON_OUTER_SIZE);
         icon_button_with_color(
             appearance,
             icons::Icon::Brain,
@@ -19622,6 +19715,7 @@ impl Workspace {
             self.mouse_states.cortex_settings_icon.clone(),
             icon_color,
         )
+        .with_style(button_outer)
         .with_custom_label(sized_brain)
         .with_hovered_styles(UiComponentStyles {
             font_color: Some(icon_color.into()),
@@ -22073,6 +22167,13 @@ impl TypedActionView for Workspace {
                 );
                 ctx.notify();
             }
+            SetVerticalTabsRowSpacing(value) => {
+                let value = (*value).clamp(0.0, 16.0);
+                crate::settings::CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+                    let _ = settings.tabs_panel_row_spacing.set_value(value, ctx);
+                });
+                ctx.notify();
+            }
             SetVerticalTabsPrimaryInfo(primary_info) => {
                 let primary_info = *primary_info;
                 TabSettings::handle(ctx).update(ctx, |settings, ctx| {
@@ -22149,6 +22250,20 @@ impl TypedActionView for Workspace {
                     ),
                     ctx
                 );
+                ctx.notify();
+            }
+            ToggleCortexHideTabIcon => {
+                crate::settings::CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+                    let new_value = !*settings.hide_tab_icon.value();
+                    let _ = settings.hide_tab_icon.set_value(new_value, ctx);
+                });
+                ctx.notify();
+            }
+            ToggleCortexHideTabMetadata => {
+                crate::settings::CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+                    let new_value = !*settings.hide_tab_metadata.value();
+                    let _ = settings.hide_tab_metadata.set_value(new_value, ctx);
+                });
                 ctx.notify();
             }
             ToggleAgentManagementView => {

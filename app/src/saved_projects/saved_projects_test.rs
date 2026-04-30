@@ -1,7 +1,7 @@
 use std::fs;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
-use super::{load_projects_from, ProjectsConfig};
+use super::{load_projects_from, project_for_path, Project, ProjectsConfig};
 
 fn write_json(dir: &tempfile::TempDir, contents: &str) -> PathBuf {
     let path = dir.path().join("projects.json");
@@ -61,6 +61,62 @@ fn round_trip_serde() {
     let serialized = serde_json::to_string(&original).unwrap();
     let parsed: ProjectsConfig = serde_json::from_str(&serialized).unwrap();
     assert_eq!(original, parsed);
+}
+
+fn project(name: &str, cwd: &str) -> Project {
+    Project {
+        name: name.into(),
+        cwd: PathBuf::from(cwd),
+        color: "#ff00ff".into(),
+        rank: 0,
+    }
+}
+
+#[test]
+fn project_for_path_exact_match() {
+    let projects = vec![project("Alpha", "/projects/alpha")];
+    let hit = project_for_path(Path::new("/projects/alpha"), &projects);
+    assert_eq!(hit.map(|p| p.name.as_str()), Some("Alpha"));
+}
+
+#[test]
+fn project_for_path_subdirectory_match() {
+    let projects = vec![project("Alpha", "/projects/alpha")];
+    let hit = project_for_path(Path::new("/projects/alpha/src/lib"), &projects);
+    assert_eq!(hit.map(|p| p.name.as_str()), Some("Alpha"));
+}
+
+#[test]
+fn project_for_path_nested_longest_prefix_wins() {
+    let projects = vec![
+        project("Outer", "/projects"),
+        project("Inner", "/projects/alpha"),
+    ];
+    let hit = project_for_path(Path::new("/projects/alpha/src"), &projects);
+    assert_eq!(hit.map(|p| p.name.as_str()), Some("Inner"));
+}
+
+#[test]
+fn project_for_path_no_match_when_unrelated() {
+    let projects = vec![
+        project("Alpha", "/projects/alpha"),
+        project("Beta", "/projects/beta"),
+    ];
+    assert!(project_for_path(Path::new("/elsewhere"), &projects).is_none());
+}
+
+#[test]
+fn project_for_path_partial_component_is_not_a_prefix() {
+    // `/projects/alphabet` should NOT match a project at `/projects/alpha`,
+    // because Path::starts_with is component-wise, not byte-wise.
+    let projects = vec![project("Alpha", "/projects/alpha")];
+    assert!(project_for_path(Path::new("/projects/alphabet"), &projects).is_none());
+}
+
+#[test]
+fn project_for_path_empty_projects_returns_none() {
+    let projects: Vec<Project> = vec![];
+    assert!(project_for_path(Path::new("/anywhere"), &projects).is_none());
 }
 
 #[test]
