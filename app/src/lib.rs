@@ -114,6 +114,7 @@ mod workspaces;
 pub mod ai_assistant;
 pub mod appearance;
 pub mod channel;
+pub mod cortex_settings;
 pub mod editor;
 pub mod features;
 pub mod input_suggestions;
@@ -323,6 +324,7 @@ use warpui::{AppContext, SingletonEntity, WindowId};
 #[folder = "assets"]
 #[include = "bundled/**"] // Should be kept in sync with BUNDLED_ASSETS_DIR.
 #[include = "async/**"] // Should be kept in sync with ASYNC_ASSETS_DIR.
+#[include = "cortex/**"] // Cortex fork assets (brain.svg etc). See app/assets/cortex/.
 #[cfg_attr(target_family = "wasm", exclude = "async/**")]
 // Excludes take precedence.
 // Standalone CLI builds (the `oz` tarball) are headless and never render the
@@ -1377,6 +1379,7 @@ pub(crate) fn initialize_app(
     ctx.add_singleton_model(|_| AIFactManager::new());
     ctx.add_singleton_model(|_| ExecutionProfileEditorManager::default());
     ctx.add_singleton_model(|_| NetworkLogPaneManager::default());
+    ctx.add_singleton_model(|_| crate::cortex_settings::CortexSettingsPaneManager::default());
     ctx.add_singleton_model(|_| pricing::PricingInfoModel::new());
     ctx.add_singleton_model(|ctx| {
         // Not using the *Provider types isn't ideal, but it's worth it for the ability to move managed secrets to a separate crate.

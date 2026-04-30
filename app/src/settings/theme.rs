@@ -45,6 +45,13 @@ define_settings_group!(ThemeSettings, settings: [
         max_table_depth: 0,
         description: "The themes to use for system light and dark modes.",
     },
+    recent_themes: RecentThemes {
+        type: Vec<ThemeKind>,
+        default: Vec::new(),
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Never,
+        private: true,
+    },
 ]);
 
 impl Theme {

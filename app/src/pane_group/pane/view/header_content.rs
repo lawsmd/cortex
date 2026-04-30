@@ -84,6 +84,9 @@ pub struct StandardHeader {
     pub title_secondary: Option<String>,
     /// Optional title text styling.
     pub title_style: Option<Properties>,
+    /// Optional override for the title text color. When `None`, the framework
+    /// uses the default sub-text color against the surface background.
+    pub title_color: Option<Fill>,
     /// Configuration for clipping the title text when it overflows.
     pub title_clip_config: ClipConfig,
     /// Optional max width for the title in pixels.
@@ -141,6 +144,7 @@ impl HeaderContent {
             title: title.into(),
             title_secondary: None,
             title_style: None,
+            title_color: None,
             title_clip_config: ClipConfig::start(),
             title_max_width: None,
             left_of_title: None,

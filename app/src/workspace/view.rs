@@ -183,13 +183,15 @@ use crate::drive::export::ExportManager;
 use crate::drive::settings::WarpDriveSettings;
 use crate::launch_configs::launch_config::WindowTemplate;
 use crate::pane_group::{
-    AIFactPane, ChildAgentOrigin, CodeReviewPanelArg, Direction as PaneGroupDirection,
+    AIFactPane, ChildAgentOrigin, CodeReviewPanelArg, CortexSettingsPane,
+    Direction as PaneGroupDirection,
     EnvironmentManagementPane, ExecutionProfileEditorPane, NetworkLogPane, PaneGroup, PaneId,
     TerminalPaneId,
 };
 use crate::quit_warning::UnsavedStateSummary;
 use crate::search::command_palette::view::NavigationMode;
 use crate::search::slash_command_menu::static_commands::commands;
+use crate::cortex_settings::CortexSettingsPaneManager;
 use crate::server::network_log_pane_manager::NetworkLogPaneManager;
 use crate::server::server_api::ai::AIClient;
 use crate::server::server_api::auth::AuthClient;
@@ -8583,6 +8585,28 @@ impl Workspace {
             }
         }
 
+        // Cortex fork: Cortex Settings entry at the top of the menu, with a
+        // leading brain glyph + "Cortex Settings" text. Both the icon and the
+        // label are tinted to `theme.accent()` (matching the Cortex Settings
+        // pane header) so the entry visually stands out from Warp's regular
+        // menu items. Icon is sized 40% above the menu's font size so the
+        // OpenMoji silhouette reads at the same visual weight as the label.
+        // The icon-tint mechanic is the shader-rule covered in
+        // docs/branding.md. Never use the U+1F9E0 emoji codepoint here. A
+        // divider follows so the Cortex entry is visually separated from
+        // Warp's own menu items.
+        let cortex_accent: Fill = appearance.theme().accent();
+        items.push(
+            MenuItemFields::new("Cortex Settings")
+                .with_icon(icons::Icon::Brain)
+                .with_icon_size_override(appearance.ui_font_size() * 1.4)
+                .with_override_icon_color(cortex_accent)
+                .with_override_text_color(cortex_accent)
+                .with_on_select_action(WorkspaceAction::ShowCortexSettings)
+                .into_item(),
+        );
+        items.push(MenuItem::Separator);
+
         items.extend([
             MenuItemFields::new("What's new")
                 .with_on_select_action(WorkspaceAction::ViewLatestChangelog)
@@ -16745,6 +16769,28 @@ impl Workspace {
         self.show_settings_with_section(None, ctx);
     }
 
+    /// Cortex fork: open the Cortex Settings pane (or focus the existing one
+    /// if it's already open in this window).
+    fn show_cortex_settings(&mut self, ctx: &mut ViewContext<Self>) {
+        self.close_all_overlays(ctx);
+
+        let manager = CortexSettingsPaneManager::handle(ctx);
+        if let Some(locator) = manager.as_ref(ctx).find_pane(ctx.window_id()) {
+            self.focus_pane(locator, ctx);
+            return;
+        }
+
+        let pane = CortexSettingsPane::new(ctx);
+        self.active_tab_pane_group().update(ctx, |pane_group, ctx| {
+            pane_group.add_pane_with_direction(
+                PaneGroupDirection::Right,
+                pane,
+                true, /* focus_new_pane */
+                ctx,
+            );
+        });
+    }
+
     fn show_settings_with_section(
         &mut self,
         section: Option<SettingsSection>,
@@ -18472,6 +18518,34 @@ impl Workspace {
             .header_toolbar_chip_selection
             .clone();
         if knowledge_center_closed && !self.is_theme_chooser_open() {
+            // Cortex fork: brain button + vertical divider rendered as a fixed
+            // left prefix (not a `HeaderToolbarItemKind` variant). The user
+            // wants the brand button always present and not user-rearrangeable,
+            // and keeping it outside the configurable toolbar avoids polluting
+            // `HeaderToolbarItemKind` with a Cortex-specific item. See
+            // `render_cortex_brain_button` for the icon-size + color overrides
+            // that distinguish this button from the generic tab-bar buttons.
+            let cortex_brain_button = self.render_cortex_brain_button(appearance).finish();
+            tab_bar.add_child(
+                Container::new(cortex_brain_button)
+                    .with_margin_left(TAB_BAR_ICON_PADDING)
+                    .finish(),
+            );
+            let cortex_divider = ConstrainedBox::new(
+                Container::new(
+                    Rect::new()
+                        .with_background_color(appearance.theme().outline().into_solid())
+                        .finish(),
+                )
+                .with_margin_left(6.)
+                .with_margin_right(6.)
+                .finish(),
+            )
+            .with_width(1.0)
+            .with_height(16.0)
+            .finish();
+            tab_bar.add_child(cortex_divider);
+
             let left_toolbar_buttons = config
                 .left_items()
                 .into_iter()
@@ -19515,6 +19589,59 @@ impl Workspace {
         }
     }
 
+    /// Cortex-fork brand button at the top-left of the header toolbar. The
+    /// brain glyph is sized 30% larger than `render_tab_bar_icon_button` (so
+    /// OpenMoji's stroked silhouette reads at the same visual weight as
+    /// neighboring filled glyphs) and tinted to `theme.foreground()` instead
+    /// of `sub_text_color` (so it matches the other toolbar buttons'
+    /// brightness rather than appearing grayed out). Hover/click chrome and
+    /// tooltip mirror `render_tab_bar_icon_button`'s — the Cortex button is a
+    /// brand mark, not a tab-bar button, so it intentionally never enters an
+    /// "active" state.
+    fn render_cortex_brain_button(&self, appearance: &Appearance) -> Hoverable {
+        const BRAIN_BUTTON_ICON_SIZE: f32 = 25.0;
+
+        let theme = appearance.theme();
+        let icon_color: Fill = theme.foreground();
+
+        let sized_brain = ConstrainedBox::new(
+            icons::Icon::Brain.to_warpui_icon(icon_color).finish(),
+        )
+        .with_width(BRAIN_BUTTON_ICON_SIZE)
+        .with_height(BRAIN_BUTTON_ICON_SIZE)
+        .finish();
+
+        // `icon_button_with_color` constructs the right base styles + button
+        // chrome; `with_custom_label` then replaces the auto-sized icon with
+        // our explicitly-sized one. The `Icon::Brain` argument is consumed
+        // only by the discarded initial label.
+        icon_button_with_color(
+            appearance,
+            icons::Icon::Brain,
+            false, /* is_active */
+            self.mouse_states.cortex_settings_icon.clone(),
+            icon_color,
+        )
+        .with_custom_label(sized_brain)
+        .with_hovered_styles(UiComponentStyles {
+            font_color: Some(icon_color.into()),
+            background: Some(theme.surface_2().into()),
+            ..UiComponentStyles::default()
+        })
+        .with_clicked_styles(UiComponentStyles {
+            font_color: Some(icon_color.into()),
+            background: Some(theme.background().into()),
+            ..UiComponentStyles::default()
+        })
+        .with_tooltip(self.render_tab_bar_icon_button_tooltip(
+            appearance,
+            "Cortex Settings".to_string(),
+            None,
+        ))
+        .build()
+        .on_click(move |ctx, _, _| ctx.dispatch_typed_action(WorkspaceAction::ShowCortexSettings))
+    }
+
     fn render_tab_overflow_menu(
         &self,
         app: &AppContext,
@@ -19691,9 +19818,14 @@ impl Workspace {
     }
 
     fn render_theme_chooser(&self) -> Box<dyn Element> {
+        // Width sized for the swatch+name layout: 16 swatches (~140px) +
+        // the longest common community theme names ("Aubergine Light Soft
+        // (Gogh)") + scrollbar + chrome. The earlier 240px was sized for
+        // the vertical thumbnail-above-name layout and clipped names badly
+        // once the picker switched to a single-row swatch+name design.
         let theme_chooser = ChildView::new(&self.theme_chooser_view).finish();
         ConstrainedBox::new(theme_chooser)
-            .with_max_width(240.0)
+            .with_max_width(400.0)
             .finish()
     }
 
@@ -20192,6 +20324,16 @@ impl Workspace {
     }
 
     fn render_panel_separator(app: &AppContext) -> Box<dyn Element> {
+        // Cortex fork: when `hide_pane_separators` is enabled, suppress the
+        // panel divider entirely. Returning an empty zero-width
+        // `ConstrainedBox` keeps the surrounding flex layout intact (no
+        // resize) — only the painted line goes away. Covers all call sites of
+        // this function.
+        if *crate::settings::CortexSettings::as_ref(app).hide_pane_separators {
+            return ConstrainedBox::new(Empty::new().finish())
+                .with_width(0.0)
+                .finish();
+        }
         let appearance = Appearance::as_ref(app);
         ConstrainedBox::new(
             Rect::new()
@@ -21527,6 +21669,7 @@ impl TypedActionView for Workspace {
                 self.show_keyboard_settings(keybinding_name.as_deref(), ctx)
             }
             ShowSettings => self.show_settings(ctx),
+            ShowCortexSettings => self.show_cortex_settings(ctx),
             ShowSettingsPage(section) => self.show_settings_with_section(Some(*section), ctx),
             ShowSettingsPageWithSearch {
                 search_query,

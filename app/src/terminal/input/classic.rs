@@ -251,7 +251,12 @@ impl Input {
         // When AgentView is enabled, match terminal-mode input behavior and only render the
         // divider adjacent to the status/message line when block dividers are enabled.
         let show_block_dividers = *BlockListSettings::as_ref(app).show_block_dividers.value();
-        let should_render_divider = !FeatureFlag::AgentView.is_enabled() || show_block_dividers;
+        // Cortex fork: also AND with `!hide_pane_separators` so the toggle
+        // suppresses every flavor of input-box border (PinnedToBottom top,
+        // PinnedToTop bottom, Waterfall left+right).
+        let cortex_hide = *crate::settings::CortexSettings::as_ref(app).hide_pane_separators;
+        let should_render_divider =
+            (!FeatureFlag::AgentView.is_enabled() || show_block_dividers) && !cortex_hide;
 
         let border = match input_mode {
             InputMode::PinnedToBottom => Border::top(if should_render_divider {
@@ -266,9 +271,13 @@ impl Input {
                 0.
             })
             .with_border_fill(theme.outline()),
-            InputMode::Waterfall => Border::new(get_input_box_top_border_width())
-                .with_sides(true, false, true, false)
-                .with_border_fill(theme.outline()),
+            InputMode::Waterfall => Border::new(if should_render_divider {
+                get_input_box_top_border_width()
+            } else {
+                0.
+            })
+            .with_sides(true, false, true, false)
+            .with_border_fill(theme.outline()),
         };
 
         let drop_target = DropTarget::new(

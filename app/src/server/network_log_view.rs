@@ -235,6 +235,7 @@ impl BackingView for NetworkLogView {
             title: NETWORK_LOG_HEADER_TEXT.to_string(),
             title_secondary: None,
             title_style: None,
+            title_color: None,
             title_clip_config: ClipConfig::start(),
             title_max_width: None,
             left_of_title: None,

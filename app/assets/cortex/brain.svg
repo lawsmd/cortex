@@ -1,23 +1,28 @@
 <!--
-  Cortex brain glyph (filled silhouette).
+  Cortex brain glyph — OpenMoji black variant of U+1F9E0 (🧠).
 
-  History: this used to be Lucide's stroke-only brain (https://lucide.dev/icons/brain)
-  with `stroke="currentColor"`, then `stroke="#000"`. Both rendered as fully transparent
-  through warpui's `Icon` rasterizer — the rasterizer apparently does not produce
-  opaque pixels for stroked-only paths. The runtime `draw_icon` tint then has no
-  pixels to recolor, so nothing is visible.
+  Rendered through warpui's `Icon` element, which uses the rasterized
+  SVG's RED channel as the alpha mask (see image_shader.wgsl line 78-86 +
+  shaders.metal line 296). The call-site tint color (passed to
+  `Icon::Brain.to_warpui_icon(color)`) supplies the final RGB. So every
+  visible pixel of this SVG must have a non-zero red channel —
+  `stroke="#ffffff"` is the convention for stroked icons in this
+  codebase. `currentColor` and `#000` both default to R=0 and produce
+  an invisible icon.
 
-  Fix: keep the two closed hemisphere paths from the Lucide source (left + right
-  halves of the brain), drop the open detail strokes, and fill the result. Each
-  hemisphere is a closed shape (ends with `Z`) so `fill="#000"` produces a
-  recognizable filled brain silhouette. `Icon` re-tints all opaque pixels at
-  paint time via `ctx.scene.draw_icon(..., color)`, so the literal `#000` is just
-  a placeholder for "render an opaque pixel here" — the runtime color wins.
-
-  Source: Lucide (https://lucide.dev/icons/brain) — ISC License.
-  Copyright (c) Lucide Contributors. Original Feather portions (c) Cole Bemis.
+  Source: OpenMoji (https://openmoji.org) — CC BY-SA 4.0.
+  Original colors `#000000` swapped to `#ffffff` for the shader rule
+  above; geometry unchanged.
 -->
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="#000">
-  <path d="M12 5a3 3 0 1 0-5.997.125 4 4 0 0 0-2.526 5.77 4 4 0 0 0 .556 6.588A4 4 0 1 0 12 18Z"/>
-  <path d="M12 5a3 3 0 1 1 5.997.125 4 4 0 0 1 2.526 5.77 4 4 0 0 1-.556 6.588A4 4 0 1 1 12 18Z"/>
+<svg id="emoji" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+  <g id="line" fill="none" stroke="#ffffff" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10" stroke-width="2">
+    <line x1="16" x2="25.875" y1="35" y2="35"/>
+    <path d="M25.875,35c3.4167,0,4.75-2.9167,4.75-6.1667"/>
+    <line x1="16" x2="19.75" y1="45.5" y2="45.5"/>
+    <line x1="35.2997" x2="35.2997" y1="45.5" y2="39.4375"/>
+    <path d="M35.2997,39.4375c0-2.2455,1.2003-5.25,5.0756-5.25"/>
+    <line x1="58.4583" x2="49.875" y1="34.5417" y2="34.5417"/>
+    <path d="M40.375,45.5c0,0,0.1642,10.5-7.9583,10.5H16c-7.2083,0-7.6667-10.5,0-10.5C8.7917,45.5,8.3333,35,16,35 c-8.1667-7.25,1.875-13.5625,6.5-8.6875c-4.799-6.625,5.375-10.3125,8.875-5C30.9627,16,36.2222,15.0417,41.1003,19.024 l-0.4336,0.351c2.375-2.375,10.1776-1.0833,10.1776,5.3141l-2.2192,1.6234c6.8646-6.8646,14.2083,4.1875,8.5,8.2292h1.3333 c4.75,0,5.2917,10.9583-1.3333,10.9583H29.2917"/>
+    <path d="M40.6667,19.375c-2.4167,2.4167-0.2822,3.1782-4.2707,7.1667"/>
+  </g>
 </svg>

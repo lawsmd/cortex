@@ -191,6 +191,7 @@ pub use pane::environment_management_pane::EnvironmentManagementPane;
 pub use pane::execution_profile_editor_pane::ExecutionProfileEditorPane;
 pub use pane::file_pane::FilePane;
 pub use pane::network_log_pane::NetworkLogPane;
+pub use pane::cortex_settings_pane::CortexSettingsPane;
 pub use pane::notebook_pane::NotebookPane;
 pub use pane::settings_pane::SettingsPane;
 pub use pane::terminal_pane::TerminalPane;
@@ -1942,6 +1943,15 @@ impl PaneGroup {
                 // pane on demand via Privacy settings or the keybinding.
                 Err(anyhow::anyhow!(
                     "Network log pane should not have been persisted, as it cannot be restored"
+                ))
+            }
+            LeafContents::CortexSettings => {
+                // Cortex Settings panes are intentionally not restored — see
+                // `LeafContents::is_persisted` and `save_pane_state` for the
+                // skip path. Reaching this arm indicates the persistence side
+                // failed to filter the variant out and is a programmer error.
+                Err(anyhow::anyhow!(
+                    "Cortex Settings pane should not have been persisted, as it cannot be restored"
                 ))
             }
             LeafContents::GetStarted => {

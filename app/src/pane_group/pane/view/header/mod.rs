@@ -550,6 +550,7 @@ impl<P: BackingView> PaneHeader<P> {
             title,
             title_secondary,
             title_style,
+            title_color,
             title_clip_config,
             title_max_width,
             left_of_title,
@@ -616,9 +617,11 @@ impl<P: BackingView> PaneHeader<P> {
                 }
 
                 let font_size = appearance.ui_font_size();
-                let font_color = appearance
-                    .theme()
-                    .sub_text_color(appearance.theme().background());
+                let font_color = title_color.unwrap_or_else(|| {
+                    appearance
+                        .theme()
+                        .sub_text_color(appearance.theme().background())
+                });
 
                 // Build title row with primary title and optional secondary title.
                 let mut title_row = Flex::row();

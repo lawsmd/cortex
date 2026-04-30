@@ -157,8 +157,10 @@ impl Input {
             .finish();
 
         let show_block_dividers = *BlockListSettings::as_ref(app).show_block_dividers.value();
+        // Cortex fork: hide_pane_separators overrides show_block_dividers.
+        let cortex_hide = *crate::settings::CortexSettings::as_ref(app).hide_pane_separators;
 
-        let input = if show_block_dividers {
+        let input = if show_block_dividers && !cortex_hide {
             Container::new(hoverable_input)
                 .with_border(
                     Border::top(1.)

@@ -36,10 +36,10 @@ use super::{
     cloud_preferences::CloudPreferencesSettings, initializer::SettingsInitializer,
     native_preference::NativePreferenceSettings, AISettings, AccessibilitySettings,
     AliasExpansionSettings, AppEditorSettings, BlockVisibilitySettings, ChangelogSettings,
-    CodeSettings, DebugSettings, EmacsBindingsSettings, FontSettings, FontSettingsChangedEvent,
-    GPUSettings, InputBoxType, InputModeSettings, InputSettings, PaneSettings,
-    SameLinePromptBlockSettings, ScrollSettings, SelectionSettings, SshSettings, ThemeSettings,
-    VimBannerSettings, WarpDrivePrivacySettings,
+    CodeSettings, CortexSettings, DebugSettings, EmacsBindingsSettings, FontSettings,
+    FontSettingsChangedEvent, GPUSettings, InputBoxType, InputModeSettings, InputSettings,
+    PaneSettings, SameLinePromptBlockSettings, ScrollSettings, SelectionSettings, SshSettings,
+    ThemeSettings, VimBannerSettings, WarpDrivePrivacySettings,
 };
 
 pub struct UserDefaultsOnStartup {
@@ -66,6 +66,7 @@ pub fn register_all_settings(ctx: &mut AppContext) {
     SafeModeSettings::register(ctx);
     TerminalSettings::register(ctx);
     PaneSettings::register(ctx);
+    CortexSettings::register(ctx);
     CommandSearchSettings::register(ctx);
     AliasExpansionSettings::register(ctx);
     CodeSettings::register(ctx);
