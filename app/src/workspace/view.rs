@@ -1000,6 +1000,11 @@ pub struct Workspace {
     // Same applies to "show_new_session_dropdown_menu"
     new_session_dropdown_menu: ViewHandle<Menu<WorkspaceAction>>,
     show_new_session_dropdown_menu: Option<Vector2F>,
+    /// Cortex: when the dropdown is open from the bottom "+" button on the
+    /// vertical tab panel, this is `true` and the popup anchors to
+    /// `VERTICAL_TABS_BOTTOM_ADD_TAB_POSITION_ID` instead of the top button.
+    /// Cleared whenever the dropdown closes.
+    show_projects_picker_menu: bool,
     changelog_model: ModelHandle<ChangelogModel>,
     palette: ViewHandle<CommandPalette>,
     ctrl_tab_palette: ViewHandle<CommandPalette>,
@@ -1182,6 +1187,7 @@ impl Workspace {
 
     fn close_new_session_dropdown_menu(&mut self, ctx: &mut ViewContext<Self>) {
         self.show_new_session_dropdown_menu = None;
+        self.show_projects_picker_menu = false;
         self.tab_config_action_sidecar_item = None;
         self.clear_worktree_sidecar_state(ctx);
         self.new_session_dropdown_menu.update(ctx, |menu, _| {
@@ -3137,6 +3143,7 @@ impl Workspace {
             show_tab_right_click_menu: None,
             new_session_dropdown_menu,
             show_new_session_dropdown_menu: None,
+            show_projects_picker_menu: false,
             changelog_model,
             welcome_tips_view_state,
             welcome_tips_view,
@@ -6433,6 +6440,51 @@ impl Workspace {
         self.open_tab_configs_menu(position, TabConfigsMenuOpenSource::Pointer, ctx);
     }
 
+    /// Cortex: builds the saved-projects picker menu shown by the bottom "+"
+    /// button on the vertical tab panel. Reads `~/.warp-oss/projects.json` on
+    /// every open (per-open re-read; hot-reload watcher is a follow-up).
+    fn projects_picker_menu_items(&self) -> Vec<MenuItem<WorkspaceAction>> {
+        let mut menu_items = Vec::new();
+        for project in crate::saved_projects::load_projects() {
+            let item = MenuItemFields::new(project.name.clone())
+                .with_on_select_action(WorkspaceAction::SelectNewSessionMenuItem(
+                    NewSessionMenuItem::OpenProject(project),
+                ))
+                .with_icon(icons::Icon::LayoutAlt01);
+            menu_items.push(item.into_item());
+        }
+        // TODO(cortex,reskin-vertical-tabs-step-2): append a separator + a
+        // "Open a directory…" row that launches a directory navigator and
+        // opens a tab in the chosen path with a neutral default color.
+        // Distinct from saved projects (no rank, no name, no per-entry color).
+        menu_items
+    }
+
+    /// Cortex: opens (or toggles) the saved-projects picker anchored to the
+    /// bottom "+" button on the vertical tab panel. Reuses the existing
+    /// `new_session_dropdown_menu` view handle but with a project-only item
+    /// list and a different anchor point.
+    pub fn toggle_projects_picker_menu(
+        &mut self,
+        position: Vector2F,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        if self.show_new_session_dropdown_menu.is_some() {
+            self.close_new_session_dropdown_menu(ctx);
+            return;
+        }
+        let menu_items = self.projects_picker_menu_items();
+        ctx.update_view(&self.new_session_dropdown_menu, |context_menu, view_ctx| {
+            context_menu.set_width(268.);
+            context_menu.set_items(menu_items, view_ctx);
+            context_menu.reset_selection(view_ctx);
+        });
+        self.show_new_session_dropdown_menu = Some(position);
+        self.show_projects_picker_menu = true;
+        ctx.focus(&self.new_session_dropdown_menu);
+        ctx.notify();
+    }
+
     fn toggle_tab_configs_menu(&mut self, ctx: &mut ViewContext<Self>) {
         let use_vertical_tabs =
             FeatureFlag::VerticalTabs.is_enabled() && *TabSettings::as_ref(ctx).use_vertical_tabs;
@@ -6480,6 +6532,18 @@ impl Workspace {
         ctx: &mut ViewContext<Self>,
     ) {
         match new_session_menu_item {
+            NewSessionMenuItem::OpenProject(project) => {
+                self.close_new_session_dropdown_menu(ctx);
+                self.add_tab_with_pane_layout(
+                    PanesLayout::SingleTerminal(Box::new(NewTerminalOptions {
+                        initial_directory: Some(project.cwd.clone()),
+                        ..Default::default()
+                    })),
+                    Arc::new(HashMap::new()),
+                    Some(project.name.clone()),
+                    ctx,
+                );
+            }
             NewSessionMenuItem::OpenLaunchConfig(launch_config) => ctx.dispatch_global_action(
                 "root_view:open_launch_config",
                 OpenLaunchConfigArg {
@@ -21206,6 +21270,9 @@ impl TypedActionView for Workspace {
             ToggleNewSessionMenu { position } => {
                 self.toggle_new_session_dropdown_menu(*position, ctx)
             }
+            ToggleProjectsPickerMenu { position } => {
+                self.toggle_projects_picker_menu(*position, ctx)
+            }
             SelectNewSessionMenuItem(new_session_menu_item) => {
                 self.open_launch_config_from_menu(new_session_menu_item.clone(), ctx)
             }
@@ -23706,26 +23773,32 @@ impl View for Workspace {
                 && self.vertical_tabs_panel_open;
 
             if is_vertical {
-                // Anchor the menu below the vertical-tabs + button. The anchor
-                // side mirrors which side the tabs panel itself is on, so the
-                // menu always expands inward and stays inside the window.
-                let tabs_side =
-                    Self::tabs_panel_side(&TabSettings::as_ref(app).header_toolbar_chip_selection);
-                let (anchor, child_anchor) = match tabs_side {
-                    PanelPosition::Left => {
-                        (PositionedElementAnchor::BottomLeft, ChildAnchor::TopLeft)
-                    }
-                    PanelPosition::Right => {
-                        (PositionedElementAnchor::BottomRight, ChildAnchor::TopRight)
-                    }
-                };
+                // Cortex: when the dropdown is the projects picker (opened from
+                // the bottom + button), anchor it ABOVE that button. Otherwise
+                // anchor below the top + button as Warp does.
+                let (anchor_id, offset, parent_anchor, child_anchor) =
+                    if self.show_projects_picker_menu {
+                        (
+                            vertical_tabs::VERTICAL_TABS_BOTTOM_ADD_TAB_POSITION_ID,
+                            vec2f(0., -4.),
+                            PositionedElementAnchor::TopLeft,
+                            ChildAnchor::BottomLeft,
+                        )
+                    } else {
+                        (
+                            vertical_tabs::VERTICAL_TABS_ADD_TAB_POSITION_ID,
+                            vec2f(0., 4.),
+                            PositionedElementAnchor::BottomLeft,
+                            ChildAnchor::TopLeft,
+                        )
+                    };
                 stack.add_positioned_overlay_child(
                     ChildView::new(&self.new_session_dropdown_menu).finish(),
                     OffsetPositioning::offset_from_save_position_element(
-                        vertical_tabs::VERTICAL_TABS_ADD_TAB_POSITION_ID,
-                        vec2f(0., 4.),
+                        anchor_id,
+                        offset,
                         PositionedElementOffsetBounds::WindowBySize,
-                        anchor,
+                        parent_anchor,
                         child_anchor,
                     ),
                 );

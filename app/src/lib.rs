@@ -70,6 +70,7 @@ mod remote_server;
 mod resource_limits;
 mod reward_view;
 mod safe_triangle;
+mod saved_projects;
 mod search_bar;
 mod server;
 mod session_management;

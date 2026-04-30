@@ -567,6 +567,9 @@ pub(super) struct VerticalTabsPanelState {
     detail_overlay_state: Arc<Mutex<VerticalTabsDetailOverlayState>>,
     new_tab_hover_state: MouseStateHandle,
     new_tab_button_state: MouseStateHandle,
+    /// Cortex: hover/click state for the bottom "+" button (saved-projects picker).
+    bottom_new_tab_hover_state: MouseStateHandle,
+    bottom_new_tab_button_state: MouseStateHandle,
     pub(super) search_query: String,
     settings_button_mouse_state: MouseStateHandle,
     panes_segment_mouse_state: MouseStateHandle,
@@ -602,6 +605,8 @@ impl Default for VerticalTabsPanelState {
             detail_overlay_state: Arc::new(Mutex::new(VerticalTabsDetailOverlayState::default())),
             new_tab_hover_state: Default::default(),
             new_tab_button_state: Default::default(),
+            bottom_new_tab_hover_state: Default::default(),
+            bottom_new_tab_button_state: Default::default(),
             search_query: String::new(),
             settings_button_mouse_state: Default::default(),
             panes_segment_mouse_state: Default::default(),
@@ -1106,7 +1111,12 @@ const SEARCH_BAR_HEIGHT: f32 = 24.;
 const CONTROL_BAR_BUTTON_RADIUS: Radius = Radius::Pixels(4.);
 const SPLIT_BUTTON_HEIGHT: f32 = SEARCH_BAR_HEIGHT;
 pub(super) const VERTICAL_TABS_ADD_TAB_POSITION_ID: &str = "vertical_tabs_add_tab_button";
+pub(super) const VERTICAL_TABS_BOTTOM_ADD_TAB_POSITION_ID: &str =
+    "vertical_tabs_bottom_add_tab_button";
 pub(super) const VERTICAL_TABS_SETTINGS_BUTTON_POSITION_ID: &str = "vertical_tabs_settings_button";
+
+const BOTTOM_ADD_BUTTON_SIZE: f32 = 28.;
+const BOTTOM_ADD_BUTTON_VERTICAL_PADDING: f32 = 8.;
 
 pub(super) fn vtab_action_buttons_position_id(tab_index: usize) -> String {
     format!("vtab_action_buttons_{tab_index}")
@@ -1484,6 +1494,94 @@ fn render_new_tab_button(
     .finish()
 }
 
+/// Cortex: SideQuest-style "+" button pinned to the bottom of the vertical
+/// tab panel. Opens a saved-projects picker (separate from the top
+/// "Tab configs" menu). The dynamic spacing between the bottom-most tab and
+/// this button is emergent — the scrollable groups take their natural height,
+/// then the panel column's `MainAxisSize::Max` absorbs the rest above this row.
+fn render_bottom_new_tab_button(
+    state: &VerticalTabsPanelState,
+    appearance: &Appearance,
+) -> Box<dyn Element> {
+    let theme = appearance.theme();
+    let sub_text = theme.sub_text_color(theme.background());
+    let main_text = theme.main_text_color(theme.background());
+    let ui_builder = appearance.ui_builder().clone();
+
+    let button_inner = Hoverable::new(
+        state.bottom_new_tab_hover_state.clone(),
+        move |hover_state| {
+            let plus_button = combo_inner_button(
+                appearance,
+                UiIcon::Plus,
+                false,
+                state.bottom_new_tab_button_state.clone(),
+            )
+            .with_style(
+                UiComponentStyles::default()
+                    .set_border_radius(CornerRadius::with_all(CONTROL_BAR_BUTTON_RADIUS))
+                    .set_font_color(if hover_state.is_hovered() { main_text } else { sub_text }
+                        .into()),
+            )
+            .with_active_styles(
+                UiComponentStyles::default()
+                    .set_background(internal_colors::fg_overlay_3(theme).into()),
+            )
+            .build()
+            .on_click(|ctx, _, position| {
+                ctx.dispatch_typed_action(WorkspaceAction::ToggleProjectsPickerMenu { position });
+            })
+            .finish();
+
+            let button = SavePosition::new(plus_button, VERTICAL_TABS_BOTTOM_ADD_TAB_POSITION_ID)
+                .finish();
+            let mut container = Container::new(
+                ConstrainedBox::new(button)
+                    .with_width(BOTTOM_ADD_BUTTON_SIZE)
+                    .with_height(BOTTOM_ADD_BUTTON_SIZE)
+                    .finish(),
+            )
+            .with_corner_radius(CornerRadius::with_all(CONTROL_BAR_BUTTON_RADIUS));
+            if hover_state.is_hovered() {
+                container = container.with_background(internal_colors::neutral_1(theme));
+            }
+            let container = container.finish();
+
+            if hover_state.is_hovered() {
+                let tooltip = ui_builder
+                    .tool_tip("Open saved project".to_string())
+                    .build()
+                    .finish();
+                let mut stack = Stack::new().with_child(container);
+                stack.add_positioned_overlay_child(
+                    tooltip,
+                    OffsetPositioning::offset_from_parent(
+                        vec2f(0., -4.),
+                        ParentOffsetBounds::WindowByPosition,
+                        ParentAnchor::TopMiddle,
+                        ChildAnchor::BottomMiddle,
+                    ),
+                );
+                stack.finish()
+            } else {
+                container
+            }
+        },
+    )
+    .finish();
+
+    Container::new(
+        Flex::row()
+            .with_main_axis_size(MainAxisSize::Max)
+            .with_cross_axis_alignment(CrossAxisAlignment::Center)
+            .with_main_axis_alignment(MainAxisAlignment::Center)
+            .with_child(button_inner)
+            .finish(),
+    )
+    .with_padding(Padding::uniform(BOTTOM_ADD_BUTTON_VERTICAL_PADDING))
+    .finish()
+}
+
 fn render_vertical_tabs_panel(
     state: &VerticalTabsPanelState,
     workspace: &Workspace,
@@ -1514,6 +1612,7 @@ fn render_vertical_tabs_panel(
             app,
         ))
         .with_child(Shrinkable::new(1., scrollable_groups).finish())
+        .with_child(render_bottom_new_tab_button(state, appearance))
         .finish();
 
     // The settings popup is rendered at the workspace level (with Dismiss for click-outside-
