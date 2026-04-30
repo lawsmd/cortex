@@ -401,6 +401,16 @@ debug = "line-tables-only"
 # location while retaining the debug information.
 split-debuginfo = "unpacked"
 
+[profile.dev.package."*"]
+# Optimize all third-party dependencies at level 1 in dev builds. Workspace
+# crates stay at the default opt-level (0) so iterating on Cortex code is
+# unaffected. This matters most for the wgpu / cosmic-text / pathfinder /
+# palette stack — without it, the first paint of any rendering-heavy UI
+# (theme picker thumbnails especially) takes seconds while shaders compile
+# and font atlases warm. Specific overrides at higher opt-levels below
+# (e.g. backtrace = 3) take precedence over this wildcard.
+opt-level = 1
+
 [profile.dev.package]
 # Improve the performance of core terminal logic.
 warp_terminal.opt-level = 3
