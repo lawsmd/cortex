@@ -1,10 +1,27 @@
-//! Bundled WezTerm color schemes.
+//! Bundled community color schemes.
 //!
-//! Cortex ships ~1,078 themes from `wezterm.color.get_builtin_schemes()` as
-//! YAML files committed under `yaml/`, embedded into the binary at build time
-//! via `include_dir!` and registered into [`WarpThemeConfig`] alongside the
-//! curated builtins. Source data, generator script, and refresh helper live
-//! in `scripts/`.
+//! Cortex ships ~1,078 themes embedded as YAML files under `yaml/`, loaded into
+//! [`WarpThemeConfig`] alongside the curated builtins via `include_dir!` at
+//! build time.
+//!
+//! These themes are not Cortex-original work. They're aggregated from four
+//! upstream community projects (all MIT-licensed):
+//!
+//! - **Gogh** (~361 schemes) — <https://github.com/Gogh-Co/Gogh>
+//! - **iTerm2-Color-Schemes** (~381 schemes) —
+//!   <https://github.com/mbadolato/iTerm2-Color-Schemes>
+//! - **base16** (~179 schemes) — <https://github.com/chriskempson/base16>
+//! - **terminal.sexy** (~157 schemes) —
+//!   <https://github.com/stayradiated/terminal.sexy>
+//!
+//! Each theme's display name preserves its source tag, e.g. `"3024 (base16)"`,
+//! `"Adventure Time (Gogh)"`. Full attribution lives in the repo `README.md`
+//! and `docs/roadmap/themes.md`.
+//!
+//! The YAML on disk is the form WezTerm exposes via
+//! `wezterm.color.get_builtin_schemes()`, which is how this collection reaches
+//! us; the generator/refresh script that pulls from that source lives under
+//! `scripts/`.
 
 use include_dir::{Dir, include_dir};
 use warp_core::ui::theme::WarpTheme;

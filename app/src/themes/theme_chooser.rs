@@ -1,3 +1,6 @@
+use std::collections::HashSet;
+
+use fuzzy_match::match_indices_case_insensitive;
 use pathfinder_color::ColorU;
 use settings::Setting as _;
 use warp_editor::editor::NavigationKey;
@@ -49,7 +52,6 @@ use crate::{
     ui_components::icons,
 };
 
-use super::theme;
 
 // All units in px
 const THEME_CHOOSER_TITLE: &str = "Themes";
@@ -57,13 +59,29 @@ const CLOSE_BUTTON_MARGIN_RIGHT: f32 = 6.;
 const TITLE_FONT_SIZE: f32 = 16.;
 const TITLE_MARGIN: f32 = 12.;
 const SCROLLBAR_WIDTH: ScrollbarWidth = ScrollbarWidth::Auto;
-const THEME_NAME_FONT_SIZE: f32 = 14.;
-const THEME_NAME_MARGIN_LEFT: f32 = 16.;
+const THEME_NAME_FONT_SIZE: f32 = 13.;
+const THEME_NAME_MARGIN_LEFT: f32 = 12.;
 const DELETE_BUTTON_LINE_WIDTH: f32 = 10.;
 const DELETE_BUTTON_LINE_HEIGHT: f32 = 1.33;
 const DELETE_BUTTON_SIZE: f32 = 16.;
 const DELETE_BUTTON_MARGIN_RIGHT: f32 = 16.;
-const THEME_CHOOSER_ITEM_PADDING: f32 = 16.;
+const THEME_CHOOSER_ITEM_PADDING: f32 = 8.;
+
+// Swatch strip — small palette preview rendered to the left of each theme
+// name. Cheap to paint (16 colored rects, no text, no font atlas warm-up)
+// so the picker can open instantly even on a cold GPU.
+const SWATCH_WIDTH: f32 = 8.;
+const SWATCH_HEIGHT: f32 = 14.;
+const SWATCH_STRIP_MARGIN_LEFT: f32 = 14.;
+
+// Section-header / hint rows in the layered default view.
+const SECTION_HEADER_FONT_SIZE: f32 = 11.;
+const SECTION_HEADER_MARGIN_TOP: f32 = 8.;
+const SECTION_HEADER_MARGIN_BOTTOM: f32 = 2.;
+const HINT_ROW_FONT_SIZE: f32 = 12.;
+const HINT_ROW_PADDING: f32 = 4.;
+// How many recently-selected themes the "Recents" section surfaces.
+const MAX_RECENT_THEMES: usize = 5;
 
 #[derive(Default)]
 struct MouseStateHandles {
@@ -144,8 +162,11 @@ pub struct ThemeChooser {
     list_state: UniformListState,
     scroll_state: ScrollStateHandle,
     selected_theme: Tracked<Option<ThemeKind>>,
-    themes: Tracked<Vec<ThemeChooserItem>>,
-    filtered_themes: Tracked<Option<Vec<ThemeChooserItem>>>,
+    /// Default-view rows (sectioned). Used when the search box is empty.
+    rows: Tracked<Vec<ThemeChooserRow>>,
+    /// Search-mode rows (flat, fuzzy-ranked). `Some` only when the user has
+    /// typed in the search box; `None` means render `rows` instead.
+    filtered_rows: Tracked<Option<Vec<ThemeChooserRow>>>,
     mode: ThemeChooserMode,
     search_editor: ViewHandle<EditorView>,
     referral_theme_status: ModelHandle<ReferralThemeStatus>,
@@ -175,26 +196,217 @@ pub fn init(app: &mut AppContext) {
     ]);
 }
 
-fn theme_chooser_items(
-    referral_theme_status: &ReferralThemeStatus,
-    theme_config: &WarpThemeConfig,
-) -> Vec<ThemeChooserItem> {
-    let sent_referral_theme_active = referral_theme_status.sent_referral_theme_active();
-    let received_referral_theme_active = referral_theme_status.received_referral_theme_active();
+/// One row in the theme picker list. Header and HintRow are visual-only and
+/// non-selectable; navigation skips them.
+#[derive(Clone)]
+enum ThemeChooserRow {
+    Header(&'static str),
+    HintRow(String),
+    Item(ThemeChooserItem),
+}
 
-    let mut theme_items: Vec<ThemeChooserItem> = theme_config
+impl ThemeChooserRow {
+    fn item_kind(&self) -> Option<&ThemeKind> {
+        match self {
+            ThemeChooserRow::Item(it) => Some(&it.kind),
+            _ => None,
+        }
+    }
+
+    fn is_selectable(&self) -> bool {
+        matches!(self, ThemeChooserRow::Item(_))
+    }
+}
+
+/// The 21 unconditional Cortex-curated built-in themes. Order matches the
+/// historical sort order of `ThemeKind` discriminants for visual continuity.
+/// Referral reward themes are handled separately because they're conditional
+/// on `ReferralThemeStatus`; they appear in the "Your themes" section when
+/// active.
+fn cortex_builtin_kinds() -> Vec<ThemeKind> {
+    use ThemeKind::*;
+    vec![
+        Adeberry,
+        Phenomenon,
+        Dark,
+        Dracula,
+        FancyDracula,
+        CyberWave,
+        SolarFlare,
+        SolarizedDark,
+        WillowDream,
+        Light,
+        DarkCity,
+        GruvboxDark,
+        RedRock,
+        JellyFish,
+        Leafy,
+        Koi,
+        SolarizedLight,
+        Snowy,
+        GruvboxLight,
+        PinkCity,
+        Marble,
+    ]
+}
+
+fn item_for(kind: &ThemeKind, theme_config: &WarpThemeConfig) -> ThemeChooserItem {
+    ThemeChooserItem::new(kind.clone(), theme_config.theme(kind))
+}
+
+/// Build the layered default view (no search): Recents → Your themes →
+/// Cortex built-ins → "browse the library" hint row.
+fn build_default_rows(
+    referral: &ReferralThemeStatus,
+    theme_config: &WarpThemeConfig,
+    recents: &[ThemeKind],
+) -> Vec<ThemeChooserRow> {
+    let mut rows: Vec<ThemeChooserRow> = Vec::new();
+
+    let mut already_in_recents: HashSet<ThemeKind> = HashSet::new();
+    let recents_items: Vec<ThemeChooserItem> = recents
+        .iter()
+        .filter(|kind| {
+            // Skip an inactive referral reward kind even if it lingers in the
+            // user's MRU list.
+            match kind {
+                ThemeKind::SentReferralReward => referral.sent_referral_theme_active(),
+                ThemeKind::ReceivedReferralReward => referral.received_referral_theme_active(),
+                _ => true,
+            }
+        })
+        .filter(|kind| already_in_recents.insert((*kind).clone()))
+        .take(MAX_RECENT_THEMES)
+        .map(|kind| item_for(kind, theme_config))
+        .collect();
+    if !recents_items.is_empty() {
+        rows.push(ThemeChooserRow::Header("Recents"));
+        rows.extend(recents_items.into_iter().map(ThemeChooserRow::Item));
+    }
+
+    let mut your_items: Vec<ThemeChooserItem> = theme_config
         .theme_items()
-        .filter(|(key, _)| match key {
-            // Only show the referral reward themes if they are active
-            ThemeKind::SentReferralReward => sent_referral_theme_active,
-            ThemeKind::ReceivedReferralReward => received_referral_theme_active,
-            // All other themes should show up always
+        .filter_map(|(kind, theme)| match kind {
+            ThemeKind::Custom(_) | ThemeKind::CustomBase16(_) => {
+                Some(ThemeChooserItem::new(kind.clone(), theme.clone()))
+            }
+            ThemeKind::SentReferralReward if referral.sent_referral_theme_active() => {
+                Some(ThemeChooserItem::new(kind.clone(), theme.clone()))
+            }
+            ThemeKind::ReceivedReferralReward if referral.received_referral_theme_active() => {
+                Some(ThemeChooserItem::new(kind.clone(), theme.clone()))
+            }
+            _ => None,
+        })
+        .collect();
+    your_items.sort_by(|a, b| a.kind.cmp(&b.kind));
+    if !your_items.is_empty() {
+        rows.push(ThemeChooserRow::Header("Your themes"));
+        rows.extend(your_items.into_iter().map(ThemeChooserRow::Item));
+    }
+
+    rows.push(ThemeChooserRow::Header("Cortex built-ins"));
+    for kind in cortex_builtin_kinds() {
+        rows.push(ThemeChooserRow::Item(item_for(&kind, theme_config)));
+    }
+
+    let bundled_count = theme_config
+        .theme_items()
+        .filter(|(kind, _)| matches!(kind, ThemeKind::Wezterm(_)))
+        .count();
+    if bundled_count > 0 {
+        rows.push(ThemeChooserRow::HintRow(format!(
+            "Type to search {} more community themes",
+            bundled_count
+        )));
+    }
+
+    rows
+}
+
+/// Build the search-mode flat list: every theme that fuzzy-matches the query,
+/// ranked by score descending, plus a count footer.
+fn build_search_rows(
+    query: &str,
+    referral: &ReferralThemeStatus,
+    theme_config: &WarpThemeConfig,
+) -> Vec<ThemeChooserRow> {
+    let total_count = theme_config
+        .theme_items()
+        .filter(|(kind, _)| match kind {
+            ThemeKind::SentReferralReward => referral.sent_referral_theme_active(),
+            ThemeKind::ReceivedReferralReward => referral.received_referral_theme_active(),
             _ => true,
         })
-        .map(|(key, theme)| ThemeChooserItem::new(key.clone(), theme.clone()))
+        .count();
+
+    let mut scored: Vec<(i64, ThemeChooserItem)> = theme_config
+        .theme_items()
+        .filter(|(kind, _)| match kind {
+            ThemeKind::SentReferralReward => referral.sent_referral_theme_active(),
+            ThemeKind::ReceivedReferralReward => referral.received_referral_theme_active(),
+            _ => true,
+        })
+        .filter_map(|(kind, theme)| {
+            let name = kind.to_string();
+            match_indices_case_insensitive(&name, query)
+                .map(|m| (m.score, ThemeChooserItem::new(kind.clone(), theme.clone())))
+        })
         .collect();
-    theme_items.sort_by(|a, b| a.kind.cmp(&b.kind));
-    theme_items
+    // Higher score first; tie-break alphabetically by the rendered name.
+    scored.sort_by(|a, b| {
+        b.0.cmp(&a.0)
+            .then_with(|| a.1.kind.to_string().cmp(&b.1.kind.to_string()))
+    });
+
+    let match_count = scored.len();
+    let mut rows: Vec<ThemeChooserRow> = scored
+        .into_iter()
+        .map(|(_, item)| ThemeChooserRow::Item(item))
+        .collect();
+
+    if match_count > 0 {
+        rows.push(ThemeChooserRow::HintRow(format!(
+            "Showing {} of {} themes",
+            match_count, total_count
+        )));
+    }
+
+    rows
+}
+
+fn position_of_kind(rows: &[ThemeChooserRow], kind: &ThemeKind) -> Option<usize> {
+    rows.iter().position(|r| match r {
+        ThemeChooserRow::Item(item) => &item.kind == kind,
+        _ => false,
+    })
+}
+
+fn next_selectable_after(rows: &[ThemeChooserRow], from: Option<usize>) -> Option<usize> {
+    let start = from.map(|i| i + 1).unwrap_or(0);
+    rows.iter()
+        .enumerate()
+        .skip(start)
+        .find(|(_, r)| r.is_selectable())
+        .map(|(i, _)| i)
+}
+
+fn prev_selectable_before(rows: &[ThemeChooserRow], from: Option<usize>) -> Option<usize> {
+    let upper = from.unwrap_or(rows.len());
+    rows.iter()
+        .enumerate()
+        .take(upper)
+        .rev()
+        .find(|(_, r)| r.is_selectable())
+        .map(|(i, _)| i)
+}
+
+fn first_selectable(rows: &[ThemeChooserRow]) -> Option<usize> {
+    next_selectable_after(rows, None)
+}
+
+fn selectable_count(rows: &[ThemeChooserRow]) -> usize {
+    rows.iter().filter(|r| r.is_selectable()).count()
 }
 
 impl ThemeChooser {
@@ -245,19 +457,21 @@ impl ThemeChooser {
             }
         });
 
-        let themes = theme_chooser_items(
+        let recents = ThemeSettings::as_ref(ctx).recent_themes.value().clone();
+        let rows = build_default_rows(
             referral_theme_status.as_ref(ctx),
             WarpConfig::as_ref(ctx).theme_config(),
+            &recents,
         );
 
         Self {
-            themes: Tracked::new(themes),
+            rows: Tracked::new(rows),
             button_mouse_states: Default::default(),
             header_dimming_mouse_state: Default::default(),
             list_state: Default::default(),
             scroll_state: Default::default(),
             selected_theme: Tracked::new(None),
-            filtered_themes: Tracked::new(None),
+            filtered_rows: Tracked::new(None),
             mode: ThemeChooserMode::for_active_theme(ctx),
             search_editor,
             referral_theme_status,
@@ -336,16 +550,14 @@ impl ThemeChooser {
         match event {
             EditorEvent::Edited(_) => {
                 let search_term = self.search_editor.as_ref(ctx).buffer_text(ctx);
-                *self.filtered_themes = if search_term.is_empty() {
+                *self.filtered_rows = if search_term.is_empty() {
                     None
                 } else {
-                    Some(
-                        self.themes
-                            .iter()
-                            .filter(|item| item.kind.matches(&search_term))
-                            .cloned()
-                            .collect::<Vec<_>>(),
-                    )
+                    Some(build_search_rows(
+                        &search_term,
+                        self.referral_theme_status.as_ref(ctx),
+                        WarpConfig::as_ref(ctx).theme_config(),
+                    ))
                 };
                 // Finding the position of the selected theme to adjust the scroll position of the
                 // list of visible themes.
@@ -386,14 +598,42 @@ impl ThemeChooser {
     // but rust thinks it's unused when running unit tests in this crate
     #[allow(dead_code)]
     pub fn themes(&self) -> impl Iterator<Item = &ThemeKind> {
-        self.themes
-            .iter()
-            .map(|theme_chooser_item| &theme_chooser_item.kind)
+        self.visible_rows().iter().filter_map(|r| r.item_kind())
+    }
+
+    /// The currently visible row sequence: search results when the user is
+    /// searching, otherwise the layered default view.
+    fn visible_rows(&self) -> &[ThemeChooserRow] {
+        match self.filtered_rows.as_ref() {
+            Some(filtered) => filtered.as_slice(),
+            None => self.rows.as_slice(),
+        }
+    }
+
+    fn push_recent_theme(&self, kind: &ThemeKind, ctx: &mut ViewContext<Self>) {
+        // Custom themes reference local files that may not exist on other
+        // machines, so we keep them out of the synced MRU list — same logic
+        // the existing `Theme::current_value_is_syncable` uses.
+        if matches!(
+            kind,
+            ThemeKind::Custom(_) | ThemeKind::CustomBase16(_) | ThemeKind::InMemory(_)
+        ) {
+            return;
+        }
+
+        let theme_settings = ThemeSettings::handle(ctx);
+        let mut next = theme_settings.as_ref(ctx).recent_themes.value().clone();
+        next.retain(|k| k != kind);
+        next.insert(0, kind.clone());
+        next.truncate(MAX_RECENT_THEMES);
+        theme_settings.update(ctx, |theme_settings, ctx| {
+            report_if_error!(theme_settings.recent_themes.set_value(next, ctx));
+        });
     }
 
     fn close(&mut self, ctx: &mut ViewContext<Self>) {
         *self.selected_theme = None;
-        *self.filtered_themes = None;
+        *self.filtered_rows = None;
         AppearanceManager::handle(ctx).update(ctx, |appearance_manager, ctx| {
             appearance_manager.clear_transient_theme(ctx);
         });
@@ -426,6 +666,7 @@ impl ThemeChooser {
             },
             ctx
         );
+        self.push_recent_theme(selected_kind, ctx);
         let theme_settings = ThemeSettings::handle(ctx);
 
         let selected_themes = respect_system_theme(theme_settings.as_ref(ctx))
@@ -466,11 +707,7 @@ impl ThemeChooser {
     }
 
     fn theme_position(&self, kind: ThemeKind) -> Option<usize> {
-        self.filtered_themes
-            .as_ref()
-            .unwrap_or_else(|| self.themes.as_ref())
-            .iter()
-            .position(|item| item.kind == kind)
+        position_of_kind(self.visible_rows(), &kind)
     }
 
     pub fn select_theme(&mut self, kind: ThemeKind, ctx: &mut ViewContext<Self>) {
@@ -495,11 +732,23 @@ impl ThemeChooser {
     }
 
     pub fn select_latest_theme(&mut self, ctx: &mut ViewContext<Self>) {
-        let index = self.themes.len() - 1;
+        // "Latest" means the most recently registered theme — typically a
+        // user-created custom theme that just landed in `Your themes`. Pick
+        // the last selectable row in the current view; if there are none, no-op.
+        let target = {
+            let rows = self.visible_rows();
+            let Some(index) = prev_selectable_before(rows, None) else {
+                return;
+            };
+            let Some(kind) = rows.get(index).and_then(|r| r.item_kind().cloned()) else {
+                return;
+            };
+            (index, kind)
+        };
+        let (index, kind) = target;
 
         self.list_state.scroll_to(index);
-
-        *self.selected_theme = Some(self.themes[index].kind.clone());
+        *self.selected_theme = Some(kind.clone());
 
         self.tips_completed.update(ctx, |tips_completed, ctx| {
             mark_feature_used_and_write_to_user_defaults(
@@ -511,14 +760,16 @@ impl ThemeChooser {
         });
 
         AppearanceManager::handle(ctx).update(ctx, |appearance_manager, ctx| {
-            appearance_manager.set_transient_theme(self.themes[index].kind.clone(), ctx);
+            appearance_manager.set_transient_theme(kind, ctx);
         });
     }
 
     fn update_themes(&mut self, ctx: &mut ViewContext<Self>) {
-        *self.themes = theme_chooser_items(
+        let recents = ThemeSettings::as_ref(ctx).recent_themes.value().clone();
+        *self.rows = build_default_rows(
             self.referral_theme_status.as_ref(ctx),
             WarpConfig::as_ref(ctx).theme_config(),
+            &recents,
         );
     }
 
@@ -527,15 +778,23 @@ impl ThemeChooser {
             return;
         }
 
-        let index = match &*self.selected_theme {
-            None => 0,
-            Some(selected_kind) => self
-                .theme_position(selected_kind.clone())
-                .unwrap_or_default()
-                .saturating_sub(1),
+        let next = {
+            let rows = self.visible_rows();
+            let from = self
+                .selected_theme
+                .as_ref()
+                .and_then(|kind| position_of_kind(rows, kind));
+            let target = prev_selectable_before(rows, from)
+                .or_else(|| first_selectable(rows))
+                .unwrap_or(0);
+            let target_kind = rows.get(target).and_then(|r| r.item_kind().cloned());
+            (target, target_kind)
         };
-        self.list_state.scroll_to(index);
-        self.select_and_save_theme(&self.selected_theme(index), ctx);
+        let (target, target_kind) = next;
+        self.list_state.scroll_to(target);
+        if let Some(kind) = target_kind {
+            self.select_and_save_theme(&kind, ctx);
+        }
     }
 
     fn down(&mut self, ctx: &mut ViewContext<Self>) {
@@ -543,31 +802,27 @@ impl ThemeChooser {
             return;
         }
 
-        let index = match &*self.selected_theme {
-            None => 0,
-            Some(selected_kind) => {
-                match self.theme_position(selected_kind.clone()) {
-                    None => 0, // selected element is not visible
-                    Some(index) => (index + 1).min(self.visible_theme_count() - 1),
-                }
-            }
+        let next = {
+            let rows = self.visible_rows();
+            let from = self
+                .selected_theme
+                .as_ref()
+                .and_then(|kind| position_of_kind(rows, kind));
+            let target = next_selectable_after(rows, from)
+                .or_else(|| first_selectable(rows))
+                .unwrap_or(0);
+            let target_kind = rows.get(target).and_then(|r| r.item_kind().cloned());
+            (target, target_kind)
         };
-        self.list_state.scroll_to(index);
-        self.select_and_save_theme(&self.selected_theme(index), ctx);
+        let (target, target_kind) = next;
+        self.list_state.scroll_to(target);
+        if let Some(kind) = target_kind {
+            self.select_and_save_theme(&kind, ctx);
+        }
     }
 
     fn visible_theme_count(&self) -> usize {
-        match &*self.filtered_themes {
-            None => self.themes.len(),
-            Some(themes) => themes.len(),
-        }
-    }
-
-    fn selected_theme(&self, index: usize) -> ThemeKind {
-        match &*self.filtered_themes {
-            None => self.themes[index].kind.clone(),
-            Some(themes) => themes[index].kind.clone(),
-        }
+        selectable_count(self.visible_rows())
     }
 
     fn is_selected_theme_visible(&self) -> bool {
@@ -733,16 +988,14 @@ impl ThemeChooser {
     }
 
     fn render_list(&self, appearance: &Appearance) -> Box<dyn Element> {
-        let themes = self
-            .filtered_themes
-            .as_ref()
-            .unwrap_or_else(|| self.themes.as_ref())
-            .to_vec();
-
+        // Owned copy: the closure passed to UniformList is stored on the
+        // element and called across layout passes, so it can't borrow from
+        // `self` for the duration of one render.
+        let rows: Vec<ThemeChooserRow> = self.visible_rows().to_vec();
         let selected_kind = self.selected_theme.clone();
 
-        let list_len = themes.len();
-        let element = if list_len == 0 {
+        let selectable = selectable_count(&rows);
+        let element = if selectable == 0 {
             // renders a text & an empty rectangle that expands over the panel
             // without it, the theme picker panel would be shorter than the terminal window
             Flex::column()
@@ -757,39 +1010,46 @@ impl ThemeChooser {
                 .with_cross_axis_alignment(CrossAxisAlignment::Center)
                 .finish()
         } else {
+            let list_len = rows.len();
             let list = UniformList::new(self.list_state.clone(), list_len, move |range, ctx| {
                 let appearance = Appearance::as_ref(ctx);
                 let font_family = appearance.ui_font_family();
-                let monospace_font_family = appearance.monospace_font_family();
                 let text_color = appearance.theme().active_ui_text_color().into();
                 let selected_background_color = appearance.theme().surface_2();
 
-                themes
-                    .clone()
+                rows.clone()
                     .into_iter()
                     .enumerate()
                     .skip(range.start)
                     .take(range.end - range.start)
-                    .map(|(_, item)| {
-                        let selected = match &selected_kind {
-                            Some(selected_kind) => selected_kind == &item.kind,
-                            None => false,
-                        };
-                        let element = item.render(
-                            selected,
-                            font_family,
-                            monospace_font_family,
-                            text_color,
-                            selected_background_color.into(),
-                        );
-                        EventHandler::new(element)
-                            .on_left_mouse_down(move |ctx, _, _| {
-                                ctx.dispatch_typed_action(ThemeChooserAction::Click(
-                                    item.kind.clone(),
-                                ));
-                                DispatchEventResult::StopPropagation
-                            })
-                            .finish()
+                    .map(|(_, row)| match row {
+                        ThemeChooserRow::Item(item) => {
+                            let selected = match &selected_kind {
+                                Some(selected_kind) => selected_kind == &item.kind,
+                                None => false,
+                            };
+                            let element = item.render(
+                                selected,
+                                font_family,
+                                text_color,
+                                selected_background_color.into(),
+                            );
+                            let kind_for_click = item.kind.clone();
+                            EventHandler::new(element)
+                                .on_left_mouse_down(move |ctx, _, _| {
+                                    ctx.dispatch_typed_action(ThemeChooserAction::Click(
+                                        kind_for_click.clone(),
+                                    ));
+                                    DispatchEventResult::StopPropagation
+                                })
+                                .finish()
+                        }
+                        ThemeChooserRow::Header(label) => {
+                            render_section_header_row(label, font_family, appearance)
+                        }
+                        ThemeChooserRow::HintRow(text) => {
+                            render_hint_row(&text, font_family, appearance)
+                        }
                     })
                     .collect::<Vec<_>>()
                     .into_iter()
@@ -815,6 +1075,75 @@ impl ThemeChooser {
         )
         .finish()
     }
+}
+
+fn render_section_header_row(
+    label: &'static str,
+    font_family: FamilyId,
+    appearance: &Appearance,
+) -> Box<dyn Element> {
+    let header = Container::new(
+        appearance
+            .ui_builder()
+            .span(label.to_string())
+            .with_style(UiComponentStyles {
+                font_family_id: Some(font_family),
+                font_size: Some(SECTION_HEADER_FONT_SIZE),
+                font_weight: Some(Weight::Semibold),
+                ..Default::default()
+            })
+            .build()
+            .finish(),
+    )
+    .with_padding_top(SECTION_HEADER_MARGIN_TOP)
+    .with_padding_bottom(SECTION_HEADER_MARGIN_BOTTOM)
+    .with_padding_left(THEME_NAME_MARGIN_LEFT)
+    .finish();
+
+    // Pad to item-row height so UniformList's first-item height measurement
+    // produces a row that comfortably fits both items and headers.
+    Container::new(
+        Flex::column()
+            .with_child(header)
+            .with_child(Empty::new().finish())
+            .finish(),
+    )
+    .with_padding_top(THEME_CHOOSER_ITEM_PADDING)
+    .with_padding_bottom(THEME_CHOOSER_ITEM_PADDING)
+    .finish()
+}
+
+fn render_hint_row(
+    text: &str,
+    font_family: FamilyId,
+    appearance: &Appearance,
+) -> Box<dyn Element> {
+    let hint = Container::new(
+        appearance
+            .ui_builder()
+            .span(text.to_string())
+            .with_style(UiComponentStyles {
+                font_family_id: Some(font_family),
+                font_size: Some(HINT_ROW_FONT_SIZE),
+                ..Default::default()
+            })
+            .build()
+            .finish(),
+    )
+    .with_padding_top(HINT_ROW_PADDING)
+    .with_padding_bottom(HINT_ROW_PADDING)
+    .with_padding_left(THEME_NAME_MARGIN_LEFT)
+    .finish();
+
+    Container::new(
+        Flex::column()
+            .with_child(hint)
+            .with_child(Empty::new().finish())
+            .finish(),
+    )
+    .with_padding_top(THEME_CHOOSER_ITEM_PADDING)
+    .with_padding_bottom(THEME_CHOOSER_ITEM_PADDING)
+    .finish()
 }
 
 impl Entity for ThemeChooser {
@@ -891,43 +1220,75 @@ impl ThemeChooserItem {
         }
     }
 
-    fn render_thumbnail(&self, font_family: FamilyId) -> Box<dyn Element> {
-        theme::render_preview(&self.warp_theme, font_family, None)
+    /// Compact palette preview: 16 small colored rects, one per ANSI color.
+    /// Replaces the old mini-terminal thumbnail (`theme::render_preview`),
+    /// which was visually richer but cost so much on cold-GPU first paint that
+    /// the picker took 5-8s to appear. Swatches are essentially free.
+    fn render_swatch_strip(&self) -> Box<dyn Element> {
+        let normal = self.warp_theme.terminal_colors().normal;
+        let bright = self.warp_theme.terminal_colors().bright;
+        let palette: [_; 16] = [
+            normal.black,
+            normal.red,
+            normal.green,
+            normal.yellow,
+            normal.blue,
+            normal.magenta,
+            normal.cyan,
+            normal.white,
+            bright.black,
+            bright.red,
+            bright.green,
+            bright.yellow,
+            bright.blue,
+            bright.magenta,
+            bright.cyan,
+            bright.white,
+        ];
+        let mut row = Flex::row();
+        for color in palette {
+            row = row.with_child(
+                ConstrainedBox::new(Rect::new().with_background_color(color.into()).finish())
+                    .with_width(SWATCH_WIDTH)
+                    .with_height(SWATCH_HEIGHT)
+                    .finish(),
+            );
+        }
+        Container::new(row.finish())
+            .with_margin_left(SWATCH_STRIP_MARGIN_LEFT)
+            .finish()
     }
 
     pub fn render(
         &self,
         is_selected: bool,
         font_family: FamilyId,
-        monospace_font_family: FamilyId,
         text_color: ColorU,
         selected_background_color: ColorU,
     ) -> Box<dyn Element> {
         Hoverable::new(self.mouse_state.clone(), |state| {
-            let thumbnail = self.render_thumbnail(monospace_font_family);
+            let swatches = self.render_swatch_strip();
 
             let name_text = Shrinkable::new(
                 1.,
                 Container::new(
-                    ConstrainedBox::new(
-                        Text::new_inline(self.kind.to_string(), font_family, THEME_NAME_FONT_SIZE)
-                            .with_color(text_color)
-                            .finish(),
-                    )
-                    .with_max_width(190.)
-                    .finish(),
+                    Text::new_inline(self.kind.to_string(), font_family, THEME_NAME_FONT_SIZE)
+                        .with_color(text_color)
+                        .finish(),
                 )
                 .with_margin_left(THEME_NAME_MARGIN_LEFT)
                 .finish(),
             )
             .finish();
 
-            let mut name_with_delete = Flex::row()
-                .with_child(name_text)
+            let mut row = Flex::row()
+                .with_cross_axis_alignment(CrossAxisAlignment::Center)
                 .with_main_axis_size(MainAxisSize::Max)
-                .with_main_axis_alignment(MainAxisAlignment::SpaceBetween);
+                .with_main_axis_alignment(MainAxisAlignment::Start)
+                .with_child(swatches)
+                .with_child(name_text);
 
-            // Only show deletion button if custom theme and on hover
+            // Custom themes get a delete circle on hover, on the far right.
             if matches!(self.kind, ThemeKind::Custom(_)) && state.is_hovered() {
                 let horizontal_line = ConstrainedBox::new(
                     Rect::new()
@@ -960,7 +1321,7 @@ impl ThemeChooserItem {
                 );
 
                 let theme_kind = self.kind.clone();
-                name_with_delete.add_child(
+                row = row.with_child(
                     EventHandler::new(
                         Container::new(stack.finish())
                             .with_margin_right(DELETE_BUTTON_MARGIN_RIGHT)
@@ -976,18 +1337,9 @@ impl ThemeChooserItem {
                 );
             }
 
-            let mut container = Container::new(
-                Flex::column()
-                    .with_child(thumbnail)
-                    .with_child(
-                        Container::new(name_with_delete.finish())
-                            .with_margin_top(8.)
-                            .finish(),
-                    )
-                    .finish(),
-            )
-            .with_padding_top(THEME_CHOOSER_ITEM_PADDING)
-            .with_padding_bottom(THEME_CHOOSER_ITEM_PADDING);
+            let mut container = Container::new(row.finish())
+                .with_padding_top(THEME_CHOOSER_ITEM_PADDING)
+                .with_padding_bottom(THEME_CHOOSER_ITEM_PADDING);
 
             if is_selected {
                 container = container.with_background_color(selected_background_color);
