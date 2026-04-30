@@ -110,3 +110,14 @@ We'd like to call out a few of the [open source dependencies](https://docs.warp.
 - [FontKit](https://github.com/servo/font-kit)
 - [Core-foundation](https://github.com/servo/core-foundation-rs)
 - [Smol](https://github.com/smol-rs/smol)
+
+## Color Themes
+
+This fork bundles ~1,078 terminal color schemes drawn from open-source community projects. None of these themes are original work in this repository; full credit goes to the upstream maintainers and the individual scheme authors:
+
+- [**Gogh**](https://github.com/Gogh-Co/Gogh) — ~361 schemes (MIT)
+- [**iTerm2-Color-Schemes**](https://github.com/mbadolato/iTerm2-Color-Schemes) — ~381 schemes (MIT; individual schemes retain their original copyright)
+- [**base16**](https://github.com/chriskempson/base16) — ~179 schemes (MIT)
+- [**terminal.sexy**](https://github.com/stayradiated/terminal.sexy) — ~157 schemes (MIT)
+
+Each theme's display name preserves its source tag (e.g. *"3024 (base16)"*, *"Adventure Time (Gogh)"*). The hand-curated default themes shipped with Warp are separate from this bundled library.
