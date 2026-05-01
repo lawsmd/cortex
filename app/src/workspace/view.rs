@@ -6517,14 +6517,33 @@ impl Workspace {
     /// Cortex: builds the saved-projects picker menu shown by the bottom "+"
     /// button on the vertical tab panel. Reads `~/.warp-oss/projects.json` on
     /// every open (per-open re-read; hot-reload watcher is a follow-up).
-    fn projects_picker_menu_items(&self) -> Vec<MenuItem<WorkspaceAction>> {
+    ///
+    /// Each row is centered, drawn in the project's saved hex color, and on
+    /// hover swaps to a fill in that color with the title flipped to the
+    /// menu's surface color (inverse). Projects with malformed hex fall
+    /// through to the menu's default styling.
+    fn projects_picker_menu_items(
+        &self,
+        projects: Vec<crate::saved_projects::Project>,
+        ctx: &ViewContext<Self>,
+    ) -> Vec<MenuItem<WorkspaceAction>> {
+        let theme = Appearance::as_ref(ctx).theme();
+        let menu_surface_color: ColorU = internal_colors::neutral_2(theme);
         let mut menu_items = Vec::new();
-        for project in crate::saved_projects::load_projects() {
-            let item = MenuItemFields::new(project.name.clone())
+        for project in projects {
+            let coloru =
+                warp_core::ui::color::hex_color::coloru_from_hex_string(&project.color).ok();
+            let mut item = MenuItemFields::new(project.name.clone())
                 .with_on_select_action(WorkspaceAction::SelectNewSessionMenuItem(
                     NewSessionMenuItem::OpenProject(project),
                 ))
-                .with_icon(icons::Icon::LayoutAlt01);
+                .with_centered_label();
+            if let Some(c) = coloru {
+                item = item
+                    .with_override_text_color(c)
+                    .with_override_hover_background_color(Fill::Solid(c))
+                    .with_override_hover_text_color(menu_surface_color);
+            }
             menu_items.push(item.into_item());
         }
         // TODO(cortex,reskin-vertical-tabs-step-2): append a separator + a
@@ -6547,9 +6566,28 @@ impl Workspace {
             self.close_new_session_dropdown_menu(ctx);
             return;
         }
-        let menu_items = self.projects_picker_menu_items();
+        // Picker autosize: estimate the longest project name's pixel width and
+        // clamp. Cheap (no font measurement pass) and accurate enough for the
+        // short labels saved-projects names tend to be; if a long name visibly
+        // mis-sizes the popup, swap to a real text-measurement primitive.
+        const PROJECT_PICKER_MIN_WIDTH: f32 = 110.;
+        const PROJECT_PICKER_MAX_WIDTH: f32 = 240.;
+        const PROJECT_PICKER_HORIZONTAL_PADDING: f32 = 24.;
+        const PROJECT_PICKER_CHAR_WIDTH_ESTIMATE: f32 = 7.5;
+
+        let projects = crate::saved_projects::load_projects();
+        let widest_chars = projects
+            .iter()
+            .map(|p| p.name.chars().count())
+            .max()
+            .unwrap_or(0);
+        let measured = (widest_chars as f32) * PROJECT_PICKER_CHAR_WIDTH_ESTIMATE
+            + PROJECT_PICKER_HORIZONTAL_PADDING;
+        let width = measured.clamp(PROJECT_PICKER_MIN_WIDTH, PROJECT_PICKER_MAX_WIDTH);
+
+        let menu_items = self.projects_picker_menu_items(projects, ctx);
         ctx.update_view(&self.new_session_dropdown_menu, |context_menu, view_ctx| {
-            context_menu.set_width(268.);
+            context_menu.set_width(width);
             context_menu.set_items(menu_items, view_ctx);
             context_menu.reset_selection(view_ctx);
         });
