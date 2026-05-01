@@ -432,6 +432,16 @@ pub struct MenuItemFields<A: Action + Clone> {
     /// Optional override (in logical pixels) for the gap between the leading
     /// icon and the label. When `None`, the gap is `icon_size / 2`.
     icon_label_gap_override: Option<f32>,
+    /// Optional override for the title text color when this item is hovered or
+    /// selected. When `None`, the hover state keeps the same text color as the
+    /// non-hovered state. Set this to invert the title against a colored
+    /// hover background (e.g. Cortex saved-projects picker).
+    override_hover_text_color: Option<ColorU>,
+    /// When `true`, center the row's label on the main axis instead of the
+    /// default left-aligned `SpaceEvenly` layout, and suppress the right-side
+    /// label / shortcut / chevron / timestamp slot (which would visually
+    /// fight with a centered label).
+    centered_label: bool,
 }
 
 impl<A: Action + Clone> std::fmt::Debug for MenuItemFields<A> {
@@ -474,6 +484,8 @@ impl<A: Action + Clone> MenuItemFields<A> {
             icon_size_override: None,
             clip_config: None,
             icon_label_gap_override: None,
+            override_hover_text_color: None,
+            centered_label: false,
         }
     }
 
@@ -505,6 +517,8 @@ impl<A: Action + Clone> MenuItemFields<A> {
             icon_size_override: None,
             clip_config: None,
             icon_label_gap_override: None,
+            override_hover_text_color: None,
+            centered_label: false,
         }
     }
 
@@ -539,6 +553,8 @@ impl<A: Action + Clone> MenuItemFields<A> {
             icon_size_override: None,
             clip_config: None,
             icon_label_gap_override: None,
+            override_hover_text_color: None,
+            centered_label: false,
         }
     }
 
@@ -576,6 +592,8 @@ impl<A: Action + Clone> MenuItemFields<A> {
             icon_size_override: None,
             clip_config: None,
             icon_label_gap_override: None,
+            override_hover_text_color: None,
+            centered_label: false,
         }
     }
 
@@ -611,6 +629,8 @@ impl<A: Action + Clone> MenuItemFields<A> {
             icon_size_override: None,
             clip_config: None,
             icon_label_gap_override: None,
+            override_hover_text_color: None,
+            centered_label: false,
         }
     }
 
@@ -645,6 +665,8 @@ impl<A: Action + Clone> MenuItemFields<A> {
             icon_size_override: None,
             clip_config: None,
             icon_label_gap_override: None,
+            override_hover_text_color: None,
+            centered_label: false,
         }
     }
 
@@ -676,6 +698,8 @@ impl<A: Action + Clone> MenuItemFields<A> {
             icon_size_override: None,
             clip_config: None,
             icon_label_gap_override: None,
+            override_hover_text_color: None,
+            centered_label: false,
         }
     }
 
@@ -723,6 +747,8 @@ impl<A: Action + Clone> MenuItemFields<A> {
             icon_size_override: self.icon_size_override,
             clip_config: self.clip_config,
             icon_label_gap_override: self.icon_label_gap_override,
+            override_hover_text_color: self.override_hover_text_color,
+            centered_label: self.centered_label,
         }
     }
 
@@ -777,6 +803,25 @@ impl<A: Action + Clone> MenuItemFields<A> {
     /// is set, or when the item is disabled.
     pub fn with_override_hover_background_color(mut self, color: impl Into<Fill>) -> Self {
         self.override_hover_background_color = Some(color.into());
+        self
+    }
+
+    /// Overrides the title text color used while this item is hovered or
+    /// selected. When unset, the hover state keeps whichever color
+    /// `with_override_text_color` (or the theme default) chose. Used by the
+    /// Cortex saved-projects picker to flip the title to the menu's
+    /// background color when its colored hover fill takes over.
+    pub fn with_override_hover_text_color(mut self, color: impl Into<ColorU>) -> Self {
+        self.override_hover_text_color = Some(color.into());
+        self
+    }
+
+    /// Centers the row's label on the main axis. Suppresses the right-side
+    /// label / shortcut / chevron / timestamp slot, since centering with a
+    /// trailing element would visually fight. Intended for picker-style
+    /// menus where each row is just a label.
+    pub fn with_centered_label(mut self) -> Self {
+        self.centered_label = true;
         self
     }
 
@@ -1136,6 +1181,11 @@ impl<A: Action + Clone> MenuItemFields<A> {
 
             let primary_color = if self.disabled {
                 theme.disabled_text_color(text_background_color)
+            } else if is_hovered_or_selected
+                && !self.no_interaction_on_hover
+                && self.override_hover_text_color.is_some()
+            {
+                self.override_hover_text_color.unwrap().into()
             } else if let Some(color) = self.override_text_color {
                 color.into()
             } else {
@@ -1195,25 +1245,28 @@ impl<A: Action + Clone> MenuItemFields<A> {
             } else {
                 label_row.add_child(label_element);
 
-                if self.has_submenu {
-                    label_row
-                        .add_child(self.render_right_aligned_chevron(appearance, primary_color));
-                } else if let Some(right_label) =
-                    self.render_right_side_label(appearance, secondary_color.into())
-                {
-                    label_row.add_child(right_label);
-                } else if let Some(key_shortcut) =
-                    self.render_key_shortcut(appearance, secondary_color.into())
-                {
-                    label_row.add_child(key_shortcut);
-                } else if let Some(timestamp) = &self.timestamp {
-                    label_row.add_child(self.render_right_aligned_time_estimation(
-                        timestamp,
-                        font_family,
-                        font_size,
-                        text_background_color,
-                        appearance,
-                    ));
+                if !self.centered_label {
+                    if self.has_submenu {
+                        label_row.add_child(
+                            self.render_right_aligned_chevron(appearance, primary_color),
+                        );
+                    } else if let Some(right_label) =
+                        self.render_right_side_label(appearance, secondary_color.into())
+                    {
+                        label_row.add_child(right_label);
+                    } else if let Some(key_shortcut) =
+                        self.render_key_shortcut(appearance, secondary_color.into())
+                    {
+                        label_row.add_child(key_shortcut);
+                    } else if let Some(timestamp) = &self.timestamp {
+                        label_row.add_child(self.render_right_aligned_time_estimation(
+                            timestamp,
+                            font_family,
+                            font_size,
+                            text_background_color,
+                            appearance,
+                        ));
+                    }
                 }
 
                 if let Some(right_icon) = self.render_right_side_icon(appearance, primary_color) {
@@ -1235,9 +1288,15 @@ impl<A: Action + Clone> MenuItemFields<A> {
                     CrossAxisAlignment::Center
                 };
 
+            let main_axis_alignment = if self.centered_label {
+                MainAxisAlignment::Center
+            } else {
+                MainAxisAlignment::SpaceEvenly
+            };
+
             let container = Container::new(
                 label_row
-                    .with_main_axis_alignment(MainAxisAlignment::SpaceEvenly)
+                    .with_main_axis_alignment(main_axis_alignment)
                     .with_cross_axis_alignment(horizontal_alignment)
                     .finish(),
             )
