@@ -186,8 +186,35 @@ define_settings_group!(CortexSettings, settings: [
         toml_path: "cortex.tabs.selected.inverse_fill",
         description: "Whether the selected vertical tab inverts its colors so the tab fills with its accent color and the title/metadata text become the terminal background color.",
     },
+    tabs_hide_icon_backdrop: TabsHideIconBackdrop {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.tabs.icon.hide_backdrop",
+        description: "Whether the small circular backdrop rendered behind a vertical tab's leading icon is hidden. Affects neutral pane icons (terminal, settings, code, etc.); CLI/Oz agent badge backgrounds are unchanged because their colors carry identity meaning.",
+    },
     tabs_selected_title_alignment: TabsSelectedTitleAlignment,
     tabs_selected_metadata_alignment: TabsSelectedMetadataAlignment,
     tabs_unselected_title_alignment: TabsUnselectedTitleAlignment,
-    tabs_unselected_metadata_alignment: TabsUnselectedMetadataAlignment
+    tabs_unselected_metadata_alignment: TabsUnselectedMetadataAlignment,
+    stack_left_column: StackLeftColumn {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.layout.stack_left_column",
+        description: "Whether the vertical tab bar is stacked on top of the multi-view side panel (Agent Conversations / File Explorer / Global Search / Warp Drive) in a single left-rail column with a draggable horizontal divider, instead of rendering them as horizontal siblings. Cortex default: on.",
+    },
+    stacked_left_top_height_px: StackedLeftTopHeightPx {
+        type: f32,
+        default: 300.0,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.layout.stacked_left_top_height_px",
+        description: "When the left rail is stacked, the height in pixels of the top half (vertical tab bar). Updated when the user drags the horizontal divider; clamped on each render to the column's safe min/max."
+    }
 ]);

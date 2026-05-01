@@ -4268,7 +4268,7 @@ impl TerminalView {
             pending_auto_bootstrap_shell_type: None,
             pending_env_var_collection: None,
             env_vars: Vec::new(),
-            show_snackbar: true,
+            show_snackbar: false,
             hover_near_snackbar_area: false,
             ai_controller,
             passive_suggestions_models,

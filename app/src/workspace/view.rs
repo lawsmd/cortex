@@ -427,8 +427,8 @@ use warpui::clipboard::ClipboardContent;
 #[cfg(target_family = "wasm")]
 use warpui::elements::Percentage;
 use warpui::elements::{
-    CacheOption, DispatchEventResult, DraggableState, DropTarget, EventHandler, Image,
-    MouseInBehavior, Rect,
+    resizable_state_handle, CacheOption, DispatchEventResult, DragBarSide, DraggableState,
+    DropTarget, EventHandler, Image, MouseInBehavior, Rect, Resizable, ResizableStateHandle,
 };
 use warpui::ui_components::button::{Button, ButtonVariant};
 use warpui::windowing::{state::ApplicationStage, StateEvent, WindowManager};
@@ -1101,6 +1101,11 @@ pub struct Workspace {
     left_panel_open: bool,
     vertical_tabs_panel_open: bool,
     vertical_tabs_panel: VerticalTabsPanelState,
+    /// Height (px) of the top half of the stacked left rail (vertical tabs
+    /// panel) when the user enables `cortex.layout.stack_left_column`. Stable
+    /// across renders so an in-progress drag doesn't get reset on re-render;
+    /// initialized from the cortex setting and pushed back on drag end.
+    stacked_left_divider_height: ResizableStateHandle,
     left_panel_view: ViewHandle<LeftPanelView>,
     left_panel_views: Vec<ToolPanelView>,
     right_panel_view: ViewHandle<RightPanelView>,
@@ -3254,6 +3259,11 @@ impl Workspace {
             left_panel_open: false,
             vertical_tabs_panel_open: false,
             vertical_tabs_panel: Default::default(),
+            stacked_left_divider_height: resizable_state_handle(
+                *crate::settings::CortexSettings::as_ref(ctx)
+                    .stacked_left_top_height_px
+                    .value(),
+            ),
             left_panel_view,
             left_panel_views,
             right_panel_view,
@@ -4031,6 +4041,28 @@ impl Workspace {
             true
         };
         let initial_tab = self.active_tab_pane_group().clone();
+
+        // Cortex: when the stacked left-rail layout is active by default
+        // (`cortex.layout.stack_left_column` on, vertical-tabs feature on,
+        // `use_vertical_tabs` setting on), open the multi-view side panel
+        // on this fresh window so the new user lands on the full stacked
+        // rail (vertical tabs above, side panel below) rather than just
+        // the tabs strip. Restored windows go through a different branch
+        // and aren't touched here. Skipped when the side panel has no
+        // toggleable views available (mobile, AI/file-tree both off, etc.)
+        // since opening an empty panel surfaces nothing useful.
+        if !warpui::platform::is_mobile_device()
+            && !self.left_panel_views.is_empty()
+            && FeatureFlag::VerticalTabs.is_enabled()
+            && *TabSettings::as_ref(ctx).use_vertical_tabs
+            && *crate::settings::CortexSettings::as_ref(ctx)
+                .stack_left_column
+                .value()
+        {
+            initial_tab.update(ctx, |pane_group, ctx| {
+                pane_group.set_left_panel_open(true, ctx);
+            });
+        }
 
         if open_warp_drive {
             // We open Warp Drive automatically in two cases:
@@ -20507,6 +20539,14 @@ impl Workspace {
             && FeatureFlag::VerticalTabs.is_enabled()
             && *TabSettings::as_ref(app).use_vertical_tabs;
 
+        // Push the current vertical-tabs-panel-open state into the side panel
+        // before it renders. The side panel reads this to decide whether to
+        // surface its "stack" toggle button and whether to skip its own
+        // horizontal Resizable (the stacked column owns width-drag for both).
+        self.left_panel_view
+            .as_ref(app)
+            .set_vertical_tabs_panel_open(self.vertical_tabs_panel_open);
+
         // In vertical tabs mode, config-driven panels are rendered here.
         // In horizontal tabs mode, they're rendered inside render_banner_and_active_tab.
         if vertical_tabs_active {
@@ -20515,13 +20555,61 @@ impl Workspace {
                 .clone();
             let pane_group = self.active_tab_pane_group().as_ref(app);
 
-            for item in config.left_items() {
-                Self::add_panel_with_separator(
-                    &mut panels_view,
-                    &mut prev_panel_added,
-                    self.render_config_panel(&item, pane_group, &config, app),
-                    app,
-                );
+            // Cortex stacked-left-rail layout: when the user enables
+            // `cortex.layout.stack_left_column` AND both the vertical tab bar
+            // and the multi-view side panel are configured on the left AND
+            // both are currently open, fuse them into one stacked column
+            // (vertical tabs above, side panel below, draggable horizontal
+            // divider). Otherwise fall through to the normal sibling layout.
+            let left_items = config.left_items();
+            let stack_setting = *crate::settings::CortexSettings::as_ref(app)
+                .stack_left_column
+                .value();
+            let render_stacked = stack_setting
+                && !warpui::platform::is_mobile_device()
+                && self.vertical_tabs_panel_open
+                && pane_group.left_panel_open
+                && left_items.contains(&HeaderToolbarItemKind::TabsPanel)
+                && left_items.contains(&HeaderToolbarItemKind::ToolsPanel);
+
+            if render_stacked {
+                let mut stacked_emitted = false;
+                for item in left_items {
+                    if matches!(
+                        item,
+                        HeaderToolbarItemKind::TabsPanel | HeaderToolbarItemKind::ToolsPanel
+                    ) {
+                        if !stacked_emitted {
+                            stacked_emitted = true;
+                            let column =
+                                self.render_stacked_left_column(&config, app);
+                            Self::add_panel_with_separator(
+                                &mut panels_view,
+                                &mut prev_panel_added,
+                                Some(column),
+                                app,
+                            );
+                        }
+                        // Skip the second of the two — both are absorbed into
+                        // the stacked column we just emitted.
+                        continue;
+                    }
+                    Self::add_panel_with_separator(
+                        &mut panels_view,
+                        &mut prev_panel_added,
+                        self.render_config_panel(&item, pane_group, &config, app),
+                        app,
+                    );
+                }
+            } else {
+                for item in left_items {
+                    Self::add_panel_with_separator(
+                        &mut panels_view,
+                        &mut prev_panel_added,
+                        self.render_config_panel(&item, pane_group, &config, app),
+                        app,
+                    );
+                }
             }
         }
 
@@ -20685,6 +20773,100 @@ impl Workspace {
             HeaderToolbarItemKind::AgentManagement
             | HeaderToolbarItemKind::NotificationsMailbox => None,
         }
+    }
+
+    /// Builds the stacked left rail used when `cortex.layout.stack_left_column`
+    /// is on: the vertical tabs panel sits on top, the multi-view side panel
+    /// (Agent Conversations / File Explorer / Global Search / Warp Drive)
+    /// sits below, and a draggable horizontal divider lets the user shift the
+    /// split. The whole column is wrapped in a single horizontal `Resizable`
+    /// using the vertical-tabs width handle (per design choice locked in
+    /// during planning), so dragging the column edge here and dragging the
+    /// vertical tabs panel edge in the side-by-side layout both move the
+    /// same persisted width.
+    fn render_stacked_left_column(
+        &self,
+        config: &HeaderToolbarChipSelection,
+        app: &AppContext,
+    ) -> Box<dyn Element> {
+        // Top half: vertical tabs panel without its horizontal Resizable.
+        let side = Self::tabs_panel_side(config);
+        let tabs_inner = self.render_vertical_tabs_panel_unwrapped(side, app);
+
+        // Bottom half: side panel as a child view. `LeftPanelView::render`
+        // checks `is_stacked_layout_effective` and skips its own horizontal
+        // Resizable when stacked is active, so we don't double-wrap.
+        let side_panel_inner = ChildView::new(&self.left_panel_view).finish();
+
+        // Horizontal divider on top half. The divider clamp leaves enough
+        // room for at least 2 tab rows above and the side panel header +
+        // a row of content below.
+        let divider_handle = self.stacked_left_divider_height.clone();
+        let divider_min_top: f32 = 120.0;
+        let divider_min_bottom: f32 = 180.0;
+        let divider_handle_for_callback = divider_handle.clone();
+        let top_resizable = Resizable::new(divider_handle, tabs_inner)
+            .with_dragbar_side(DragBarSide::Bottom)
+            .on_resize(|ctx, _| {
+                ctx.notify();
+            })
+            .on_end_resizing(move |ctx, _| {
+                // Persist the new pixel height so it's restored on restart
+                // and synced across machines via the cloud-synced cortex
+                // setting. Settings updates run on a context that supports
+                // model writes, which an `EventContext` doesn't expose
+                // directly — dispatch a workspace action to do the write.
+                let new_height = divider_handle_for_callback
+                    .lock()
+                    .map(|state| state.size())
+                    .unwrap_or(0.0);
+                if new_height > 0.0 {
+                    ctx.dispatch_typed_action(
+                        WorkspaceAction::PersistStackedLeftTopHeight(new_height),
+                    );
+                }
+            })
+            .with_bounds_callback(Box::new(move |window_size| {
+                // Keep some breathing room for the side panel beneath us.
+                // The vertical-tabs panel itself is happy at any height;
+                // the side panel's header alone needs ~40px, and the file
+                // tree needs some content area to be useful.
+                let max_top = (window_size.y() - divider_min_bottom).max(divider_min_top);
+                (divider_min_top, max_top)
+            }))
+            .finish();
+
+        let column = Flex::column()
+            .with_main_axis_size(MainAxisSize::Max)
+            .with_cross_axis_alignment(CrossAxisAlignment::Stretch)
+            .with_child(top_resizable)
+            .with_child(Shrinkable::new(1.0, side_panel_inner).finish())
+            .finish();
+
+        // Outer width-drag for the whole column reuses the vertical-tabs
+        // width handle. `LeftPanelView` is rendered above without its own
+        // Resizable, so there's no width-handle conflict.
+        let drag_side = match side {
+            PanelPosition::Left => DragBarSide::Right,
+            PanelPosition::Right => DragBarSide::Left,
+        };
+        let column_width_handle = self.vertical_tabs_panel_width_handle();
+        // Min/max derived from both panels' published constraints, so the
+        // column never squeezes below either panel's minimum and never
+        // expands beyond the vertical-tab panel's max ratio.
+        let combined_min_width = vertical_tabs::MIN_PANEL_WIDTH
+            .max(crate::drive::panel::MIN_SIDEBAR_WIDTH);
+        let max_panel_width_ratio = vertical_tabs::MAX_PANEL_WIDTH_RATIO;
+        Resizable::new(column_width_handle, column)
+            .with_dragbar_side(drag_side)
+            .on_resize(|ctx, _| {
+                ctx.notify();
+            })
+            .with_bounds_callback(Box::new(move |window_size| {
+                let max_width = window_size.x() * max_panel_width_ratio;
+                (combined_min_width, max_width.max(combined_min_width))
+            }))
+            .finish()
     }
 
     /// Renders the maximized code review panel if it is configured and maximized.
@@ -22303,6 +22485,23 @@ impl TypedActionView for Workspace {
                     let _ = settings.hide_tab_metadata.set_value(new_value, ctx);
                 });
                 ctx.notify();
+            }
+            ToggleStackLeftColumn => {
+                crate::settings::CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+                    let new_value = !*settings.stack_left_column.value();
+                    let _ = settings.stack_left_column.set_value(new_value, ctx);
+                });
+                ctx.notify();
+            }
+            PersistStackedLeftTopHeight(height) => {
+                let height = *height;
+                if height > 0.0 {
+                    crate::settings::CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+                        let _ = settings
+                            .stacked_left_top_height_px
+                            .set_value(height, ctx);
+                    });
+                }
             }
             ToggleAgentManagementView => {
                 if AISettings::as_ref(ctx).is_any_ai_enabled(ctx)

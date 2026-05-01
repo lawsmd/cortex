@@ -100,8 +100,8 @@ const VERTICAL_TAB_UNSELECTED_BORDER_GRAY: ColorU = ColorU {
 };
 
 const PANEL_WIDTH: f32 = 248.;
-const MIN_PANEL_WIDTH: f32 = 200.;
-const MAX_PANEL_WIDTH_RATIO: f32 = 0.5;
+pub(super) const MIN_PANEL_WIDTH: f32 = 200.;
+pub(super) const MAX_PANEL_WIDTH_RATIO: f32 = 0.5;
 const DETAIL_SIDECAR_SECTION_PADDING: f32 = 12.;
 const DETAIL_SIDECAR_SECTION_GAP: f32 = 4.;
 const GROUP_HEADER_VERTICAL_PADDING: f32 = 4.;
@@ -263,13 +263,24 @@ fn oz_icon_fill(theme: &WarpTheme) -> WarpThemeFill {
 fn render_pane_icon_with_status(
     variant: IconWithStatusVariant,
     theme: &WarpTheme,
+    app: &AppContext,
 ) -> Box<dyn Element> {
+    let sizing = match &variant {
+        IconWithStatusVariant::OzAgent { .. } => &VERTICAL_TABS_AGENT_SIZING,
+        IconWithStatusVariant::CLIAgent { status, .. } if status.is_some() => {
+            &VERTICAL_TABS_AGENT_SIZING
+        }
+        _ => &VERTICAL_TABS_SIZING,
+    };
+    let hide_neutral_backdrop = *crate::settings::CortexSettings::as_ref(app)
+        .tabs_hide_icon_backdrop
+        .value();
     render_icon_with_status(
         variant,
-        VERTICAL_TABS_ICON_SIZE,
-        0.,
+        sizing,
         theme,
         theme.background(),
+        hide_neutral_backdrop,
     )
 }
 
@@ -331,6 +342,13 @@ struct CortexRowAppearance {
     /// Color for the title-row indicator dot (badge / unread). Matches the
     /// title color so it visually belongs with that line.
     indicator_color: ThemeFill,
+    /// When `Some`, neutral pane icons that would normally use `main_text` /
+    /// `sub_text` should use this color instead — set to `theme.background()`
+    /// when the row is selected with inverse-fill active so icons read as
+    /// negative space against the accent fill, mirroring `title_color`.
+    /// `None` keeps the default Warp/Cortex foreground colors. Drive-color
+    /// and CLI/Oz agent icons are unaffected (they carry identity meaning).
+    neutral_icon_color: Option<ThemeFill>,
     /// `true` when the title line should be horizontally centered in the tab.
     title_centered: bool,
     /// `true` when the metadata line should be horizontally centered in the tab.
@@ -374,10 +392,12 @@ fn cortex_row_appearance(
             crate::settings::TabsUnselectedMetadataAlignment::Centered
         )
     };
+    let neutral_icon_color = inverse_fill_active.then(|| theme.background());
     CortexRowAppearance {
         title_color,
         metadata_color,
         indicator_color: title_color,
+        neutral_icon_color,
         title_centered,
         metadata_centered,
     }
@@ -1703,6 +1723,20 @@ fn render_vertical_tabs_panel(
     side: super::PanelPosition,
     app: &AppContext,
 ) -> Box<dyn Element> {
+    render_vertical_tabs_panel_with_options(state, workspace, side, true, app)
+}
+
+/// Builds the vertical tabs panel content. When `wrap_in_resizable` is false,
+/// returns just the inner container — the caller is responsible for sizing it
+/// (used by the stacked left-rail layout, where the parent column owns the
+/// horizontal `Resizable`).
+fn render_vertical_tabs_panel_with_options(
+    state: &VerticalTabsPanelState,
+    workspace: &Workspace,
+    side: super::PanelPosition,
+    wrap_in_resizable: bool,
+    app: &AppContext,
+) -> Box<dyn Element> {
     let appearance = Appearance::as_ref(app);
     let theme = appearance.theme();
 
@@ -1754,6 +1788,10 @@ fn render_vertical_tabs_panel(
         inner_container = inner_container.with_background(theme.background());
     }
     let inner = inner_container.finish();
+
+    if !wrap_in_resizable {
+        return inner;
+    }
 
     Resizable::new(state.resizable_state.clone(), inner)
         .with_dragbar_side(drag_side)
@@ -2592,11 +2630,17 @@ fn resolve_icon_with_status_variant(
     typed: &TypedPane<'_>,
     title: &str,
     appearance: &Appearance,
+    neutral_text_override: Option<ThemeFill>,
     app: &AppContext,
 ) -> IconWithStatusVariant {
     let theme = appearance.theme();
-    let main_text = theme.main_text_color(theme.background());
-    let sub_text = theme.sub_text_color(theme.background());
+    let (main_text, sub_text) = match neutral_text_override {
+        Some(c) => (c, c),
+        None => (
+            theme.main_text_color(theme.background()),
+            theme.sub_text_color(theme.background()),
+        ),
+    };
 
     let drive_color = |object_type: DriveObjectType| -> WarpThemeFill {
         WarpThemeFill::Solid(warp_drive_icon_color(appearance, object_type))
@@ -2754,8 +2798,15 @@ fn render_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn Element> {
     let cortex = cortex_row_appearance(props.pane_color.as_ref(), is_selected, theme, app);
 
     let icon = render_pane_icon_with_status(
-        resolve_icon_with_status_variant(&props.typed, &props.title, appearance, app),
+        resolve_icon_with_status_variant(
+            &props.typed,
+            &props.title,
+            appearance,
+            cortex.neutral_icon_color,
+            app,
+        ),
         theme,
+        app,
     );
 
     let has_visible_subtitle = !cortex_hide_tab_metadata && !effective_subtitle.is_empty();
@@ -3951,8 +4002,15 @@ fn render_summary_tab_item(
         .map(|icons| render_summary_pane_kind_icons(icons, appearance))
         .unwrap_or_else(|| {
             render_pane_icon_with_status(
-                resolve_icon_with_status_variant(&props.typed, &props.title, appearance, app),
+                resolve_icon_with_status_variant(
+                    &props.typed,
+                    &props.title,
+                    appearance,
+                    None,
+                    app,
+                ),
                 theme,
+                app,
             )
         });
 
@@ -6521,8 +6579,15 @@ fn render_compact_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn El
         .value();
 
     let icon = render_pane_icon_with_status(
-        resolve_icon_with_status_variant(&props.typed, &props.title, appearance, app),
+        resolve_icon_with_status_variant(
+            &props.typed,
+            &props.title,
+            appearance,
+            cortex.neutral_icon_color,
+            app,
+        ),
         theme,
+        app,
     );
 
     let primary_info = *TabSettings::as_ref(app).vertical_tabs_primary_info.value();
@@ -6723,6 +6788,33 @@ impl Workspace {
         app: &AppContext,
     ) -> Box<dyn Element> {
         render_vertical_tabs_panel(&self.vertical_tabs_panel, self, side, app)
+    }
+
+    /// Renders the vertical tabs panel content without its outer horizontal
+    /// `Resizable` wrapper. Used by the stacked left-rail layout, where the
+    /// parent column owns one shared width-drag for both the tabs panel and
+    /// the side panel beneath it.
+    pub(super) fn render_vertical_tabs_panel_unwrapped(
+        &self,
+        side: super::PanelPosition,
+        app: &AppContext,
+    ) -> Box<dyn Element> {
+        render_vertical_tabs_panel_with_options(
+            &self.vertical_tabs_panel,
+            self,
+            side,
+            false,
+            app,
+        )
+    }
+
+    /// The width-handle backing the vertical tabs panel. The stacked left-rail
+    /// layout reuses this same handle as its column-width handle (per the
+    /// design choice locked in during planning) so dragging the column edge in
+    /// stacked mode and dragging the tabs panel edge in side-by-side mode both
+    /// move the same persisted value.
+    pub(super) fn vertical_tabs_panel_width_handle(&self) -> ResizableStateHandle {
+        self.vertical_tabs_panel.resizable_state.clone()
     }
 }
 

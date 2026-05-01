@@ -20,7 +20,7 @@ use warpui::ui_components::radio_buttons::{
     RadioButtonItem, RadioButtonLayout, RadioButtonStateHandle, RadioButtons,
 };
 use warpui::ui_components::slider::{Slider, SliderStateHandle};
-use warpui::ui_components::switch::{Switch, SwitchStateHandle, TRACK_COLOR};
+use warpui::ui_components::switch::{Switch, SwitchStateHandle};
 use warpui::ui_components::text::WrappableText;
 use warpui::ui_components::toggle_menu::{
     ToggleMenu, ToggleMenuCallback, ToggleMenuItem, ToggleMenuStateHandle,
@@ -640,36 +640,55 @@ impl UiBuilder {
     }
 
     pub fn switch(&self, mouse_state: SwitchStateHandle) -> Switch {
-        let switch_margin_styles = UiComponentStyles {
+        // Shared styling — margin, font family, font size — used by every
+        // state. Colors and borders are layered on per-state below.
+        let base = UiComponentStyles {
             margin: Some(Coords {
                 top: 5.,
                 bottom: 5.,
                 left: 0.,
                 right: 5.,
             }),
+            font_family_id: Some(self.ui_font_family),
+            font_size: Some(11.),
             ..Default::default()
+        };
+
+        // OFF: no fill, accent border, accent label.
+        let off_styles = UiComponentStyles {
+            background: None,
+            border_color: Some(self.warp_theme.accent().into()),
+            border_width: Some(1.5),
+            font_color: Some(self.warp_theme.accent().into_solid()),
+            ..base
+        };
+
+        // ON: accent fill + same-color border so the chip's outer dimensions
+        // stay identical to OFF, and the label flips to the terminal
+        // background color so it reads against the filled chip.
+        let on_styles = UiComponentStyles {
+            background: Some(self.warp_theme.accent().into()),
+            border_color: Some(self.warp_theme.accent().into()),
+            border_width: Some(1.5),
+            font_color: Some(self.warp_theme.background().into_solid()),
+            ..base
+        };
+
+        let disabled_styles = UiComponentStyles {
+            background: None,
+            border_color: Some(self.warp_theme.disabled_ui_text_color().into()),
+            border_width: Some(1.5),
+            font_color: Some(self.warp_theme.disabled_ui_text_color().into_solid()),
+            ..base
         };
 
         Switch::new(
             mouse_state,
-            switch_margin_styles.merge(self.base_styles(
-                Some(Fill::Solid(*TRACK_COLOR)),
-                Fill::white(),
-                self.warp_theme.main_text_color(self.warp_theme.surface_2()),
-            )),
+            off_styles,
             None,
-            Some(switch_margin_styles.merge(self.base_styles(
-                Some(self.warp_theme.accent()),
-                Fill::white(),
-                self.warp_theme.main_text_color(self.warp_theme.surface_2()),
-            ))),
-            Some(switch_margin_styles.merge(self.base_styles(
-                Some(self.warp_theme.disabled_ui_text_color()),
-                Fill::white(),
-                self.warp_theme.main_text_color(self.warp_theme.surface_2()),
-            ))),
+            Some(on_styles),
+            Some(disabled_styles),
         )
-        .with_thumb_hover_border(10.)
     }
 
     pub fn checkbox(&self, mouse_state: MouseStateHandle, size: Option<f32>) -> Checkbox {

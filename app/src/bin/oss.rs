@@ -10,11 +10,18 @@ use warp_core::{
 
 // Simple wrapper around warp::run() for Warp OSS builds.
 fn main() -> Result<()> {
+    // Distinct identity for debug builds so prod + dev coexist without sharing state.
+    let (app_name, logfile_name) = if cfg!(debug_assertions) {
+        ("WarpOssDev", "warp-oss-dev.log")
+    } else {
+        ("WarpOss", "warp-oss.log")
+    };
+
     let mut state = ChannelState::new(
         Channel::Oss,
         ChannelConfig {
-            app_id: AppId::new("dev", "warp", "WarpOss"),
-            logfile_name: "warp-oss.log".into(),
+            app_id: AppId::new("dev", "warp", app_name),
+            logfile_name: logfile_name.into(),
             server_config: WarpServerConfig::production(),
             oz_config: OzConfig::production(),
             telemetry_config: None,

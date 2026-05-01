@@ -11,8 +11,8 @@
 use warp_core::ui::theme::Fill;
 use warpui::{
     elements::{
-        ChildView, Clipped, ConstrainedBox, Container, CrossAxisAlignment, Element, Flex,
-        MainAxisAlignment, MouseStateHandle, Padding, ParentElement, Rect, Shrinkable, Text,
+        Align, Border, ChildView, Clipped, ConstrainedBox, Container, CrossAxisAlignment, Element,
+        Flex, MainAxisAlignment, MainAxisSize, MouseStateHandle, ParentElement, Shrinkable, Text,
     },
     text_layout::ClipConfig,
     ui_components::{
@@ -47,13 +47,21 @@ use crate::ui_components::icons::Icon;
 
 pub const CORTEX_SETTINGS_HEADER_TEXT: &str = "Cortex Settings";
 
-const SIDEBAR_WIDTH: f32 = 220.0;
+// Match the Warp Settings sidebar geometry (no settings-file footer variant)
+// so flipping between a Cortex Settings tab and a Warp Settings tab lands on
+// pixel-identical chrome. Constants mirrored from
+// `app/src/settings_view/settings_page.rs` and `settings_view/mod.rs`.
+const SIDEBAR_WIDTH: f32 = 200.0;
 const SIDEBAR_ITEM_PADDING: f32 = 8.0;
-const SIDEBAR_ITEM_HORIZONTAL_MARGIN: f32 = 6.0;
-const SEARCH_BAR_VERTICAL_MARGIN: f32 = 6.0;
-const SEARCH_BAR_HORIZONTAL_MARGIN: f32 = 8.0;
-const SEARCH_ICON_SIZE: f32 = 14.0;
-const CONTENT_AREA_PADDING: f32 = 20.0;
+const SIDEBAR_ITEM_LEFT_MARGIN: f32 = 12.0;
+const SEARCH_BAR_HORIZONTAL_MARGIN: f32 = 16.0;
+const SEARCH_BAR_BOTTOM_MARGIN: f32 = 8.0;
+const SEARCH_ICON_SIZE: f32 = 16.0;
+const SEARCH_ICON_RIGHT_GAP: f32 = 12.0;
+const SIDEBAR_HEADER_PADDING: f32 = 15.0;
+const SIDEBAR_BORDER_WIDTH: f32 = 1.0;
+const PAGE_PADDING: f32 = 28.0;
+const MAX_PAGE_WIDTH: f32 = 800.0;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CortexSettingsViewEvent {
@@ -176,6 +184,28 @@ impl CortexSettingsView {
         ctx.notify();
     }
 
+    fn toggle_tabs_hide_icon_backdrop(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.tabs_hide_icon_backdrop.toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_stack_left_column(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.stack_left_column.toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
     fn set_tabs_selected_title_alignment(
         &mut self,
         value: crate::settings::TabsSelectedTitleAlignment,
@@ -272,7 +302,7 @@ impl CortexSettingsView {
                         .finish(),
                     )
                     .with_uniform_margin(4.0)
-                    .with_margin_right(8.0)
+                    .with_margin_right(SEARCH_ICON_RIGHT_GAP)
                     .finish(),
                 )
                 .with_child(
@@ -286,8 +316,7 @@ impl CortexSettingsView {
         )
         .with_margin_left(SEARCH_BAR_HORIZONTAL_MARGIN)
         .with_margin_right(SEARCH_BAR_HORIZONTAL_MARGIN)
-        .with_margin_top(SEARCH_BAR_VERTICAL_MARGIN)
-        .with_margin_bottom(SEARCH_BAR_VERTICAL_MARGIN)
+        .with_margin_bottom(SEARCH_BAR_BOTTOM_MARGIN)
         .finish()
     }
 
@@ -296,8 +325,7 @@ impl CortexSettingsView {
         let query_lower = query.to_lowercase();
         let query_trimmed = query_lower.trim();
 
-        let mut column = Flex::column().with_cross_axis_alignment(CrossAxisAlignment::Stretch);
-        column = column.with_child(self.render_search_bar(appearance));
+        let mut nav_column = Flex::column().with_cross_axis_alignment(CrossAxisAlignment::Stretch);
 
         for (section, mouse_state) in &self.sidebar_states {
             let label = section.label();
@@ -320,11 +348,7 @@ impl CortexSettingsView {
                 .with_style(
                     UiComponentStyles::default()
                         .set_border_width(0.)
-                        .set_margin(
-                            Coords::default()
-                                .left(SIDEBAR_ITEM_HORIZONTAL_MARGIN)
-                                .right(SIDEBAR_ITEM_HORIZONTAL_MARGIN),
-                        )
+                        .set_margin(Coords::default().left(SIDEBAR_ITEM_LEFT_MARGIN))
                         .set_padding(Coords::uniform(SIDEBAR_ITEM_PADDING)),
                 )
                 .build();
@@ -335,22 +359,31 @@ impl CortexSettingsView {
                 })
                 .finish();
 
-            column = column.with_child(row);
+            nav_column = nav_column.with_child(row);
         }
 
-        ConstrainedBox::new(column.finish())
-            .with_width(SIDEBAR_WIDTH)
-            .finish()
-    }
+        // Search bar sits flush with the top, then 15 px of breathing room
+        // before the first nav item — matches Warp's `HEADER_PADDING`-padded
+        // scroll wrapper around the nav list.
+        let column = Flex::column()
+            .with_cross_axis_alignment(CrossAxisAlignment::Stretch)
+            .with_child(self.render_search_bar(appearance))
+            .with_child(
+                Container::new(nav_column.finish())
+                    .with_padding_top(SIDEBAR_HEADER_PADDING)
+                    .finish(),
+            )
+            .finish();
 
-    fn render_divider(&self, appearance: &Appearance) -> Box<dyn Element> {
         let theme = appearance.theme();
         ConstrainedBox::new(
-            Rect::new()
-                .with_background_color(theme.outline().into_solid())
+            Container::new(column)
+                .with_border(
+                    Border::right(SIDEBAR_BORDER_WIDTH).with_border_fill(theme.outline()),
+                )
                 .finish(),
         )
-        .with_width(1.0)
+        .with_width(SIDEBAR_WIDTH)
         .finish()
     }
 
@@ -378,16 +411,28 @@ impl View for CortexSettingsView {
     fn render(&self, app: &AppContext) -> Box<dyn Element> {
         let appearance = Appearance::as_ref(app);
 
+        // Mirror Warp Settings: page content is centered in a max-800px column
+        // with `Align::top_center`, wrapped in 28 px page padding. Pages
+        // themselves continue to use the full inner width via
+        // `CrossAxisAlignment::Stretch`.
+        let centered_content = Container::new(
+            Align::new(
+                ConstrainedBox::new(self.render_content(appearance, app))
+                    .with_max_width(MAX_PAGE_WIDTH)
+                    .finish(),
+            )
+            .top_center()
+            .finish(),
+        )
+        .with_uniform_padding(PAGE_PADDING)
+        .finish();
+
         Flex::row()
             .with_cross_axis_alignment(CrossAxisAlignment::Stretch)
             .with_main_axis_alignment(MainAxisAlignment::Start)
+            .with_main_axis_size(MainAxisSize::Max)
             .with_child(self.render_sidebar(appearance, app))
-            .with_child(self.render_divider(appearance))
-            .with_child(
-                Container::new(self.render_content(appearance, app))
-                    .with_padding(Padding::uniform(CONTENT_AREA_PADDING))
-                    .finish(),
-            )
+            .with_child(Shrinkable::new(1., centered_content).finish())
             .finish()
     }
 }
@@ -405,6 +450,9 @@ impl warpui::TypedActionView for CortexSettingsView {
             CortexSettingsAction::ToggleTabsInverseFillOnSelection => {
                 self.toggle_tabs_inverse_fill_on_selection(ctx)
             }
+            CortexSettingsAction::ToggleTabsHideIconBackdrop => {
+                self.toggle_tabs_hide_icon_backdrop(ctx)
+            }
             CortexSettingsAction::SetTabsSelectedTitleAlignment(value) => {
                 self.set_tabs_selected_title_alignment(*value, ctx)
             }
@@ -417,6 +465,7 @@ impl warpui::TypedActionView for CortexSettingsView {
             CortexSettingsAction::SetTabsUnselectedMetadataAlignment(value) => {
                 self.set_tabs_unselected_metadata_alignment(*value, ctx)
             }
+            CortexSettingsAction::ToggleStackLeftColumn => self.toggle_stack_left_column(ctx),
         }
     }
 }
