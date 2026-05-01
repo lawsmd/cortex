@@ -1,41 +1,28 @@
 #!/usr/bin/env bash
-# Build a fresh Cortex dev bundle and ensure ~/Applications/Cortex.app
-# points at it (so Raycast / Spotlight launches the latest code).
+# Backwards-compat alias for the macOS dev loop.
 #
-# Run after code changes:
-#   ./scripts/install-cortex.sh
-# Then CMD+Q the running Cortex and relaunch via Raycast.
+# This used to be the single-lane macOS installer (build + symlink
+# ~/Applications/Cortex.app to target/debug/bundle/osx/Cortex.app). It's been
+# superseded by a two-lane setup that mirrors the Windows workflow:
 #
-# Branding (name, bundle id, icon) is baked into app/Cargo.toml's
-# [package.metadata.bundle.bin.warp-oss] section, so cargo bundle produces
-# Cortex.app directly — no post-processing here.
+#   scripts/install-cortex-prod.sh    - build release + copy to ~/Applications/Cortex.app
+#   scripts/launch-cortex.sh          - daily-driver smart launcher (use from Raycast)
+#   scripts/launch-cortex-dev.sh      - live-rebuild dev loop  (this file delegates here)
+#   scripts/install-shortcuts-macos.sh - one-shot setup of icons + dev symlink
+#
+# Full docs: docs/development/macos-prod-dev.md
+#
+# This shim stays around so that muscle memory (`./scripts/install-cortex.sh`)
+# and any stale doc references still work. It just forwards to the new dev
+# launcher.
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-cd "$REPO_ROOT"
 
-PATH="$HOME/.cargo/bin:$PATH" ./script/run --dont-open
-
-BUILT="$REPO_ROOT/target/debug/bundle/osx/Cortex.app"
-LINK="$HOME/Applications/Cortex.app"
-
-if [[ ! -d "$BUILT" ]]; then
-  echo "error: $BUILT not found after build" >&2
-  exit 1
-fi
-
-mkdir -p "$(dirname "$LINK")"
-ln -sfn "$BUILT" "$LINK"
-
-# One-time cleanup: remove the legacy Quest.app symlink left from the
-# pre-rename install path. Safe to delete this block once it's run on every
-# machine that ever had Quest installed.
-if [[ -L "$HOME/Applications/Quest.app" ]]; then
-  rm "$HOME/Applications/Quest.app"
-  echo "removed legacy ~/Applications/Quest.app symlink"
-fi
-
+echo "note: install-cortex.sh has been superseded by the two-lane workflow."
+echo "      forwarding to scripts/launch-cortex-dev.sh (the dev loop)."
+echo "      see docs/development/macos-prod-dev.md for the full setup."
 echo
-echo "linked: $LINK -> $BUILT"
-echo "next: CMD+Q the running Cortex, then Raycast → Cortex"
+
+exec "$REPO_ROOT/scripts/launch-cortex-dev.sh" "$@"
