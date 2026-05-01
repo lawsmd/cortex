@@ -296,6 +296,15 @@ pub enum WorkspaceAction {
     ToggleCortexHideTabIcon,
     /// Cortex: hide the per-tab metadata subtitle in each vertical-tab row.
     ToggleCortexHideTabMetadata,
+    /// Cortex: stack the vertical tab bar on top of the multi-view side panel
+    /// (Agent Conversations / File Explorer / Global Search / Warp Drive) in
+    /// a single left-rail column, instead of rendering them as horizontal
+    /// siblings. Dispatched from the icon button at the top of the side
+    /// panel.
+    ToggleStackLeftColumn,
+    /// Cortex: persist the new height (px) of the top half of the stacked
+    /// left rail after the user finishes dragging the horizontal divider.
+    PersistStackedLeftTopHeight(f32),
     /// Closes the focused panel. This happens as an explicit action from the user.
     ClosePanel,
     CopyTextToClipboard(String),
@@ -901,6 +910,8 @@ impl WorkspaceAction {
             | ToggleVerticalTabsShowDetailsOnHover
             | ToggleCortexHideTabIcon
             | ToggleCortexHideTabMetadata
+            | ToggleStackLeftColumn
+            | PersistStackedLeftTopHeight(_)
             | ToggleWelcomeTips
             | CopyTextToClipboard(_)
             | CopyAccessTokenToClipboard

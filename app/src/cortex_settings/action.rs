@@ -43,6 +43,8 @@ pub enum CortexSettingsAction {
     ToggleTabsPanelMatchesTerminalBg,
     /// Flip the "Inverse Fill on Selection" toggle.
     ToggleTabsInverseFillOnSelection,
+    /// Flip the "Hide Icon Backdrop" toggle (Tab Icons section).
+    ToggleTabsHideIconBackdrop,
     /// Set the selected-tab title alignment.
     SetTabsSelectedTitleAlignment(TabsSelectedTitleAlignment),
     /// Set the selected-tab metadata alignment.
@@ -51,4 +53,10 @@ pub enum CortexSettingsAction {
     SetTabsUnselectedTitleAlignment(TabsUnselectedTitleAlignment),
     /// Set the unselected-tab metadata alignment.
     SetTabsUnselectedMetadataAlignment(TabsUnselectedMetadataAlignment),
+    /// Flip the "Stack vertical tabs over side panel" toggle. Stacks the
+    /// vertical tab bar on top of the side panel (Agent Conversations / File
+    /// Explorer / Global Search / Warp Drive) in a single left-rail column
+    /// with a draggable horizontal divider. Mirrored by the icon button in
+    /// the side panel header.
+    ToggleStackLeftColumn,
 }

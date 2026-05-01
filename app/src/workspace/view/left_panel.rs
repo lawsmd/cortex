@@ -1,6 +1,8 @@
+use std::cell::Cell;
 use std::collections::HashSet;
 use std::path::PathBuf;
 
+use warp_core::features::FeatureFlag;
 use warp_core::ui::theme::color::internal_colors;
 use warp_core::{send_telemetry_from_ctx, ui::Icon};
 use warp_util::path::LineAndColumnArg;
@@ -46,18 +48,22 @@ use crate::workspace::view::{
     OPEN_GLOBAL_SEARCH_BINDING_NAME, TOGGLE_CONVERSATION_LIST_VIEW_BINDING_NAME,
     TOGGLE_PROJECT_EXPLORER_BINDING_NAME, TOGGLE_WARP_DRIVE_BINDING_NAME,
 };
+use settings::Setting;
+
 use crate::{
     appearance::Appearance,
     code::file_tree::FileTreeView,
     drive::panel::{MAX_SIDEBAR_WIDTH_RATIO, MIN_SIDEBAR_WIDTH},
     pane_group::pane::view::header::{components::HEADER_EDGE_PADDING, PANE_HEADER_HEIGHT},
     pane_group::{self},
+    settings::CortexSettings,
     terminal::resizable_data::{ModalType, ResizableData},
     ui_components::{
         buttons::{icon_button, icon_button_with_color},
         icons,
     },
     util::bindings::keybinding_name_to_display_string,
+    workspace::tab_settings::TabSettings,
     workspace::WorkspaceAction,
     TelemetryEvent,
 };
@@ -167,6 +173,7 @@ pub struct LeftPanelView {
     resizable_state_handle: ResizableStateHandle,
     mouse_state_handles: MouseStateHandles,
     close_button_mouse_state: MouseStateHandle,
+    stack_button_mouse_state: MouseStateHandle,
     warp_drive_view: ViewHandle<DrivePanel>,
     conversation_list_view: ViewHandle<ConversationListView>,
     active_view: active_view_state::ActiveViewState,
@@ -176,6 +183,15 @@ pub struct LeftPanelView {
     working_directories_model: ModelHandle<WorkingDirectoriesModel>,
     is_agent_management_view_open: bool,
     panel_position: super::PanelPosition,
+    /// Pushed by `Workspace` whenever it toggles the vertical tabs panel.
+    /// Read here in `render` to decide whether to surface the "stack vertical
+    /// tabs over side panel" toggle button (only meaningful when the vertical
+    /// tab bar is currently visible) and whether the stacked-column layout is
+    /// effective (which suppresses our own horizontal `Resizable` wrapper so
+    /// `Workspace` can own width-drag for the entire stacked column).
+    /// `Cell` because both setters and renders run on the UI thread and the
+    /// flag is purely a render hint.
+    vertical_tabs_panel_open: Cell<bool>,
 }
 
 fn toolbelt_tooltip_keybinding(binding_names: &[&'static str], app: &AppContext) -> Option<String> {
@@ -308,6 +324,7 @@ impl LeftPanelView {
             resizable_state_handle,
             mouse_state_handles: Default::default(),
             close_button_mouse_state: Default::default(),
+            stack_button_mouse_state: Default::default(),
             warp_drive_view,
             conversation_list_view,
             active_view: active_view_state::new(active_view),
@@ -316,6 +333,7 @@ impl LeftPanelView {
             working_directories_model,
             is_agent_management_view_open: false,
             panel_position: super::PanelPosition::Left,
+            vertical_tabs_panel_open: Cell::new(false),
         };
         view.update_button_active_states();
 
@@ -334,6 +352,25 @@ impl LeftPanelView {
     ) {
         self.panel_position = position;
         ctx.notify();
+    }
+
+    /// Pushed by `Workspace` whenever the vertical tabs panel opens or closes.
+    /// `&self` because the flag lives in a `Cell`; this is called from
+    /// `Workspace::render_panels` (where only `&AppContext` is available) as
+    /// well as from `&mut self` toggle handlers.
+    pub fn set_vertical_tabs_panel_open(&self, open: bool) {
+        self.vertical_tabs_panel_open.set(open);
+    }
+
+    /// True when the cortex setting `stack_left_column` is on AND the vertical
+    /// tabs panel is currently visible AND the vertical-tabs feature is
+    /// enabled. When true, `render` skips its own outer `Resizable` wrapper —
+    /// the stacked column built in `Workspace::render_panels` owns width-drag.
+    fn is_stacked_layout_effective(&self, app: &AppContext) -> bool {
+        self.vertical_tabs_panel_open.get()
+            && *CortexSettings::as_ref(app).stack_left_column.value()
+            && FeatureFlag::VerticalTabs.is_enabled()
+            && *TabSettings::as_ref(app).use_vertical_tabs
     }
 
     /// Updates the available tool panel views.
@@ -823,6 +860,75 @@ impl LeftPanelView {
         .finish()
     }
 
+    /// "Stack vertical tab bar over side panel" toggle. Surfaced only when the
+    /// vertical tab bar is currently visible — per the design choice the user
+    /// confirmed during planning, the button hides when there's nothing above
+    /// to stack against. Returns `None` when the button shouldn't render.
+    fn stack_toggle_button(
+        &self,
+        appearance: &Appearance,
+        app: &AppContext,
+    ) -> Option<Box<dyn Element>> {
+        if !self.vertical_tabs_panel_open.get()
+            || !FeatureFlag::VerticalTabs.is_enabled()
+            || !*TabSettings::as_ref(app).use_vertical_tabs
+        {
+            return None;
+        }
+
+        let stacked = *CortexSettings::as_ref(app).stack_left_column.value();
+        let ui_builder = appearance.ui_builder().clone();
+        let tooltip_text = if stacked {
+            "Unstack vertical tabs from side panel"
+        } else {
+            "Stack vertical tabs over side panel"
+        };
+        let tooltip = ui_builder
+            .tool_tip(tooltip_text.to_string())
+            .build()
+            .finish();
+
+        let icon_color = if stacked {
+            appearance.theme().foreground().into_solid()
+        } else {
+            appearance
+                .theme()
+                .sub_text_color(appearance.theme().background())
+                .into_solid()
+        };
+
+        Some(
+            icon_button(
+                appearance,
+                icons::Icon::HorizontalRuleBlock,
+                stacked,
+                self.stack_button_mouse_state.clone(),
+            )
+            .with_tooltip(move || tooltip)
+            .with_style(UiComponentStyles {
+                font_color: Some(icon_color),
+                height: Some(24.),
+                width: Some(24.),
+                padding: Some(Coords::uniform(4.)),
+                ..Default::default()
+            })
+            .with_active_styles(UiComponentStyles {
+                font_color: Some(icon_color),
+                height: Some(24.),
+                width: Some(24.),
+                padding: Some(Coords::uniform(4.)),
+                background: Some(internal_colors::fg_overlay_3(appearance.theme()).into()),
+                ..Default::default()
+            })
+            .build()
+            .on_click(move |ctx, _, _| {
+                ctx.dispatch_typed_action(WorkspaceAction::ToggleStackLeftColumn);
+            })
+            .with_cursor(Cursor::PointingHand)
+            .finish(),
+        )
+    }
+
     fn update_button_active_states(&mut self) {
         for button in &mut self.toolbelt_buttons {
             button.render_with_active_state = match &button.action {
@@ -1159,6 +1265,15 @@ impl View for LeftPanelView {
                 Flex::row().finish()
             };
 
+            let mut header_right = Flex::row()
+                .with_cross_axis_alignment(CrossAxisAlignment::Center)
+                .with_spacing(4.0)
+                .with_main_axis_size(MainAxisSize::Min);
+            if let Some(stack_button) = self.stack_toggle_button(appearance, app) {
+                header_right = header_right.with_child(stack_button);
+            }
+            header_right = header_right.with_child(self.close_button(appearance, app));
+
             let header_row = Container::new(
                 ConstrainedBox::new(
                     Flex::row()
@@ -1166,7 +1281,7 @@ impl View for LeftPanelView {
                         .with_main_axis_alignment(MainAxisAlignment::SpaceBetween)
                         .with_cross_axis_alignment(CrossAxisAlignment::Center)
                         .with_child(Shrinkable::new(1.0, header_left).finish())
-                        .with_child(self.close_button(appearance, app))
+                        .with_child(header_right.finish())
                         .finish(),
                 )
                 .with_height(PANE_HEADER_HEIGHT)
@@ -1185,6 +1300,13 @@ impl View for LeftPanelView {
         .finish();
 
         if warpui::platform::is_mobile_device() {
+            return panel_content;
+        }
+
+        // Stacked-column layout: `Workspace::render_panels` wraps the entire
+        // top-tabs + side-panel column in one outer `Resizable`, so we skip
+        // ours here to avoid two competing width handles.
+        if self.is_stacked_layout_effective(app) {
             return panel_content;
         }
 
