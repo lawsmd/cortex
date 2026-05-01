@@ -1,0 +1,12 @@
+# Per-machine dev deps for the helper scripts in this directory.
+# These are NOT project dependencies — the Cortex build itself doesn't need
+# them. They're only used to regenerate per-machine shortcut icons.
+#
+# Install (Homebrew Python / PEP 668):
+#     pip3 install --user --break-system-packages -r scripts/requirements.txt
+# Install (anywhere else):
+#     pip3 install --user -r scripts/requirements.txt
+
+# Used by build-shortcut-icons.py + build-shortcut-icons-macos.py to composite
+# the master icon with a "DEV" overlay and write multi-resolution .ico/.icns.
+Pillow>=9.0
