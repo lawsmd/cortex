@@ -1099,6 +1099,13 @@ pub(crate) fn initialize_app(
     let data_domain = ChannelState::data_domain();
 
     // Register an implementation of the secure storage service.
+    //
+    // macOS dev opt-out: when `WARP_SECURE_STORAGE_FILE` is set to a non-empty
+    // value, use an AES-256-GCM file-encrypted backend in `state_dir()` instead
+    // of the macOS Keychain. Default macOS behavior remains Keychain so shared
+    // builds see the standard, expected platform behavior. Existing Keychain
+    // entries are not migrated; first launch with the var set requires
+    // re-login. Wired up in `scripts/launch-cortex*.sh` via `launchctl setenv`.
     cfg_if::cfg_if! {
         if #[cfg(feature = "integration_tests")] {
             warpui_extras::secure_storage::register_noop(&data_domain, ctx);
@@ -1106,6 +1113,12 @@ pub(crate) fn initialize_app(
             warpui_extras::secure_storage::register_with_fallback(&data_domain, warp_core::paths::state_dir(), ctx)
         } else if #[cfg(target_os = "windows")] {
             warpui_extras::secure_storage::register_with_dir(&data_domain, warp_core::paths::state_dir(), ctx)
+        } else if #[cfg(target_os = "macos")] {
+            if std::env::var_os("WARP_SECURE_STORAGE_FILE").is_some_and(|v| !v.is_empty()) {
+                warpui_extras::secure_storage::register_with_file_storage(&data_domain, warp_core::paths::state_dir(), ctx);
+            } else {
+                warpui_extras::secure_storage::register(&data_domain, ctx);
+            }
         } else {
             warpui_extras::secure_storage::register(&data_domain, ctx);
         }

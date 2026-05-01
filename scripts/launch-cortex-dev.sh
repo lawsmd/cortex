@@ -19,6 +19,15 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
+# --- Secure storage backend: file-encrypted, not macOS Keychain.
+#     Set once for the user's launchd session so the `open -a` below inherits
+#     it. The app reads this in app/src/lib.rs and switches from Keychain to
+#     an AES-256-GCM file in ~/Library/Application Support/<bundle-id>/.
+#     Default macOS builds (no env set) still use Keychain, so shared
+#     installs are unaffected. See scripts/launch-cortex.sh for the same
+#     line on the prod lane.
+launchctl setenv WARP_SECURE_STORAGE_FILE 1
+
 # --- Preflight: see install-cortex-prod.sh for rationale.
 if ! [ -d "/Applications/Xcode.app" ]; then
     echo "error: full Xcode is required. Install from the Mac App Store, then:" >&2
