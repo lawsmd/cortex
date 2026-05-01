@@ -24,6 +24,17 @@ PROD_APP="$HOME/Applications/Cortex.app"
 SUPPORT_DIR="$HOME/Library/Application Support/Cortex"
 STAMP="$SUPPORT_DIR/Cortex.build-info"
 
+# --- Secure storage backend: file-encrypted, not macOS Keychain.
+#     Set once for the user's launchd session so every `open -a` below (and
+#     the AppleScript-driven rebuild path) inherits it. The app reads this in
+#     app/src/lib.rs and switches from Keychain to an AES-256-GCM file in
+#     ~/Library/Application Support/<bundle-id>/. Default macOS builds (no
+#     env set) still use Keychain, so shared installs are unaffected.
+#     Tradeoff: launchctl setenv is per-login-session, so any GUI app
+#     launched after this inherits the var until logout. Acceptable on a
+#     personal dev machine; benign elsewhere.
+launchctl setenv WARP_SECURE_STORAGE_FILE 1
+
 if [[ ! -d "$PROD_APP" ]]; then
     osascript -e 'display dialog "Cortex prod isn'"'"'t installed yet.\n\nRun:\n    ~/cortex/scripts/install-cortex-prod.sh" buttons {"OK"} default button "OK" with title "Cortex"' >/dev/null 2>&1 || true
     echo "Cortex prod isn't installed. Run scripts/install-cortex-prod.sh first." >&2

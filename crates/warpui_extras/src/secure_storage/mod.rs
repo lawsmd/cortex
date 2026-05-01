@@ -87,6 +87,21 @@ pub fn register_with_dir(
     });
 }
 
+/// Registers a file-backed Secure Storage provider on macOS that stores data
+/// in encrypted files (AES-256-GCM) under the provided directory, bypassing
+/// the macOS Keychain. Selected at runtime via `WARP_SECURE_STORAGE_FILE` in
+/// `app/src/lib.rs` to avoid the Keychain prompt on dev workstations.
+#[cfg(target_os = "macos")]
+pub fn register_with_file_storage(
+    service_name: &str,
+    storage_dir: std::path::PathBuf,
+    ctx: &mut warpui::AppContext,
+) {
+    ctx.add_singleton_model(|_| -> Model {
+        Box::new(imp::FileSecureStorage::new(service_name, storage_dir))
+    });
+}
+
 /// A trait representing a secure store for key-value pairs.
 ///
 /// This is typically backed by an OS-provided secure storage system.
