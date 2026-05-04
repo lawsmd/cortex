@@ -35,7 +35,7 @@ use super::{
     CloudObjectTypeAndId, DriveObjectType,
 };
 
-pub const MIN_SIDEBAR_WIDTH: f32 = 250.;
+pub const MIN_SIDEBAR_WIDTH: f32 = 190.;
 pub const MAX_SIDEBAR_WIDTH_RATIO: f32 = 0.75;
 
 pub const WARP_DRIVE_POSITION_ID: &str = "warp_drive";
