@@ -79,7 +79,7 @@ use warpui::elements::{
     ResizableStateHandle, SavePosition, ScrollTarget, ScrollToPositionMode, ScrollbarWidth,
     Shrinkable, Stack, Text,
 };
-use warpui::fonts::{Properties, Weight};
+use warpui::fonts::{FamilyId, Properties, Style, Weight};
 use warpui::platform::Cursor;
 use warpui::prelude::Align;
 use warpui::text_layout::ClipConfig;
@@ -99,8 +99,8 @@ const VERTICAL_TAB_UNSELECTED_BORDER_GRAY: ColorU = ColorU {
     a: 255,
 };
 
-const PANEL_WIDTH: f32 = 248.;
-pub(super) const MIN_PANEL_WIDTH: f32 = 200.;
+const PANEL_WIDTH: f32 = 200.;
+pub(super) const MIN_PANEL_WIDTH: f32 = 190.;
 pub(super) const MAX_PANEL_WIDTH_RATIO: f32 = 0.5;
 const DETAIL_SIDECAR_SECTION_PADDING: f32 = 12.;
 const DETAIL_SIDECAR_SECTION_GAP: f32 = 4.;
@@ -131,6 +131,23 @@ const VERTICAL_TABS_ICON_SIZE: f32 = 24.;
 /// Icon size for the per-line conversation status pill in Summary mode. Pairs with
 /// `STATUS_ELEMENT_PADDING` (2px) for an overall ~14px element next to a 12pt title.
 const VERTICAL_TABS_SUMMARY_STATUS_ICON_SIZE: f32 = 10.;
+
+/// Sizing override for the Cortex Settings tab's brain glyph. The brain SVG
+/// has more inherent whitespace inside its viewBox than the other neutral
+/// glyphs, so at the default 16px it reads optically smaller next to them.
+/// Bumped to 30 (~88% larger; user dialed it in by eye in two passes —
+/// +25%, then another +50% on top). Padding drops to 0 so the icon slot
+/// grows to 30px (vs. the standard 24px); the brain row's title sits ~6px
+/// farther right than other rows — a deliberate trade for the optical
+/// weight on this single tab.
+const VERTICAL_TABS_BRAIN_SIZING: IconWithStatusSizing = IconWithStatusSizing {
+    icon_size: 30.,
+    padding: 0.,
+    badge_icon_size: VERTICAL_TABS_STATUS_BADGE_ICON_SIZE,
+    badge_padding: VERTICAL_TABS_STATUS_BADGE_PADDING,
+    overall_size_override: None,
+    badge_offset: VERTICAL_TABS_STATUS_BADGE_OFFSET,
+};
 
 fn vtab_pane_row_position_id(pane_group_id: EntityId, pane_id: PaneId) -> String {
     format!("vertical_tabs:pane_row:{pane_group_id:?}:{pane_id}")
@@ -262,15 +279,20 @@ fn oz_icon_fill(theme: &WarpTheme) -> WarpThemeFill {
 
 fn render_pane_icon_with_status(
     variant: IconWithStatusVariant,
+    typed: &TypedPane<'_>,
     theme: &WarpTheme,
     app: &AppContext,
 ) -> Box<dyn Element> {
-    let sizing = match &variant {
-        IconWithStatusVariant::OzAgent { .. } => &VERTICAL_TABS_AGENT_SIZING,
-        IconWithStatusVariant::CLIAgent { status, .. } if status.is_some() => {
-            &VERTICAL_TABS_AGENT_SIZING
+    let sizing = if matches!(typed, TypedPane::CortexSettings) {
+        &VERTICAL_TABS_BRAIN_SIZING
+    } else {
+        match &variant {
+            IconWithStatusVariant::OzAgent { .. } => &VERTICAL_TABS_AGENT_SIZING,
+            IconWithStatusVariant::CLIAgent { status, .. } if status.is_some() => {
+                &VERTICAL_TABS_AGENT_SIZING
+            }
+            _ => &VERTICAL_TABS_SIZING,
         }
-        _ => &VERTICAL_TABS_SIZING,
     };
     let hide_neutral_backdrop = *crate::settings::CortexSettings::as_ref(app)
         .tabs_hide_icon_backdrop
@@ -2729,6 +2751,42 @@ const INDICATOR_DOT_SIZE: f32 = 8.;
 /// editor's current text so the input box matches the static title's width.
 const RENAME_EDITOR_FONT_SIZE: f32 = 12.;
 
+/// Resolves the Cortex Settings → Tabs → Tab Title overrides into a
+/// (`FamilyId`, font size, `Properties`) triple ready for `Text::new_inline`
+/// + `.with_style`.
+///
+/// Empty `tabs_title_font_name` (the default) and unrecognized font names both
+/// fall back to `appearance.ui_font_family()`. Size clamps to `[8.0, 32.0]` to
+/// keep tab rows from collapsing or blowing up the rail.
+///
+/// Vertical tabs already differentiate active/inactive rows by color (and
+/// optionally by inverse fill), so unlike `tab.rs` this resolver does not
+/// apply an active-weight bump — the user's chosen weight applies uniformly.
+fn cortex_tab_title_style(
+    appearance: &crate::appearance::Appearance,
+    app: &AppContext,
+) -> (FamilyId, f32, Properties) {
+    let cortex = crate::settings::CortexSettings::as_ref(app);
+    let name = &**cortex.tabs_title_font_name.value();
+    let family = if name.is_empty() {
+        appearance.ui_font_family()
+    } else {
+        app.font_cache()
+            .family_id_for_name(name)
+            .unwrap_or_else(|| appearance.ui_font_family())
+    };
+    let size = (*cortex.tabs_title_font_size.value()).clamp(8.0, 32.0);
+    let props = Properties {
+        style: if *cortex.tabs_title_italic.value() {
+            Style::Italic
+        } else {
+            Style::Normal
+        },
+        weight: *cortex.tabs_title_font_weight.value(),
+    };
+    (family, size, props)
+}
+
 fn render_title_indicator(color: ThemeFill) -> Box<dyn Element> {
     ConstrainedBox::new(WarpIcon::CircleFilled.to_warpui_icon(color).finish())
         .with_width(INDICATOR_DOT_SIZE)
@@ -2790,6 +2848,8 @@ fn render_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn Element> {
     let appearance = Appearance::as_ref(app);
     let theme = appearance.theme();
     let font_family = appearance.ui_font_family();
+    let (tab_title_family, tab_title_size, tab_title_props) =
+        cortex_tab_title_style(appearance, app);
     let cortex_hide_tab_icon = *crate::settings::CortexSettings::as_ref(app).hide_tab_icon.value();
     let cortex_hide_tab_metadata = *crate::settings::CortexSettings::as_ref(app)
         .hide_tab_metadata
@@ -2805,6 +2865,7 @@ fn render_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn Element> {
             cortex.neutral_icon_color,
             app,
         ),
+        &props.typed,
         theme,
         app,
     );
@@ -2834,12 +2895,17 @@ fn render_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn Element> {
         let title_slot = render_pane_title_slot(
             &props,
             || {
-                Text::new_inline(props.displayed_title().to_string(), font_family, 12.)
-                    .with_clip(ClipConfig::ellipsis())
-                    .with_color(cortex.title_color.into())
-                    .finish()
+                Text::new_inline(
+                    props.displayed_title().to_string(),
+                    tab_title_family,
+                    tab_title_size,
+                )
+                .with_clip(ClipConfig::ellipsis())
+                .with_style(tab_title_props)
+                .with_color(cortex.title_color.into())
+                .finish()
             },
-            12.,
+            tab_title_size,
             cortex.title_color,
             ClipConfig::ellipsis(),
             appearance,
@@ -3933,13 +3999,20 @@ fn render_title_override(
             .map(|rename_editor| render_inline_tab_rename_editor(rename_editor, appearance, app));
     }
 
+    let (tab_title_family, _tab_title_size, tab_title_props) =
+        cortex_tab_title_style(appearance, app);
     props
         .custom_vertical_tabs_title
         .as_ref()
         .or(props.display_title_override.as_ref())
         .map(|title| {
-            Text::new_inline(title.clone(), appearance.ui_font_family(), font_size)
+            // `font_size` here is the title-slot height supplied by the caller —
+            // already cortex-resolved at the `render_pane_row` call site, so we
+            // honor it rather than re-clamping. Family + Properties pull from
+            // the cortex resolver so the override path matches the default.
+            Text::new_inline(title.clone(), tab_title_family, font_size)
                 .with_clip(clip)
+                .with_style(tab_title_props)
                 .with_color(text_color.into())
                 .finish()
         })
@@ -4009,6 +4082,7 @@ fn render_summary_tab_item(
                     None,
                     app,
                 ),
+                &props.typed,
                 theme,
                 app,
             )
@@ -6586,6 +6660,7 @@ fn render_compact_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn El
             cortex.neutral_icon_color,
             app,
         ),
+        &props.typed,
         theme,
         app,
     );

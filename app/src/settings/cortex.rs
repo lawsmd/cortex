@@ -1,6 +1,7 @@
 use settings::{
     macros::define_settings_group, RespectUserSyncSetting, SupportedPlatforms, SyncToCloud,
 };
+use warpui::fonts::Weight;
 
 /// Horizontal alignment of a line of text in a Cortex vertical-tab row.
 ///
@@ -216,5 +217,41 @@ define_settings_group!(CortexSettings, settings: [
         private: false,
         toml_path: "cortex.layout.stacked_left_top_height_px",
         description: "When the left rail is stacked, the height in pixels of the top half (vertical tab bar). Updated when the user drags the horizontal divider; clamped on each render to the column's safe min/max."
+    },
+    tabs_title_font_name: TabsTitleFontName {
+        type: String,
+        default: String::new(),
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.tabs.title.font_name",
+        description: "Font family for tab titles in both the horizontal tab bar and the vertical tab rail. Empty string falls back to the UI font.",
+    },
+    tabs_title_font_size: TabsTitleFontSize {
+        type: f32,
+        default: 12.0,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.tabs.title.font_size",
+        description: "Tab title font size in logical px. Clamped to 8..=32 at the consumption site.",
+    },
+    tabs_title_font_weight: TabsTitleFontWeight {
+        type: Weight,
+        default: Weight::Normal,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.tabs.title.font_weight",
+        description: "Tab title font weight. Active tabs are bumped to at least Medium so a Normal/Light base weight still reads as differentiated.",
+    },
+    tabs_title_italic: TabsTitleItalic {
+        type: bool,
+        default: false,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.tabs.title.italic",
+        description: "Render tab titles in italic.",
     }
 ]);

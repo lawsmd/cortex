@@ -19,11 +19,11 @@
 //! `app/src/pane_group/pane/cortex_settings_pane.rs` because it needs access
 //! to `pub(super)` items in the pane-group module hierarchy.
 pub mod action;
-pub mod appearance_page;
 pub mod brand;
 pub mod pane_manager;
-pub mod tabs_panes_page;
+pub mod tabs_page;
 pub mod view;
+pub mod working_panes_page;
 
 pub use action::{CortexSettingsAction, CortexSettingsSection};
 pub use pane_manager::CortexSettingsPaneManager;

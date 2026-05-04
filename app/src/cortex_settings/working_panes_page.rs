@@ -1,8 +1,8 @@
 //! Content rendered on the right side of the Cortex Settings pane when the
-//! "Appearance" section is selected.
+//! "Working Panes" section is selected.
 //!
 //! Currently houses a single toggle: `Hide Pane Separator Lines`. New
-//! appearance toggles go here.
+//! working-pane chrome toggles go here.
 use warpui::{
     elements::{
         Align, Container, CrossAxisAlignment, Element, Flex, Padding, ParentElement, Shrinkable,
@@ -22,16 +22,18 @@ const CONTROL_RIGHT_PADDING: f32 = 5.0;
 /// handles for hover detection, switch animation state, etc.). Owned by
 /// `CortexSettingsView` and threaded into the render fns via `&self`.
 #[derive(Default)]
-pub struct AppearancePageState {
+pub struct WorkingPanesPageState {
     hide_pane_separators_switch: SwitchStateHandle,
 }
 
-pub fn appearance_page_search_terms() -> &'static [&'static str] {
-    &["appearance", "hide", "pane", "separator", "lines", "border"]
+pub fn working_panes_page_search_terms() -> &'static [&'static str] {
+    &[
+        "working", "panes", "pane", "hide", "separator", "lines", "border",
+    ]
 }
 
-pub fn render_appearance_page(
-    state: &AppearancePageState,
+pub fn render_working_panes_page(
+    state: &WorkingPanesPageState,
     appearance: &Appearance,
     app: &AppContext,
 ) -> Box<dyn Element> {
@@ -42,7 +44,7 @@ pub fn render_appearance_page(
 }
 
 fn render_hide_pane_separators_row(
-    state: &AppearancePageState,
+    state: &WorkingPanesPageState,
     appearance: &Appearance,
     app: &AppContext,
 ) -> Box<dyn Element> {
