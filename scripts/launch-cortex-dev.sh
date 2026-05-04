@@ -116,6 +116,13 @@ echo
 export CARGO_TERM_COLOR=never
 export CARGO_TERM_PROGRESS_WHEN=never
 
+# Isolate dev's runtime state from prod. WARP_DATA_PROFILE is honored only
+# in debug builds (gated on cfg!(debug_assertions) in
+# crates/warp_core/src/channel/state.rs), so this has no effect on
+# release-mode prod even if the env var leaks into its environment.
+# Result: dev writes to ~/.warp-oss-dev/ while prod stays on ~/.warp-oss/.
+export WARP_DATA_PROFILE=dev
+
 set +e
 PATH="$HOME/.cargo/bin:$PATH" ./script/run --dont-open 2>&1 | tee -a "$LOG_PATH"
 CARGO_EXIT=${PIPESTATUS[0]}
