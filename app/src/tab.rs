@@ -46,7 +46,7 @@ use warpui::elements::{
     PositionedElementOffsetBounds, Radius, Rect, SavePosition, Shrinkable, SizeConstraintCondition,
     SizeConstraintSwitch, Stack, Text,
 };
-use warpui::fonts::Weight;
+use warpui::fonts::{Style, Weight};
 use warpui::text_layout::ClipConfig;
 use warpui::ui_components::components::{Coords, UiComponent, UiComponentStyles};
 use warpui::ui_components::text_input::TextInput;
@@ -749,6 +749,24 @@ struct TabStyles {
     default: UiComponentStyles,
     /// On top of the default styles, active contains extra styling for when the tab is active
     active: UiComponentStyles,
+
+    /// Whether the tab title should render italic. `UiComponentStyles` doesn't
+    /// carry a `font_style` (`warpui::fonts::Style`) — `font_properties()`
+    /// always returns `Style::Normal` from the default field set. We thread
+    /// italic separately and apply it onto the `Properties` at render time.
+    italic: bool,
+}
+
+/// Bumps a user-chosen base weight up to at least `Weight::Medium` for the
+/// active tab. `Weight` doesn't implement `Ord`, so this is a manual mapping.
+/// Light/Thin/ExtraLight/Normal lift to Medium; everything Medium and above
+/// stays put — bumping a Bold base to a non-existent heavier weight would
+/// just be a no-op or worse.
+fn active_tab_weight_bump(base: Weight) -> Weight {
+    match base {
+        Weight::Thin | Weight::ExtraLight | Weight::Light | Weight::Normal => Weight::Medium,
+        other => other,
+    }
 }
 
 impl TabStyles {
@@ -762,7 +780,11 @@ impl TabStyles {
 
     /// Returns the default styling (based on the current settings and ui builder, hence not
     /// implementing Default trait).
-    fn default(appearance: &Appearance, tab_color: Option<AnsiColorIdentifier>) -> TabStyles {
+    fn default(
+        appearance: &Appearance,
+        tab_color: Option<AnsiColorIdentifier>,
+        app: &AppContext,
+    ) -> TabStyles {
         let theme = appearance.theme();
         let active_tab_bar_color: Option<ThemeFill> =
             tab_color.map(|color| color.to_ansi_color(&theme.terminal_colors().normal).into());
@@ -774,6 +796,22 @@ impl TabStyles {
                 color.into(),
             ))
         });
+
+        // Cortex Settings → Tabs → Tab Title overrides. Empty font name = use UI font;
+        // unrecognized name also falls back to UI font. Size clamps to 8..=32.
+        let cortex_settings = crate::settings::CortexSettings::as_ref(app);
+        let title_font_name = &**cortex_settings.tabs_title_font_name.value();
+        let title_font_size = (*cortex_settings.tabs_title_font_size.value()).clamp(8.0, 32.0);
+        let title_font_weight = *cortex_settings.tabs_title_font_weight.value();
+        let italic = *cortex_settings.tabs_title_italic.value();
+        let title_font_family = if title_font_name.is_empty() {
+            appearance.ui_builder().ui_font_family()
+        } else {
+            app.font_cache()
+                .family_id_for_name(title_font_name)
+                .unwrap_or_else(|| appearance.ui_builder().ui_font_family())
+        };
+
         TabStyles {
             background,
             error_color,
@@ -781,12 +819,14 @@ impl TabStyles {
             synced_input_indicator_color: ColorU::from_u32(TAB_INDICATOR_SYNCED_COLOR),
             default: UiComponentStyles::default()
                 .set_font_color(theme.nonactive_ui_text_color().into())
-                .set_font_family_id(appearance.ui_builder().ui_font_family())
-                .set_font_size(appearance.ui_builder().ui_font_size()),
+                .set_font_family_id(title_font_family)
+                .set_font_size(title_font_size)
+                .set_font_weight(title_font_weight),
             active: UiComponentStyles::default()
                 .set_font_color(theme.active_ui_text_color().into())
-                .set_font_weight(Weight::Medium)
+                .set_font_weight(active_tab_weight_bump(title_font_weight))
                 .set_border_color(theme.accent().into()),
+            italic,
         }
     }
 }
@@ -885,7 +925,7 @@ impl<'a> TabComponent<'a> {
             title,
             has_custom_title: tab.pane_group.as_ref(ctx).custom_title(ctx).is_some(),
             tab_index,
-            styles: TabStyles::default(appearance, tab.color()),
+            styles: TabStyles::default(appearance, tab.color(), ctx),
             ui_builder: appearance.ui_builder().clone(),
             indicator,
             close_button_position,
@@ -1076,7 +1116,10 @@ impl<'a> TabComponent<'a> {
         } else {
             self.styles.default
         };
-        let font_style = styles.font_properties();
+        let mut font_style = styles.font_properties();
+        if self.styles.italic {
+            font_style.style = Style::Italic;
+        }
         let font_color = styles.font_color.expect("Font color is set");
 
         if self.is_tab_being_renamed() {

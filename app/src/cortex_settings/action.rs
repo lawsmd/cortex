@@ -1,5 +1,7 @@
 //! Actions and section identifiers for the Cortex Settings UI.
 
+use warpui::fonts::Weight;
+
 use crate::settings::{
     TabsSelectedMetadataAlignment, TabsSelectedTitleAlignment, TabsUnselectedMetadataAlignment,
     TabsUnselectedTitleAlignment,
@@ -9,35 +11,37 @@ use crate::settings::{
 /// Add new sections here as the toggle set grows.
 #[derive(Copy, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum CortexSettingsSection {
-    Appearance,
-    TabsPanes,
+    WorkingPanes,
+    Tabs,
 }
 
 impl CortexSettingsSection {
     pub fn label(self) -> &'static str {
         match self {
-            Self::Appearance => "Appearance",
-            Self::TabsPanes => "Tabs/Panes",
+            Self::WorkingPanes => "Working Panes",
+            Self::Tabs => "Tabs",
         }
     }
 
     pub fn all() -> &'static [Self] {
-        &[Self::Appearance, Self::TabsPanes]
+        &[Self::WorkingPanes, Self::Tabs]
     }
 }
 
 impl Default for CortexSettingsSection {
     fn default() -> Self {
-        Self::Appearance
+        Self::WorkingPanes
     }
 }
 
 /// Actions emitted by the Cortex Settings view in response to user input.
-#[derive(Clone, Debug, PartialEq, Eq)]
+///
+/// Carries `f32` (font size) so derives `PartialEq` only — `f32` is not `Eq`.
+#[derive(Clone, Debug, PartialEq)]
 pub enum CortexSettingsAction {
     /// Switch the active sidebar section.
     SelectSection(CortexSettingsSection),
-    /// Flip the `hide_pane_separators` toggle on the Appearance page.
+    /// Flip the `hide_pane_separators` toggle on the Working Panes page.
     ToggleHidePaneSeparators,
     /// Flip the "Bar/Panel Background Matches Terminal Background" toggle.
     ToggleTabsPanelMatchesTerminalBg,
@@ -59,4 +63,13 @@ pub enum CortexSettingsAction {
     /// with a draggable horizontal divider. Mirrored by the icon button in
     /// the side panel header.
     ToggleStackLeftColumn,
+    /// Set the font family for tab titles. Empty string = inherit UI font.
+    SetTabTitleFontName(String),
+    /// Set the font size for tab titles (logical px). Clamped at the
+    /// consumption site to 8..=32.
+    SetTabTitleFontSize(f32),
+    /// Set the font weight for tab titles.
+    SetTabTitleFontWeight(Weight),
+    /// Flip the italic toggle for tab titles.
+    ToggleTabTitleItalic,
 }

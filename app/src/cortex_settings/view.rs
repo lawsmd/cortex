@@ -24,15 +24,13 @@ use warpui::{
 
 use crate::appearance::Appearance;
 use crate::cortex_settings::action::{CortexSettingsAction, CortexSettingsSection};
-use crate::cortex_settings::appearance_page::{
-    appearance_page_search_terms, render_appearance_page, AppearancePageState,
-};
 use crate::cortex_settings::brand::{
     BRAND_HEADER_ICON_TO_TITLE_FONT_RATIO, BRAND_HEADER_TITLE_TO_FONT_RATIO,
     BRAND_MENU_ICON_LABEL_GAP_RATIO,
 };
-use crate::cortex_settings::tabs_panes_page::{
-    render_tabs_panes_page, tabs_panes_page_search_terms, TabsPanesPageState,
+use crate::cortex_settings::tabs_page::{render_tabs_page, tabs_page_search_terms, TabsPageState};
+use crate::cortex_settings::working_panes_page::{
+    render_working_panes_page, working_panes_page_search_terms, WorkingPanesPageState,
 };
 use crate::editor::{
     EditorView, Event as EditorEvent, PropagateAndNoOpNavigationKeys, SingleLineEditorOptions,
@@ -81,8 +79,8 @@ pub struct CortexSettingsView {
     focus_handle: Option<PaneFocusHandle>,
     current_section: CortexSettingsSection,
     sidebar_states: Vec<(CortexSettingsSection, MouseStateHandle)>,
-    appearance_state: AppearancePageState,
-    tabs_panes_state: TabsPanesPageState,
+    working_panes_state: WorkingPanesPageState,
+    tabs_state: TabsPageState,
     search_editor: ViewHandle<EditorView>,
 }
 
@@ -119,8 +117,8 @@ impl CortexSettingsView {
             focus_handle: None,
             current_section: CortexSettingsSection::default(),
             sidebar_states,
-            appearance_state: AppearancePageState::default(),
-            tabs_panes_state: TabsPanesPageState::default(),
+            working_panes_state: WorkingPanesPageState::default(),
+            tabs_state: TabsPageState::new(ctx),
             search_editor,
         }
     }
@@ -272,6 +270,57 @@ impl CortexSettingsView {
         ctx.notify();
     }
 
+    fn set_tab_title_font_name(&mut self, value: String, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::Setting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.tabs_title_font_name.set_value(value, ctx);
+        });
+        ctx.notify();
+    }
+
+    fn set_tab_title_font_size(&mut self, value: f32, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::Setting;
+        use warpui::SingletonEntity;
+
+        // Clamp at the write boundary as well as the consumption site —
+        // belt-and-suspenders against typo'd hand-edits in `user_preferences.toml`.
+        let value = value.clamp(8.0, 32.0);
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.tabs_title_font_size.set_value(value, ctx);
+        });
+        ctx.notify();
+    }
+
+    fn set_tab_title_font_weight(
+        &mut self,
+        value: warpui::fonts::Weight,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        use crate::settings::CortexSettings;
+        use settings::Setting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.tabs_title_font_weight.set_value(value, ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_tab_title_italic(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.tabs_title_italic.toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
     fn handle_search_editor_event(
         &mut self,
         _editor: ViewHandle<EditorView>,
@@ -283,6 +332,46 @@ impl CortexSettingsView {
         // query — `render_sidebar` reads it on demand from the editor.
         if matches!(event, EditorEvent::Edited(_)) {
             ctx.notify();
+        }
+    }
+
+    /// Persist the Tab Title font family on every keystroke. Empty / unknown
+    /// names fall back to the UI font at the consumption site, so partial
+    /// typed values like "Inte" while typing "Inter" are harmless.
+    pub(crate) fn handle_tab_title_font_name_editor_event(
+        &mut self,
+        _editor: ViewHandle<EditorView>,
+        event: &EditorEvent,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        if matches!(event, EditorEvent::Edited(_)) {
+            let value = self
+                .tabs_state
+                .title_font_name_editor
+                .as_ref(ctx)
+                .buffer_text(ctx);
+            self.set_tab_title_font_name(value, ctx);
+        }
+    }
+
+    /// Parse the Tab Title font size on every keystroke. Non-numeric input is
+    /// ignored (the existing setting value persists); valid f32 input is
+    /// clamped to 8.0..=32.0 by `set_tab_title_font_size`.
+    pub(crate) fn handle_tab_title_font_size_editor_event(
+        &mut self,
+        _editor: ViewHandle<EditorView>,
+        event: &EditorEvent,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        if matches!(event, EditorEvent::Edited(_)) {
+            let buffer = self
+                .tabs_state
+                .title_font_size_editor
+                .as_ref(ctx)
+                .buffer_text(ctx);
+            if let Ok(value) = buffer.trim().parse::<f32>() {
+                self.set_tab_title_font_size(value, ctx);
+            }
         }
     }
 
@@ -389,12 +478,10 @@ impl CortexSettingsView {
 
     fn render_content(&self, appearance: &Appearance, app: &AppContext) -> Box<dyn Element> {
         match self.current_section {
-            CortexSettingsSection::Appearance => {
-                render_appearance_page(&self.appearance_state, appearance, app)
+            CortexSettingsSection::WorkingPanes => {
+                render_working_panes_page(&self.working_panes_state, appearance, app)
             }
-            CortexSettingsSection::TabsPanes => {
-                render_tabs_panes_page(&self.tabs_panes_state, appearance, app)
-            }
+            CortexSettingsSection::Tabs => render_tabs_page(&self.tabs_state, appearance, app),
         }
     }
 }
@@ -466,6 +553,16 @@ impl warpui::TypedActionView for CortexSettingsView {
                 self.set_tabs_unselected_metadata_alignment(*value, ctx)
             }
             CortexSettingsAction::ToggleStackLeftColumn => self.toggle_stack_left_column(ctx),
+            CortexSettingsAction::SetTabTitleFontName(value) => {
+                self.set_tab_title_font_name(value.clone(), ctx)
+            }
+            CortexSettingsAction::SetTabTitleFontSize(value) => {
+                self.set_tab_title_font_size(*value, ctx)
+            }
+            CortexSettingsAction::SetTabTitleFontWeight(value) => {
+                self.set_tab_title_font_weight(*value, ctx)
+            }
+            CortexSettingsAction::ToggleTabTitleItalic => self.toggle_tab_title_italic(ctx),
         }
     }
 }
@@ -572,7 +669,7 @@ impl BackingView for CortexSettingsView {
 pub fn cortex_settings_search_terms() -> String {
     format!(
         "cortex settings {} {}",
-        appearance_page_search_terms().join(" "),
-        tabs_panes_page_search_terms().join(" ")
+        working_panes_page_search_terms().join(" "),
+        tabs_page_search_terms().join(" ")
     )
 }
