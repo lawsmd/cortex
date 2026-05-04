@@ -84,22 +84,31 @@ pub fn warp_home_projects_file_path() -> Option<PathBuf> {
     warp_home_config_dir().map(|warp_config_dir| warp_config_dir.join("projects.json"))
 }
 
-/// Returns the macOS config directory name for the current channel.
+/// Returns the macOS config directory name for the current channel and data profile.
 ///
 /// Stable uses `.warp`, while other channels include a channel suffix
-/// (e.g., `.warp-dev`, `.warp-local`).
+/// (e.g., `.warp-dev`, `.warp-local`). When `WARP_DATA_PROFILE` is set in a
+/// debug build, the profile is appended (e.g. `.warp-oss-dev` for the
+/// Cortex two-lane macOS workflow, where dev launches with
+/// `WARP_DATA_PROFILE=dev` so it doesn't collide with prod's state).
 ///
 /// These suffixes are persisted on disk as directory names and must not be
 /// changed once established, or existing user data will be orphaned.
 #[cfg(target_os = "macos")]
 fn macos_config_dir_name() -> String {
-    match ChannelState::channel() {
+    let base_dir_name = match ChannelState::channel() {
         Channel::Stable => WARP_CONFIG_DIR.to_owned(),
         Channel::Preview => format!("{WARP_CONFIG_DIR}-preview"),
         Channel::Oss => format!("{WARP_CONFIG_DIR}-oss"),
         Channel::Dev => format!("{WARP_CONFIG_DIR}-dev"),
         Channel::Integration => format!("{WARP_CONFIG_DIR}-integration"),
         Channel::Local => format!("{WARP_CONFIG_DIR}-local"),
+    };
+
+    if let Some(data_profile) = ChannelState::data_profile() {
+        format!("{base_dir_name}-{data_profile}")
+    } else {
+        base_dir_name
     }
 }
 
