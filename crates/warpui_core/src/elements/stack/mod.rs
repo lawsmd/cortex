@@ -100,11 +100,13 @@ impl Stack {
             size: Default::default(),
             origin: Default::default(),
             constrain_absolute_children: !SHOULD_ENABLE_NEW_STACK_CONSTRAINT_BEHAVIOR,
-            event_dispatch_mode: if cfg!(debug_assertions) {
-                EventDispatchMode::Waterfall
-            } else {
-                EventDispatchMode::Broadcast
-            },
+            // Waterfall in both debug and release. Broadcast in release was
+            // eating clicks inside the Cortex Settings → Tabs page (e.g. the
+            // vertical-tabs settings flyout's controls became unresponsive in
+            // prod but worked in dev). The debug/release split was the only
+            // thing changing; forcing Waterfall everywhere fixes prod and
+            // matches the dispatch behavior we'd already validated in dev.
+            event_dispatch_mode: EventDispatchMode::Waterfall,
         }
     }
 
