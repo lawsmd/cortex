@@ -206,20 +206,11 @@ const VERTICAL_TABS_SUMMARY_STATUS_ICON_SIZE: f32 = 10.;
 
 /// Sizing override for the Cortex Settings tab's brain glyph. The brain SVG
 /// has more inherent whitespace inside its viewBox than the other neutral
-/// glyphs, so at the default 16px it reads optically smaller next to them.
-/// Bumped to 30 (~88% larger; user dialed it in by eye in two passes —
-/// +25%, then another +50% on top). Padding drops to 0 so the icon slot
-/// grows to 30px (vs. the standard 24px); the brain row's title sits ~6px
+/// glyphs, so at the default 24px it reads optically smaller next to them.
+/// Bumped to 30 so the icon slot grows; the brain row's title sits ~6px
 /// farther right than other rows — a deliberate trade for the optical
 /// weight on this single tab.
-const VERTICAL_TABS_BRAIN_SIZING: IconWithStatusSizing = IconWithStatusSizing {
-    icon_size: 30.,
-    padding: 0.,
-    badge_icon_size: VERTICAL_TABS_STATUS_BADGE_ICON_SIZE,
-    badge_padding: VERTICAL_TABS_STATUS_BADGE_PADDING,
-    overall_size_override: None,
-    badge_offset: VERTICAL_TABS_STATUS_BADGE_OFFSET,
-};
+const VERTICAL_TABS_BRAIN_ICON_SIZE: f32 = 30.;
 
 fn vtab_pane_row_position_id(pane_group_id: EntityId, pane_id: PaneId) -> String {
     format!("vertical_tabs:pane_row:{pane_group_id:?}:{pane_id}")
@@ -353,28 +344,29 @@ fn render_pane_icon_with_status(
     variant: IconWithStatusVariant,
     typed: &TypedPane<'_>,
     theme: &WarpTheme,
-    app: &AppContext,
+    _app: &AppContext,
 ) -> Box<dyn Element> {
-    let sizing = if matches!(typed, TypedPane::CortexSettings) {
-        &VERTICAL_TABS_BRAIN_SIZING
+    // Cortex: brain glyph for the Cortex Settings tab gets a larger total_size
+    // because the SVG has more inherent whitespace inside its viewBox than the
+    // other neutral glyphs.
+    //
+    // NOTE: the `tabs_hide_icon_backdrop` Cortex setting is currently inert —
+    // upstream's 2026-05-05 refactor of `render_icon_with_status` to a single
+    // `total_size: f32` parameter dropped the per-variant struct that our
+    // hide-neutral-backdrop branch used. Re-implementing it on top of upstream's
+    // `render_neutral_circle` helper is a follow-up; until then the setting
+    // exists in CortexSettings but renders identically to the default.
+    let total_size = if matches!(typed, TypedPane::CortexSettings) {
+        VERTICAL_TABS_BRAIN_ICON_SIZE
     } else {
-        match &variant {
-            IconWithStatusVariant::OzAgent { .. } => &VERTICAL_TABS_AGENT_SIZING,
-            IconWithStatusVariant::CLIAgent { status, .. } if status.is_some() => {
-                &VERTICAL_TABS_AGENT_SIZING
-            }
-            _ => &VERTICAL_TABS_SIZING,
-        }
+        VERTICAL_TABS_ICON_SIZE
     };
-    let hide_neutral_backdrop = *crate::settings::CortexSettings::as_ref(app)
-        .tabs_hide_icon_backdrop
-        .value();
     render_icon_with_status(
         variant,
-        sizing,
+        total_size,
+        0.,
         theme,
         theme.background(),
-        hide_neutral_backdrop,
     )
 }
 
