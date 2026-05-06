@@ -1,3 +1,6 @@
+> [!NOTE]
+> **This is [Cortex](https://github.com/lawsmd/cortex), a personal fork of [Warp](https://github.com/warpdotdev/warp)** by [@lawsmd](https://github.com/lawsmd). The Cortex layer adds a TUI-flavored re-skin, a ~1,079-theme picker bundled from open-source community schemes, and ergonomic tweaks for solo use; it's additive where possible. Build instructions in this README target upstream Warp — for the Cortex two-lane Windows/macOS dev workflow, see `scripts/launch-cortex-dev.{bat,sh}`. If you're working on Cortex with an AI assistant (Claude Code, Codex, etc.), drop your own `CLAUDE.md` at the repo root — it's gitignored, so it stays local to your machine. Upstream lives at [warpdotdev/warp](https://github.com/warpdotdev/warp); the Warp content below is theirs unchanged except where noted.
+
 <a href="https://www.warp.dev">
     <img width="1024" alt="Warp Agentic Development Environment product preview" src="https://github.com/user-attachments/assets/9976b2da-2edd-4604-a36c-8fd53719c6d4" />
 </a>
