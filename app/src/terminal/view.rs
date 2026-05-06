@@ -8382,6 +8382,21 @@ impl TerminalView {
             }
         }
 
+        // Eager-clear the AttentionNeeded breath wash: typing into a pane is
+        // a stronger "I see it" signal than `PaneFocused` (whose handler at
+        // app/src/workspace/view.rs:3499 has a guard that can lose races
+        // when the workspace's `active_view_id` lags the pane-group's focus
+        // event). Without this, a fast user can navigate to a B-pulsing tab
+        // and submit a fresh prompt before either the focus path runs or the
+        // hook bridge's PromptSubmit OSC 777 lands — leaving the tab stuck
+        // on AttentionNeeded for the duration of the race.
+        // `mark_session_viewed` short-circuits when the flag isn't set, so
+        // this is a cheap no-op for sessions that aren't pulsing.
+        let view_id = ctx.view_id();
+        CLIAgentSessionsModel::handle(ctx).update(ctx, |sessions, ctx| {
+            sessions.mark_session_viewed(view_id, ctx);
+        });
+
         let bytes = data.into();
         let bytes_vec = bytes.to_vec();
         self.clear_selected_blocks(ctx);
