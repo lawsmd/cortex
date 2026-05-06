@@ -171,12 +171,12 @@ define_settings_group!(CortexSettings, settings: [
     },
     tabs_panel_row_spacing: TabsPanelRowSpacing {
         type: f32,
-        default: 4.0,
+        default: 8.0,
         supported_platforms: SupportedPlatforms::ALL,
         sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
         private: false,
         toml_path: "cortex.tabs.panel.row_spacing",
-        description: "Vertical spacing in pixels between tab rows in the vertical tab panel. Adjusted via the slider in the vertical-tabs settings popup.",
+        description: "Vertical spacing in pixels between tab rows in the vertical tab panel. Adjusted via the slider in the vertical-tabs settings popup. Range 8–24 px; widened from 0–16 to prevent tab-edge animations from clipping into neighbors.",
     },
     tabs_inverse_fill_on_selection: TabsInverseFillOnSelection {
         type: bool,
