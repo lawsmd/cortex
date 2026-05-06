@@ -53,7 +53,7 @@ fn round_trip_serde() {
     let original = ProjectsConfig {
         projects: vec![super::Project {
             name: "Acme".into(),
-            cwd: PathBuf::from("D:\\acme-services"),
+            cwd: PathBuf::from("C:\\projects\\acme-services"),
             color: "#2bd7fb".into(),
             rank: 2,
         }],
