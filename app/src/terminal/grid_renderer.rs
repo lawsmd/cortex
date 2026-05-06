@@ -622,7 +622,20 @@ fn render_grid_without_ligatures<'a>(
             continue;
         };
 
-        for col in 0..grid.columns() {
+        // Scrollback rows can briefly lag grid.columns() during resize because
+        // grid_storage and flat_storage track column counts independently;
+        // clamp so a transient mismatch becomes a one-frame visual artifact
+        // instead of a panic on `row[col]`.
+        let row_len = row.len();
+        #[cfg(debug_assertions)]
+        if row_len < grid.columns() {
+            log::warn!(
+                "grid_renderer: row {row_idx} has {row_len} cells but grid.columns() is {}; clamping",
+                grid.columns()
+            );
+        }
+
+        for col in 0..grid.columns().min(row_len) {
             let current_point = Point::new(row_idx, col);
 
             // Skip the cursor cell when CLI agent rich input is open
@@ -1149,7 +1162,20 @@ fn render_grid_with_ligatures<'a>(
             }
         };
 
-        for col in 0..grid.columns() {
+        // Scrollback rows can briefly lag grid.columns() during resize because
+        // grid_storage and flat_storage track column counts independently;
+        // clamp so a transient mismatch becomes a one-frame visual artifact
+        // instead of a panic on `row[col]`.
+        let row_len = row.len();
+        #[cfg(debug_assertions)]
+        if row_len < grid.columns() {
+            log::warn!(
+                "grid_renderer: row {row_idx} has {row_len} cells but grid.columns() is {}; clamping",
+                grid.columns()
+            );
+        }
+
+        for col in 0..grid.columns().min(row_len) {
             let cell = &row[col];
             let mut cell_type = CellType::default();
             let mut first_cell_in_link = false;
