@@ -285,6 +285,11 @@ impl FlatStorage {
         self.index = Index::rebuild(&self.index, new_columns);
     }
 
+    /// Returns the width of the grid.
+    pub fn columns(&self) -> usize {
+        self.columns
+    }
+
     /// Returns the total number of rows in the grid.
     pub fn total_rows(&self) -> usize {
         self.index.len()
