@@ -894,7 +894,17 @@ fn classify_pane_animation(
     if let Some(session) = CLIAgentSessionsModel::as_ref(app).session(view_id) {
         let rich = agent_supports_rich_status(&session.agent);
         let prompted = session.session_context.query.is_some();
-        if rich && prompted {
+        // Hook-bridged and plugin-attached sessions have an authoritative
+        // `status` field even before the first PromptSubmit — every OSC 777
+        // event runs through `register_cli_agent_listener_from_event`, which
+        // sets `listener: Some(_)`. Only bare command-detection sessions
+        // (which never get one) need the `prompted` gate to stay quiet.
+        // Without this, a `/resume`-as-first-action emits SessionEnd → Stop
+        // before any PromptSubmit, leaving Tier 1 toothless and letting
+        // Tier 2 falsely report Running on the long-lived `claude` PTY.
+        // See docs/ai/external-status-injection.md § Phase D.
+        let bridged = session.listener.is_some();
+        if rich && (prompted || bridged) {
             // Pulse-until-viewed: when a turn finishes on a backgrounded pane
             // (Stop event fired without the user viewing the source tab
             // since), the breath wash should fire so the tab bar surfaces a
@@ -918,11 +928,23 @@ fn classify_pane_animation(
                 }
             };
             // Stale-state backstop: if Tier 1 says Running but the underlying
-            // conversation block has actually terminated, trust Tier 2. Mainly
-            // protects hook-bridged sessions when claude is SIGKILL'd before
-            // its Stop/SessionEnd hook fires. (Plugin-attached sessions hit
-            // the same edge case, so this also benefits them.)
+            // conversation block has actually terminated AND we have no live
+            // listener, trust Tier 2. Catches the "claude SIGKILL'd before
+            // its Stop/SessionEnd hook fires" case for non-bridged sessions.
+            //
+            // We deliberately skip the backstop for bridged sessions
+            // (`listener.is_some()`) because Tier 1 can transiently disagree
+            // with Tier 2 during a normal turn-start: when a fresh
+            // `PromptSubmit` flips `session.status` to `InProgress`, the
+            // conversation-level `display_status` may still be `Success` for
+            // a frame or two until the in-conversation state catches up. The
+            // old unconditional backstop turned that frame into a flicker
+            // where the comet went dark instead of switching from None →
+            // Running, which the user noticed as "B → A transition stuck".
+            // For listener-attached sessions, more events are still in flight
+            // and Tier 1 is authoritative — falling through helps no one.
             let stale = matches!(result, Some(TabAnimationKind::Running))
+                && session.listener.is_none()
                 && matches!(
                     view.selected_conversation_status_for_display(app),
                     Some(
