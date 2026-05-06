@@ -423,7 +423,6 @@ fn render_agent_avatar(
         0.,
         theme,
         theme.surface_2(),
-        false,
     )
 }
 

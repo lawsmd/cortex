@@ -125,55 +125,37 @@ pub(crate) enum IconWithStatusVariant {
     },
 }
 
-/// Renders an icon inside a circle with an optional status badge overlay.
+/// Renders an icon-with-status component sized entirely from a single `total_size`. All
+/// sub-components (brand circle, status badge, cloud lobe) are derived proportionally,
+/// so callers only need to pick the size they want.
 ///
-/// `hide_neutral_backdrop` skips the gray `fg_overlay_2` fill behind `Neutral`
-/// and `NeutralElement` variants — used by the Cortex "Hide Icon Backdrop"
-/// setting to render the glyph directly on the tab/pane background without
-/// the small circle. Padding is preserved so the layout footprint stays
-/// identical. Agent variants (`OzAgent`, `CLIAgent`) are unaffected: their
-/// backdrops carry identity meaning (theme background / brand color).
+/// `overlay_extra_overhang_ratio` is a signed fraction of `total_size` added to the
+/// default overlay overhang past the circle's BR edge. Most surfaces pass `0.0` to
+/// get the default position; positive values push the overlay further toward the box's
+/// BR (more overhang) and negative values pull it inward toward the circle's center.
+///
+/// When `is_ambient` is set on an agent variant, the status badge is replaced by a
+/// cloud (filled with `status_container_background`) containing the status icon.
 pub(crate) fn render_icon_with_status(
     variant: IconWithStatusVariant,
     total_size: f32,
     overlay_extra_overhang_ratio: f32,
     theme: &WarpTheme,
-    badge_ring_background: WarpThemeFill,
-    hide_neutral_backdrop: bool,
+    status_container_background: WarpThemeFill,
 ) -> Box<dyn Element> {
     let sub_text = theme.sub_text_color(theme.background());
 
     match variant {
-        IconWithStatusVariant::Neutral { icon, icon_color } => {
-            let inner = ConstrainedBox::new(icon.to_warpui_icon(icon_color).finish())
-                .with_width(sizing.icon_size)
-                .with_height(sizing.icon_size)
-                .finish();
-            let mut container = Container::new(inner).with_uniform_padding(sizing.padding);
-            if !hide_neutral_backdrop {
-                container = container
-                    .with_background(internal_colors::fg_overlay_2(theme))
-                    .with_corner_radius(CornerRadius::with_all(Radius::Pixels(
-                        (sizing.icon_size + sizing.padding * 2.) / 2.,
-                    )));
-            }
-            container.finish()
-        }
-        IconWithStatusVariant::NeutralElement { icon_element } => {
-            let inner = ConstrainedBox::new(icon_element)
-                .with_width(sizing.icon_size)
-                .with_height(sizing.icon_size)
-                .finish();
-            let mut container = Container::new(inner).with_uniform_padding(sizing.padding);
-            if !hide_neutral_backdrop {
-                container = container
-                    .with_background(internal_colors::fg_overlay_2(theme))
-                    .with_corner_radius(CornerRadius::with_all(Radius::Pixels(
-                        (sizing.icon_size + sizing.padding * 2.) / 2.,
-                    )));
-            }
-            container.finish()
-        }
+        IconWithStatusVariant::Neutral { icon, icon_color } => render_neutral_circle(
+            icon.to_warpui_icon(icon_color).finish(),
+            internal_colors::fg_overlay_2(theme),
+            total_size,
+        ),
+        IconWithStatusVariant::NeutralElement { icon_element } => render_neutral_circle(
+            icon_element,
+            internal_colors::fg_overlay_2(theme),
+            total_size,
+        ),
         IconWithStatusVariant::OzAgent { status, is_ambient } => {
             let circle_background = if is_ambient {
                 ThemeFill::Solid(OZ_AMBIENT_BACKGROUND_COLOR)
