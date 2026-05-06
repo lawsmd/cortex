@@ -24,6 +24,13 @@ pub mod web_handoff;
 /// and the login screen itself. Set to `false` when working on the
 /// login screen or onboarding slides.
 ///
+/// On Windows, the `skip_login` Cargo feature is the actual auth path —
+/// it auto-authenticates as a test user (see `auth_state.rs:137`) so the
+/// user reaches the workspace already-authenticated. This const is the
+/// macOS analog because `./script/run` doesn't forward Cargo features
+/// cleanly. Both layers stay `true` on purpose: the personal-use posture
+/// of this fork is that Cortex never asks for login.
+///
 /// The login screen is rendered from `app/src/auth/login_slide.rs`, gated
 /// by the auth-onboarding decision in `app/src/root_view.rs` (search for
 /// this constant to find the call site).
