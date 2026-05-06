@@ -15,7 +15,11 @@ REM every launch.
 
 setlocal enableextensions
 
-set REPO=C:\Users\Michael\cortex
+REM Resolve repo root from the script's own location so the launcher works
+REM regardless of where the user installed Cortex (or after a Windows
+REM reinstall onto a different drive). %~dp0 is this script's directory
+REM with a trailing backslash; %%~fI canonicalizes the parent path.
+for %%I in ("%~dp0..") do set "REPO=%%~fI"
 set INSTALL_DIR=%LOCALAPPDATA%\Cortex
 set PROD_EXE=%INSTALL_DIR%\Cortex.exe
 set STAMP=%INSTALL_DIR%\Cortex.build-info

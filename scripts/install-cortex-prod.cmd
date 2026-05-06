@@ -27,7 +27,11 @@ REM See CLAUDE.md "The dev loop" for the full two-lane workflow.
 
 setlocal enableextensions
 title Cortex (build prod + install)
-cd /d C:\Users\Michael\cortex
+REM cd to repo root via the script's own location so this works regardless
+REM of where Cortex is installed (or after a Windows reinstall onto a
+REM different drive). %~dp0 is this script's directory with a trailing
+REM backslash; cd resolves the .. immediately.
+cd /d "%~dp0.."
 
 set INSTALL_DIR=%LOCALAPPDATA%\Cortex
 set INSTALL_PATH=%INSTALL_DIR%\Cortex.exe
