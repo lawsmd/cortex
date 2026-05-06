@@ -80,3 +80,6 @@ __pycache__/
 
 # Dev-loop session logs from scripts\launch-cortex-dev.bat. See CLAUDE.md "Live dev-session logs".
 /.cortex-logs/
+
+# Personal rebuild-cortex skill — local-only, not for the public repo.
+/.agents/skills/rebuild-cortex/
