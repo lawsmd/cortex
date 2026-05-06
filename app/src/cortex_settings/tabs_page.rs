@@ -18,8 +18,9 @@ use warpui::{
     },
     fonts::{Properties, Weight},
     ui_components::{
-        components::UiComponent,
+        components::{Coords, UiComponent, UiComponentStyles},
         radio_buttons::{RadioButtonItem, RadioButtonLayout, RadioButtonStateHandle},
+        slider::SliderStateHandle,
         switch::SwitchStateHandle,
     },
     AppContext, SingletonEntity, ViewContext, ViewHandle,
@@ -28,13 +29,11 @@ use warpui::{
 use crate::appearance::Appearance;
 use crate::cortex_settings::action::CortexSettingsAction;
 use crate::cortex_settings::view::CortexSettingsView;
-use crate::editor::{
-    EditorView, PropagateAndNoOpNavigationKeys, SingleLineEditorOptions, TextOptions,
-};
 use crate::settings::{
     CortexSettings, TabsSelectedMetadataAlignment, TabsSelectedTitleAlignment,
     TabsUnselectedMetadataAlignment, TabsUnselectedTitleAlignment,
 };
+use crate::view_components::{Dropdown, DropdownItem};
 
 const ROW_VERTICAL_PADDING: f32 = 6.0;
 const CONTROL_RIGHT_PADDING: f32 = 5.0;
@@ -49,20 +48,26 @@ const SUBSECTION_HEADER_PADDING_BOTTOM: f32 = 15.0;
 // to space neighboring section groups apart.
 const SECTION_SEPARATOR_BORDER_WIDTH: f32 = 2.0;
 const SECTION_SEPARATOR_MARGIN_BOTTOM: f32 = 15.0;
-// Tab Title text inputs need explicit widths — `EditorElement::layout` panics
-// on infinite width (`app/src/editor/view/element.rs:1670`), and a raw
-// `ChildView<EditorView>` reports infinite width to the parent flex unless
-// constrained. The label-control row helper only shrinks the label side.
-const TAB_TITLE_FONT_NAME_INPUT_WIDTH: f32 = 200.0;
-const TAB_TITLE_FONT_SIZE_INPUT_WIDTH: f32 = 64.0;
+// Tab Title controls need explicit widths — `ChildView` reports infinite
+// width to the parent flex unless constrained, and the label-control row
+// helper only shrinks the label side.
+const TAB_TITLE_FONT_NAME_DROPDOWN_WIDTH: f32 = 200.0;
+const TAB_TITLE_FONT_SIZE_SLIDER_WIDTH: f32 = 160.0;
+// Slider range — kept narrower than the on-disk clamp (8..=32 in
+// `app/src/settings/cortex.rs`) because below 10 the title is unreadable in
+// tab chrome and above 20 the tab bar height starts to drift. The wider
+// on-disk range stays so a hand-edited TOML value doesn't get silently
+// rejected.
+const TAB_TITLE_FONT_SIZE_MIN: f32 = 10.0;
+const TAB_TITLE_FONT_SIZE_MAX: f32 = 20.0;
 
 /// Per-toggle/selector UI state that has to outlive a single render frame
 /// (mouse-state handles for hover detection, switch animation, radio-button
-/// selection state, plus the two `EditorView` handles for the Tab Title font
-/// name + size text inputs). Owned by `CortexSettingsView` and threaded into
+/// selection state, slider thumb position, plus the dropdown view handle for
+/// the Tab Title font family). Owned by `CortexSettingsView` and threaded into
 /// the render fns via `&self`.
 ///
-/// No `Default` impl — the editor handles need a `ViewContext` to construct,
+/// No `Default` impl — the dropdown handle needs a `ViewContext` to construct,
 /// so this is built via [`TabsPageState::new`] from `CortexSettingsView::new`.
 pub struct TabsPageState {
     panel_bg_switch: SwitchStateHandle,
@@ -78,10 +83,12 @@ pub struct TabsPageState {
     unselected_metadata_radio: RadioButtonStateHandle,
     unselected_metadata_mouse_states: Vec<MouseStateHandle>,
 
-    /// Tab Title subsection — font family (text input; empty = inherit UI font).
-    pub(crate) title_font_name_editor: ViewHandle<EditorView>,
-    /// Tab Title subsection — font size (numeric text input; clamped to 8..=32).
-    pub(crate) title_font_size_editor: ViewHandle<EditorView>,
+    /// Tab Title subsection — font family dropdown. Three bundled options:
+    /// `(use UI font)` (empty string), `Hack`, `Roboto`.
+    pub(crate) title_font_name_dropdown: ViewHandle<Dropdown<CortexSettingsAction>>,
+    /// Tab Title subsection — font size slider (integer steps,
+    /// [`TAB_TITLE_FONT_SIZE_MIN`]..=[`TAB_TITLE_FONT_SIZE_MAX`]).
+    title_font_size_slider: SliderStateHandle,
     /// Tab Title subsection — font weight radio (3 options: Normal / Medium / Bold).
     title_font_weight_radio: RadioButtonStateHandle,
     title_font_weight_mouse_states: Vec<MouseStateHandle>,
@@ -92,58 +99,19 @@ pub struct TabsPageState {
 impl TabsPageState {
     /// Build the page state inside `CortexSettingsView::new`.
     ///
-    /// The two `EditorView` handles for Tab Title font name + size are created
-    /// here and the parent view subscribes to their `Edited` events so each
-    /// keystroke writes through to `CortexSettings`. Pre-populates the editors
-    /// with the current setting value.
+    /// Constructs the font-family dropdown (3 bundled options) and pre-selects
+    /// the row matching the current `cortex.tabs.title.font_name` setting.
     pub fn new(ctx: &mut ViewContext<CortexSettingsView>) -> Self {
-        let appearance = Appearance::as_ref(ctx);
-        let font_family = appearance.ui_font_family();
-        let cortex = CortexSettings::as_ref(ctx);
-        let initial_name = (*cortex.tabs_title_font_name.value()).clone();
-        let initial_size = *cortex.tabs_title_font_size.value();
-
-        let title_font_name_editor = ctx.add_typed_action_view(|ctx| {
-            let options = SingleLineEditorOptions {
-                text: TextOptions {
-                    font_family_override: Some(font_family),
-                    ..Default::default()
-                },
-                propagate_and_no_op_vertical_navigation_keys:
-                    PropagateAndNoOpNavigationKeys::Always,
-                ..Default::default()
-            };
-            let mut editor = EditorView::single_line(options, ctx);
-            if !initial_name.is_empty() {
-                editor.set_buffer_text(&initial_name, ctx);
-            }
-            editor.set_placeholder_text("(use UI font)", ctx);
-            editor
+        let title_font_name_dropdown = ctx.add_typed_action_view(|ctx| {
+            let mut dropdown = Dropdown::new(ctx);
+            dropdown.set_top_bar_max_width(TAB_TITLE_FONT_NAME_DROPDOWN_WIDTH);
+            dropdown.set_menu_width(TAB_TITLE_FONT_NAME_DROPDOWN_WIDTH, ctx);
+            let items = font_family_dropdown_items();
+            dropdown.add_items(items, ctx);
+            let initial_name = (*CortexSettings::as_ref(ctx).tabs_title_font_name.value()).clone();
+            dropdown.set_selected_by_name(font_family_label_for_value(&initial_name), ctx);
+            dropdown
         });
-        ctx.subscribe_to_view(
-            &title_font_name_editor,
-            CortexSettingsView::handle_tab_title_font_name_editor_event,
-        );
-
-        let title_font_size_editor = ctx.add_typed_action_view(|ctx| {
-            let options = SingleLineEditorOptions {
-                text: TextOptions {
-                    font_family_override: Some(font_family),
-                    ..Default::default()
-                },
-                propagate_and_no_op_vertical_navigation_keys:
-                    PropagateAndNoOpNavigationKeys::Always,
-                ..Default::default()
-            };
-            let mut editor = EditorView::single_line(options, ctx);
-            editor.set_buffer_text(&format!("{}", initial_size), ctx);
-            editor.set_placeholder_text("12", ctx);
-            editor
-        });
-        ctx.subscribe_to_view(
-            &title_font_size_editor,
-            CortexSettingsView::handle_tab_title_font_size_editor_event,
-        );
 
         Self {
             panel_bg_switch: SwitchStateHandle::default(),
@@ -170,8 +138,8 @@ impl TabsPageState {
                 MouseStateHandle::default(),
                 MouseStateHandle::default(),
             ],
-            title_font_name_editor,
-            title_font_size_editor,
+            title_font_name_dropdown,
+            title_font_size_slider: SliderStateHandle::default(),
             title_font_weight_radio: RadioButtonStateHandle::default(),
             title_font_weight_mouse_states: vec![
                 MouseStateHandle::default(),
@@ -181,6 +149,42 @@ impl TabsPageState {
             title_italic_switch: SwitchStateHandle::default(),
         }
     }
+}
+
+/// Bundled font choices presented in the Tab Title > Font Family dropdown.
+/// Tuple shape: `(visible label, persisted setting value)`. The empty string
+/// is the documented "fall back to UI font" sentinel for
+/// `cortex.tabs.title.font_name`.
+const TAB_TITLE_FONT_FAMILY_OPTIONS: &[(&str, &str)] = &[
+    ("(use UI font)", ""),
+    ("Hack", "Hack"),
+    ("Roboto", "Roboto"),
+];
+
+fn font_family_dropdown_items() -> Vec<DropdownItem<CortexSettingsAction>> {
+    TAB_TITLE_FONT_FAMILY_OPTIONS
+        .iter()
+        .map(|(label, value)| {
+            DropdownItem::new(
+                *label,
+                CortexSettingsAction::SetTabTitleFontName((*value).to_string()),
+            )
+        })
+        .collect()
+}
+
+/// Maps a stored `cortex.tabs.title.font_name` value back to the dropdown
+/// label so the closed-state header reflects the current selection. Falls back
+/// to "(use UI font)" for any value that isn't in the bundled list — this
+/// keeps the UI sensible even if the user hand-edited TOML to an unbundled
+/// font name (the consumption sites already fall back to the UI font in that
+/// case, so the visible state stays consistent with the rendered behavior).
+fn font_family_label_for_value(value: &str) -> &'static str {
+    TAB_TITLE_FONT_FAMILY_OPTIONS
+        .iter()
+        .find(|(_, v)| *v == value)
+        .map(|(label, _)| *label)
+        .unwrap_or(TAB_TITLE_FONT_FAMILY_OPTIONS[0].0)
 }
 
 pub fn tabs_page_search_terms() -> &'static [&'static str] {
@@ -341,7 +345,7 @@ pub fn render_tabs_page(
         // and vertical tab rail; metadata/subtitle lines stay on the UI font).
         .with_child(render_subsection_header("Tab Title", appearance))
         .with_child(render_tab_title_font_family_row(state, appearance))
-        .with_child(render_tab_title_font_size_row(state, appearance))
+        .with_child(render_tab_title_font_size_row(state, appearance, app))
         .with_child(render_tab_title_font_weight_row(state, appearance, app))
         .with_child(render_toggle_row(
             "Italic",
@@ -362,25 +366,46 @@ fn render_tab_title_font_family_row(
         .span("Font Family".to_string())
         .build()
         .finish();
-    let editor = ConstrainedBox::new(ChildView::new(&state.title_font_name_editor).finish())
-        .with_width(TAB_TITLE_FONT_NAME_INPUT_WIDTH)
+    let dropdown = ConstrainedBox::new(ChildView::new(&state.title_font_name_dropdown).finish())
+        .with_width(TAB_TITLE_FONT_NAME_DROPDOWN_WIDTH)
         .finish();
-    label_control_row(label, editor)
+    label_control_row(label, dropdown)
 }
 
 fn render_tab_title_font_size_row(
     state: &TabsPageState,
     appearance: &Appearance,
+    app: &AppContext,
 ) -> Box<dyn Element> {
+    let current = (*CortexSettings::as_ref(app).tabs_title_font_size.value())
+        .clamp(TAB_TITLE_FONT_SIZE_MIN, TAB_TITLE_FONT_SIZE_MAX);
     let label = appearance
         .ui_builder()
-        .span("Font Size".to_string())
+        .span(format!("Font Size: {}", current.round() as u32))
         .build()
         .finish();
-    let editor = ConstrainedBox::new(ChildView::new(&state.title_font_size_editor).finish())
-        .with_width(TAB_TITLE_FONT_SIZE_INPUT_WIDTH)
+    let slider = appearance
+        .ui_builder()
+        .slider(state.title_font_size_slider.clone())
+        .with_range(TAB_TITLE_FONT_SIZE_MIN..TAB_TITLE_FONT_SIZE_MAX)
+        .with_default_value(current)
+        .with_style(UiComponentStyles {
+            width: Some(TAB_TITLE_FONT_SIZE_SLIDER_WIDTH),
+            // Vertical margin matches the opacity slider in
+            // `app/src/settings_view/appearance_page.rs` — keeps the row's
+            // baseline aligned with the other label-control rows on this page.
+            margin: Some(Coords::default().top(3.).bottom(3.)),
+            ..Default::default()
+        })
+        .on_drag(|ctx, _, val| {
+            ctx.dispatch_typed_action(CortexSettingsAction::SetTabTitleFontSize(val.round()));
+        })
+        .on_change(|ctx, _, val| {
+            ctx.dispatch_typed_action(CortexSettingsAction::SetTabTitleFontSize(val.round()));
+        })
+        .build()
         .finish();
-    label_control_row(label, editor)
+    label_control_row(label, slider)
 }
 
 fn render_tab_title_font_weight_row(
@@ -399,7 +424,6 @@ fn render_tab_title_font_weight_row(
             state.title_font_weight_mouse_states.clone(),
             vec![
                 RadioButtonItem::text("Normal"),
-                RadioButtonItem::text("Medium"),
                 RadioButtonItem::text("Bold"),
             ],
             state.title_font_weight_radio.clone(),
@@ -420,18 +444,30 @@ fn render_tab_title_font_weight_row(
     label_control_row(label, radio)
 }
 
+/// Two-rung weight radio: Normal / Bold. We dropped the middle "Medium" rung
+/// because the bundled monospace font (Hack) ships only Regular and Bold
+/// variants, so an intermediate weight (Medium / Semibold / either) can only
+/// match Regular or Bold — there's no real third weight to render. Roboto and
+/// Segoe UI do have intermediate variants, but a control whose middle option
+/// silently collapses to one of the outer two on the most-used font choice is
+/// worse than just not offering it. Existing on-disk values for any weight in
+/// the Light–Semibold range round-trip to the Normal radio; Bold and heavier
+/// round-trip to Bold.
 fn weight_to_radio_index(weight: Weight) -> usize {
     match weight {
-        Weight::Thin | Weight::ExtraLight | Weight::Light | Weight::Normal => 0,
-        Weight::Medium | Weight::Semibold => 1,
-        Weight::Bold | Weight::ExtraBold | Weight::Black => 2,
+        Weight::Thin
+        | Weight::ExtraLight
+        | Weight::Light
+        | Weight::Normal
+        | Weight::Medium
+        | Weight::Semibold => 0,
+        Weight::Bold | Weight::ExtraBold | Weight::Black => 1,
     }
 }
 
 fn radio_index_to_weight(index: usize) -> Weight {
     match index {
         0 => Weight::Normal,
-        1 => Weight::Medium,
         _ => Weight::Bold,
     }
 }

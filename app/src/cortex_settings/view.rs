@@ -335,46 +335,6 @@ impl CortexSettingsView {
         }
     }
 
-    /// Persist the Tab Title font family on every keystroke. Empty / unknown
-    /// names fall back to the UI font at the consumption site, so partial
-    /// typed values like "Inte" while typing "Inter" are harmless.
-    pub(crate) fn handle_tab_title_font_name_editor_event(
-        &mut self,
-        _editor: ViewHandle<EditorView>,
-        event: &EditorEvent,
-        ctx: &mut ViewContext<Self>,
-    ) {
-        if matches!(event, EditorEvent::Edited(_)) {
-            let value = self
-                .tabs_state
-                .title_font_name_editor
-                .as_ref(ctx)
-                .buffer_text(ctx);
-            self.set_tab_title_font_name(value, ctx);
-        }
-    }
-
-    /// Parse the Tab Title font size on every keystroke. Non-numeric input is
-    /// ignored (the existing setting value persists); valid f32 input is
-    /// clamped to 8.0..=32.0 by `set_tab_title_font_size`.
-    pub(crate) fn handle_tab_title_font_size_editor_event(
-        &mut self,
-        _editor: ViewHandle<EditorView>,
-        event: &EditorEvent,
-        ctx: &mut ViewContext<Self>,
-    ) {
-        if matches!(event, EditorEvent::Edited(_)) {
-            let buffer = self
-                .tabs_state
-                .title_font_size_editor
-                .as_ref(ctx)
-                .buffer_text(ctx);
-            if let Ok(value) = buffer.trim().parse::<f32>() {
-                self.set_tab_title_font_size(value, ctx);
-            }
-        }
-    }
-
     fn render_search_bar(&self, appearance: &Appearance) -> Box<dyn Element> {
         Container::new(
             Flex::row()
