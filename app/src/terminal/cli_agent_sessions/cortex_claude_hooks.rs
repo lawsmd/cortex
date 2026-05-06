@@ -6,9 +6,11 @@
 //!
 //! Architecture and rationale: see `docs/ai/external-status-injection.md`.
 //!
-//! Windows-first by user direction. Other OSes get a no-op stub until the
-//! macOS/Linux follow-up lands; then the script port + unix-flavored install
-//! drop in here too.
+//! Windows ships the PowerShell + AttachConsole + CONOUT$ flavor;
+//! Unix ships a bash + `printf > /dev/tty` flavor (no ConPTY workaround
+//! needed). Everything else — the OSC 777 wire format, the listener-less
+//! Tier 1 path, `apply_event` semantics — is OS-shared. Other (non-Windows,
+//! non-unix) targets get a no-op stub.
 
 use std::fs;
 use std::io;
@@ -19,12 +21,21 @@ use serde_json::{json, Value};
 #[cfg(target_os = "windows")]
 const HOOK_SCRIPT: &[u8] =
     include_bytes!("../../../assets/cli-agent-hooks/claude/cortex-hook.ps1");
+#[cfg(unix)]
+const HOOK_SCRIPT: &[u8] =
+    include_bytes!("../../../assets/cli-agent-hooks/claude/cortex-hook.sh");
 
 /// Substring embedded in every Cortex-managed hook entry's command string.
 /// Used to find/replace our entries on idempotent re-install and to find/remove
 /// them on uninstall, without depending on a top-level `_cortex_managed`
 /// JSON field that claude might warn about as an unknown setting.
+///
+/// Per-OS so each platform only ever purges its own entries — defensive even
+/// though `~/.claude/settings.json` isn't currently synced across machines.
+#[cfg(target_os = "windows")]
 const COMMAND_MARKER: &str = "cortex-hook.ps1";
+#[cfg(unix)]
+const COMMAND_MARKER: &str = "cortex-hook.sh";
 
 /// The claude hook events we route through. Each gets one or more
 /// Cortex-managed entries in `settings.json.hooks.<event>`. Order matches the
@@ -41,8 +52,9 @@ struct HookSpec {
     /// `None` for events where matchers are irrelevant (UserPromptSubmit,
     /// Stop, SessionEnd).
     matcher: Option<&'static str>,
-    /// First positional arg passed to `cortex-hook.ps1`. The script routes
-    /// purely on this — no message-body parsing.
+    /// First positional arg passed to the hook script (`cortex-hook.ps1`
+    /// on Windows, `cortex-hook.sh` on Unix). The script routes purely on
+    /// this — no message-body parsing.
     arg: &'static str,
 }
 
@@ -110,8 +122,7 @@ impl From<serde_json::Error> for HookInstallError {
 /// every claude detection — the file mutations are no-ops when the on-disk
 /// state already matches.
 ///
-/// On non-Windows OSes this is a no-op stub until the macOS/Linux follow-up
-/// from the plan ships its own script ports.
+/// Targets that aren't Windows or Unix (e.g. wasm, fuchsia) get a no-op stub.
 ///
 /// A future maintenance UI will likely want a `CortexSettings` flag like
 /// `cli_agent_hooks.claude_installed` so it can show "Installed ✓" without
@@ -119,16 +130,14 @@ impl From<serde_json::Error> for HookInstallError {
 /// idempotent on its own, so the flag would be a UX optimization, not a
 /// correctness requirement.
 pub fn ensure_claude_hooks_installed() -> Result<(), HookInstallError> {
-    #[cfg(target_os = "windows")]
+    #[cfg(any(target_os = "windows", unix))]
     {
         let script_path = ensure_hook_script_extracted()?;
         merge_hook_entries(&script_path)?;
         Ok(())
     }
-    #[cfg(not(target_os = "windows"))]
+    #[cfg(not(any(target_os = "windows", unix)))]
     {
-        // Cortex hook bridge is Windows-first per
-        // docs/ai/external-status-injection.md § Phase 5.
         Ok(())
     }
 }
@@ -162,7 +171,7 @@ pub fn uninstall_claude_hooks() -> Result<(), HookInstallError> {
     Ok(())
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows", unix))]
 fn ensure_hook_script_extracted() -> Result<PathBuf, HookInstallError> {
     let dst = hook_script_path()?;
     if let Some(parent) = dst.parent() {
@@ -178,16 +187,46 @@ fn ensure_hook_script_extracted() -> Result<PathBuf, HookInstallError> {
     if needs_write {
         fs::write(&dst, HOOK_SCRIPT)?;
     }
+    // Mark the script executable on Unix. Idempotent — set every time so a
+    // user who chmod'd it back to 0644 by accident gets it fixed on the next
+    // claude detection. PowerShell on Windows runs `.ps1` files via the
+    // explicit `powershell -File` invocation regardless of NTFS exec bits,
+    // so this is unix-only.
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut perms = fs::metadata(&dst)?.permissions();
+        if perms.mode() & 0o111 != 0o111 {
+            perms.set_mode(0o755);
+            fs::set_permissions(&dst, perms)?;
+        }
+    }
     Ok(dst)
 }
 
 /// Stable, lane-independent location: prod and dev both extract here, so a
 /// single absolute path embedded in `settings.json` keeps working when the
 /// user switches between launching prod vs dev Cortex.
-#[cfg(target_os = "windows")]
+///
+/// `dirs::data_local_dir()` resolves to:
+///   - Windows: `%LOCALAPPDATA%`
+///   - macOS:   `~/Library/Application Support`
+///   - Linux:   `$XDG_DATA_HOME` or `~/.local/share`
+///
+/// All three are appropriate per-user, lane-independent locations.
+#[cfg(any(target_os = "windows", unix))]
 fn hook_script_path() -> Result<PathBuf, HookInstallError> {
     let local = dirs::data_local_dir().ok_or(HookInstallError::NoHomeDir)?;
-    Ok(local.join("Cortex").join("hooks").join("claude").join("cortex-hook.ps1"))
+    let filename = if cfg!(target_os = "windows") {
+        "cortex-hook.ps1"
+    } else {
+        "cortex-hook.sh"
+    };
+    Ok(local
+        .join("Cortex")
+        .join("hooks")
+        .join("claude")
+        .join(filename))
 }
 
 fn claude_settings_path() -> Result<PathBuf, HookInstallError> {
@@ -198,7 +237,7 @@ fn claude_settings_path() -> Result<PathBuf, HookInstallError> {
     Ok(home.join(".claude").join("settings.json"))
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows", unix))]
 fn merge_hook_entries(script_path: &Path) -> Result<(), HookInstallError> {
     let settings_path = claude_settings_path()?;
     let mut json: Value = if settings_path.exists() {
@@ -275,13 +314,20 @@ fn merge_hook_entries(script_path: &Path) -> Result<(), HookInstallError> {
     Ok(())
 }
 
-#[cfg(target_os = "windows")]
+#[cfg(any(target_os = "windows", unix))]
 fn build_managed_entry(script_path: &Path, spec: &HookSpec) -> Value {
     let path_str = script_path.to_string_lossy();
-    let command = format!(
-        "powershell -NoProfile -ExecutionPolicy Bypass -File \"{path_str}\" {arg}",
-        arg = spec.arg,
-    );
+    // Explicit interpreter mirrors the Windows pattern (`powershell -File ...`)
+    // and keeps the entry independent of the script's shebang or NTFS/HFS
+    // exec bits.
+    let command = if cfg!(target_os = "windows") {
+        format!(
+            "powershell -NoProfile -ExecutionPolicy Bypass -File \"{path_str}\" {arg}",
+            arg = spec.arg,
+        )
+    } else {
+        format!("/bin/bash \"{path_str}\" {arg}", arg = spec.arg)
+    };
     let mut entry = json!({
         "hooks": [
             {
