@@ -2312,3 +2312,70 @@ fn test_full_grid_clear_resize_then_bounds_to_string_does_not_panic() {
         );
     }
 }
+
+// Regression test for the prod crash on 2026-05-06 (build 20260506.033655),
+// where `render_grid_without_ligatures` panicked with `panic_bounds_check`
+// during a CALayer paint pass. Inside `resize_storage`, `flat_storage`'s
+// column count is updated before `grid_storage`'s, so during a shrink there
+// is a window where `self.grid.columns()` is the OLD (large) value but a
+// scrollback row materialized via `RowIterator` already has length equal to
+// the NEW (small) `flat_storage.columns()`. A renderer iterating
+// `0..self.columns()` and indexing `row[col]` then went out of bounds.
+//
+// We simulate that exact divergent state by directly narrowing
+// `flat_storage` while leaving `grid_storage` untouched, then check the
+// invariants the renderer depends on:
+//   1. `self.columns()` returns the safe minimum, never exceeding the row
+//      length of any row reachable via `self.row(_)`.
+//   2. The render-style loop `for col in 0..self.columns() { &row[col] }`
+//      stays in bounds for both visible (grid_storage) and scrollback
+//      (flat_storage) rows.
+#[test]
+fn columns_returns_safe_min_during_shrink_resize_window() {
+    // 2 visible rows, 5 columns, room for scrollback.
+    let mut grid = GridHandler::new_for_test_with_scroll_limit(2, 5, MAX_SCROLL_LIMIT);
+
+    // Push enough rows that the first ones spill into flat_storage.
+    grid.input_at_cursor("aaaaa");
+    grid.carriage_return();
+    grid.linefeed();
+    grid.input_at_cursor("bbbbb");
+    grid.carriage_return();
+    grid.linefeed();
+    grid.input_at_cursor("ccccc");
+    grid.carriage_return();
+    grid.linefeed();
+    grid.input_at_cursor("ddddd");
+    assert!(grid.history_size() > 0, "test needs scrollback in flat_storage");
+
+    // Force the divergent state that resize_storage briefly creates: narrow
+    // flat_storage while grid_storage stays at the old (wider) width.
+    let new_cols = 3;
+    let old_grid_cols = grid.grid.columns();
+    assert!(new_cols < old_grid_cols);
+    grid.flat_storage.set_columns(new_cols);
+
+    // GridHandler::columns() must report the safe minimum, not the stale
+    // grid_storage width — otherwise a renderer iterating up to columns()
+    // would walk past the end of a scrollback row.
+    assert_eq!(grid.columns(), new_cols);
+
+    // Walk the rendering loop pattern used by render_grid_*_ligatures and
+    // confirm every indexed cell is in bounds across both storage backends.
+    for row_idx in 0..grid.total_rows() {
+        let Some(row) = grid.row(row_idx) else {
+            continue;
+        };
+        assert!(
+            row.len() >= grid.columns(),
+            "columns() ({}) must not exceed row.len() ({}) at row {}",
+            grid.columns(),
+            row.len(),
+            row_idx,
+        );
+        for col in 0..grid.columns() {
+            // This index is what was panicking pre-fix.
+            let _ = &row[col];
+        }
+    }
+}

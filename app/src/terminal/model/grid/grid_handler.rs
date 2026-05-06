@@ -2749,7 +2749,18 @@ impl Dimensions for GridHandler {
 
     #[inline]
     fn columns(&self) -> usize {
-        self.grid.columns()
+        // `flat_storage` and `grid` track column counts independently and are
+        // updated in two steps inside `resize_storage`: `flat_storage`
+        // narrows first (`set_columns` at the new width), then `grid`
+        // catches up via `set_stored_rows`. During a shrink, callers that
+        // iterate `0..self.columns()` and index a scrollback row pulled
+        // through `self.row(_)` would see `row.len() == flat_storage.columns()`
+        // (small) but `self.grid.columns()` (large) — and panic on the
+        // out-of-range index. Returning the minimum keeps that loop in
+        // bounds during the transient. The clamps in
+        // `grid_renderer::render_grid_{with,without}_ligatures` are
+        // belt-and-suspenders for per-row variability.
+        self.grid.columns().min(self.flat_storage.columns())
     }
 }
 
