@@ -19,6 +19,7 @@ distinct entries so this script doesn't have to discriminate subtypes:
     powershell -NoProfile -File cortex-hook.ps1 permission_request
     powershell -NoProfile -File cortex-hook.ps1 idle_prompt
     powershell -NoProfile -File cortex-hook.ps1 session_end
+    powershell -NoProfile -File cortex-hook.ps1 pre_compact
 
 Claude pipes the rest of the event payload (session_id, transcript path,
 event-specific fields) as JSON over stdin.
@@ -141,6 +142,23 @@ switch -Regex ($eventName) {
         # consumer can react if needed.
         $cortexEvent = 'idle_prompt'
         if ($stdinObj -and $stdinObj.message) { $payload['summary'] = [string]$stdinObj.message }
+        break
+    }
+    '^pre_compact$' {
+        # `/compact` (manual) and auto-compaction. Map to prompt_submit so
+        # apply_event flips status to InProgress for the duration of the
+        # compaction API call. There's no PostCompact hook in current claude;
+        # the running animation clears on the next Stop or UserPromptSubmit.
+        # We do NOT block compaction (no `decision: "block"` JSON on stdout —
+        # we exit 0 with stdout empty; the OSC 777 goes to the TTY directly).
+        $cortexEvent = 'prompt_submit'
+        if ($stdinObj -and $stdinObj.trigger) {
+            # Surface "manual" vs "auto" for the discovery log; not load-
+            # bearing for the Rust state machine but useful for grepping.
+            $payload['query'] = ('compact ({0})' -f [string]$stdinObj.trigger)
+        } else {
+            $payload['query'] = 'compact'
+        }
         break
     }
     '^notification$' {

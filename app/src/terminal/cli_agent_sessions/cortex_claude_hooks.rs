@@ -41,7 +41,15 @@ const COMMAND_MARKER: &str = "cortex-hook.sh";
 /// Cortex-managed entries in `settings.json.hooks.<event>`. Order matches the
 /// order claude fires them across a turn. Used by the uninstall path to
 /// purge every slot we ever touch.
-const HOOK_EVENTS: &[&str] = &["UserPromptSubmit", "Notification", "Stop", "SessionEnd"];
+///
+/// `PreCompact` is included so `/compact` (and auto-compaction) lights up the
+/// Tier 1 "task running" comet. There is no documented `PostCompact` hook in
+/// the current claude version, so the running animation is cleared by whatever
+/// claude fires next — typically the next `Stop` (compaction is a turn) or
+/// `UserPromptSubmit`. If `PostCompact` appears in a future claude version,
+/// add it here mapped to `cortexEvent: 'stop'`.
+const HOOK_EVENTS: &[&str] =
+    &["UserPromptSubmit", "Notification", "Stop", "SessionEnd", "PreCompact"];
 
 /// One hook entry to install. `Notification` is split by `matcher` into the
 /// two subtypes claude actually exposes (`permission_prompt`, `idle_prompt`)
@@ -83,6 +91,15 @@ const HOOK_SPECS: &[HookSpec] = &[
         event: "SessionEnd",
         matcher: None,
         arg: "session_end",
+    },
+    // `/compact` and auto-compaction. Routed to `prompt_submit` in the hook
+    // scripts so it reuses apply_event's PromptSubmit→InProgress transition;
+    // the Tier 1 classifier then shows the comet for the duration of the
+    // (often minutes-long) compaction call.
+    HookSpec {
+        event: "PreCompact",
+        matcher: None,
+        arg: "pre_compact",
     },
 ];
 
