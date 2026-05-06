@@ -10,8 +10,23 @@ use warp_core::{
 
 // Simple wrapper around warp::run() for Warp OSS builds.
 fn main() -> Result<()> {
-    // Distinct identity for debug builds so prod + dev coexist without sharing state.
-    let (app_name, logfile_name) = if cfg!(debug_assertions) {
+    // macOS-only: distinct AppId for debug builds so prod + dev coexist
+    // without sharing the macOS Keychain entry (which would prompt on every
+    // dev launch as the bundle identity changed). The logfile name forks for
+    // the same reason — keeps prod's `warp-oss.log` and dev's
+    // `warp-oss-dev.log` independent on macOS.
+    //
+    // Cross-platform data isolation between prod and dev (separate
+    // `~/.warp-oss[-dev]/`, separate `WarpOss[-dev]` AppData paths, separate
+    // SQLite, etc.) is handled *separately* by the `WARP_DATA_PROFILE=dev`
+    // env var that both `scripts/launch-cortex-dev.sh` (macOS) and
+    // `scripts/launch-cortex-dev.bat` (Windows) export. That env var is
+    // honored only in debug builds and forks the home-dir + ProjectDirs
+    // paths automatically — see `crates/warp_core/src/paths.rs` and
+    // `crates/warp_core/src/channel/state.rs::data_profile`. Linux's
+    // `script/run` will pick up the same mechanism if a launcher ever
+    // exports `WARP_DATA_PROFILE=dev` there.
+    let (app_name, logfile_name) = if cfg!(all(target_os = "macos", debug_assertions)) {
         ("WarpOssDev", "warp-oss-dev.log")
     } else {
         ("WarpOss", "warp-oss.log")

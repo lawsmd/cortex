@@ -1,21 +1,47 @@
 #!/usr/bin/env bash
-# Cortex prod installer (macOS).
-# Builds a release-mode warp-oss bundle and copies it to a stable location at
-#   ~/Applications/Cortex.app
-# decoupled from target/, so dev rebuilds (./scripts/launch-cortex-dev.sh) and
-# Cloud agents never touch the daily-driver bundle. Run this whenever you want
-# prod to catch up to main.
+# Cortex prod installer.
+#
+# - macOS: builds a release-mode warp-oss bundle and copies it to
+#     ~/Applications/Cortex.app
+#   decoupled from target/, so dev rebuilds (./scripts/launch-cortex-dev.sh) and
+#   Cloud agents never touch the daily-driver bundle. Run this whenever you want
+#   prod to catch up to main.
+# - Windows (Git Bash / MSYS / Cygwin): delegates to install-cortex-prod.cmd,
+#   which does the equivalent release-build + EXE copy to
+#   %LOCALAPPDATA%\Cortex\Cortex.exe. This route exists because typing
+#   `scripts\install-cortex-prod.cmd` from bash would have bash eat the
+#   backslash as a non-special escape, turning the path into
+#   `scriptsinstall-cortex-prod.cmd` and failing with "command not found".
 #
 # Pair with:
-#   scripts/launch-cortex.sh        - daily-driver smart launcher (Raycast)
-#   scripts/launch-cortex-dev.sh    - live-rebuild dev loop
+#   scripts/launch-cortex.sh        - macOS daily-driver smart launcher (Raycast)
+#   scripts/launch-cortex-dev.sh    - macOS live-rebuild dev loop
+#   scripts\launch-cortex.cmd       - Windows daily-driver launcher (taskbar)
+#   scripts\launch-cortex-dev.bat   - Windows live-rebuild dev loop
 #
-# See docs/development/macos-prod-dev.md for the full two-lane workflow.
+# See docs/development/macos-prod-dev.md (macOS) or
+# docs/development/windows-prod-dev.md (Windows) for the full two-lane workflow.
 
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
+
+# --- Windows-via-bash short-circuit. When invoked from Cortex's own Git Bash
+#     terminal (or any MSYS/Cygwin shell), hand off to install-cortex-prod.cmd
+#     so the user's daily-driver shell can run prod rebuilds without flipping
+#     to a separate cmd/Windows Terminal window. The cmd script does the
+#     real work (cargo build --release + EXE copy + asset copy + build stamp);
+#     this branch only routes the call.
+#
+#     `cmd //c` is MSYS's idiom for `cmd /c`: the leading slash is escaped to
+#     avoid MSYS's auto-translation of /c into a path. We pass the .cmd as a
+#     forward-slash relative path; cmd accepts that just fine.
+case "${OSTYPE:-}" in
+    msys*|cygwin*|win*)
+        exec cmd //c scripts/install-cortex-prod.cmd "$@"
+        ;;
+esac
 
 # --- Preflight: catch the two fresh-machine deps most likely to be missing
 #     and surface a clear pointer instead of letting the build fail mid-flight

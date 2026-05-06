@@ -9,10 +9,11 @@
 # made in dev appear in prod after prod restarts.
 #
 # Each launch captures the build's combined output to
-#   <repo>/.cortex-logs/cortex-<TS>.log
-# so Claude Code agents can read the current/last session log without copy/
-# pasting from the terminal. See docs/logging/dev-loop-capture.md for the
-# full agent-readable convention.
+#   <repo>/.cortex-logs/cortex-dev-<TS>.log
+# (sibling prefix to prod-build logs `cortex-prod-*.log` written by the
+# Windows installer; macOS prod doesn't tee yet) so Claude Code agents can
+# read the current/last session log without copy/pasting from the terminal.
+# See docs/logging/dev-loop-capture.md for the full agent-readable convention.
 
 set -euo pipefail
 
@@ -71,14 +72,16 @@ DEV_ICNS="$SUPPORT_DIR/Cortex-Dev.icns"
 LOGS_DIR="$REPO_ROOT/.cortex-logs"
 mkdir -p "$LOGS_DIR"
 LOG_TS="$(date +%Y-%m-%d-%H%M%S)"
-LOG_PATH="$LOGS_DIR/cortex-$LOG_TS.log"
+LOG_PATH="$LOGS_DIR/cortex-dev-$LOG_TS.log"
 
 # --- Retention: keep only the 10 newest dev-session logs. Done at launch
 #     start (not exit) so a crash on the previous run can't postpone cleanup.
 #     `ls -t` orders by mtime descending; tail -n +11 yields everything past
 #     the 10th newest. xargs -r is GNU-only; on macOS BSD xargs we substitute
-#     with a guard to avoid running rm with no args.
-old_logs="$(ls -t "$LOGS_DIR"/cortex-*.log 2>/dev/null | tail -n +11 || true)"
+#     with a guard to avoid running rm with no args. Glob narrowed to the
+#     `cortex-dev-` prefix so future prod-build logs (`cortex-prod-*.log`)
+#     rotate on a separate counter.
+old_logs="$(ls -t "$LOGS_DIR"/cortex-dev-*.log 2>/dev/null | tail -n +11 || true)"
 if [[ -n "$old_logs" ]]; then
     # shellcheck disable=SC2086
     rm -f $old_logs
