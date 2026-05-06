@@ -48,7 +48,11 @@ REM     Mirrors scripts/launch-cortex-dev.sh:122-127 on macOS.
 set WARP_DATA_PROFILE=dev
 
 title Cortex Dev (rebuild + launch)
-cd /d C:\Users\Michael\cortex
+REM cd to repo root via the script's own location so this works regardless
+REM of where Cortex is installed (or after a Windows reinstall onto a
+REM different drive). %~dp0 is this script's directory with a trailing
+REM backslash; cd resolves the .. immediately.
+cd /d "%~dp0.."
 
 REM --- Setup capture path ---
 REM     Why this looks weird: capturing PowerShell stdout via `for /f` is fragile

@@ -8,7 +8,7 @@
 #
 # Usage (one-time, idempotent):
 #   1. Right-click PowerShell → "Run as administrator"
-#   2. cd C:\Users\Michael\cortex
+#   2. cd <your cortex repo root>
 #   3. powershell -NoProfile -ExecutionPolicy Bypass -File scripts\setup-defender-exclusions.ps1
 #
 # Re-run any time. Listing/adding exclusions both require admin.
