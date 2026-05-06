@@ -40,6 +40,13 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 MASTER_PNG = REPO_ROOT / "app" / "assets" / "cortex" / "CortexIcon.png"
 MASTER_ICO = REPO_ROOT / "app" / "channels" / "oss" / "icon" / "no-padding" / "icon.ico"
 
+# In-tree dev .ico that app/build.rs embeds into warp-oss.exe when
+# WARP_APP_NAME=Cortex Dev (i.e. the dev lane). Sits next to the prod
+# icon.ico in the channel build.rs actually reads from. CARGO_BIN_NAME isn't
+# set during build-script execution, so build.rs falls back to "local" --
+# that's why this lives under channels/local/, not channels/oss/.
+IN_TREE_DEV_ICO = REPO_ROOT / "app" / "channels" / "local" / "icon" / "no-padding" / "icon-dev.ico"
+
 ICO_SIZES = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
 
 
@@ -85,6 +92,10 @@ def main() -> int:
     _core.build_dev_master(MASTER_PNG, dev_png, find_bold_font)
     dev_ico = install_dir / "Cortex-Dev.ico"
     png_to_multires_ico(dev_png, dev_ico)
+
+    print()
+    print("=== In-tree dev .ico (for app/build.rs to embed in warp-oss.exe dev builds) ===")
+    png_to_multires_ico(dev_png, IN_TREE_DEV_ICO)
 
     print()
     print("Done. Use these in shortcut .lnk files via the IconLocation field.")

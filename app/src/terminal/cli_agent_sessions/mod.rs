@@ -2,6 +2,12 @@ pub mod event;
 pub mod listener;
 #[cfg(not(target_family = "wasm"))]
 pub(crate) mod plugin_manager;
+// Cortex-only: bridge for vanilla `clauded` (no warp@claude-code-warp plugin).
+// Installs a hook script into ~/.claude/settings.json that translates claude's
+// hook lifecycle events to OSC 777 messages this model already understands.
+// See docs/ai/external-status-injection.md.
+#[cfg(not(target_family = "wasm"))]
+pub mod cortex_claude_hooks;
 
 use std::collections::{HashMap, HashSet};
 
@@ -186,7 +192,19 @@ impl CLIAgentSession {
                 CLIAgentSessionStatus::InProgress
             }
             CLIAgentEventType::Stop => {
-                self.session_context.query = event.payload.query.clone();
+                // Only update query if the Stop event explicitly carries one;
+                // otherwise preserve the prior PromptSubmit's query. Hook-
+                // bridged Stop events (cortex-hook.ps1) don't include a query
+                // field — claude's Stop hook input doesn't surface it. The
+                // tab-animation Tier 1 gate at app/src/tab.rs reads
+                // session_context.query.is_some() as "the agent has been
+                // prompted at least once" and uses it to discriminate against
+                // bare command-detection sessions; clobbering it to None here
+                // closes that gate after a successful turn-end and lets the
+                // title heuristic falsely report Running indefinitely.
+                if event.payload.query.is_some() {
+                    self.session_context.query = event.payload.query.clone();
+                }
                 self.session_context.response = event.payload.response.clone();
                 self.clear_permission_scoped_state();
                 CLIAgentSessionStatus::Success
@@ -291,6 +309,14 @@ pub struct CLIAgentSessionsModel {
     /// Tracks (agent, remote_host) pairs where an auto plugin operation (install or update) has failed.
     /// Shared across all views so failure in one tab is reflected everywhere.
     plugin_auto_failures: HashSet<(CLIAgent, Option<String>)>,
+    /// Terminal views whose CLI-agent session ended on a non-active tab and
+    /// that haven't been viewed since. Drives the AttentionNeeded breath
+    /// pulse on completed-while-backgrounded panes; Tier 1's classifier
+    /// (`app/src/tab.rs`) consults [`Self::is_attention_pending`] to upgrade
+    /// `Success → AttentionNeeded` when set. Cleared by `mark_session_viewed`
+    /// (called from the workspace's `PaneFocused` handler) and by a fresh
+    /// `PromptSubmit` (the user re-engaged so the prior turn is acknowledged).
+    attention_pending: HashSet<EntityId>,
 }
 
 impl Entity for CLIAgentSessionsModel {
@@ -304,11 +330,36 @@ impl CLIAgentSessionsModel {
         Self {
             sessions: HashMap::new(),
             plugin_auto_failures: HashSet::new(),
+            attention_pending: HashSet::new(),
         }
     }
 
     pub fn session(&self, terminal_view_id: EntityId) -> Option<&CLIAgentSession> {
         self.sessions.get(&terminal_view_id)
+    }
+
+    /// Whether this session's most recent turn ended without the user having
+    /// viewed the source pane since. Set on `Stop`/`SessionEnd` and cleared
+    /// on `PromptSubmit` or via [`Self::mark_session_viewed`]. The Tier 1
+    /// tab-animation classifier reads this to fire the AttentionNeeded breath
+    /// pulse on completed-while-backgrounded panes.
+    pub fn is_attention_pending(&self, terminal_view_id: EntityId) -> bool {
+        self.attention_pending.contains(&terminal_view_id)
+    }
+
+    /// Clears the attention-pending flag for this session, if set. Called
+    /// from the workspace's `PaneFocused` handler — reaching the pane is the
+    /// "I've seen it" signal that satisfies the user-chosen
+    /// pulse-until-viewed semantics. Notifies subscribers so the tab bar
+    /// re-paints and drops the breath wash on the next frame.
+    pub fn mark_session_viewed(
+        &mut self,
+        terminal_view_id: EntityId,
+        ctx: &mut ModelContext<Self>,
+    ) {
+        if self.attention_pending.remove(&terminal_view_id) {
+            ctx.notify();
+        }
     }
 
     /// Returns `true` if the rich input editor is currently open for this terminal.
@@ -342,6 +393,10 @@ impl CLIAgentSessionsModel {
         listener: ModelHandle<CLIAgentSessionListener>,
         ctx: &mut ModelContext<Self>,
     ) {
+        log::info!(
+            target: "cli_agent_pipeline",
+            "L5 register_listener terminal_view_id={terminal_view_id:?} agent={agent:?}"
+        );
         if let Some(session) = self
             .sessions
             .get_mut(&terminal_view_id)
@@ -385,6 +440,7 @@ impl CLIAgentSessionsModel {
 
     pub fn remove_session(&mut self, terminal_view_id: EntityId, ctx: &mut ModelContext<Self>) {
         if let Some(session) = self.sessions.remove(&terminal_view_id) {
+            self.attention_pending.remove(&terminal_view_id);
             ctx.emit(CLIAgentSessionsModelEvent::Ended {
                 terminal_view_id,
                 agent: session.agent,
@@ -412,6 +468,20 @@ impl CLIAgentSessionsModel {
                 status: new_status,
                 session_context: Box::new(session.session_context.clone()),
             });
+        }
+
+        // Maintain the pulse-until-viewed set independently of status so
+        // tests/state-machine consumers don't have to thread it through
+        // CLIAgentSession itself. Stop arms the pulse; PromptSubmit clears
+        // it (a fresh turn means the prior result has been acknowledged).
+        match event_type {
+            CLIAgentEventType::Stop => {
+                self.attention_pending.insert(terminal_view_id);
+            }
+            CLIAgentEventType::PromptSubmit => {
+                self.attention_pending.remove(&terminal_view_id);
+            }
+            _ => {}
         }
 
         if matches!(

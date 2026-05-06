@@ -34,6 +34,10 @@ fn main() -> Result<()> {
     // asset edits trigger re-embedding.
     println!("cargo:rerun-if-changed=assets/bundled");
     println!("cargo:rerun-if-changed=assets/cortex");
+    // Cortex: hook scripts are include_bytes!'d into the binary and
+    // extracted to %LOCALAPPDATA%\Cortex\hooks\ at install time. Watch the
+    // dir so script edits invalidate the embed.
+    println!("cargo:rerun-if-changed=assets/cli-agent-hooks");
 
     let target_os = env::var("CARGO_CFG_TARGET_OS")?;
     let target_family = env::var("CARGO_CFG_TARGET_FAMILY")?;
@@ -507,21 +511,51 @@ fn embed_resource_file(target_dir: &Path) {
     let app_name = env::var("WARP_APP_NAME").unwrap_or("Warp".to_owned());
     let bin_name = env::var("CARGO_BIN_NAME").unwrap_or("local".to_owned());
 
-    let icon_path = Path::new("channels")
+    let icon_dir = Path::new("channels")
         .join(bin_name)
         .join("icon")
-        .join("no-padding")
-        .join("icon.ico");
+        .join("no-padding");
+    let prod_icon_path = icon_dir.join("icon.ico");
+    let dev_icon_path = icon_dir.join("icon-dev.ico");
 
-    // Cortex: re-run the build script when the channel icon changes so icon swaps
-    // don't require `cargo clean -p warp`. See docs/branding.md "Why two channels?"
-    // for why bin_name resolves to "local" during build-script execution.
-    println!("cargo:rerun-if-changed={}", icon_path.display());
+    // Cortex: re-run the build script when either icon variant changes so icon
+    // swaps don't require `cargo clean -p warp`. See docs/branding.md "Why two
+    // channels?" for why bin_name resolves to "local" during build-script execution.
+    println!("cargo:rerun-if-changed={}", prod_icon_path.display());
+    println!("cargo:rerun-if-changed={}", dev_icon_path.display());
     // Cortex: re-run when WARP_APP_NAME flips so prod ("Cortex") and dev
     // ("Cortex Dev") builds get distinct embedded resources without `cargo clean`.
     println!("cargo:rerun-if-env-changed=WARP_APP_NAME");
 
-    copy_if_changed(&icon_path, &target_dir.join("icon.ico"), "icon.ico");
+    // Cortex: dev lane (launch-cortex-dev.bat exports WARP_APP_NAME="Cortex Dev")
+    // gets the "DEV"-overlay variant icon embedded into warp-oss.exe. Without
+    // this, dev's running taskbar window inherits prod's icon via Windows's
+    // AUMID-based shortcut association. The companion piece is the runtime
+    // AUMID suffix in app/src/lib.rs's Windows block. See
+    // docs/development/windows-prod-dev.md "Distinct dev identity".
+    let icon_source = if app_name == "Cortex Dev" {
+        if dev_icon_path.exists() {
+            &dev_icon_path
+        } else {
+            println!(
+                "cargo:warning=WARP_APP_NAME=\"Cortex Dev\" but {} is missing; \
+                 embedding prod icon. Run scripts/build-shortcut-icons.py to regenerate.",
+                dev_icon_path.display()
+            );
+            &prod_icon_path
+        }
+    } else {
+        &prod_icon_path
+    };
+    // Plain fs::copy (not copy_if_changed) -- when WARP_APP_NAME flips between
+    // lanes the *source* path changes but the *destination* is always
+    // target_dir/icon.ico. copy_if_changed's mtime gate would skip the copy
+    // when dst is newer than src (the common case after a recent prod build),
+    // silently leaving the wrong icon embedded. The .ico is ~70 KB, so copying
+    // it on every build script run is cheap.
+    let icon_dst = target_dir.join("icon.ico");
+    fs::copy(icon_source, &icon_dst)
+        .unwrap_or_else(|err| panic!("Could not copy {icon_source:?} to {icon_dst:?}: {err:#}"));
 
     let resource_file_path = target_dir.join("resource.rc");
     let mut rcfile = fs::File::create(&resource_file_path).unwrap();

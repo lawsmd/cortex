@@ -3,6 +3,7 @@
 
 mod ai;
 mod alloc;
+mod animation;
 mod antivirus;
 #[cfg(target_os = "macos")]
 mod app_menus;
@@ -999,7 +1000,18 @@ fn run_internal(mut launch_mode: LaunchMode) -> Result<()> {
     #[cfg(target_os = "windows")]
     {
         use warpui::platform::windows::AppBuilderExt;
-        app_builder.set_app_user_model_id(ChannelState::app_id().to_string());
+        // Cortex: debug builds (the dev lane) suffix the AUMID with ".Dev" so
+        // Windows's taskbar grouping treats dev's running window as a distinct
+        // app from prod -- without this, both lanes share dev.warp.WarpOss and
+        // dev's window inherits prod's pinned-shortcut icon. AppId itself is
+        // deliberately *not* changed (see app/src/bin/oss.rs's macOS-only
+        // debug carve-out comment) so ~/.warp-oss\ + AppData stay shared.
+        let aumid = if cfg!(debug_assertions) {
+            format!("{}.Dev", ChannelState::app_id())
+        } else {
+            ChannelState::app_id().to_string()
+        };
+        app_builder.set_app_user_model_id(aumid);
 
         // Only use DXC for DirectX shader compilation if we're not running in a Parallels VM
         // Parallels VMs can have issues with DXC shader compilation
@@ -1184,6 +1196,7 @@ pub(crate) fn initialize_app(
     });
 
     ctx.add_singleton_model(|_ctx| GPUState::new());
+    ctx.add_singleton_model(|_ctx| crate::animation::AnimationClock::new());
 
     PrivacySettings::register_singleton(ctx);
 
@@ -1764,6 +1777,21 @@ pub(crate) fn initialize_app(
     });
     ctx.add_singleton_model(move |_| RestoredAgentConversations::new(multi_agent_conversations));
     ctx.add_singleton_model(|_| CLIAgentSessionsModel::new());
+    // Cortex: install the claude hook bridge once per app launch. Idempotent
+    // — no-ops when already installed. Runs at startup (not on first claude
+    // detection) because the gating triggers on `ClaudeCodePluginManager::install`
+    // and the notifications-discovery banner only fire for first-time users;
+    // existing users (with plugin installed and notifications already enabled)
+    // would otherwise never hit either path. See
+    // docs/ai/external-status-injection.md.
+    #[cfg(not(target_family = "wasm"))]
+    std::thread::spawn(|| {
+        if let Err(err) =
+            terminal::cli_agent_sessions::cortex_claude_hooks::ensure_claude_hooks_installed()
+        {
+            log::warn!("Cortex claude-hook startup install failed: {err}");
+        }
+    });
     // ActiveAgentViewsModel is used to track active agent conversations and notify listeners when they change.
     ctx.add_singleton_model(|_| ActiveAgentViewsModel::new());
     ctx.add_singleton_model(AgentNotificationsModel::new);

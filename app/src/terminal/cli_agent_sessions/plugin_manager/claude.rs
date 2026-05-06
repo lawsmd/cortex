@@ -81,6 +81,14 @@ impl CliAgentPluginManager for ClaudeCodePluginManager {
         .await?;
         self.run_logged(&["plugin", "install", PLUGIN_KEY], &mut log)
             .await?;
+        // Cortex: also install the hook bridge for vanilla `clauded`. The
+        // plugin path covers the `claude` (with-plugin) flow; the hook covers
+        // `clauded` / `claude --dangerously-skip-permissions` which don't load
+        // plugins. Both can coexist — duplicate Stop events are idempotent.
+        // Failures here don't fail the plugin install; we log and move on.
+        if let Err(err) = super::super::cortex_claude_hooks::ensure_claude_hooks_installed() {
+            log::warn!("Cortex claude-hook install failed: {err}");
+        }
         Ok(())
     }
 
