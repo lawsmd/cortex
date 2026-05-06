@@ -17,6 +17,7 @@
 #     /bin/bash cortex-hook.sh permission_request
 #     /bin/bash cortex-hook.sh idle_prompt
 #     /bin/bash cortex-hook.sh session_end
+#     /bin/bash cortex-hook.sh pre_compact
 #
 # Claude pipes the rest of the event payload (session_id, transcript path,
 # event-specific fields) as JSON over stdin.
@@ -106,6 +107,14 @@ mapping = {
     "sessionend":         "stop",
     "permission_request": "permission_request",
     "idle_prompt":        "idle_prompt",
+    # `/compact` (manual) and auto-compaction. Reuses prompt_submit so
+    # apply_event flips status to InProgress for the duration of the
+    # compaction call. There is no PostCompact hook in current claude;
+    # the next Stop or UserPromptSubmit clears the running animation.
+    # We do NOT block compaction — exit 0 with empty stdout (the OSC 777
+    # goes to /dev/tty, never to claude'"'"'s stdin/stdout).
+    "pre_compact":        "prompt_submit",
+    "precompact":         "prompt_submit",
 }
 
 # Prefer the positional arg (set by ~/.claude/settings.json). Fall back to
@@ -146,6 +155,12 @@ envelope = {
 # Per-event payload — FLAT, not nested under a `payload` key.
 if cortex_event == "prompt_submit" and obj.get("prompt"):
     envelope["query"] = str(obj["prompt"])
+elif cortex_event == "prompt_submit" and event_name in ("pre_compact", "precompact"):
+    # PreCompact has no `prompt` field but does carry `trigger` ("manual"
+    # vs "auto"). Surface it as the query so the discovery log + any
+    # downstream consumer can see what kicked off the compaction.
+    trigger = obj.get("trigger")
+    envelope["query"] = "compact ({})".format(trigger) if trigger else "compact"
 elif cortex_event == "permission_request":
     if obj.get("message"):
         envelope["summary"] = str(obj["message"])
