@@ -12451,16 +12451,32 @@ impl TerminalView {
         body: &str,
         ctx: &mut ViewContext<Self>,
     ) {
+        log::info!(
+            target: "cli_agent_pipeline",
+            "L3 handle_cli_agent_notification view_id={:?} title={title:?} body_len={}",
+            self.view_id,
+            body.len()
+        );
         let Some(notification) = parse_event(title, body) else {
+            log::info!(
+                target: "cli_agent_pipeline",
+                "L3a parse_event returned None (title or body didn't match the warp://cli-agent schema)"
+            );
             return;
         };
 
         if !is_agent_supported(&notification.agent) {
             return;
         }
-        if !self.register_cli_agent_listener_from_event(&notification, ctx) {
-            return;
-        }
+        // register_cli_agent_listener_from_event creates the session +
+        // listener on the first event, and returns false on subsequent
+        // events because has_listener=true. Originally, the caller
+        // early-returned in that case — which silently dropped Stop /
+        // PermissionRequest / etc. on the floor, since update_from_event
+        // is what applies the event to the session's status state machine.
+        // Don't early-return: always run update_from_event so the status
+        // tracks the event stream.
+        let _ = self.register_cli_agent_listener_from_event(&notification, ctx);
 
         CLIAgentSessionsModel::handle(ctx).update(ctx, |sessions_model, ctx| {
             sessions_model.update_from_event(self.view_id, &notification, ctx);
@@ -12482,13 +12498,29 @@ impl TerminalView {
         notification: &CLIAgentEvent,
         ctx: &mut ViewContext<Self>,
     ) -> bool {
+        log::info!(
+            target: "cli_agent_pipeline",
+            "L4 register_cli_agent_listener_from_event view_id={:?} agent={:?} event={:?}",
+            self.view_id,
+            notification.agent,
+            notification.event
+        );
         if !is_agent_supported(&notification.agent) {
+            log::info!(
+                target: "cli_agent_pipeline",
+                "L4a is_agent_supported returned false for agent={:?}",
+                notification.agent
+            );
             return false;
         }
         let has_listener = CLIAgentSessionsModel::as_ref(ctx)
             .session(self.view_id)
             .is_some_and(|s| s.listener.is_some());
         if has_listener {
+            log::info!(
+                target: "cli_agent_pipeline",
+                "L4b has_listener=true; skipping registration"
+            );
             return false;
         }
 
@@ -21093,7 +21125,10 @@ impl TerminalView {
         ctx: &mut ViewContext<Self>,
     ) {
         let Some(active_filter_editor_block_index) = self.active_filter_editor_block_index else {
-            log::warn!(
+            // cortex: downgraded from warn — startup race; the filter editor
+            // index isn't set until the editor block is first focused, but
+            // restore-time actions can fire update-query before that happens.
+            log::debug!(
                 "Tried to update block filter query without active_filter_editor_block_index set"
             );
             return;
@@ -22229,7 +22264,10 @@ impl TerminalView {
 
         let session_id = self.active_block_session_id()?;
         let Some(session) = self.sessions.as_ref(ctx).get(session_id) else {
-            log::warn!("Expected to have session for session ID {session_id:?}, but doesn't exist");
+            // cortex: downgraded from warn — startup race; sessions register
+            // after the first render pass, so this fires several times during
+            // workspace restore and self-heals on the next pass.
+            log::debug!("Expected to have session for session ID {session_id:?}, but doesn't exist");
             return None;
         };
         if !session.is_local() {
@@ -24072,6 +24110,14 @@ impl TerminalView {
                         log::error!("Error persisting notifications setting: {e}");
                     }
                 });
+
+                // Cortex: this consent moment is also when we install the
+                // claude hook bridge for vanilla `clauded` users. Idempotent
+                // — if the plugin manager already ran, this is a no-op.
+                // Failure here doesn't fail the notification flow.
+                if let Err(err) = crate::terminal::cli_agent_sessions::cortex_claude_hooks::ensure_claude_hooks_installed() {
+                    log::warn!("Cortex claude-hook install (from notifications banner) failed: {err}");
+                }
 
                 // On Linux, immediately mark the request permission status as accepted since there's no concept of
                 // requesting desktop notification permissions.

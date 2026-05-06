@@ -35,7 +35,11 @@ use crate::pane_group::TerminalPane;
 use crate::pane_group::{
     CodePane, NotebookPane, PaneGroup, PaneId, TabBarHoverIndex, WorkflowPane,
 };
-use crate::tab::{tab_position_id, SelectedTabColor, TabData};
+use crate::animation::elements::row_glow_breath::RowGlowBreathElement;
+use crate::animation::elements::traveling_comet::TravelingCometElement;
+use crate::tab::{
+    aggregated_tab_animation, tab_position_id, SelectedTabColor, TabAnimationKind, TabData,
+};
 use crate::terminal::session_settings::SessionSettings;
 use crate::terminal::TerminalView;
 use crate::themes::theme::Fill as ThemeFill;
@@ -98,6 +102,74 @@ const VERTICAL_TAB_UNSELECTED_BORDER_GRAY: ColorU = ColorU {
     b: 140,
     a: 255,
 };
+
+/// Resolve a pane's color into a single `ColorU` for the comet outline. Saved
+/// projects use their accent color; unsaved projects fall back to the same
+/// 140-gray that draws the unselected row border, so the comet visually
+/// belongs to the row in both cases.
+fn comet_outline_color(pane_color: Option<&ThemeFill>) -> ColorU {
+    match pane_color {
+        Some(ThemeFill::Solid(c)) => *c,
+        _ => VERTICAL_TAB_UNSELECTED_BORDER_GRAY,
+    }
+}
+
+/// Resolve a pane's color into the un-lightened tint for the AttentionNeeded
+/// breath frame. Same sourcing as the comet outline (saved → project color,
+/// unsaved → 140-gray) so the two animations read as part of the same tab
+/// identity. The element lightens the result internally before painting,
+/// which is what keeps the frame visible when it's drawn over a row whose
+/// fill is already the project color (selected saved-project tabs).
+fn breath_frame_tint(pane_color: Option<&ThemeFill>) -> ColorU {
+    comet_outline_color(pane_color)
+}
+
+/// If the tab has an active animation state, wrap `content` in a `Stack` so
+/// the appropriate animation element renders alongside it. Returns `content`
+/// unchanged when there's no animation to layer.
+///
+/// `Running` overlays the comet on top of the content; `AttentionNeeded`
+/// puts the breath wash underneath. The two states are mutually exclusive
+/// at the aggregator level — see `aggregated_tab_animation` in `tab.rs`.
+///
+/// The animation element is added as a *positioned* child anchored to the
+/// row's top-left and bounded to the parent's size. This is required: the
+/// Flex column above us passes an unbounded y-constraint, and a regular
+/// (non-positioned) child whose `layout` returns `constraint.max` would
+/// poison the Stack with infinite height (see `scene.rs` rect-size assert).
+/// `ParentBySize` makes the Stack size from `content` alone, then re-layouts
+/// the animation element with a tight constraint matching the row's bounds.
+fn wrap_with_agent_animation_layers(
+    content: Box<dyn Element>,
+    tab_animation: Option<TabAnimationKind>,
+    pane_color: Option<&ThemeFill>,
+) -> Box<dyn Element> {
+    let Some(kind) = tab_animation else {
+        return content;
+    };
+    let fill_parent = OffsetPositioning::offset_from_parent(
+        Vector2F::zero(),
+        ParentOffsetBounds::ParentBySize,
+        ParentAnchor::TopLeft,
+        ChildAnchor::TopLeft,
+    );
+    let stack = match kind {
+        TabAnimationKind::Running => {
+            let outline = comet_outline_color(pane_color);
+            Stack::new().with_child(content).with_positioned_child(
+                TravelingCometElement::new(outline).finish(),
+                fill_parent,
+            )
+        }
+        TabAnimationKind::AttentionNeeded => {
+            let tint = breath_frame_tint(pane_color);
+            Stack::new()
+                .with_positioned_child(RowGlowBreathElement::new(tint).finish(), fill_parent)
+                .with_child(content)
+        }
+    };
+    stack.finish()
+}
 
 const PANEL_WIDTH: f32 = 200.;
 pub(super) const MIN_PANEL_WIDTH: f32 = 190.;
@@ -1984,7 +2056,7 @@ fn render_groups(
     let cortex_tab_row_spacing = (*crate::settings::CortexSettings::as_ref(app)
         .tabs_panel_row_spacing
         .value())
-    .clamp(0.0, 16.0);
+    .clamp(8.0, 24.0);
     let mut groups = Flex::column()
         .with_main_axis_size(MainAxisSize::Min)
         .with_cross_axis_alignment(CrossAxisAlignment::Stretch);
@@ -2043,7 +2115,7 @@ fn render_groups(
         groups
     } else {
         Container::new(groups)
-            .with_padding(Padding::uniform(8.).with_top(0.))
+            .with_padding(Padding::uniform(8.).with_top(6.))
             .finish()
     }
 }
@@ -2085,6 +2157,10 @@ fn render_tab_group_internal(
     let pane_group = tab.pane_group.as_ref(app);
     let pane_group_id = tab.pane_group.id();
     let visible_pane_ids = pane_group.visible_pane_ids();
+    // Folded once per tab (any pane Blocked/Error → AttentionNeeded;
+    // else any pane InProgress → Running). All rows in this tab share the
+    // same animation state.
+    let tab_animation = aggregated_tab_animation(tab, app);
     let resolved_mode = resolve_vertical_tabs_mode(app);
     let display_granularity = match resolved_mode {
         VerticalTabsResolvedMode::Panes => VerticalTabsDisplayGranularity::Panes,
@@ -2171,7 +2247,7 @@ fn render_tab_group_internal(
     let tab_row_spacing = (*crate::settings::CortexSettings::as_ref(app)
         .tabs_panel_row_spacing
         .value())
-    .clamp(0.0, 16.0);
+    .clamp(8.0, 24.0);
 
     let mut group_element = Hoverable::new(group_mouse_state, move |group_state| {
         let build_rows = || {
@@ -2218,14 +2294,20 @@ fn render_tab_group_internal(
                 ) else {
                     return Empty::new().finish();
                 };
-                rows.add_child(render_summary_tab_item(
+                let summary_row = render_summary_tab_item(
                     pane_props,
                     summary
                         .as_ref()
                         .expect("summary data must exist in summary mode"),
                     summary_pane_kind_icons,
                     app,
-                ));
+                );
+                let summary_row = wrap_with_agent_animation_layers(
+                    summary_row,
+                    tab_animation,
+                    pane_color.as_ref(),
+                );
+                rows.add_child(summary_row);
                 return rows.finish();
             }
             for (pane_id, row_mouse_state) in &row_mouse_states {
@@ -2276,6 +2358,8 @@ fn render_tab_group_internal(
                     VerticalTabsViewMode::Compact => render_compact_pane_row(pane_props, app),
                     VerticalTabsViewMode::Expanded => render_pane_row(pane_props, app),
                 };
+                let row =
+                    wrap_with_agent_animation_layers(row, tab_animation, pane_color.as_ref());
                 rows.add_child(row);
             }
             rows.finish()
@@ -3733,6 +3817,11 @@ fn render_terminal_row_content(
     let main_text_color = cortex.title_color;
     let sub_text_color = cortex.metadata_color;
     let primary_info = *TabSettings::as_ref(app).vertical_tabs_primary_info.value();
+    // The user's `cortex.tabs.title.font_size` setting only applies to the
+    // primary line (the "title"). Subtitle (line 2) and metadata (line 3)
+    // stay at the defaults — that matches the setting's name and avoids
+    // making the rail row collapse in surprising ways when sizes diverge.
+    let tab_title_size = cortex_tab_title_style(appearance, app).1;
 
     let title_text = terminal_view.terminal_title_from_shell();
     let working_directory = resolved_terminal_working_directory(terminal_view, app)
@@ -3757,10 +3846,11 @@ fn render_terminal_row_content(
                         terminal_view,
                         appearance,
                         main_text_color,
+                        tab_title_size,
                         app,
                     )
                 },
-                12.,
+                tab_title_size,
                 main_text_color,
                 ClipConfig::ellipsis(),
                 appearance,
@@ -3770,6 +3860,7 @@ fn render_terminal_row_content(
                 &working_directory,
                 sub_text_color,
                 ClipConfig::start(),
+                12.,
                 appearance,
             ),
             MetadataLeftContent::GitBranch(git_branch),
@@ -3782,16 +3873,23 @@ fn render_terminal_row_content(
                         &working_directory,
                         main_text_color,
                         ClipConfig::start(),
+                        tab_title_size,
                         appearance,
                     )
                 },
-                12.,
+                tab_title_size,
                 main_text_color,
                 ClipConfig::ellipsis(),
                 appearance,
                 app,
             ),
-            render_terminal_primary_line_for_view(terminal_view, appearance, sub_text_color, app),
+            render_terminal_primary_line_for_view(
+                terminal_view,
+                appearance,
+                sub_text_color,
+                12.,
+                app,
+            ),
             MetadataLeftContent::GitBranch(git_branch),
         ),
         VerticalTabsPrimaryInfo::Branch => {
@@ -3802,17 +3900,23 @@ fn render_terminal_row_content(
                     props,
                     || {
                         if show_branch_icon {
-                            render_git_branch_text(&branch_text, main_text_color, 12., appearance)
+                            render_git_branch_text(
+                                &branch_text,
+                                main_text_color,
+                                tab_title_size,
+                                appearance,
+                            )
                         } else {
                             render_text_line(
                                 &branch_text,
                                 main_text_color,
                                 ClipConfig::start(),
+                                tab_title_size,
                                 appearance,
                             )
                         }
                     },
-                    12.,
+                    tab_title_size,
                     main_text_color,
                     ClipConfig::ellipsis(),
                     appearance,
@@ -3822,6 +3926,7 @@ fn render_terminal_row_content(
                     terminal_view,
                     appearance,
                     sub_text_color,
+                    12.,
                     app,
                 ),
                 MetadataLeftContent::WorkingDirectory(working_directory),
@@ -3936,9 +4041,10 @@ fn render_text_line(
     text: &str,
     text_color: WarpThemeFill,
     clip: ClipConfig,
+    font_size: f32,
     appearance: &Appearance,
 ) -> Box<dyn Element> {
-    Text::new_inline(text.to_string(), appearance.ui_font_family(), 12.)
+    Text::new_inline(text.to_string(), appearance.ui_font_family(), font_size)
         .with_clip(clip)
         .with_color(text_color.into())
         .finish()
@@ -4170,6 +4276,7 @@ fn render_summary_tab_item(
                 working_dir,
                 sub_text_color,
                 ClipConfig::start(),
+                12.,
                 appearance,
             ))
             .with_margin_top(margin)
@@ -4562,6 +4669,7 @@ fn render_terminal_primary_line_for_view(
     terminal_view: &TerminalView,
     appearance: &Appearance,
     text_color: WarpThemeFill,
+    font_size: f32,
     app: &AppContext,
 ) -> Box<dyn Element> {
     let title_text = terminal_view.terminal_title_from_shell();
@@ -4584,6 +4692,7 @@ fn render_terminal_primary_line_for_view(
         terminal_view,
         appearance,
         text_color,
+        font_size,
     )
 }
 
@@ -4596,6 +4705,7 @@ fn render_terminal_primary_line(
     terminal_view: &TerminalView,
     appearance: &Appearance,
     text_color: WarpThemeFill,
+    font_size: f32,
 ) -> Box<dyn Element> {
     let theme = appearance.theme();
 
@@ -4625,7 +4735,7 @@ fn render_terminal_primary_line(
     };
     match primary_line {
         TerminalPrimaryLineData::StatusText { text, .. } => {
-            Text::new_inline(text, appearance.ui_font_family(), 12.)
+            Text::new_inline(text, appearance.ui_font_family(), font_size)
                 .with_clip(ClipConfig::ellipsis())
                 .with_color(text_color.into())
                 .finish()
@@ -4635,7 +4745,7 @@ fn render_terminal_primary_line(
                 TerminalPrimaryLineFont::Ui => appearance.ui_font_family(),
                 TerminalPrimaryLineFont::Monospace => appearance.monospace_font_family(),
             };
-            let title_el = Text::new_inline(text, font_family, 12.)
+            let title_el = Text::new_inline(text, font_family, font_size)
                 .with_clip(ClipConfig::ellipsis())
                 .with_color(text_color.into())
                 .finish();
@@ -5275,13 +5385,13 @@ pub(super) fn render_settings_popup(
     let current_tab_spacing = (*crate::settings::CortexSettings::as_ref(app)
         .tabs_panel_row_spacing
         .value())
-    .clamp(0.0, 16.0);
+    .clamp(8.0, 24.0);
 
     let tab_spacing_slider = Container::new(
         appearance
             .ui_builder()
             .slider(state.tab_spacing_slider_state.clone())
-            .with_range(0.0..16.0)
+            .with_range(8.0..24.0)
             .with_default_value(current_tab_spacing)
             .on_change(|ctx, _, val| {
                 ctx.dispatch_typed_action(WorkspaceAction::SetVerticalTabsRowSpacing(val));
@@ -6646,6 +6756,9 @@ fn render_compact_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn El
     let main_text_color = cortex.title_color;
     let sub_text_color = cortex.metadata_color;
     let font_family = appearance.ui_font_family();
+    // Title text honors `cortex.tabs.title.font_size`; subtitle stays at its
+    // tighter default so the compact row keeps a single-line feel.
+    let tab_title_size = cortex_tab_title_style(appearance, app).1;
     let has_indicator = props.typed.badge(app).is_some() || has_unread_activity(&props.typed, app);
     let cortex_hide_tab_icon = *crate::settings::CortexSettings::as_ref(app).hide_tab_icon.value();
     let cortex_hide_tab_metadata = *crate::settings::CortexSettings::as_ref(app)
@@ -6695,25 +6808,33 @@ fn render_compact_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn El
                         terminal_view,
                         appearance,
                         main_text_color,
+                        tab_title_size,
                         app,
                     ),
-                    VerticalTabsPrimaryInfo::WorkingDirectory => {
-                        Text::new_inline(working_directory_text.clone(), font_family, 12.)
-                            .with_clip(ClipConfig::start())
-                            .with_color(main_text_color.into())
-                            .finish()
-                    }
+                    VerticalTabsPrimaryInfo::WorkingDirectory => Text::new_inline(
+                        working_directory_text.clone(),
+                        font_family,
+                        tab_title_size,
+                    )
+                    .with_clip(ClipConfig::start())
+                    .with_color(main_text_color.into())
+                    .finish(),
                     VerticalTabsPrimaryInfo::Branch => match branch_display {
-                        (branch_text, true) => {
-                            render_git_branch_text(&branch_text, main_text_color, 12., appearance)
+                        (branch_text, true) => render_git_branch_text(
+                            &branch_text,
+                            main_text_color,
+                            tab_title_size,
+                            appearance,
+                        ),
+                        (fallback_text, false) => {
+                            Text::new_inline(fallback_text, font_family, tab_title_size)
+                                .with_clip(ClipConfig::start())
+                                .with_color(main_text_color.into())
+                                .finish()
                         }
-                        (fallback_text, false) => Text::new_inline(fallback_text, font_family, 12.)
-                            .with_clip(ClipConfig::start())
-                            .with_color(main_text_color.into())
-                            .finish(),
                     },
                 },
-                12.,
+                tab_title_size,
                 main_text_color,
                 ClipConfig::ellipsis(),
                 appearance,
@@ -6775,7 +6896,7 @@ fn render_compact_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn El
                         appearance,
                     )
                 },
-                12.,
+                tab_title_size,
                 main_text_color,
                 if matches!(props.typed, TypedPane::Code(_)) {
                     ClipConfig::start()

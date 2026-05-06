@@ -132,7 +132,9 @@ use crate::util::openable_file_type::{resolve_file_target_with_editor_choice, Ed
 
 #[cfg(not(target_family = "wasm"))]
 use crate::terminal::cli_agent_sessions::plugin_manager::{plugin_manager_for, PluginModalKind};
-use crate::terminal::cli_agent_sessions::{CLIAgentSessionsModel, CLIAgentSessionsModelEvent};
+use crate::terminal::cli_agent_sessions::{
+    CLIAgentSessionStatus, CLIAgentSessionsModel, CLIAgentSessionsModelEvent,
+};
 use crate::workspace::header_toolbar_editor::{HeaderToolbarEditorEvent, HeaderToolbarEditorModal};
 use crate::workspace::header_toolbar_item::HeaderToolbarItemKind;
 use crate::workspace::tab_settings::TabCloseButtonPosition;
@@ -2998,6 +3000,22 @@ impl Workspace {
             me.handle_tab_settings_change(event, ctx)
         });
 
+        // Re-paint the workspace whenever any Cortex setting changes. The Cortex
+        // fork added `CortexSettings` and the various `update` writers but never
+        // wired the observer side, so until this subscription existed the tab
+        // bar only re-rendered when an unrelated reactive surface (font cache,
+        // theme, etc.) happened to invalidate at the same time. That made
+        // `tabs_title_font_name` and `tabs_title_font_weight` look like they
+        // worked (font-cache touch on family lookup; properties-path touch on
+        // weight) while a pure `f32` `tabs_title_font_size` change had nothing
+        // to piggyback on and silently no-op'd at the consumer.
+        ctx.subscribe_to_model(
+            &crate::settings::CortexSettings::handle(ctx),
+            |_me, _handle, _event, ctx| {
+                ctx.notify();
+            },
+        );
+
         ctx.subscribe_to_model(&CodeSettings::handle(ctx), |me, _, event, ctx| {
             if matches!(
                 event,
@@ -3512,6 +3530,29 @@ impl Workspace {
                 | CLIAgentSessionsModelEvent::SessionUpdated { .. }
         ) && self.workspace_contains_terminal_view(event.terminal_view_id(), ctx)
         {
+            // Cortex pulse-until-viewed: when a turn ends on the *active*
+            // pane the user is already looking, suppress the AttentionNeeded
+            // breath. The PaneFocused-driven clear only fires on a fresh
+            // focus event, so a Stop arriving while the source tab is
+            // already up front would otherwise leave a persistent pulse.
+            if let CLIAgentSessionsModelEvent::StatusChanged {
+                status: CLIAgentSessionStatus::Success,
+                terminal_view_id,
+                ..
+            } = event
+            {
+                let active_view_id = self
+                    .active_tab_pane_group()
+                    .as_ref(ctx)
+                    .active_session_view(ctx)
+                    .map(|view| view.id());
+                if active_view_id == Some(*terminal_view_id) {
+                    let view_id = *terminal_view_id;
+                    CLIAgentSessionsModel::handle(ctx).update(ctx, |sessions, ctx| {
+                        sessions.mark_session_viewed(view_id, ctx);
+                    });
+                }
+            }
             ctx.notify();
         }
     }
@@ -6687,6 +6728,15 @@ impl Workspace {
                     Some(project.name.clone()),
                     ctx,
                 );
+                // Cortex: saved-project tabs always go to the end of the tab
+                // list so the order reflects the chronological order in which
+                // the user opened them, overriding `general.new_tab_placement`.
+                let last_idx = self.tab_count().saturating_sub(1);
+                if self.active_tab_index != last_idx {
+                    let new_tab = self.tabs.remove(self.active_tab_index);
+                    self.tabs.push(new_tab);
+                    self.set_active_tab_index(last_idx, ctx);
+                }
                 // Cortex: carry the saved project's hex color through to the
                 // new tab so vertical-tab rendering can use it as the tab's
                 // accent (border / fill / title text). Mirrors the pattern in
@@ -14741,6 +14791,22 @@ impl Workspace {
 
                 // Re-evaluate which region is focused and update pane dimming accordingly.
                 self.update_pane_dimming_for_current_focus_region(ctx);
+
+                // Cortex pulse-until-viewed: focusing a pane is the "I've
+                // seen it" signal that clears the AttentionNeeded breath
+                // pulse for any CLI-agent session ended while this pane
+                // was backgrounded. See app/src/terminal/cli_agent_sessions/
+                // mod.rs::mark_session_viewed.
+                let focused_terminal_view_id = self
+                    .active_tab_pane_group()
+                    .as_ref(ctx)
+                    .active_session_view(ctx)
+                    .map(|view| view.id());
+                if let Some(view_id) = focused_terminal_view_id {
+                    CLIAgentSessionsModel::handle(ctx).update(ctx, |sessions, ctx| {
+                        sessions.mark_session_viewed(view_id, ctx);
+                    });
+                }
 
                 let mut active_object_open_in_pane = false;
                 // Case 1: if workflow, get workflow ID via TerminalView input

@@ -2083,7 +2083,10 @@ impl TerminalModel {
     /// times, like `info`  (see WAR-5897).
     fn exit_alt_screen(&mut self, restore_cursor: bool) {
         if !self.alt_screen_active {
-            log::info!("Tried to exit the alternate screen, but it was already inactive");
+            // cortex: downgraded from info — programs like `info` toggle the
+            // alt-screen multiple times by design (see WAR-5897 above), so
+            // the no-op exit is normal behavior, not a diagnostic signal.
+            log::debug!("Tried to exit the alternate screen, but it was already inactive");
             return;
         }
 
@@ -3564,7 +3567,17 @@ impl ansi::Handler for TerminalModel {
     }
 
     fn pluggable_notification(&mut self, title: Option<String>, body: String) {
+        log::info!(
+            target: "cli_agent_pipeline",
+            "L1 pluggable_notification entry title={title:?} body_len={} flag_enabled={}",
+            body.len(),
+            FeatureFlag::PluggableNotifications.is_enabled()
+        );
         if FeatureFlag::PluggableNotifications.is_enabled() {
+            log::info!(
+                target: "cli_agent_pipeline",
+                "L2 flag-gate passed; sending Event::PluggableNotification"
+            );
             self.event_proxy
                 .send_terminal_event(Event::PluggableNotification { title, body });
         }

@@ -8,6 +8,9 @@ use crate::features::FeatureFlag;
 use crate::launch_configs::launch_config::LaunchConfig;
 use crate::menu::{MenuAction, MenuItem, MenuItemFields};
 use crate::pane_group::{PaneGroup, PaneId};
+use crate::terminal::cli_agent_sessions::listener::agent_supports_rich_status;
+use crate::terminal::cli_agent_sessions::{CLIAgentSessionStatus, CLIAgentSessionsModel};
+use crate::terminal::model::terminal_model::ConversationTranscriptViewerStatus;
 use settings::Setting as _;
 use std::sync::Arc;
 use std::time::Duration;
@@ -831,6 +834,242 @@ impl TabStyles {
     }
 }
 
+/// Tab-level animation kind for the Cortex vertical-tab side panel.
+///
+/// Folded from every pane's AI-agent status by [`aggregated_tab_animation`].
+/// `AttentionNeeded` always supersedes `Running`. See
+/// `docs/tab-bar/agent-status-animations.md` for the full spec.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TabAnimationKind {
+    Running,
+    AttentionNeeded,
+}
+
+/// Map a single pane's external CLI-agent status (Claude Code, Codex, Gemini,
+/// etc.) into one of the two animation buckets, or `None` if the pane has no
+/// animatable status.
+///
+/// Two signal sources, in order:
+///
+/// 1. **`CLIAgentSessionsModel`** — the precise rich-status signal driven by
+///    OSC 777 plugin events. Used when the session has a listener attached, a
+///    rich-status-capable agent, AND `session_context.query.is_some()` (which
+///    is set only on a `PromptSubmit` event, distinguishing "session just
+///    started" from "user actually prompted").
+/// 2. **Title-prefix heuristic** — fallback for setups where the OSC 777 path
+///    isn't firing (e.g. `claude --dangerously-skip-permissions`, where
+///    Cortex never sees the plugin protocol). Detects whether the terminal
+///    title starts with a CLI-agent "thinking" indicator. The Braille range
+///    `U+2800..=U+28FF` is the standard rotating spinner used by Claude Code,
+///    Codex, and Gemini while a tool is running. The sparkle `✳` (U+2733) is
+///    Claude's "synthesizing response" indicator and also appears at idle —
+///    we distinguish those by inspecting the rest of the title: if it's just
+///    the agent name (e.g. `"Claude Code"`) the agent is idle; otherwise it's
+///    actively working. See `title_indicates_active_work` for the exact rule.
+///
+/// Oz is intentionally not consulted: Cortex's roadmap strips Oz, so the
+/// animation feature only powers off external CLI agents.
+///
+/// Each call emits an `info!` line targeted at `tab_animation` so the runtime
+/// log can be grepped to verify the aggregator's decisions
+/// (`%LOCALAPPDATA%\warp\WarpOss-dev\data\logs\warp-oss.log` on Windows dev).
+/// Bump down to `debug!` once the feature is stable.
+fn classify_pane_animation(
+    pane_id: crate::pane_group::PaneId,
+    pane_group: &PaneGroup,
+    app: &AppContext,
+) -> Option<TabAnimationKind> {
+    let Some(terminal_view) = pane_group.terminal_view_from_pane_id(pane_id, app) else {
+        log::info!(target: "tab_animation", "pane {pane_id:?}: no terminal_view → None");
+        return None;
+    };
+    let view = terminal_view.as_ref(app);
+    let view_id = view.id();
+
+    // 1. OSC-777-backed rich-status path. The `prompted` gate
+    //    (query.is_some()) keeps bare `clauded` panes that haven't received
+    //    a PromptSubmit out of Tier 1, so they don't falsely animate.
+    //    See docs/ai/external-status-injection.md for the bridge that lets
+    //    non-plugin agents reach this path.
+    if let Some(session) = CLIAgentSessionsModel::as_ref(app).session(view_id) {
+        let rich = agent_supports_rich_status(&session.agent);
+        let prompted = session.session_context.query.is_some();
+        if rich && prompted {
+            // Pulse-until-viewed: when a turn finishes on a backgrounded pane
+            // (Stop event fired without the user viewing the source tab
+            // since), the breath wash should fire so the tab bar surfaces a
+            // "come look" cue. The flag is owned by CLIAgentSessionsModel
+            // (set on Stop, cleared on PromptSubmit or via mark_session_viewed
+            // from the workspace's PaneFocused handler) — see
+            // app/src/terminal/cli_agent_sessions/mod.rs.
+            let attention_pending =
+                CLIAgentSessionsModel::as_ref(app).is_attention_pending(view_id);
+            let result = match &session.status {
+                CLIAgentSessionStatus::InProgress => Some(TabAnimationKind::Running),
+                CLIAgentSessionStatus::Blocked { .. } => {
+                    Some(TabAnimationKind::AttentionNeeded)
+                }
+                CLIAgentSessionStatus::Success => {
+                    if attention_pending {
+                        Some(TabAnimationKind::AttentionNeeded)
+                    } else {
+                        None
+                    }
+                }
+            };
+            // Stale-state backstop: if Tier 1 says Running but the underlying
+            // conversation block has actually terminated, trust Tier 2. Mainly
+            // protects hook-bridged sessions when claude is SIGKILL'd before
+            // its Stop/SessionEnd hook fires. (Plugin-attached sessions hit
+            // the same edge case, so this also benefits them.)
+            let stale = matches!(result, Some(TabAnimationKind::Running))
+                && matches!(
+                    view.selected_conversation_status_for_display(app),
+                    Some(
+                        ConversationStatus::Success
+                            | ConversationStatus::Error
+                            | ConversationStatus::Cancelled
+                    )
+                );
+            if !stale {
+                log::info!(
+                    target: "tab_animation",
+                    "pane {pane_id:?} view={view_id:?} session-based agent={:?} status={:?} → {result:?}",
+                    session.agent,
+                    session.status,
+                );
+                return result;
+            }
+            log::info!(
+                target: "tab_animation",
+                "pane {pane_id:?} view={view_id:?} agent={:?} session.status={:?} but conversation terminated; Tier 1 stale, falling through",
+                session.agent,
+                session.status,
+            );
+        }
+    }
+
+    // 2. Model-level conversation status. Same accessor the working
+    //    vertical-tab hover tooltip's icon uses (vertical_tabs.rs:2641 →
+    //    pane_impl.rs:1011). Returns InProgress while is_long_running OR
+    //    while the conversation's underlying state is mid-turn; flips to
+    //    Success/Error/Cancelled when the turn finishes; reports Blocked
+    //    when claude is waiting on user permission.
+    match view.selected_conversation_status_for_display(app) {
+        Some(ConversationStatus::InProgress) => {
+            log::info!(
+                target: "tab_animation",
+                "pane {pane_id:?} view={view_id:?} display_status=InProgress → Running"
+            );
+            return Some(TabAnimationKind::Running);
+        }
+        Some(ConversationStatus::Blocked { .. }) => {
+            log::info!(
+                target: "tab_animation",
+                "pane {pane_id:?} view={view_id:?} display_status=Blocked → AttentionNeeded"
+            );
+            return Some(TabAnimationKind::AttentionNeeded);
+        }
+        Some(
+            status @ (ConversationStatus::Success
+            | ConversationStatus::Error
+            | ConversationStatus::Cancelled),
+        ) => {
+            log::info!(
+                target: "tab_animation",
+                "pane {pane_id:?} view={view_id:?} display_status={status:?} → None"
+            );
+            return None;
+        }
+        None => {
+            // Fall through to Tier 3 — fresh `clauded` pane that hasn't
+            // started a conversation yet, or non-agent pane.
+        }
+    }
+
+    // 3. Title-prefix heuristic. Last-resort fallback for the case above
+    //    (no conversation, not long-running). Gated by the agent-name-only-
+    //    is-idle disambiguator so plain `clauded` at idle doesn't fire.
+    let title = view.terminal_title_from_shell();
+    let title_active = title_indicates_active_work(&title);
+    let result = if title_active {
+        Some(TabAnimationKind::Running)
+    } else {
+        None
+    };
+    log::info!(
+        target: "tab_animation",
+        "pane {pane_id:?} view={view_id:?} title={title:?} title_active={title_active} → {result:?}"
+    );
+    result
+}
+
+/// Returns `true` if the terminal title looks like a CLI agent that is
+/// actively working on a task (running a tool or synthesizing a response).
+///
+/// Recognised activity glyphs (any of these as the first char):
+/// - **Braille block** (`U+2800..=U+28FF`): Claude Code, Codex, and Gemini all
+///   render their rotating spinner from this range. Claude shows it both while
+///   tools run *and* at the idle prompt as a cosmetic indicator.
+/// - **Sparkle** (`U+2733`, `✳`): Claude shows this while synthesizing a
+///   response and also at the idle prompt.
+///
+/// In both cases the disambiguator is what follows the glyph:
+/// - `"⠂ Claude Code"` / `"✳ Claude Code"` → idle (just the agent name).
+/// - `"⠂ Test ping command…"` / `"✳ Test ping command…"` → active.
+///
+/// Empty or non-prefixed titles (e.g. `"~\cortex"`, `"Windows PowerShell"`,
+/// `"clauded"`) always return `false`.
+fn title_indicates_active_work(title: &str) -> bool {
+    let Some(first) = title.chars().next() else {
+        return false;
+    };
+    let is_activity_glyph =
+        ('\u{2800}'..='\u{28FF}').contains(&first) || first == '✳';
+    if !is_activity_glyph {
+        return false;
+    }
+    let rest = title[first.len_utf8()..].trim();
+    // Idle agent titles: just the agent name with nothing else after the
+    // glyph. Add new agents here as they ship.
+    !matches!(
+        rest,
+        "" | "Claude Code" | "Claude" | "Codex" | "Gemini" | "Auggie" | "OpenCode"
+    )
+}
+
+/// Fold every pane in this tab into a single tab-level animation state.
+/// Any pane being `Blocked`/`Error` makes the whole tab `AttentionNeeded`;
+/// otherwise any `InProgress` pane makes the tab `Running`; otherwise `None`.
+pub fn aggregated_tab_animation(tab: &TabData, app: &AppContext) -> Option<TabAnimationKind> {
+    let pane_group = tab.pane_group.as_ref(app);
+    let pane_group_id = tab.pane_group.id();
+    let mut found_running = false;
+    for pane_id in pane_group.pane_ids() {
+        match classify_pane_animation(pane_id, pane_group, app) {
+            Some(TabAnimationKind::AttentionNeeded) => {
+                log::info!(
+                    target: "tab_animation",
+                    "tab pane_group={pane_group_id:?}: AttentionNeeded (short-circuit on pane {pane_id:?})"
+                );
+                return Some(TabAnimationKind::AttentionNeeded);
+            }
+            Some(TabAnimationKind::Running) => found_running = true,
+            None => {}
+        }
+    }
+    let result = if found_running {
+        Some(TabAnimationKind::Running)
+    } else {
+        None
+    };
+    log::info!(
+        target: "tab_animation",
+        "tab pane_group={pane_group_id:?}: folded → {result:?}"
+    );
+    result
+}
+
 impl<'a> TabComponent<'a> {
     pub fn new(
         tab_index: usize,
@@ -910,6 +1149,43 @@ impl<'a> TabComponent<'a> {
             Indicator::None
         };
 
+        // T5: capture which branch of the priority chain won, with the
+        // agent-status detail when it's an `Indicator::Agent`. Cross-references
+        // T1–T3 (agent_indicator) to confirm whether the tooltip's working
+        // dots/check are coming from `Indicator::Agent` or some other branch.
+        let indicator_label: &str = match &indicator {
+            Indicator::None => "None",
+            Indicator::UnsavedChanges => "UnsavedChanges",
+            Indicator::Synced => "Synced",
+            Indicator::Error => "Error",
+            Indicator::Shared => "Shared",
+            Indicator::Maximized => "Maximized",
+            Indicator::Shell(_) => "Shell(...)",
+            Indicator::Agent {
+                conversation_status: None,
+            } => "Agent{None}",
+            Indicator::Agent {
+                conversation_status: Some(ConversationStatus::InProgress),
+            } => "Agent{InProgress}",
+            Indicator::Agent {
+                conversation_status: Some(ConversationStatus::Success),
+            } => "Agent{Success}",
+            Indicator::Agent {
+                conversation_status: Some(ConversationStatus::Error),
+            } => "Agent{Error}",
+            Indicator::Agent {
+                conversation_status: Some(ConversationStatus::Cancelled),
+            } => "Agent{Cancelled}",
+            Indicator::Agent {
+                conversation_status: Some(ConversationStatus::Blocked { .. }),
+            } => "Agent{Blocked}",
+            Indicator::AmbientAgent => "AmbientAgent",
+        };
+        log::info!(
+            target: "tooltip_signal",
+            "T5 tab_index={tab_index} chose Indicator::{indicator_label}",
+        );
+
         let tooltip_message = Self::get_tooltip_message(&indicator, tab, ctx);
         let tooltip_directory = Self::get_tooltip_directory(&indicator, tab, ctx);
         let tooltip_git_branch = Self::get_tooltip_git_branch(&indicator, tab, ctx);
@@ -953,23 +1229,65 @@ impl<'a> TabComponent<'a> {
     fn agent_indicator(tab: &TabData, app: &AppContext) -> Option<Indicator> {
         let terminal_view = tab.pane_group.as_ref(app).focused_session_view(app)?;
         let terminal_view_ref = terminal_view.as_ref(app);
+        let view_id = terminal_view_ref.id();
         let is_long_running = terminal_view_ref.is_long_running();
-        let conversation =
-            BlocklistAIHistoryModel::as_ref(app).active_conversation(terminal_view_ref.id())?;
+        let conversation_opt =
+            BlocklistAIHistoryModel::as_ref(app).active_conversation(view_id);
+
+        // T1+T2+T4: snapshot every plausible signal the working tab tooltip might
+        // be reading, once per render, before any early-return. Cross-reference
+        // with `tab_animation` logs to find the gap between what the tooltip
+        // sees and what `classify_pane_animation` sees.
+        let active_block_state = {
+            let model = terminal_view_ref.model.lock();
+            model.block_list().active_block().state()
+        };
+        match conversation_opt {
+            Some(conv) => log::info!(
+                target: "tooltip_signal",
+                "T1 agent_indicator view={view_id:?} is_long_running={is_long_running} \
+                 block_state={active_block_state:?} \
+                 active_conversation=Some(id={:?}, status={:?}, empty={}, passive={})",
+                conv.id(),
+                conv.status(),
+                conv.is_empty(),
+                conv.is_entirely_passive(),
+            ),
+            None => log::info!(
+                target: "tooltip_signal",
+                "T1 agent_indicator view={view_id:?} is_long_running={is_long_running} \
+                 block_state={active_block_state:?} active_conversation=None"
+            ),
+        }
+
+        let conversation = conversation_opt?;
 
         // Show in-progress indicator when a shell command is running in the AgentView.
         // This matches vertical-tab behavior.
         if is_long_running {
+            log::info!(
+                target: "tooltip_signal",
+                "T3 view={view_id:?} → Indicator::Agent(InProgress) [is_long_running override]"
+            );
             return Some(Indicator::Agent {
                 conversation_status: Some(ConversationStatus::InProgress),
             });
         }
 
         if conversation.is_empty() || conversation.is_entirely_passive() {
+            log::info!(
+                target: "tooltip_signal",
+                "T3 view={view_id:?} → None [conversation empty or passive]"
+            );
             return None;
         }
 
         let conversation_status = Some(conversation.status().clone());
+        log::info!(
+            target: "tooltip_signal",
+            "T3 view={view_id:?} → Indicator::Agent(status={:?})",
+            conversation_status,
+        );
         Some(Indicator::Agent {
             conversation_status,
         })
