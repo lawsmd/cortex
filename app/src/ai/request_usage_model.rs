@@ -237,7 +237,16 @@ impl AIRequestUsageModel {
                     model.update_request_limit_info(usage_info.request_limit_info, ctx);
                 }
                 Err(e) => {
-                    log::warn!("Failed to retrieve initial request limit info: {e:#}");
+                    // cortex: skip_login feature flag means every
+                    // auth-dependent GraphQL call fails by design — see
+                    // app/src/server/server_api/auth.rs. Downgrade in that
+                    // case so dev/prod logs stay quiet for the expected
+                    // failure mode.
+                    if cfg!(feature = "skip_login") {
+                        log::debug!("Failed to retrieve initial request limit info: {e:#}");
+                    } else {
+                        log::warn!("Failed to retrieve initial request limit info: {e:#}");
+                    }
                 }
             },
         );

@@ -1450,7 +1450,12 @@ impl AppContext {
         }
 
         if !any_action_handled {
-            log::warn!("Action {name:?} was dispatched, but no view handled it");
+            // cortex: downgraded from warn — startup races where actions are
+            // dispatched before the responder chain is fully registered are
+            // expected; the action is harmlessly dropped and the chain
+            // recovers within milliseconds. Real cases where this signals a
+            // wiring bug surface elsewhere (missing UI behavior).
+            log::debug!("Action {name:?} was dispatched, but no view handled it");
         }
 
         self.dispatch_global_action(name, arg);

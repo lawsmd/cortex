@@ -102,7 +102,10 @@ impl WslInfo {
             .collect_vec();
 
         if distributions.iter().all(|distro| !distro.is_default) {
-            log::warn!("No distribution matched the default guid");
+            // cortex: downgraded from warn — expected on machines with no WSL
+            // installed, or when the default-marked distribution was uninstalled
+            // but the registry GUID stuck around.
+            log::debug!("No distribution matched the default guid");
         }
 
         Ok(distributions)

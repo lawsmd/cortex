@@ -413,7 +413,17 @@ impl Listener {
                         });
                     }
                     RequestState::RequestFailedRetryPending(e) => {
-                        log::warn!("CloudObjects::Listener: websocket connection failed to connect or finished with an error; trying again: {e:#}");
+                        // cortex: when the skip_login feature is enabled,
+                        // every auth-dependent request fails with a fixed
+                        // "skip_login enabled" error from
+                        // app/src/server/server_api/auth.rs. That's expected
+                        // and unactionable — downgrade to debug. Without
+                        // the feature, this is a real network/server problem.
+                        if cfg!(feature = "skip_login") {
+                            log::debug!("CloudObjects::Listener: websocket connection failed to connect or finished with an error; trying again: {e:#}");
+                        } else {
+                            log::warn!("CloudObjects::Listener: websocket connection failed to connect or finished with an error; trying again: {e:#}");
+                        }
                     }
                     RequestState::RequestFailed(e) => {
                         report_error!(e.context("CloudObjects::Listener websocket connection failed"));

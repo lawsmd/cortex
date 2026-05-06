@@ -350,6 +350,18 @@ impl ApiKeyManager {
             Ok(json) => json,
             Err(e) => {
                 if !matches!(e, secure_storage::Error::NotFound) {
+                    // cortex: on Windows, the file-encrypted secure-storage
+                    // backend emits IOError on first launch (or before keys
+                    // have been written), which is normal startup state, not
+                    // a real error. Downgrade to debug for that variant; keep
+                    // the loud error for genuine failures (decode, API errors).
+                    #[cfg(windows)]
+                    if matches!(e, secure_storage::Error::IOError(_)) {
+                        log::debug!("Failed to read API keys from secure storage: {e:#}");
+                    } else {
+                        log::error!("Failed to read API keys from secure storage: {e:#}");
+                    }
+                    #[cfg(not(windows))]
                     log::error!("Failed to read API keys from secure storage: {e:#}");
                 }
                 return ApiKeys::default();

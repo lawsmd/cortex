@@ -478,6 +478,15 @@ pub(crate) fn load_credentials_from_secure_storage<T: DeserializeOwned + Default
         .read_value(key)
         .inspect_err(|err| {
             if !matches!(err, warpui_extras::secure_storage::Error::NotFound) {
+                // cortex: see api_keys.rs — Windows IOError is normal
+                // startup state, not actionable noise.
+                #[cfg(windows)]
+                if matches!(err, warpui_extras::secure_storage::Error::IOError(_)) {
+                    log::debug!("Failed to read MCP credentials from secure storage: {err:#}");
+                } else {
+                    log::warn!("Failed to read MCP credentials from secure storage: {err:#}");
+                }
+                #[cfg(not(windows))]
                 log::warn!("Failed to read MCP credentials from secure storage: {err:#}");
             }
         })

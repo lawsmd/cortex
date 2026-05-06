@@ -17,7 +17,7 @@ use warp_completer::completer::{
 };
 use warp_completer::signatures::CommandRegistry;
 use warp_core::features::FeatureFlag;
-use warp_util::path::{EscapeChar, ShellFamily};
+use warp_util::path::{EscapeChar, MSYS2PathConversionError, ShellFamily};
 use warpui::{AppContext, SingletonEntity};
 
 use crate::safe_warn;
@@ -62,7 +62,19 @@ impl SessionContext {
                 let dir = match self.session.maybe_convert_to_native_path(directory) {
                     Ok(dir) => dir,
                     Err(err) => {
-                        log::warn!("Failed to convert path: {err:#}");
+                        // cortex: NonUnixPath fires when the input is already
+                        // Windows-form (e.g. `C:\Users\...` typed in a Git Bash
+                        // session). It's not actionable noise — the completer
+                        // already returns no entries for non-resolvable paths.
+                        // Only warn on genuine conversion failures.
+                        if err
+                            .downcast_ref::<MSYS2PathConversionError>()
+                            .is_some_and(|e| matches!(e, MSYS2PathConversionError::NonUnixPath))
+                        {
+                            log::debug!("Skipping path completion for Windows-form path: {err:#}");
+                        } else {
+                            log::warn!("Failed to convert path: {err:#}");
+                        }
                         return Vec::new();
                     }
                 };
