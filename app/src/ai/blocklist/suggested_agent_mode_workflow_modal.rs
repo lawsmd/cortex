@@ -233,7 +233,9 @@ impl View for SuggestedAgentModeWorkflowModal {
         if let Some(modal) = &self.modal {
             ChildView::new(modal).finish()
         } else {
-            log::warn!("SuggestedAgentModeWorkflowModal has not been initialized");
+            // cortex: downgraded from warn — render-before-init; modal is
+            // only initialized when the workflow is opened.
+            log::debug!("SuggestedAgentModeWorkflowModal has not been initialized");
             Empty::new().finish()
         }
     }

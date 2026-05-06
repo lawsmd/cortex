@@ -219,7 +219,11 @@ impl DProtoHook {
                 }
                 "session_id" => value.session_id = v.parse::<u64>().ok(),
                 _ => {
-                    log::warn!("Tried to add unknown field {key} to Precmd");
+                    // cortex: downgraded from warn — the shell-init hook scripts
+                    // emit fields newer than this parser knows about (e.g.
+                    // node_version). Self-contained: unknown fields are simply
+                    // dropped. TODO upstream: reconcile parser with hook script.
+                    log::debug!("Tried to add unknown field {key} to Precmd");
                 }
             },
             DProtoHook::InitShell { value } => match key.as_ref() {
@@ -243,7 +247,8 @@ impl DProtoHook {
                     value.hostname = trim_null_byte(v);
                 }
                 _ => {
-                    log::warn!("Tried to add unknown field {key} to InitShell");
+                    // cortex: downgraded from warn — see Precmd note above.
+                    log::debug!("Tried to add unknown field {key} to InitShell");
                 }
             },
             DProtoHook::Bootstrapped { value } => match key.as_ref() {
@@ -307,7 +312,11 @@ impl DProtoHook {
                     value.wsl_name = map_empty_to_none(v);
                 }
                 _ => {
-                    log::warn!("Tried to add unknown field {key} to Bootstrapped hook");
+                    // cortex: downgraded from warn — see Precmd note above.
+                    // The Bootstrapped hook in particular emits session_id /
+                    // user / hostname / shell_path that this parser doesn't
+                    // currently consume but the shell init script always sends.
+                    log::debug!("Tried to add unknown field {key} to Bootstrapped hook");
                 }
             },
             DProtoHook::Preexec { value } => match key.as_ref() {

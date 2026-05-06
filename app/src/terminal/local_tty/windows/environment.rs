@@ -345,7 +345,15 @@ fn environment_block(env: impl Iterator<Item = (OsString, EnvEntry)>) -> Vec<u16
     for (_, entry) in env {
         // Environment variable names cannot contain an "=".
         if entry.preferred_key.is_empty() || entry.preferred_key.to_string_lossy().contains('=') {
-            log::warn!(
+            // cortex: silently skip Windows cmd's pseudo-env variables
+            // ("=::", "=C:", "=ExitCode", etc.) which Win32 injects into
+            // every process's environment block but are not real entries.
+            // Pre-Cortex, every shell spawn logged 3 warnings for these —
+            // 30+ per startup with multi-pane sessions. Real validation
+            // failures (other invalid names) are still dropped, just
+            // without the log noise; if we ever see legitimate breakage
+            // we'll need a more targeted filter.
+            log::debug!(
                 "Environment variable {:?} was invalid. Not adding to shell process environment block",
                 entry.preferred_key
             );

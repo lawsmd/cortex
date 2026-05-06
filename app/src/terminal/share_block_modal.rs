@@ -1022,7 +1022,9 @@ impl ShareBlockModal {
                 .finish()
             }
             None => {
-                log::warn!("Tried to render share modal without a model");
+                // cortex: downgraded from warn — render-before-init; the
+                // model arrives asynchronously. Empty is the correct render.
+                log::debug!("Tried to render share modal without a model");
                 Empty::new().finish()
             }
         };

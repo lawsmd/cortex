@@ -726,7 +726,12 @@ impl CurrentPrompt {
         match generator {
             PromptGenerator::ShellCommand(cmd) => {
                 let Some(exec_ctx) = self.prepare_shell_command_context(cmd, ctx) else {
-                    log::warn!("Generator for {chip_kind:?}: could not prepare execution context");
+                    // cortex: downgraded from warn — fires for chips like
+                    // GitDiffStats / KubernetesContext / GithubPullRequest at
+                    // first render before the session has finished bootstrapping.
+                    // The chip retries on the next prompt, so this is a soft
+                    // not-yet-ready signal, not a failure.
+                    log::debug!("Generator for {chip_kind:?}: could not prepare execution context");
                     self.update_chip_value(chip_kind, None);
                     self.update_on_click_value(chip_kind, None);
                     self.set_chip_update_status(chip_kind, ChipUpdateStatus::Error);
