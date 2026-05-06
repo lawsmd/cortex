@@ -52,8 +52,8 @@ fn sorts_by_rank_ascending() {
 fn round_trip_serde() {
     let original = ProjectsConfig {
         projects: vec![super::Project {
-            name: "Kenect".into(),
-            cwd: PathBuf::from("D:\\kenect-services"),
+            name: "Acme".into(),
+            cwd: PathBuf::from("C:\\projects\\acme-services"),
             color: "#2bd7fb".into(),
             rank: 2,
         }],
