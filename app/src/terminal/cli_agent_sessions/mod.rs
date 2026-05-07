@@ -362,6 +362,68 @@ impl CLIAgentSessionsModel {
         }
     }
 
+    /// Tab-level variant of [`Self::mark_session_viewed`]: clears the
+    /// attention-pending flag for every view in the iterator (typically
+    /// every terminal view in the active tab's pane group). Viewing a tab
+    /// is, definitionally, viewing every pane it contains — the per-pane
+    /// granularity of `mark_session_viewed` would otherwise leave the
+    /// non-focused panes stuck pulsing even though the user is clearly
+    /// looking at them.
+    pub fn mark_sessions_viewed(
+        &mut self,
+        terminal_view_ids: impl IntoIterator<Item = EntityId>,
+        ctx: &mut ModelContext<Self>,
+    ) {
+        let mut any = false;
+        for id in terminal_view_ids {
+            if self.attention_pending.remove(&id) {
+                any = true;
+            }
+        }
+        if any {
+            ctx.notify();
+        }
+    }
+
+    /// Eager status reset: typing into a pane that's stuck at `Blocked`
+    /// means the user is replying to the permission/question prompt. The
+    /// hook bridge (cortex-hook.{ps1,sh}) has no signal for
+    /// `PermissionReplied`/`ToolComplete` (only plugin-attached sessions
+    /// emit those), so without this, status stays `Blocked` from the moment
+    /// the prompt is shown until the eventual `Stop` event — often 30+
+    /// seconds, sometimes longer if claude immediately hits another
+    /// permission prompt. Tier 1 reads `Blocked → AttentionNeeded` the
+    /// whole time, even when claude is actively working again, which leaves
+    /// the tab pulsing the breath wash through the entire post-approval
+    /// run.
+    ///
+    /// Called from `write_user_bytes_to_pty` parallel to
+    /// `mark_session_viewed`. Plan-mode approval and other in-TUI
+    /// permission replies are keyboard-driven, so every byte the user types
+    /// in response flows through that single funnel.
+    pub fn mark_session_unblocked_by_input(
+        &mut self,
+        terminal_view_id: EntityId,
+        ctx: &mut ModelContext<Self>,
+    ) {
+        let Some(session) = self.sessions.get_mut(&terminal_view_id) else {
+            return;
+        };
+        if !matches!(session.status, CLIAgentSessionStatus::Blocked { .. }) {
+            return;
+        }
+        session.status = CLIAgentSessionStatus::InProgress;
+        let agent = session.agent;
+        let session_context = session.session_context.clone();
+        ctx.emit(CLIAgentSessionsModelEvent::StatusChanged {
+            terminal_view_id,
+            agent,
+            status: CLIAgentSessionStatus::InProgress,
+            session_context: Box::new(session_context),
+        });
+        ctx.notify();
+    }
+
     /// Returns `true` if the rich input editor is currently open for this terminal.
     pub fn is_input_open(&self, terminal_view_id: EntityId) -> bool {
         self.sessions

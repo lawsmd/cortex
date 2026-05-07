@@ -3530,27 +3530,40 @@ impl Workspace {
                 | CLIAgentSessionsModelEvent::SessionUpdated { .. }
         ) && self.workspace_contains_terminal_view(event.terminal_view_id(), ctx)
         {
-            // Cortex pulse-until-viewed: when a turn ends on the *active*
-            // pane the user is already looking, suppress the AttentionNeeded
-            // breath. The PaneFocused-driven clear only fires on a fresh
-            // focus event, so a Stop arriving while the source tab is
-            // already up front would otherwise leave a persistent pulse.
+            // Cortex pulse-until-viewed: when a turn ends on a pane that
+            // lives in the *active tab* the user is already looking at,
+            // suppress the AttentionNeeded breath. The PaneFocused-driven
+            // clear only fires on a fresh focus event, so a Stop arriving
+            // while the source tab is already up front would otherwise
+            // leave a persistent pulse.
+            //
+            // Tab-level (not pane-level) granularity: a multi-pane tab
+            // shows every pane simultaneously, so viewing the tab is
+            // viewing every pane it contains. Clearing only
+            // `active_session_view().id()` was wrong for tabs with two
+            // panes — a Stop on the non-focused pane would leave that
+            // pane's `attention_pending` armed, which the
+            // `aggregated_tab_animation` short-circuit (tab.rs:1066) then
+            // turns into a tab-wide breath.
             if let CLIAgentSessionsModelEvent::StatusChanged {
                 status: CLIAgentSessionStatus::Success,
                 terminal_view_id,
                 ..
             } = event
             {
-                let active_view_id = self
-                    .active_tab_pane_group()
-                    .as_ref(ctx)
-                    .active_session_view(ctx)
-                    .map(|view| view.id());
-                if active_view_id == Some(*terminal_view_id) {
-                    let view_id = *terminal_view_id;
-                    CLIAgentSessionsModel::handle(ctx).update(ctx, |sessions, ctx| {
-                        sessions.mark_session_viewed(view_id, ctx);
-                    });
+                let active_pane_group = self.active_tab_pane_group();
+                let pane_group_ref = active_pane_group.as_ref(ctx);
+                if pane_group_ref.contains_terminal_view(*terminal_view_id, ctx) {
+                    let view_ids: Vec<EntityId> = pane_group_ref
+                        .terminal_views(ctx)
+                        .into_iter()
+                        .map(|v| v.id())
+                        .collect();
+                    if !view_ids.is_empty() {
+                        CLIAgentSessionsModel::handle(ctx).update(ctx, |sessions, ctx| {
+                            sessions.mark_sessions_viewed(view_ids, ctx);
+                        });
+                    }
                 }
             }
             ctx.notify();
@@ -14792,19 +14805,29 @@ impl Workspace {
                 // Re-evaluate which region is focused and update pane dimming accordingly.
                 self.update_pane_dimming_for_current_focus_region(ctx);
 
-                // Cortex pulse-until-viewed: focusing a pane is the "I've
-                // seen it" signal that clears the AttentionNeeded breath
-                // pulse for any CLI-agent session ended while this pane
-                // was backgrounded. See app/src/terminal/cli_agent_sessions/
-                // mod.rs::mark_session_viewed.
-                let focused_terminal_view_id = self
-                    .active_tab_pane_group()
+                // Cortex pulse-until-viewed: focusing a pane in the active
+                // tab is the "I've seen it" signal that clears the
+                // AttentionNeeded breath for any CLI-agent session ended
+                // while *any* pane in this tab was backgrounded. Tab-level
+                // (not pane-level) granularity matters because a multi-
+                // pane tab shows every pane simultaneously — the user
+                // viewing the tab is viewing all of its panes. Clearing
+                // only `active_session_view().id()` left non-focused panes
+                // pulsing even though they were on screen, and the
+                // `aggregated_tab_animation` short-circuit
+                // (`app/src/tab.rs:1066`) turned that into a tab-wide
+                // breath. See `app/src/terminal/cli_agent_sessions/mod.rs`
+                // ::mark_sessions_viewed.
+                let active_pane_group = self.active_tab_pane_group();
+                let view_ids: Vec<EntityId> = active_pane_group
                     .as_ref(ctx)
-                    .active_session_view(ctx)
-                    .map(|view| view.id());
-                if let Some(view_id) = focused_terminal_view_id {
+                    .terminal_views(ctx)
+                    .into_iter()
+                    .map(|v| v.id())
+                    .collect();
+                if !view_ids.is_empty() {
                     CLIAgentSessionsModel::handle(ctx).update(ctx, |sessions, ctx| {
-                        sessions.mark_session_viewed(view_id, ctx);
+                        sessions.mark_sessions_viewed(view_ids, ctx);
                     });
                 }
 
