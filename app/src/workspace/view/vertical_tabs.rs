@@ -45,11 +45,9 @@ use crate::terminal::TerminalView;
 use crate::themes::theme::Fill as ThemeFill;
 use crate::ui_components::buttons::combo_inner_button;
 use crate::ui_components::icons::Icon as UiIcon;
-use crate::util::bindings::keybinding_name_to_display_string;
 use crate::util::color::Opacity;
 use crate::workspace::action::WorkspaceAction;
 use crate::workspace::cross_window_tab_drag::CrossWindowTabDrag;
-use crate::workspace::hoa_onboarding::HoaOnboardingStep;
 use crate::workspace::tab_settings::{
     TabSettings, VerticalTabsCompactSubtitle, VerticalTabsDisplayGranularity,
     VerticalTabsPrimaryInfo, VerticalTabsTabItemMode, VerticalTabsViewMode,
@@ -777,8 +775,6 @@ pub(super) struct VerticalTabsPanelState {
     detail_scroll_state: ClippedScrollStateHandle,
     detail_sidecar_mouse_state: MouseStateHandle,
     detail_overlay_state: Arc<Mutex<VerticalTabsDetailOverlayState>>,
-    new_tab_hover_state: MouseStateHandle,
-    new_tab_button_state: MouseStateHandle,
     /// Cortex: hover/click state for the bottom "+" button (saved-projects picker).
     bottom_new_tab_hover_state: MouseStateHandle,
     bottom_new_tab_button_state: MouseStateHandle,
@@ -821,8 +817,6 @@ impl Default for VerticalTabsPanelState {
             detail_scroll_state: ClippedScrollStateHandle::default(),
             detail_sidecar_mouse_state: Default::default(),
             detail_overlay_state: Arc::new(Mutex::new(VerticalTabsDetailOverlayState::default())),
-            new_tab_hover_state: Default::default(),
-            new_tab_button_state: Default::default(),
             bottom_new_tab_hover_state: Default::default(),
             bottom_new_tab_button_state: Default::default(),
             search_query: String::new(),
@@ -1328,10 +1322,7 @@ impl VerticalTabsPanelState {
 const CONTROL_BAR_VERTICAL_PADDING: f32 = 4.;
 const CONTROL_BAR_SPACING: f32 = 4.;
 const SEARCH_ICON_SIZE: f32 = 12.;
-const SEARCH_BAR_HEIGHT: f32 = 24.;
 const CONTROL_BAR_BUTTON_RADIUS: Radius = Radius::Pixels(4.);
-const SPLIT_BUTTON_HEIGHT: f32 = SEARCH_BAR_HEIGHT;
-pub(super) const VERTICAL_TABS_ADD_TAB_POSITION_ID: &str = "vertical_tabs_add_tab_button";
 pub(super) const VERTICAL_TABS_BOTTOM_ADD_TAB_POSITION_ID: &str =
     "vertical_tabs_bottom_add_tab_button";
 pub(super) const VERTICAL_TABS_SETTINGS_BUTTON_POSITION_ID: &str = "vertical_tabs_settings_button";
@@ -1459,7 +1450,6 @@ fn add_vertical_tab_insertion_target_overlay(
 
 fn render_control_bar(
     state: &VerticalTabsPanelState,
-    workspace: &Workspace,
     search_editor: &ViewHandle<EditorView>,
     app: &AppContext,
 ) -> Box<dyn Element> {
@@ -1491,7 +1481,6 @@ fn render_control_bar(
         .finish();
 
     let settings_button = render_settings_button(state, appearance);
-    let new_tab_button = render_new_tab_button(state, workspace, appearance, app);
 
     Container::new(
         Flex::row()
@@ -1500,7 +1489,6 @@ fn render_control_bar(
             .with_spacing(CONTROL_BAR_SPACING)
             .with_child(Shrinkable::new(1., search_bar).finish())
             .with_child(settings_button)
-            .with_child(new_tab_button)
             .finish(),
     )
     .with_padding(
@@ -1627,92 +1615,6 @@ fn render_settings_button(
     .finish();
 
     SavePosition::new(button, VERTICAL_TABS_SETTINGS_BUTTON_POSITION_ID).finish()
-}
-
-fn render_new_tab_button(
-    state: &VerticalTabsPanelState,
-    workspace: &Workspace,
-    appearance: &Appearance,
-    app: &AppContext,
-) -> Box<dyn Element> {
-    let theme = appearance.theme();
-    let sub_text = theme.sub_text_color(theme.background());
-    let main_text = theme.main_text_color(theme.background());
-    let ui_builder = appearance.ui_builder().clone();
-    let tab_configs_keybinding =
-        keybinding_name_to_display_string(super::TOGGLE_TAB_CONFIGS_MENU_BINDING_NAME, app);
-    let is_active = workspace.show_new_session_dropdown_menu.is_some()
-        || workspace
-            .hoa_onboarding_flow
-            .as_ref()
-            .is_some_and(|flow| flow.as_ref(app).step() == HoaOnboardingStep::TabConfig);
-
-    Hoverable::new(state.new_tab_hover_state.clone(), move |hover_state| {
-        let plus_button = combo_inner_button(
-            appearance,
-            UiIcon::Plus,
-            is_active,
-            state.new_tab_button_state.clone(),
-        )
-        .with_style(
-            UiComponentStyles::default()
-                .set_border_radius(CornerRadius::with_all(CONTROL_BAR_BUTTON_RADIUS))
-                .set_font_color(if is_active { main_text } else { sub_text }.into()),
-        )
-        .with_active_styles(
-            UiComponentStyles::default()
-                .set_background(internal_colors::fg_overlay_3(theme).into()),
-        )
-        .build()
-        .on_click(|ctx, _, position| {
-            ctx.dispatch_typed_action(WorkspaceAction::ToggleNewSessionMenu { position });
-        })
-        .finish();
-
-        let button = SavePosition::new(plus_button, VERTICAL_TABS_ADD_TAB_POSITION_ID).finish();
-
-        let contents = if hover_state.is_hovered() {
-            let tooltip = if let Some(sublabel) = tab_configs_keybinding.clone() {
-                ui_builder
-                    .tool_tip_with_sublabel("Tab configs".to_string(), sublabel)
-                    .build()
-                    .finish()
-            } else {
-                ui_builder
-                    .tool_tip("Tab configs".to_string())
-                    .build()
-                    .finish()
-            };
-            let mut stack = Stack::new().with_child(button);
-            stack.add_positioned_overlay_child(
-                tooltip,
-                OffsetPositioning::offset_from_parent(
-                    vec2f(0., 4.),
-                    ParentOffsetBounds::WindowByPosition,
-                    ParentAnchor::BottomMiddle,
-                    ChildAnchor::TopMiddle,
-                ),
-            );
-            stack.finish()
-        } else {
-            button
-        };
-
-        let mut container = Container::new(
-            ConstrainedBox::new(contents)
-                .with_height(SPLIT_BUTTON_HEIGHT)
-                .finish(),
-        )
-        .with_corner_radius(CornerRadius::with_all(CONTROL_BAR_BUTTON_RADIUS));
-
-        if is_active {
-            container = container.with_background(internal_colors::fg_overlay_3(theme));
-        } else if hover_state.is_hovered() {
-            container = container.with_background(internal_colors::neutral_1(theme));
-        }
-        container.finish()
-    })
-    .finish()
 }
 
 /// Cortex: SideQuest-style "+" button pinned to the bottom of the vertical
@@ -1842,7 +1744,6 @@ fn render_vertical_tabs_panel_with_options(
         .with_cross_axis_alignment(CrossAxisAlignment::Stretch)
         .with_child(render_control_bar(
             state,
-            workspace,
             &workspace.vertical_tabs_search_input,
             app,
         ))

@@ -620,6 +620,13 @@ const TOGGLE_RESOURCE_CENTER_KEYBINDING_NAME: &str = "workspace:toggle_resource_
 /// `SavePosition` wrapper and the safe-zone rect lookup.
 const NEW_SESSION_SIDECAR_POSITION_ID: &str = "new_session_sidecar";
 const NEW_SESSION_SIDECAR_WIDTH: f32 = 300.;
+
+/// Cortex: position ID + width for the projects-picker → Tab Configs hover
+/// fly-out. Same role as the new-session sidecar but populated with
+/// `WorkspaceAction` items so clicks dispatch directly.
+const PROJECTS_PICKER_TAB_CONFIGS_FLYOUT_POSITION_ID: &str =
+    "projects_picker_tab_configs_flyout";
+const PROJECTS_PICKER_TAB_CONFIGS_FLYOUT_WIDTH: f32 = 268.;
 const NEW_SESSION_SIDECAR_SEARCH_BOX_HEIGHT: f32 = 32.;
 const NEW_SESSION_SIDECAR_SEARCH_BOX_HORIZONTAL_PADDING: f32 = 12.;
 const NEW_SESSION_SIDECAR_SEARCH_BOX_VERTICAL_PADDING: f32 = 6.;
@@ -1148,6 +1155,12 @@ pub struct Workspace {
     /// orchestration cards' "New API key…" flow. Cloud mode renders the
     /// FTUX view inline and does not use this.
     create_auth_secret_modal: Option<ViewHandle<Modal<AuthSecretFtuxView>>>,
+    /// Cortex: hover fly-out shown next to the "Tab Configs" row in the bottom
+    /// projects-picker menu. Populated with the same items as the regular
+    /// Tab Configs menu (`unified_new_session_menu_items`) but kept in its own
+    /// view handle so it can render alongside the projects picker.
+    projects_picker_tab_configs_flyout: ViewHandle<Menu<WorkspaceAction>>,
+    show_projects_picker_tab_configs_flyout: bool,
 }
 
 /// Returns the cwd of the first terminal leaf reachable from a snapshot tree,
@@ -1240,12 +1253,17 @@ impl Workspace {
     fn close_new_session_dropdown_menu(&mut self, ctx: &mut ViewContext<Self>) {
         self.show_new_session_dropdown_menu = None;
         self.show_projects_picker_menu = false;
+        self.show_projects_picker_tab_configs_flyout = false;
         self.tab_config_action_sidecar_item = None;
         self.clear_worktree_sidecar_state(ctx);
         self.new_session_dropdown_menu.update(ctx, |menu, _| {
             menu.set_safe_zone_target(None);
             menu.set_submenu_being_shown_for_item_index(None);
         });
+        self.projects_picker_tab_configs_flyout
+            .update(ctx, |menu, view_ctx| {
+                menu.reset_selection(view_ctx);
+            });
         ctx.notify();
     }
 
@@ -2707,6 +2725,25 @@ impl Workspace {
         let (tab_right_click_menu, new_session_dropdown_menu, new_session_sidecar_menu) =
             Self::build_menus(ctx);
 
+        // Cortex: hover fly-out anchored to the "Tab Configs" row in the
+        // projects-picker menu. Populated lazily with the same items as the
+        // regular Tab Configs menu; clicks dispatch through Menu's standard
+        // pipeline (no `without_item_action_dispatch`).
+        let projects_picker_tab_configs_flyout = ctx.add_typed_action_view(|_ctx| {
+            let mut menu = Menu::new()
+                .with_width(PROJECTS_PICKER_TAB_CONFIGS_FLYOUT_WIDTH)
+                .with_menu_variant(crate::menu::MenuVariant::scrollable())
+                .with_ignore_hover_when_covered();
+            menu.set_height(400.);
+            menu
+        });
+        ctx.subscribe_to_view(
+            &projects_picker_tab_configs_flyout,
+            move |me, _, event, ctx| {
+                me.handle_projects_picker_tab_configs_flyout_event(event, ctx);
+            },
+        );
+
         // Subscribe to network changes
         ctx.subscribe_to_model(
             &NetworkStatus::handle(ctx),
@@ -3329,6 +3366,8 @@ impl Workspace {
             new_session_sidecar_add_repo_mouse_state: Default::default(),
             tab_config_action_sidecar_item: None,
             tab_config_action_sidecar_mouse_states: Default::default(),
+            projects_picker_tab_configs_flyout,
+            show_projects_picker_tab_configs_flyout: false,
             remove_tab_config_confirmation_dialog:
                 Self::build_remove_tab_config_confirmation_dialog(ctx),
             handoff_environment_creation_modal: None,
@@ -6632,6 +6671,14 @@ impl Workspace {
             }
             menu_items.push(item.into_item());
         }
+        // Cortex: append a "Tab Configs" submenu row that opens the regular
+        // Tab Configs menu as a hover fly-out. The chevron and lack of an
+        // `on_select_action` come from `new_submenu`; hover wiring lives in
+        // `update_new_session_sidecar`.
+        if FeatureFlag::TabConfigs.is_enabled() {
+            menu_items.push(MenuItem::Separator);
+            menu_items.push(MenuItemFields::new_submenu("Configs").into_item());
+        }
         // TODO(cortex,reskin-vertical-tabs-step-2): append a separator + a
         // "Open a directory…" row that launches a directory navigator and
         // opens a tab in the chosen path with a neutral default color.
@@ -9370,8 +9417,24 @@ impl Workspace {
                 });
                 ctx.notify();
             }
+            if self.show_projects_picker_tab_configs_flyout {
+                self.hide_projects_picker_tab_configs_flyout(ctx);
+            }
             return;
         };
+
+        // Cortex: in projects-picker mode, only the "Tab Configs" row uses
+        // the fly-out — every other row clears it. Short-circuit before the
+        // regular Tab Configs sidecar matching below so we don't mis-route.
+        if self.show_projects_picker_menu {
+            if label == "Configs" {
+                self.configure_projects_picker_tab_configs_flyout(hovered_index, ctx);
+            } else {
+                self.hide_projects_picker_tab_configs_flyout(ctx);
+            }
+            ctx.notify();
+            return;
+        }
 
         match label.as_str() {
             "New worktree config" => {
@@ -9406,6 +9469,62 @@ impl Workspace {
         }
 
         ctx.notify();
+    }
+
+    /// Cortex: populate and show the Tab Configs hover fly-out for the
+    /// projects-picker menu. Mirrors `configure_worktree_new_session_sidecar`
+    /// but uses `unified_new_session_menu_items` so the contents match the
+    /// regular Tab Configs menu, and dispatches via Menu's standard pipeline.
+    fn configure_projects_picker_tab_configs_flyout(
+        &mut self,
+        hovered_index: usize,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        let items = self.unified_new_session_menu_items(ctx);
+        self.projects_picker_tab_configs_flyout
+            .update(ctx, |menu, view_ctx| {
+                menu.set_items(items, view_ctx);
+                menu.reset_selection(view_ctx);
+            });
+        self.show_projects_picker_tab_configs_flyout = true;
+
+        let flyout_rect = ctx.element_position_by_id_at_last_frame(
+            self.window_id,
+            PROJECTS_PICKER_TAB_CONFIGS_FLYOUT_POSITION_ID,
+        );
+        self.new_session_dropdown_menu.update(ctx, |menu, _| {
+            menu.set_safe_zone_target(flyout_rect);
+            menu.set_submenu_being_shown_for_item_index(Some(hovered_index));
+        });
+    }
+
+    fn hide_projects_picker_tab_configs_flyout(&mut self, ctx: &mut ViewContext<Self>) {
+        if !self.show_projects_picker_tab_configs_flyout {
+            return;
+        }
+        self.show_projects_picker_tab_configs_flyout = false;
+        self.new_session_dropdown_menu.update(ctx, |menu, _| {
+            menu.set_safe_zone_target(None);
+            menu.set_submenu_being_shown_for_item_index(None);
+        });
+    }
+
+    fn handle_projects_picker_tab_configs_flyout_event(
+        &mut self,
+        event: &MenuEvent,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        if let MenuEvent::Close { via_select_item } = event {
+            if *via_select_item {
+                // The flyout's item already dispatched its action through
+                // Menu's pipeline; close the parent picker too so the user
+                // doesn't see a dangling projects picker.
+                self.close_new_session_dropdown_menu(ctx);
+            } else {
+                self.hide_projects_picker_tab_configs_flyout(ctx);
+                ctx.notify();
+            }
+        }
     }
 
     fn handle_tab_bar_overflow_menu_event(
@@ -21578,14 +21697,12 @@ impl Workspace {
     }
 
     /// Computes the list of available left panel views based on current AI settings and feature flags.
+    ///
+    /// Cortex order: ProjectExplorer is leftmost (and the default for fresh windows), with the
+    /// agent ConversationListView demoted to the right end so it stays available without
+    /// monopolizing the default slot.
     fn compute_left_panel_views(ctx: &AppContext) -> Vec<ToolPanelView> {
         let mut views = vec![];
-        if FeatureFlag::AgentViewConversationListView.is_enabled()
-            && AISettings::as_ref(ctx).is_any_ai_enabled(ctx)
-            && *AISettings::as_ref(ctx).show_conversation_history
-        {
-            views.push(ToolPanelView::ConversationListView);
-        }
 
         if cfg!(feature = "local_fs") && *CodeSettings::as_ref(ctx).show_project_explorer.value() {
             views.push(ToolPanelView::ProjectExplorer);
@@ -21601,6 +21718,13 @@ impl Workspace {
         if WarpDriveSettings::is_warp_drive_enabled(ctx) {
             views.push(ToolPanelView::WarpDrive);
         }
+        if FeatureFlag::AgentViewConversationListView.is_enabled()
+            && AISettings::as_ref(ctx).is_any_ai_enabled(ctx)
+            && *AISettings::as_ref(ctx).show_conversation_history
+        {
+            views.push(ToolPanelView::ConversationListView);
+        }
+
         views
     }
 
@@ -24357,33 +24481,17 @@ impl View for Workspace {
                 && self.vertical_tabs_panel_open;
 
             if is_vertical {
-                // Cortex: when the dropdown is the projects picker (opened from
-                // the bottom + button), anchor it ABOVE that button. Otherwise
-                // anchor below the top + button as Warp does.
-                let (anchor_id, offset, parent_anchor, child_anchor) =
-                    if self.show_projects_picker_menu {
-                        (
-                            vertical_tabs::VERTICAL_TABS_BOTTOM_ADD_TAB_POSITION_ID,
-                            vec2f(0., -4.),
-                            PositionedElementAnchor::TopLeft,
-                            ChildAnchor::BottomLeft,
-                        )
-                    } else {
-                        (
-                            vertical_tabs::VERTICAL_TABS_ADD_TAB_POSITION_ID,
-                            vec2f(0., 4.),
-                            PositionedElementAnchor::BottomLeft,
-                            ChildAnchor::TopLeft,
-                        )
-                    };
+                // Cortex: with the top "+" button gone, both the projects-picker
+                // and keybinding-triggered Tab Configs menus anchor above the
+                // bottom "+" button.
                 stack.add_positioned_overlay_child(
                     ChildView::new(&self.new_session_dropdown_menu).finish(),
                     OffsetPositioning::offset_from_save_position_element(
-                        anchor_id,
-                        offset,
+                        vertical_tabs::VERTICAL_TABS_BOTTOM_ADD_TAB_POSITION_ID,
+                        vec2f(0., -4.),
                         PositionedElementOffsetBounds::WindowBySize,
-                        parent_anchor,
-                        child_anchor,
+                        PositionedElementAnchor::TopLeft,
+                        ChildAnchor::BottomLeft,
                     ),
                 );
             } else {
@@ -24533,6 +24641,58 @@ impl View for Workspace {
                     );
                 }
             }
+
+            // Cortex: projects-picker → Tab Configs hover fly-out. Anchored to
+            // the hovered "Tab Configs" row in the projects picker, mirroring
+            // the new-session sidecar's positioning logic.
+            if self.show_projects_picker_tab_configs_flyout {
+                let anchor_label = self.new_session_dropdown_menu.read(app, |menu, _| {
+                    menu.hovered_index().and_then(|idx| {
+                        menu.items().get(idx).and_then(|item| match item {
+                            MenuItem::Item(fields) => Some(fields.label().to_string()),
+                            _ => None,
+                        })
+                    })
+                });
+
+                if let Some(anchor_label) = anchor_label {
+                    let flyout_element = SavePosition::new(
+                        ChildView::new(&self.projects_picker_tab_configs_flyout).finish(),
+                        PROJECTS_PICKER_TAB_CONFIGS_FLYOUT_POSITION_ID,
+                    )
+                    .finish();
+
+                    let render_left = self.should_render_sidecar_left(
+                        &anchor_label,
+                        PROJECTS_PICKER_TAB_CONFIGS_FLYOUT_WIDTH,
+                        app,
+                    );
+                    let (offset, parent_anchor, child_anchor) = if render_left {
+                        (
+                            vec2f(-4., 0.),
+                            PositionedElementAnchor::TopLeft,
+                            ChildAnchor::TopRight,
+                        )
+                    } else {
+                        (
+                            vec2f(4., 0.),
+                            PositionedElementAnchor::TopRight,
+                            ChildAnchor::TopLeft,
+                        )
+                    };
+
+                    stack.add_positioned_overlay_child(
+                        flyout_element,
+                        OffsetPositioning::offset_from_save_position_element(
+                            anchor_label,
+                            offset,
+                            PositionedElementOffsetBounds::WindowByPosition,
+                            parent_anchor,
+                            child_anchor,
+                        ),
+                    );
+                }
+            }
         }
 
         if self.current_workspace_state.is_command_search_open {
@@ -24633,14 +24793,17 @@ impl View for Workspace {
             let chip =
                 self.render_session_config_tab_config_chip(use_vertical, Appearance::as_ref(app));
             if use_vertical {
+                // Cortex: chip points at the bottom "+" button (the Tab Configs
+                // entry point in vertical mode). Sit just to the right of it,
+                // vertically centered.
                 stack.add_positioned_overlay_child(
                     chip,
                     OffsetPositioning::offset_from_save_position_element(
-                        vertical_tabs::VERTICAL_TABS_ADD_TAB_POSITION_ID,
-                        vec2f(8., -20.),
+                        vertical_tabs::VERTICAL_TABS_BOTTOM_ADD_TAB_POSITION_ID,
+                        vec2f(8., 0.),
                         PositionedElementOffsetBounds::WindowByPosition,
                         PositionedElementAnchor::MiddleRight,
-                        ChildAnchor::TopLeft,
+                        ChildAnchor::MiddleLeft,
                     ),
                 );
             } else {

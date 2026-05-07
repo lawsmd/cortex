@@ -490,6 +490,121 @@ fn test_worktree_sidecar_close_via_select_item_executes_from_workspace() {
     });
 }
 
+/// Cortex: hovering the "Tab Configs" row in the projects-picker menu opens
+/// the hover fly-out populated with the regular Tab Configs items.
+#[test]
+fn test_projects_picker_shows_tab_configs_flyout_on_hover() {
+    let _tab_configs_guard = FeatureFlag::TabConfigs.override_enabled(true);
+
+    App::test((), |mut app| async move {
+        initialize_app(&mut app);
+
+        let workspace = mock_workspace(&mut app);
+
+        workspace.update(&mut app, |workspace, ctx| {
+            workspace.toggle_projects_picker_menu(Vector2F::zero(), ctx);
+
+            let tab_configs_index = workspace
+                .new_session_dropdown_menu
+                .read(ctx, |menu, _| {
+                    menu.items().iter().position(|item| {
+                        matches!(
+                            item,
+                            MenuItem::Item(fields) if fields.label() == "Configs"
+                        )
+                    })
+                })
+                .expect("expected Tab Configs row in projects picker");
+
+            workspace
+                .new_session_dropdown_menu
+                .update(ctx, |menu, view_ctx| {
+                    menu.handle_action(
+                        &crate::menu::MenuAction::HoverSubmenuWithChildren(
+                            0,
+                            crate::menu::SelectAction::Index {
+                                row: tab_configs_index,
+                                item: 0,
+                            },
+                        ),
+                        view_ctx,
+                    );
+                });
+            workspace.update_new_session_sidecar(ctx);
+        });
+
+        workspace.read(&app, |workspace, ctx| {
+            assert!(workspace.show_projects_picker_menu);
+            assert!(workspace.show_projects_picker_tab_configs_flyout);
+            let flyout_len = workspace
+                .projects_picker_tab_configs_flyout
+                .read(ctx, |menu, _| menu.items().len());
+            assert!(
+                flyout_len > 0,
+                "fly-out should be populated with Tab Configs items"
+            );
+        });
+    });
+}
+
+/// Cortex: clicking an item in the Tab Configs fly-out closes both the
+/// fly-out and the parent projects-picker menu (and dispatches the action).
+#[test]
+fn test_projects_picker_tab_configs_flyout_close_via_select_closes_picker() {
+    let _tab_configs_guard = FeatureFlag::TabConfigs.override_enabled(true);
+
+    App::test((), |mut app| async move {
+        initialize_app(&mut app);
+
+        let workspace = mock_workspace(&mut app);
+
+        workspace.update(&mut app, |workspace, ctx| {
+            workspace.toggle_projects_picker_menu(Vector2F::zero(), ctx);
+
+            let tab_configs_index = workspace
+                .new_session_dropdown_menu
+                .read(ctx, |menu, _| {
+                    menu.items().iter().position(|item| {
+                        matches!(
+                            item,
+                            MenuItem::Item(fields) if fields.label() == "Configs"
+                        )
+                    })
+                })
+                .expect("expected Tab Configs row in projects picker");
+
+            workspace
+                .new_session_dropdown_menu
+                .update(ctx, |menu, view_ctx| {
+                    menu.handle_action(
+                        &crate::menu::MenuAction::HoverSubmenuWithChildren(
+                            0,
+                            crate::menu::SelectAction::Index {
+                                row: tab_configs_index,
+                                item: 0,
+                            },
+                        ),
+                        view_ctx,
+                    );
+                });
+            workspace.update_new_session_sidecar(ctx);
+
+            workspace.handle_projects_picker_tab_configs_flyout_event(
+                &MenuEvent::Close {
+                    via_select_item: true,
+                },
+                ctx,
+            );
+        });
+
+        workspace.read(&app, |workspace, _| {
+            assert!(workspace.show_new_session_dropdown_menu.is_none());
+            assert!(!workspace.show_projects_picker_menu);
+            assert!(!workspace.show_projects_picker_tab_configs_flyout);
+        });
+    });
+}
+
 #[cfg(feature = "local_fs")]
 #[test]
 fn test_worktree_sidecar_search_editor_enter_executes_selection() {
