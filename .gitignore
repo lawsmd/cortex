@@ -84,5 +84,5 @@ __pycache__/
 # Personal rebuild-cortex skill — local-only, not for the public repo.
 /.agents/skills/rebuild-cortex/
 
-# Personal update-cortex-prod skill — local-only, not for the public repo.
-/.agents/skills/update-cortex-prod/
+# Personal updatecortex skill — local-only, not for the public repo.
+/.agents/skills/updatecortex/

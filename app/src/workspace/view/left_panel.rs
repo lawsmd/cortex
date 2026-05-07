@@ -1222,10 +1222,7 @@ impl View for LeftPanelView {
                 if let Some(file_tree_view) = self.active_file_tree_view(app) {
                     Shrinkable::new(
                         1.0,
-                        Container::new(ChildView::new(&file_tree_view).finish())
-                            .with_padding_left(2.)
-                            .with_padding_right(2.)
-                            .finish(),
+                        Container::new(ChildView::new(&file_tree_view).finish()).finish(),
                     )
                     .finish()
                 } else {
@@ -1287,7 +1284,7 @@ impl View for LeftPanelView {
                 .with_height(PANE_HEADER_HEIGHT)
                 .finish(),
             )
-            .with_padding_left(10.)
+            .with_padding_left(4.)
             .with_padding_right(HEADER_EDGE_PADDING)
             .finish();
 
