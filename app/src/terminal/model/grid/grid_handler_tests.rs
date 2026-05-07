@@ -2379,3 +2379,82 @@ fn columns_returns_safe_min_during_shrink_resize_window() {
         }
     }
 }
+
+// Regression test for the prod crash on 2026-05-06 (build 20260506.230327),
+// where `RowIterator::next` panicked with "Tried to mutate cell past the end
+// of a row" during a CALayer paint pass, after the user closed a
+// horizontally-split sibling pane and typed in a remaining terminal pane
+// that was running a CLI agent (`enable_full_grid_clear_behavior` set on
+// `CLIAgentSessionsModelEvent::Started`).
+//
+// `resize_storage`'s early-exit branch for alt-screen / CLI-agent TUI panes
+// resized `grid_storage` but did not update `flat_storage.columns`. A later
+// `scroll_region_up` then pushed a row at the new (wider) grid width into
+// flat_storage via `push_rows_internal`, whose unchecked grapheme writer
+// records cells without enforcing the storage's column budget. The next
+// paint built `Row::new(flat_storage.columns)` in `RowIterator::new` and
+// panicked when iteration walked past the end of that under-sized row.
+//
+// We reproduce that exact sequence: pre-existing scrollback at the old
+// width, enable full-grid-clear behavior, resize wider (mirroring a sibling
+// pane closing), then spill new rows at the new width into flat_storage and
+// walk every row through the same path the renderer uses.
+#[test]
+fn resize_under_full_grid_clear_behavior_keeps_flat_storage_columns_in_sync() {
+    let mut grid = GridHandler::new_for_test_with_scroll_limit(2, 5, MAX_SCROLL_LIMIT);
+
+    // Pre-existing scrollback in flat_storage at the old (5-col) width.
+    grid.input_at_cursor("aaaaa");
+    grid.carriage_return();
+    grid.linefeed();
+    grid.input_at_cursor("bbbbb");
+    grid.carriage_return();
+    grid.linefeed();
+    grid.input_at_cursor("ccccc");
+    grid.carriage_return();
+    grid.linefeed();
+    grid.input_at_cursor("ddddd");
+    assert!(grid.history_size() > 0, "test needs scrollback in flat_storage");
+
+    // CLI-agent TUI mode: the state the user's pane was in.
+    grid.enable_full_grid_clear_behavior();
+
+    // Closing a horizontally-split sibling pane widens the remaining pane.
+    let new_cols = 8;
+    grid.resize(SizeInfo::new_without_font_metrics(2, new_cols));
+
+    // Pre-fix, flat_storage.columns stayed at 5 because resize_storage's
+    // early-exit branch only resized grid_storage. Post-fix it tracks
+    // grid_storage at the new width.
+    assert_eq!(
+        grid.flat_storage.columns(),
+        new_cols,
+        "flat_storage must follow grid_storage's new width through the early-exit branch",
+    );
+    assert_eq!(grid.grid.columns(), new_cols);
+
+    // Now spill rows at the *new* width into flat_storage. Pre-fix this
+    // pushes 8-cell rows into a flat_storage that still records 5 columns,
+    // and the next grid.row() materialization panics in RowIterator::next.
+    grid.input_at_cursor("eeeeeeee");
+    grid.carriage_return();
+    grid.linefeed();
+    grid.input_at_cursor("ffffffff");
+    grid.carriage_return();
+    grid.linefeed();
+    grid.input_at_cursor("gggggggg");
+
+    // Walk every row through the same path the renderer uses. Pre-fix this
+    // panics inside RowIterator::next; post-fix it returns rows of the new
+    // width with no panic.
+    for row_idx in 0..grid.total_rows() {
+        let Some(row) = grid.row(row_idx) else {
+            continue;
+        };
+        assert_eq!(
+            row.len(),
+            new_cols,
+            "row {row_idx} should have {new_cols} cells after a resize that kept storage backends in sync",
+        );
+    }
+}
