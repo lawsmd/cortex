@@ -8382,19 +8382,32 @@ impl TerminalView {
             }
         }
 
-        // Eager-clear the AttentionNeeded breath wash: typing into a pane is
-        // a stronger "I see it" signal than `PaneFocused` (whose handler at
+        // Eager-clear the AttentionNeeded breath wash AND the eager
+        // Blocked→InProgress reset: typing into a pane is a stronger "I
+        // see it" signal than `PaneFocused` (whose handler at
         // app/src/workspace/view.rs:3499 has a guard that can lose races
         // when the workspace's `active_view_id` lags the pane-group's focus
-        // event). Without this, a fast user can navigate to a B-pulsing tab
-        // and submit a fresh prompt before either the focus path runs or the
-        // hook bridge's PromptSubmit OSC 777 lands — leaving the tab stuck
-        // on AttentionNeeded for the duration of the race.
-        // `mark_session_viewed` short-circuits when the flag isn't set, so
-        // this is a cheap no-op for sessions that aren't pulsing.
+        // event). Without the breath-clear, a fast user can navigate to a
+        // B-pulsing tab and submit a fresh prompt before either the focus
+        // path runs or the hook bridge's PromptSubmit OSC 777 lands —
+        // leaving the tab stuck on AttentionNeeded for the duration of the
+        // race.
+        //
+        // The unblock side handles a different race: the cortex hook
+        // bridge has no `PermissionReplied`/`ToolComplete` signal (only
+        // plugin-attached sessions emit those), so after a permission
+        // approval claude can run for tens of seconds with status frozen
+        // at `Blocked`. Tier 1 keeps reporting AttentionNeeded the whole
+        // time. Typing the approval (arrow keys + enter in claude's plan
+        // UI, or "1" in a permission prompt) routes through this funnel,
+        // so we treat it as the de-facto reply signal.
+        // Both helpers short-circuit when their state isn't armed, so
+        // this is a cheap no-op for sessions that aren't pulsing or
+        // blocked.
         let view_id = ctx.view_id();
         CLIAgentSessionsModel::handle(ctx).update(ctx, |sessions, ctx| {
             sessions.mark_session_viewed(view_id, ctx);
+            sessions.mark_session_unblocked_by_input(view_id, ctx);
         });
 
         let bytes = data.into();
