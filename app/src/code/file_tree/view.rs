@@ -179,7 +179,12 @@ pub fn init(app: &mut AppContext) {
 
 // Constants matching the Drive panel styling
 const ITEM_FONT_SIZE: f32 = 14.;
-const FOLDER_INDENT: f32 = 16.; // Indentation per folder level
+// Square slot reserved for the chevron and the file/folder icon. Kept at 16 so glyph sizing is
+// independent of the per-level indent below.
+const FOLDER_INDENT: f32 = 16.;
+// Cortex: per-depth indent applied to nested rows. Trimmed from the slot size so deeply-nested
+// paths fit at the minimum stacked sidebar width.
+const FOLDER_INDENT_PER_LEVEL: f32 = 10.;
 const ITEM_PADDING: f32 = 4.;
 
 /// Represents a single item in the flattened file tree list.
@@ -1819,7 +1824,7 @@ impl FileTreeView {
             header_row.add_child(
                 Container::new(
                     ConstrainedBox::new(Empty::new().finish())
-                        .with_width(render_state.depth as f32 * FOLDER_INDENT)
+                        .with_width(render_state.depth as f32 * FOLDER_INDENT_PER_LEVEL)
                         .finish(),
                 )
                 .finish(),
@@ -1850,7 +1855,7 @@ impl FileTreeView {
                     .with_height(FOLDER_INDENT)
                     .finish(),
             )
-            .with_margin_right(4.)
+            .with_margin_right(2.)
             .finish(),
         );
 
@@ -1867,7 +1872,7 @@ impl FileTreeView {
                     .with_height(FOLDER_INDENT)
                     .finish(),
             )
-            .with_margin_right(8.)
+            .with_margin_right(6.)
             .finish(),
         );
 
@@ -1914,7 +1919,7 @@ impl FileTreeView {
         let mut container = Container::new(header_row.finish())
             .with_padding_top(ITEM_PADDING)
             .with_padding_bottom(ITEM_PADDING)
-            .with_padding_left(8.)
+            .with_padding_left(4.)
             .with_padding_right(8.);
 
         if let Some(background_color) = item_highlight_state.background_color(appearance) {
@@ -1964,7 +1969,7 @@ impl FileTreeView {
         let mut container = Container::new(text)
             .with_padding_top(ITEM_PADDING)
             .with_padding_bottom(ITEM_PADDING)
-            .with_padding_left(8.)
+            .with_padding_left(4.)
             .with_padding_right(8.)
             .with_background(appearance.theme().background());
 
@@ -2686,9 +2691,10 @@ impl FileTreeView {
 
         let main_content = Align::new(content_column).top_center().finish();
         let container = Container::new(main_content)
-            // we have padding from the left panel toolbelt so we don't need top padding here
+            // we have padding from the left panel toolbelt so we don't need top padding here.
+            // Cortex: dropped horizontal padding here; row-level 4px now sits 4px inside the
+            // vertical-tab-bar GROUP_HORIZONTAL_PADDING reference (8px) to reclaim sidebar space.
             .with_padding_bottom(12.)
-            .with_horizontal_padding(8.)
             .finish();
 
         let positioned_content = SavePosition::new(container, &self.position_id).finish();
@@ -2864,8 +2870,12 @@ impl FileTreeView {
         });
 
         // Create placeholder lines with appropriate styling
-        let placeholder_lines_with_styling =
-            placeholder_lines.map(|line| Container::new(line).with_horizontal_padding(8.).finish());
+        let placeholder_lines_with_styling = placeholder_lines.map(|line| {
+            Container::new(line)
+                .with_padding_left(4.)
+                .with_padding_right(8.)
+                .finish()
+        });
 
         // Create the main flex column with the placeholder item and all placeholder lines
         let mut main_column = Flex::column()
