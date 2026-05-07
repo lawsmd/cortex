@@ -70,8 +70,16 @@ impl GridHandler {
         {
             // We should never finish the alt screen grid.
             debug_assert!(!self.ansi_handler_state.is_alt_screen || !self.finished);
-            // We can delegate to the old grid resizing logic, as there's no
-            // flat storage for the alt screen.
+            // We can delegate to the old grid resizing logic for the visible
+            // rows, but flat_storage's column count must still track
+            // grid_storage's. The CLI-agent-TUI branch runs on the *primary*
+            // grid, which has scrollback in flat_storage; the alt-screen
+            // branch can also have pre-existing scrollback from before the
+            // alt screen was entered. Without this, a later
+            // `scroll_region_up` pushes a row at the new (wider) grid width
+            // into a flat_storage still recording the old width, the
+            // unchecked grapheme writer overflows the row's column budget,
+            // and the next paint panics inside `RowIterator::next`.
             self.grid.resize(false, num_rows, num_cols, self.finished);
 
             // Keep flat_storage's column count in sync so that rows
