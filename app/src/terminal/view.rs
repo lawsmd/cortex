@@ -10887,7 +10887,33 @@ impl TerminalView {
         match event {
             ModelEvent::TerminalClear => {
                 self.handle_terminal_wakeup((), ctx);
-                self.update_scroll_position_locking(ScrollPositionUpdate::AfterClear, ctx);
+                // Cortex divergence: when a running CLI agent (Claude Code, Codex, Cursor,
+                // Gemini) emits a full-screen erase — typically on `/clear` — scroll its
+                // block to the top of the viewport so the now-empty agent prompt sits at
+                // the top of the pane (WezTerm-style). Prior blocks stay in scrollback.
+                // Gated on a CortexSetting and skipped inside alt-screen so vim/less are
+                // unaffected; falls back to upstream's `AfterClear` behavior otherwise,
+                // including for plain shell `clear`.
+                let cli_agent_scroll = if *crate::settings::CortexSettings::as_ref(ctx)
+                    .cli_agent_clear_scrolls_to_top
+                {
+                    let model = self.model.lock();
+                    if !model.is_alt_screen_active()
+                        && self.detect_cli_agent_from_model(&model, ctx).is_some()
+                    {
+                        Some(ScrollPositionUpdate::ScrollToTopOfBlock {
+                            block_index: model.block_list().active_block_index(),
+                        })
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                };
+                self.update_scroll_position_locking(
+                    cli_agent_scroll.unwrap_or(ScrollPositionUpdate::AfterClear),
+                    ctx,
+                );
                 ctx.notify();
             }
             ModelEvent::Title(title) => {

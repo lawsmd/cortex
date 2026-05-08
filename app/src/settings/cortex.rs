@@ -253,5 +253,14 @@ define_settings_group!(CortexSettings, settings: [
         private: false,
         toml_path: "cortex.tabs.title.italic",
         description: "Render tab titles in italic.",
+    },
+    cli_agent_clear_scrolls_to_top: CliAgentClearScrollsToTop {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.terminal.cli_agent_clear_scrolls_to_top",
+        description: "When a running CLI agent (Claude Code, Codex, Cursor, Gemini) emits a full-screen erase (ESC[2J — typically /clear), scroll the viewport so the agent's block is at the top of the visible pane. Prior blocks remain in scrollback. Off restores upstream Warp behavior.",
     }
 ]);
