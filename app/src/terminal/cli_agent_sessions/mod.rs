@@ -465,7 +465,8 @@ impl CLIAgentSessionsModel {
             .filter(|s| s.agent == agent)
         {
             // Upgrade existing session with plugin context.
-            session.status = CLIAgentSessionStatus::InProgress;
+            // Idle-seed status; see new-session-path comment below.
+            session.status = CLIAgentSessionStatus::Success;
             session.listener = Some(listener);
             session.plugin_version = plugin_version;
             session.remote_host = remote_host;
@@ -481,7 +482,19 @@ impl CLIAgentSessionsModel {
             terminal_view_id,
             CLIAgentSession {
                 agent,
-                status: CLIAgentSessionStatus::InProgress,
+                // Idle seed. A plugin listener attaches on plugin handshake
+                // (every `clauded` launch with the warp@claude-code-warp
+                // plugin), which is NOT the same as "the agent has started a
+                // turn." The first real PromptSubmit / PermissionRequest /
+                // Stop overwrites this via apply_event. Seeding InProgress
+                // was the source of the idle-launch comet bug: the Tier 1
+                // gate at app/src/tab.rs trusts session.status whenever
+                // listener.is_some() (the "bridged" escape hatch), so a
+                // placeholder InProgress fired Running before the user typed
+                // anything. Success + attention_pending=false yields None in
+                // Tier 1 — correct idle. See docs/ai/external-status-injection.md
+                // § Phase E.
+                status: CLIAgentSessionStatus::Success,
                 session_context: CLIAgentSessionContext {
                     cwd,
                     project,
