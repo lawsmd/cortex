@@ -22,6 +22,7 @@ use warpui::windowing::{
 
 const APP_BECAME_ACTIVE_DEBOUNCE: Duration = Duration::from_secs(15);
 
+use pathfinder_color::ColorU;
 use pathfinder_geometry::vector::vec2f;
 use ui_components::{button, Component as _, Options as _};
 use warp_core::ui::{appearance::Appearance, theme::WarpTheme};
@@ -401,7 +402,19 @@ impl View for AgentOnboardingView {
 
         let mut stack = Stack::new();
 
-        if let Some(img) = theme.background_image() {
+        let selected_slide = self.onboarding_state.as_ref(app).step();
+        let is_intro = matches!(selected_slide, OnboardingStep::Intro);
+
+        if is_intro {
+            // Cortex reskin: intro slide gets a plain black background instead
+            // of the cosmic theme image. Other onboarding steps keep their
+            // existing theme-driven background until they're reskinned.
+            stack.add_child(
+                Container::new(Empty::new().finish())
+                    .with_background_color(ColorU::black())
+                    .finish(),
+            );
+        } else if let Some(img) = theme.background_image() {
             // Render the image behind everything.
             stack.add_child(
                 Shrinkable::new(
@@ -428,7 +441,6 @@ impl View for AgentOnboardingView {
             );
         }
 
-        let selected_slide = self.onboarding_state.as_ref(app).step();
         let slide = match selected_slide {
             OnboardingStep::Intro => ChildView::new(&self.intro_slide).finish(),
             OnboardingStep::ThemePicker => ChildView::new(&self.theme_picker_slide).finish(),
