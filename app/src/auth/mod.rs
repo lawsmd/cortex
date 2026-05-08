@@ -34,7 +34,7 @@ pub mod web_handoff;
 /// The login screen is rendered from `app/src/auth/login_slide.rs`, gated
 /// by the auth-onboarding decision in `app/src/root_view.rs` (search for
 /// this constant to find the call site).
-pub const SKIP_WARP_ACCOUNT_LOGIN: bool = true;
+pub const SKIP_WARP_ACCOUNT_LOGIN: bool = false;
 
 use crate::ai::agent_conversations_model::AgentConversationsModel;
 use crate::ai::blocklist::agent_view::orchestration_pill_bar_model::OrchestrationPillBarModel;

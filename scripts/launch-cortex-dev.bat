@@ -180,7 +180,7 @@ REM `warposs://` OAuth callback re-launches the binary - producing an
 REM infinite restart loop because dev builds lack single-instance IPC.
 set CARGO_TERM_COLOR=never
 set CARGO_TERM_PROGRESS_WHEN=never
-powershell -NoProfile -Command "$enc=New-Object System.Text.UTF8Encoding $false; [Console]::OutputEncoding=$enc; $sw=New-Object System.IO.StreamWriter('%LOG_PATH%',$true,$enc); $sw.AutoFlush=$true; $start=Get-Date; try { & { cmd /c 'cargo run --bin warp-oss --features gui,skip_login --timings 2>&1' ; $script:rc=$LASTEXITCODE } | ForEach-Object { Write-Host $_; $sw.WriteLine($_) }; $line='=== Session duration: {0:hh\:mm\:ss} ===' -f ((Get-Date)-$start); Write-Host $line; $sw.WriteLine($line) } finally { $sw.Close() }; exit $script:rc"
+powershell -NoProfile -Command "$enc=New-Object System.Text.UTF8Encoding $false; [Console]::OutputEncoding=$enc; $sw=New-Object System.IO.StreamWriter('%LOG_PATH%',$true,$enc); $sw.AutoFlush=$true; $start=Get-Date; try { & { cmd /c 'cargo run --bin warp-oss --features gui --timings 2>&1' ; $script:rc=$LASTEXITCODE } | ForEach-Object { Write-Host $_; $sw.WriteLine($_) }; $line='=== Session duration: {0:hh\:mm\:ss} ===' -f ((Get-Date)-$start); Write-Host $line; $sw.WriteLine($line) } finally { $sw.Close() }; exit $script:rc"
 
 set CARGO_EXIT=%ERRORLEVEL%
 
