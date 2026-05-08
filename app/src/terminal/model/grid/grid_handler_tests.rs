@@ -2458,3 +2458,55 @@ fn resize_under_full_grid_clear_behavior_keeps_flat_storage_columns_in_sync() {
         );
     }
 }
+
+// Companion regression test for the panic-degrade landed 2026-05-07 in
+// `crates/warp_terminal/src/model/grid/flat_storage/row_iterator.rs`.
+//
+// The three producer-side fixes for the May 6 SIGABRT family (758e515,
+// 06a3ab3, 9372f61) close every *known* path to the divergent state
+// (`grid.columns != flat_storage.columns`, with index entries wider than
+// flat_storage's column budget). This test guards the *consumer-side*
+// safety net: even if a future regression sneaks divergence past the
+// producer fixes, the renderer must log + return None rather than
+// SIGABRT — because the user's prod instance is where they actually live
+// and work, and a crash there costs real work.
+//
+// Forces the divergent state directly via the test-only
+// `force_set_columns_skipping_reflow_for_test`, since production
+// `set_columns` reflows the index and the bug isn't constructible
+// through the normal API after 9372f61.
+#[test]
+fn row_iterator_degrades_when_index_exceeds_storage_columns() {
+    let mut grid = GridHandler::new_for_test_with_scroll_limit(2, 8, MAX_SCROLL_LIMIT);
+
+    // Push rows wide enough that several land in flat_storage as scrollback
+    // at the (correct, matching) 8-column width.
+    grid.input_at_cursor("aaaaaaaa");
+    grid.carriage_return();
+    grid.linefeed();
+    grid.input_at_cursor("bbbbbbbb");
+    grid.carriage_return();
+    grid.linefeed();
+    grid.input_at_cursor("cccccccc");
+    grid.carriage_return();
+    grid.linefeed();
+    grid.input_at_cursor("dddddddd");
+    assert!(grid.history_size() > 0, "test needs scrollback in flat_storage");
+
+    // Force the divergent state: storage now claims 5 columns, but its
+    // existing index entries still describe 8-cell rows. Pre-degrade this
+    // is exactly the state that fired `panic!` in `RowIterator::next`.
+    grid.flat_storage
+        .force_set_columns_skipping_reflow_for_test(5);
+
+    // Walk every row through `grid.row(_)` — the same path the renderer
+    // uses. The point of the test: this must not panic, even though the
+    // index entries describe rows that exceed `flat_storage.columns`.
+    // Post-degrade, `RowIterator::next` logs `[GRID-ROW-DEGRADED]` and
+    // returns `None` for the offending row.
+    for row_idx in 0..grid.total_rows() {
+        // No assertions on contents — the row may be partial or absent.
+        // The contract under test is: no panic.
+        let _ = grid.row(row_idx);
+    }
+}

@@ -285,6 +285,17 @@ impl FlatStorage {
         self.index = Index::rebuild(&self.index, new_columns);
     }
 
+    /// Test-only escape hatch: changes the recorded `columns` count
+    /// without rebuilding the index. Used to construct the divergent
+    /// state (`flat_storage.columns` < cells per row in the index) that
+    /// caused three prod SIGABRTs on 2026-05-06. Production
+    /// [`Self::set_columns`] reflows on change, so the divergent state
+    /// can't be built through the normal API.
+    #[cfg(any(test, feature = "test-util"))]
+    pub fn force_set_columns_skipping_reflow_for_test(&mut self, new_columns: usize) {
+        self.columns = new_columns;
+    }
+
     /// Returns the width of the grid.
     pub fn columns(&self) -> usize {
         self.columns
