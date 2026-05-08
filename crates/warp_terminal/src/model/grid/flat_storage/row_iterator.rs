@@ -89,15 +89,34 @@ impl Iterator for RowIterator<'_> {
             // in the row.
             let idx = row.occ;
             let Some(cell) = row.get_mut(idx) else {
-                log::warn!(
-                    "Tried to mutate cell past the end of a row in RowIterator::next!\n\
-                            \tidx: {idx}\n\
-                            \tlen: {}\n\
-                            \tgrapheme runs: {:?}",
-                    row.len(),
-                    self.storage.index.grapheme_runs_for_row(self.row_index)?
+                // Invariant slip: flat_storage.columns disagrees with the
+                // index's per-row cell count for this row. Pre-2026-05-07
+                // this was a hard panic; three prod SIGABRTs in a 24h window
+                // (all addressed by 758e515 / 06a3ab3 / 9372f61) showed that
+                // the user's prod instance is the worst possible place for
+                // the renderer to die over already-detected-bad state. See
+                // docs/investigations/grid-renderer-panic-degradation.md
+                // for the policy and the diagnostic-field rationale.
+                let grapheme_runs =
+                    self.storage.index.grapheme_runs_for_row(self.row_index)?;
+                let backtrace = std::backtrace::Backtrace::capture();
+                log::error!(
+                    "[GRID-ROW-DEGRADED] flat_storage row index exceeds column \
+                     budget; degrading to partial row for this paint pass.\n\
+                     \tstorage.columns:  {storage_cols}\n\
+                     \trow.len:          {row_len}\n\
+                     \trow.occ:          {row_occ}\n\
+                     \tnext write idx:   {idx}\n\
+                     \trow_index:        {row_index}\n\
+                     \tcurrent_offset:   {current_offset}\n\
+                     \tgrapheme runs:    {grapheme_runs:?}\n\
+                     \tbacktrace:\n{backtrace}",
+                    storage_cols = self.storage.columns,
+                    row_len = row.len(),
+                    row_occ = row.occ,
+                    row_index = self.row_index,
                 );
-                panic!("Tried to mutate cell past the end of a row in RowIterator::next!")
+                return None;
             };
 
             let mut chars = grapheme.chars();
