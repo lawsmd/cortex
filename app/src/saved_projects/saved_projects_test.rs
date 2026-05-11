@@ -31,21 +31,21 @@ fn empty_projects_array_returns_empty() {
 }
 
 #[test]
-fn sorts_by_rank_ascending() {
+fn preserves_file_order() {
     let dir = tempfile::tempdir().unwrap();
     let path = write_json(
         &dir,
         r##"{
             "projects": [
-                { "name": "Beta",  "cwd": "/b", "color": "#aaaaaa", "rank": 3 },
-                { "name": "Alpha", "cwd": "/a", "color": "#bbbbbb", "rank": 1 },
-                { "name": "Gamma", "cwd": "/g", "color": "#cccccc", "rank": 2 }
+                { "name": "Beta",  "cwd": "/b", "color": "#aaaaaa" },
+                { "name": "Alpha", "cwd": "/a", "color": "#bbbbbb" },
+                { "name": "Gamma", "cwd": "/g", "color": "#cccccc" }
             ]
         }"##,
     );
     let projects = load_projects_from(&path);
     let names: Vec<&str> = projects.iter().map(|p| p.name.as_str()).collect();
-    assert_eq!(names, vec!["Alpha", "Gamma", "Beta"]);
+    assert_eq!(names, vec!["Beta", "Alpha", "Gamma"]);
 }
 
 #[test]
@@ -55,7 +55,6 @@ fn round_trip_serde() {
             name: "Acme".into(),
             cwd: PathBuf::from("C:\\projects\\acme-services"),
             color: "#2bd7fb".into(),
-            rank: 2,
         }],
     };
     let serialized = serde_json::to_string(&original).unwrap();
@@ -68,7 +67,6 @@ fn project(name: &str, cwd: &str) -> Project {
         name: name.into(),
         cwd: PathBuf::from(cwd),
         color: "#ff00ff".into(),
-        rank: 0,
     }
 }
 
@@ -124,7 +122,7 @@ fn tilde_expanded_at_load() {
     let dir = tempfile::tempdir().unwrap();
     let path = write_json(
         &dir,
-        r##"{"projects": [{ "name": "Cfg", "cwd": "~/foo/bar", "color": "#999999", "rank": 1 }]}"##,
+        r##"{"projects": [{ "name": "Cfg", "cwd": "~/foo/bar", "color": "#999999" }]}"##,
     );
     let projects = load_projects_from(&path);
     let cwd = &projects[0].cwd;

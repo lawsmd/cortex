@@ -21,7 +21,6 @@ pub struct Project {
     pub name: String,
     pub cwd: PathBuf,
     pub color: String,
-    pub rank: u32,
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -31,10 +30,10 @@ pub struct ProjectsConfig {
 }
 
 /// Reads `~/.warp-oss/projects.json` (or whatever `warp_home_projects_file_path()` resolves
-/// to for the current channel), expands `~` in each `cwd`, and returns the list sorted by
-/// `rank` ascending. Missing file or empty `projects` array → empty vec (debug-logged, not
-/// an error). Malformed JSON → empty vec with an error log so the picker never crashes the
-/// app over a typo.
+/// to for the current channel), expands `~` in each `cwd`, and returns the list in the
+/// order entries appear in the JSON `projects` array (top-of-file first). Missing file or
+/// empty `projects` array → empty vec (debug-logged, not an error). Malformed JSON → empty
+/// vec with an error log so the picker never crashes the app over a typo.
 pub fn load_projects() -> Vec<Project> {
     let Some(path) = warp_core::paths::warp_home_projects_file_path() else {
         return vec![];
@@ -67,7 +66,6 @@ fn load_projects_from(path: &Path) -> Vec<Project> {
             project.cwd = expanded;
         }
     }
-    projects.sort_by_key(|p| p.rank);
     projects
 }
 
