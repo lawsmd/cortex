@@ -443,6 +443,7 @@ impl IntentionSlide {
         "async/png/onboarding/welcome_terminal.png",
     ];
 
+    #[allow(dead_code)]
     fn render_visual(&self, appearance: &Appearance, selected_index: usize) -> Box<dyn Element> {
         let theme = appearance.theme();
 
@@ -499,11 +500,12 @@ impl View for IntentionSlide {
             OnboardingIntention::Terminal => 1,
         };
 
-        // Background is rendered by the parent onboarding view (including background images).
-        layout::static_left(
-            || self.render_content(appearance, selected_index),
-            || self.render_visual(appearance, selected_index),
-        )
+        // Cortex single-column layout: no right-side Warp visual. The content
+        // helper (`slide_content::onboarding_slide_content`) already wraps in
+        // Align so the column is centered V/H within the slide. The upstream-
+        // shaped `render_visual` below is preserved for merge clarity but no
+        // longer reached.
+        self.render_content(appearance, selected_index)
     }
 }
 

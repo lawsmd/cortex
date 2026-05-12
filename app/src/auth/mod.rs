@@ -17,25 +17,6 @@ pub mod user_uid;
 #[cfg(target_family = "wasm")]
 pub mod web_handoff;
 
-/// Bypasses the warp-account onboarding flow on app startup.
-///
-/// When `true`, an unauthenticated user is dropped straight into the
-/// workspace, skipping ForceLogin, the pre-login agent onboarding view,
-/// and the login screen itself. Set to `false` when working on the
-/// login screen or onboarding slides.
-///
-/// On Windows, the `skip_login` Cargo feature is the actual auth path —
-/// it auto-authenticates as a test user (see `auth_state.rs:137`) so the
-/// user reaches the workspace already-authenticated. This const is the
-/// macOS analog because `./script/run` doesn't forward Cargo features
-/// cleanly. Both layers stay `true` on purpose: the personal-use posture
-/// of this fork is that Cortex never asks for login.
-///
-/// The login screen is rendered from `app/src/auth/login_slide.rs`, gated
-/// by the auth-onboarding decision in `app/src/root_view.rs` (search for
-/// this constant to find the call site).
-pub const SKIP_WARP_ACCOUNT_LOGIN: bool = false;
-
 use crate::ai::agent_conversations_model::AgentConversationsModel;
 use crate::ai::blocklist::agent_view::orchestration_pill_bar_model::OrchestrationPillBarModel;
 use crate::ai::blocklist::BlocklistAIHistoryModel;

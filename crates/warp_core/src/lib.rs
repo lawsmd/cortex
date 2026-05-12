@@ -2,6 +2,7 @@ pub mod app_id;
 pub mod assertions;
 pub mod channel;
 pub mod command;
+pub mod cortex;
 pub mod context_flag;
 pub mod errors;
 pub mod execution_mode;

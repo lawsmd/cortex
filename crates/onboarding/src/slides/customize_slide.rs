@@ -585,6 +585,7 @@ impl CustomizeUISlide {
         }
     }
 
+    #[allow(dead_code)]
     fn render_visual(
         &self,
         appearance: &Appearance,
@@ -643,10 +644,10 @@ impl View for CustomizeUISlide {
         let intention = self.model_intention(app);
         let ui = self.model_ui_customization(app);
 
-        layout::static_left(
-            || self.render_content(appearance, intention, &ui),
-            || self.render_visual(appearance, intention, &ui),
-        )
+        // Cortex single-column layout: no right-side Warp visual. See
+        // `intention_slide.rs` for the same pattern. `render_visual` below
+        // is preserved upstream-shaped for merge clarity but no longer reached.
+        self.render_content(appearance, intention, &ui)
     }
 }
 

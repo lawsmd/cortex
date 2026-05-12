@@ -168,6 +168,11 @@ pub struct LoginSlideView {
     /// `RootView` only routes Terminal-intent users here when Warp Drive is
     /// enabled.
     intention: OnboardingIntention,
+    /// Path to the right-side Warp theme visual. Unused since Cortex routes
+    /// all three LoginSlide steps through centered single-column variants
+    /// (no right-side panel), but kept on the struct so `resolve_visual_path`
+    /// + `LoginSlideView::new` stay upstream-shaped.
+    #[allow(dead_code)]
     theme_visual_path: &'static str,
     step: LoginStep,
     active_overlay: Option<LoginSlideOverlay>,
@@ -197,6 +202,11 @@ pub struct LoginSlideView {
     // Privacy settings overlay (shared with AuthViewBody)
     privacy_settings_handles: PrivacySettingsHandles,
 
+    /// Scroll state for the upstream `slide_content::onboarding_slide_content`
+    /// wrapper. Unused since Cortex's centered variants don't wrap in a
+    /// scrollable; kept on the struct so the upstream-shaped helpers stay
+    /// compilable for reference.
+    #[allow(dead_code)]
     scroll_state: ClippedScrollStateHandle,
     close_login_notification_mouse_state: MouseStateHandle,
     highlighted_hyperlink_state: HighlightedHyperlink,
@@ -415,6 +425,16 @@ impl LoginSlideView {
     // Rendering — main layout
     // ------------------------------------------------------------------
 
+    // The methods below this point — `render_content`, `render_select_auth_*`,
+    // `render_browser_open_*`, `render_privacy_settings_*`, and `render_visual` —
+    // are the upstream-shaped helpers for the two-column layout. Cortex's
+    // `render` method routes all three steps through `render_*_centered`
+    // variants instead, so these are dead at runtime. We keep them so the
+    // upstream shape stays visible (easier merge resolution if Warp changes
+    // any of them upstream) and silence the lint with per-method
+    // `#[allow(dead_code)]`.
+
+    #[allow(dead_code)]
     fn render_content(
         &self,
         appearance: &Appearance,
@@ -470,6 +490,7 @@ impl LoginSlideView {
         }
     }
 
+    #[allow(dead_code)]
     fn render_select_auth_content(&self, appearance: &Appearance) -> Vec<Box<dyn Element>> {
         let theme = appearance.theme();
         let sub_text_color = internal_colors::text_sub(theme, theme.background().into_solid());
@@ -584,6 +605,7 @@ impl LoginSlideView {
         vec![header]
     }
 
+    #[allow(dead_code)]
     fn render_select_auth_bottom_nav(&self, appearance: &Appearance) -> Box<dyn Element> {
         let back_button = self.back_button.render(
             appearance,
@@ -655,6 +677,7 @@ impl LoginSlideView {
     // Step 2: Browser open
     // ------------------------------------------------------------------
 
+    #[allow(dead_code)]
     fn render_browser_open_content(
         &self,
         appearance: &Appearance,
@@ -796,6 +819,184 @@ impl LoginSlideView {
         vec![header]
     }
 
+    /// Cortex variant of the SelectAuthPathway step: single-column, centered V/H,
+    /// no right-side theme visual. Mirrors the centering approach used by
+    /// `render_browser_open_centered`. Called from `render` only when
+    /// `self.step` is `SelectAuthPathway`. The upstream-shaped
+    /// `render_select_auth_content` / `render_select_auth_bottom_nav` are
+    /// preserved above but no longer reached.
+    fn render_select_auth_centered(&self, appearance: &Appearance) -> Box<dyn Element> {
+        let theme = appearance.theme();
+        let sub_text_color = internal_colors::text_sub(theme, theme.background().into_solid());
+        let ui_builder = appearance.ui_builder();
+
+        let is_terminal = matches!(self.intention, OnboardingIntention::Terminal);
+        let title_text = if is_terminal {
+            "Get started with Warp Drive"
+        } else {
+            "Get started with AI"
+        };
+        let title = FormattedTextElement::from_str(title_text, appearance.ui_font_family(), 36.)
+            .with_color(internal_colors::text_main(
+                theme,
+                theme.background().into_solid(),
+            ))
+            .with_weight(Weight::Medium)
+            .with_alignment(TextAlignment::Center)
+            .finish();
+
+        let subtitle_text = if is_terminal {
+            "Connect your account to save and share notebooks, workflows, and more across devices."
+        } else {
+            "Connect your account to enable AI-powered planning, coding, and automation."
+        };
+        let subtitle =
+            FormattedTextElement::from_str(subtitle_text, appearance.ui_font_family(), 16.)
+                .with_color(sub_text_color)
+                .with_weight(Weight::Normal)
+                .with_alignment(TextAlignment::Center)
+                .with_line_height_ratio(1.0)
+                .finish();
+
+        let disclaimer_styles = UiComponentStyles {
+            font_color: Some(sub_text_color),
+            font_size: Some(12.),
+            ..Default::default()
+        };
+        let disclaimer_link_styles = UiComponentStyles {
+            font_size: Some(12.),
+            ..Default::default()
+        };
+
+        let tos_line = Flex::row()
+            .with_main_axis_size(MainAxisSize::Min)
+            .with_child(
+                ui_builder
+                    .span("By continuing, you agree to Warp's ")
+                    .with_style(disclaimer_styles)
+                    .build()
+                    .finish(),
+            )
+            .with_child(
+                ui_builder
+                    .link(
+                        "Terms of Service".into(),
+                        Some(TOS_URL.into()),
+                        None,
+                        self.tos_mouse_state.clone(),
+                    )
+                    .soft_wrap(false)
+                    .with_style(disclaimer_link_styles)
+                    .build()
+                    .finish(),
+            )
+            .finish();
+
+        let privacy_line = Flex::row()
+            .with_main_axis_size(MainAxisSize::Min)
+            .with_child(
+                ui_builder
+                    .span(self.privacy_disclaimer_prefix())
+                    .with_style(disclaimer_styles)
+                    .build()
+                    .finish(),
+            )
+            .with_child(
+                ui_builder
+                    .link(
+                        "Privacy Settings".into(),
+                        None,
+                        Some(Box::new(|ctx| {
+                            ctx.dispatch_typed_action(LoginSlideAction::ShowPrivacySettings);
+                        })),
+                        self.privacy_settings_mouse_state.clone(),
+                    )
+                    .soft_wrap(false)
+                    .with_style(disclaimer_link_styles)
+                    .build()
+                    .finish(),
+            )
+            .finish();
+
+        let disclaimers = Flex::column()
+            .with_main_axis_size(MainAxisSize::Min)
+            .with_cross_axis_alignment(CrossAxisAlignment::Center)
+            .with_child(privacy_line)
+            .with_child(Container::new(tos_line).with_margin_top(8.).finish())
+            .finish();
+
+        let back_button = self.back_button.render(
+            appearance,
+            button::Params {
+                content: button::Content::Label("Back".into()),
+                theme: &button::themes::Naked,
+                options: button::Options {
+                    on_click: Some(Box::new(|ctx, _app, _pos| {
+                        ctx.dispatch_typed_action(LoginSlideAction::Back);
+                    })),
+                    ..button::Options::default(appearance)
+                },
+            },
+        );
+
+        let cmd_enter = Keystroke::parse("cmdorctrl-enter").unwrap_or_default();
+        let skip_label = if matches!(self.intention, OnboardingIntention::Terminal) {
+            "Disable Warp Drive"
+        } else {
+            "Disable AI features"
+        };
+        let skip_button = self.skip_button.render(
+            appearance,
+            button::Params {
+                content: button::Content::Label(skip_label.into()),
+                theme: &button::themes::Naked,
+                options: button::Options {
+                    keystroke: Some(cmd_enter),
+                    on_click: Some(Box::new(|ctx, _app, _pos| {
+                        ctx.dispatch_typed_action(LoginSlideAction::ShowSkipDialog);
+                    })),
+                    ..button::Options::default(appearance)
+                },
+            },
+        );
+
+        let enter = Keystroke::parse("enter").unwrap_or_default();
+        let login_button = self.login_button.render(
+            appearance,
+            button::Params {
+                content: button::Content::Label("Continue".into()),
+                theme: &button::themes::Primary,
+                options: button::Options {
+                    keystroke: Some(enter),
+                    on_click: Some(Box::new(|ctx, _app, _pos| {
+                        ctx.dispatch_typed_action(LoginSlideAction::Enter);
+                    })),
+                    ..button::Options::default(appearance)
+                },
+            },
+        );
+
+        let buttons_row = Flex::row()
+            .with_main_axis_size(MainAxisSize::Min)
+            .with_cross_axis_alignment(CrossAxisAlignment::Center)
+            .with_child(back_button)
+            .with_child(Container::new(skip_button).with_margin_left(12.).finish())
+            .with_child(Container::new(login_button).with_margin_left(12.).finish())
+            .finish();
+
+        let column = Flex::column()
+            .with_main_axis_size(MainAxisSize::Min)
+            .with_cross_axis_alignment(CrossAxisAlignment::Center)
+            .with_child(title)
+            .with_child(Container::new(subtitle).with_margin_top(16.).finish())
+            .with_child(Container::new(disclaimers).with_margin_top(24.).finish())
+            .with_child(Container::new(buttons_row).with_margin_top(32.).finish())
+            .finish();
+
+        Align::new(column).finish()
+    }
+
+    #[allow(dead_code)]
     fn render_browser_open_bottom_nav(&self, appearance: &Appearance) -> Box<dyn Element> {
         let back_button = self.browser_back_button.render(
             appearance,
@@ -817,10 +1018,171 @@ impl LoginSlideView {
             .finish()
     }
 
+    /// Cortex variant of the BrowserOpen step: single-column, centered V/H,
+    /// no right-side theme visual. Replaces the upstream two-column layout
+    /// (`layout::static_left` + `render_visual`) because the right-side panel
+    /// renders a Warp screenshot that visually conflicts with Cortex's
+    /// customizations elsewhere. Called from `render` only when `self.step`
+    /// is `BrowserOpen`. `render_browser_open_content` and
+    /// `render_browser_open_bottom_nav` above are kept upstream-shaped but no
+    /// longer reached.
+    fn render_browser_open_centered(
+        &self,
+        appearance: &Appearance,
+        editor_rendered: &Cell<bool>,
+    ) -> Box<dyn Element> {
+        let theme = appearance.theme();
+        let sub_text_color = internal_colors::text_sub(theme, theme.background().into_solid());
+        let ui_builder = appearance.ui_builder();
+
+        let sub_text_styles = UiComponentStyles {
+            font_color: Some(sub_text_color),
+            ..Default::default()
+        };
+
+        let title = FormattedTextElement::from_str(
+            "Sign in on your browser to continue",
+            appearance.ui_font_family(),
+            36.,
+        )
+        .with_color(internal_colors::text_main(
+            theme,
+            theme.background().into_solid(),
+        ))
+        .with_weight(Weight::Medium)
+        .with_alignment(TextAlignment::Center)
+        .finish();
+
+        let hint = Flex::column()
+            .with_main_axis_size(MainAxisSize::Min)
+            .with_cross_axis_alignment(CrossAxisAlignment::Center)
+            .with_child(
+                Flex::row()
+                    .with_main_axis_size(MainAxisSize::Min)
+                    .with_child(
+                        ui_builder
+                            .span("If your browser hasn't launched, ")
+                            .with_style(sub_text_styles)
+                            .build()
+                            .finish(),
+                    )
+                    .with_child(
+                        ui_builder
+                            .link(
+                                "copy the URL".into(),
+                                None,
+                                Some(Box::new(|ctx| {
+                                    ctx.dispatch_typed_action(LoginSlideAction::CopyLoginUrl);
+                                })),
+                                self.copy_url_mouse_state.clone(),
+                            )
+                            .soft_wrap(false)
+                            .build()
+                            .finish(),
+                    )
+                    .with_child(
+                        ui_builder
+                            .span(" and open")
+                            .with_style(sub_text_styles)
+                            .build()
+                            .finish(),
+                    )
+                    .finish(),
+            )
+            .with_child(
+                ui_builder
+                    .span("the page manually.")
+                    .with_style(sub_text_styles)
+                    .build()
+                    .finish(),
+            )
+            .finish();
+
+        let auth_token: Box<dyn Element> = if self.show_auth_token_input {
+            if editor_rendered.get() {
+                ui_builder
+                    .text_input(self.auth_token_input.clone())
+                    .with_style(UiComponentStyles {
+                        background: Some(Fill::Solid(ColorU::white())),
+                        border_width: Some(0.),
+                        border_radius: Some(CornerRadius::with_all(AUTH_TOKEN_INPUT_BORDER_RADIUS)),
+                        padding: Some(Coords {
+                            top: 12.,
+                            bottom: 12.,
+                            left: 16.,
+                            right: 16.,
+                        }),
+                        margin: Some(Coords {
+                            top: 8.,
+                            bottom: 0.,
+                            left: 0.,
+                            right: 0.,
+                        }),
+                        ..Default::default()
+                    })
+                    .build()
+                    .finish()
+            } else {
+                editor_rendered.set(true);
+                Container::new(warpui::elements::Empty::new().finish())
+                    .with_padding_top(12.)
+                    .with_padding_bottom(12.)
+                    .with_padding_left(16.)
+                    .with_padding_right(16.)
+                    .with_margin_top(8.)
+                    .finish()
+            }
+        } else {
+            Flex::row()
+                .with_main_axis_size(MainAxisSize::Min)
+                .with_child(
+                    ui_builder
+                        .link(
+                            "Click here to paste your token from the browser".into(),
+                            None,
+                            Some(Box::new(|ctx| {
+                                ctx.dispatch_typed_action(LoginSlideAction::EnterToken);
+                            })),
+                            self.enter_token_mouse_state.clone(),
+                        )
+                        .soft_wrap(false)
+                        .build()
+                        .finish(),
+                )
+                .finish()
+        };
+
+        let back_button = self.browser_back_button.render(
+            appearance,
+            button::Params {
+                content: button::Content::Label("Back".into()),
+                theme: &button::themes::Naked,
+                options: button::Options {
+                    on_click: Some(Box::new(|ctx, _app, _pos| {
+                        ctx.dispatch_typed_action(LoginSlideAction::BackToSelectAuthPathway);
+                    })),
+                    ..button::Options::default(appearance)
+                },
+            },
+        );
+
+        let column = Flex::column()
+            .with_main_axis_size(MainAxisSize::Min)
+            .with_cross_axis_alignment(CrossAxisAlignment::Center)
+            .with_child(title)
+            .with_child(Container::new(hint).with_margin_top(16.).finish())
+            .with_child(Container::new(auth_token).with_margin_top(16.).finish())
+            .with_child(Container::new(back_button).with_margin_top(32.).finish())
+            .finish();
+
+        Align::new(column).finish()
+    }
+
     // ------------------------------------------------------------------
     // Step 3: Privacy settings (inline in left column)
     // ------------------------------------------------------------------
 
+    #[allow(dead_code)]
     fn render_privacy_settings_content(
         &self,
         appearance: &Appearance,
@@ -856,6 +1218,7 @@ impl LoginSlideView {
         vec![title, Container::new(toggles).with_margin_top(24.).finish()]
     }
 
+    #[allow(dead_code)]
     fn render_privacy_settings_bottom_nav(&self, appearance: &Appearance) -> Box<dyn Element> {
         let back_button = self.done_button.render(
             appearance,
@@ -877,10 +1240,72 @@ impl LoginSlideView {
             .finish()
     }
 
+    /// Cortex variant of the PrivacySettings step: single-column, centered V/H,
+    /// no right-side theme visual. Toggles use the same upstream helper as
+    /// the upstream layout (`render_privacy_settings_toggles`); they may
+    /// stretch wider than the centered title — eyeball and tune if so.
+    fn render_privacy_settings_centered(
+        &self,
+        appearance: &Appearance,
+        app: &AppContext,
+    ) -> Box<dyn Element> {
+        let theme = appearance.theme();
+
+        let title =
+            FormattedTextElement::from_str("Privacy Settings", appearance.ui_font_family(), 36.)
+                .with_color(internal_colors::text_main(
+                    theme,
+                    theme.background().into_solid(),
+                ))
+                .with_weight(Weight::Medium)
+                .with_alignment(TextAlignment::Center)
+                .finish();
+
+        let actions = PrivacySettingsActions {
+            toggle_telemetry: LoginSlideAction::ToggleTelemetry,
+            toggle_crash_reporting: LoginSlideAction::ToggleCrashReporting,
+            toggle_cloud_conversation_storage: LoginSlideAction::ToggleCloudConversationStorage,
+            hide_overlay: LoginSlideAction::HideOverlay,
+        };
+
+        let toggles = render_privacy_settings_toggles(
+            appearance,
+            app,
+            &self.privacy_settings_handles,
+            &actions,
+            self.ai_enabled,
+        );
+
+        let back_button = self.done_button.render(
+            appearance,
+            button::Params {
+                content: button::Content::Label("Back".into()),
+                theme: &button::themes::Naked,
+                options: button::Options {
+                    on_click: Some(Box::new(|ctx, _app, _pos| {
+                        ctx.dispatch_typed_action(LoginSlideAction::HideOverlay);
+                    })),
+                    ..button::Options::default(appearance)
+                },
+            },
+        );
+
+        let column = Flex::column()
+            .with_main_axis_size(MainAxisSize::Min)
+            .with_cross_axis_alignment(CrossAxisAlignment::Center)
+            .with_child(title)
+            .with_child(Container::new(toggles).with_margin_top(24.).finish())
+            .with_child(Container::new(back_button).with_margin_top(32.).finish())
+            .finish();
+
+        Align::new(column).finish()
+    }
+
     // ------------------------------------------------------------------
     // Visual
     // ------------------------------------------------------------------
 
+    #[allow(dead_code)]
     fn render_visual(&self) -> Box<dyn Element> {
         let path = self.theme_visual_path;
         layout::onboarding_right_panel_with_bg(path, layout::FOREGROUND_LAYOUT_DEFAULT)
@@ -1121,14 +1546,23 @@ impl View for LoginSlideView {
             );
         }
 
-        // Two-column slide layout
-        // static_left calls the left closure twice (narrow + wide). We use a
-        // Cell<bool> so the editor ChildView is only created once.
+        // Slide layout. All three sub-screens use Cortex-specific centered
+        // single-column paths instead of the upstream two-column layout
+        // (`layout::static_left` + `render_visual`), so we don't show the
+        // Warp screenshot on the right — it would clash visually with the
+        // rest of Cortex's customizations. The upstream-shaped
+        // `render_*_content` / `render_*_bottom_nav` helpers are preserved
+        // but no longer reached. The Cell<bool> is only consumed by the
+        // BrowserOpen path (which renders a text input that mustn't be
+        // constructed twice during static_left's narrow/wide measurement).
         let editor_rendered = Cell::new(false);
-        let slide = layout::static_left(
-            || self.render_content(appearance, app, &editor_rendered),
-            || self.render_visual(),
-        );
+        let slide = match self.step {
+            LoginStep::SelectAuthPathway => self.render_select_auth_centered(appearance),
+            LoginStep::BrowserOpen => {
+                self.render_browser_open_centered(appearance, &editor_rendered)
+            }
+            LoginStep::PrivacySettings => self.render_privacy_settings_centered(appearance, app),
+        };
         stack.add_child(slide);
 
         // Skip dialog overlay

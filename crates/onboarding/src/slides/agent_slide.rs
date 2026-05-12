@@ -1110,6 +1110,7 @@ impl AgentSlide {
             .finish()
     }
 
+    #[allow(dead_code)]
     fn render_visual(&self, appearance: &Appearance, app: &AppContext) -> Box<dyn Element> {
         let theme = appearance.theme();
 
@@ -1331,13 +1332,11 @@ impl View for AgentSlide {
         let settings = self.agent_settings(app);
         let workspace_enforces_autonomy = self.workspace_enforces_autonomy(app);
 
-        // The floating dropdown overlay is built inside `render_model_section`
-        // so it inherits the column width naturally. Here we only need the
-        // base two-column layout.
-        let slide = layout::static_left(
-            || self.render_content(appearance, settings, workspace_enforces_autonomy, app),
-            || self.render_visual(appearance, app),
-        );
+        // Cortex single-column layout: no right-side Warp visual. The
+        // floating dropdown overlay is built inside `render_model_section` so
+        // it inherits the column width naturally. `render_visual` below is
+        // preserved upstream-shaped for merge clarity but no longer reached.
+        let slide = self.render_content(appearance, settings, workspace_enforces_autonomy, app);
 
         // Upgrade-prompt bar: shown after the user clicks Upgrade, as long as
         // they aren't yet on a paid plan. Overlays the bottom of the slide

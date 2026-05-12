@@ -15,19 +15,25 @@ use crate::{
 use anyhow::anyhow;
 use lazy_static::lazy_static;
 use warp_core::{
+    cortex::{BRAIN_PINK, CORTEX_ASCII},
     features::FeatureFlag,
-    ui::{appearance::DEFAULT_COMMAND_PALETTE_FONT_SIZE, builder::UiBuilder},
+    ui::{
+        appearance::DEFAULT_COMMAND_PALETTE_FONT_SIZE, builder::UiBuilder, theme::Fill as CoreFill,
+        Icon,
+    },
 };
 use warpui::{
     accessibility::{AccessibilityContent, WarpA11yRole},
     clipboard::ClipboardContent,
     color::ColorU,
     elements::{
-        Align, Border, Container, CornerRadius, CrossAxisAlignment, Dismiss, Fill, Flex,
-        MainAxisAlignment, MainAxisSize, MouseStateHandle, ParentElement, Radius, Stack,
+        Align, Border, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Dismiss, Fill,
+        Flex, FormattedTextElement, MainAxisAlignment, MainAxisSize, MouseStateHandle,
+        ParentElement, Radius, Stack,
     },
     fonts::Weight,
     keymap::FixedBinding,
+    text_layout::TextAlignment,
     ui_components::components::{Coords, UiComponent, UiComponentStyles},
     AppContext, Element, Entity, FocusContext, SingletonEntity, TypedActionView, UpdateModel, View,
     ViewContext, ViewHandle,
@@ -38,8 +44,7 @@ use super::{
     auth_view_modal::AuthViewVariant,
     auth_view_shared_helpers::{
         action_button_color_and_variant, render_offline_info_overlay_body, render_overlay,
-        render_privacy_settings_overlay_body, render_square_logo, PrivacySettingsActions,
-        PrivacySettingsHandles,
+        render_privacy_settings_overlay_body, PrivacySettingsActions, PrivacySettingsHandles,
     },
     AuthStateProvider,
 };
@@ -428,35 +433,6 @@ impl AuthViewBody {
         appearance: &Appearance,
         ui_builder: &UiBuilder,
     ) -> Box<dyn Element> {
-        let (button_color, button_variant) = action_button_color_and_variant(appearance);
-        let button_styles = UiComponentStyles {
-            font_size: Some(14.),
-            font_family_id: Some(appearance.ui_font_family()),
-            font_weight: Some(Weight::Bold),
-            background: Some(Fill::Solid(button_color)),
-            border_width: Some(2.),
-            border_color: Some(Fill::Solid(ColorU::transparent_black())),
-            border_radius: Some(CornerRadius::with_all(Radius::Pixels(4.))),
-            padding: Some(Coords {
-                top: 0.,
-                bottom: 0.,
-                left: 12., // Unequal padding for optical centering
-                right: 8.,
-            }),
-            height: Some(40.),
-            ..Default::default()
-        };
-
-        let hover_button_style = UiComponentStyles {
-            border_color: Some(Fill::Solid(lighten(button_color))),
-            ..button_styles
-        };
-
-        let click_button_style = UiComponentStyles {
-            background: Some(Fill::Solid(darken(button_color))),
-            ..hover_button_style
-        };
-
         let on_click_action = if is_anonymous
             && matches!(
                 self.variant,
@@ -469,16 +445,76 @@ impl AuthViewBody {
             AuthViewBodyAction::Signup
         };
 
+        self.render_pink_outline_button(
+            appearance,
+            ui_builder,
+            "Sign up for a Warp account",
+            self.mouse_state_handles.sign_up_mouse_state_handle.clone(),
+            on_click_action,
+        )
+    }
+
+    /// Cortex outlined-pink button shared across the AuthView Initial-variant
+    /// CTAs (Sign up / Sign in / Skip for now). Default: transparent
+    /// background, pink border, pink text. Hover: pink fill, background-color
+    /// text. Press: darker pink fill. Mirrors the IntroSlide
+    /// `CortexPinkOutline` button theme but expressed via `UiBuilder`'s
+    /// custom-styles API since `auth_view_body` doesn't use the
+    /// `ui_components::button::Button` system. Centered text within the
+    /// button bounds via `with_centered_text_label`.
+    fn render_pink_outline_button(
+        &self,
+        appearance: &Appearance,
+        ui_builder: &UiBuilder,
+        label: &str,
+        mouse_state: MouseStateHandle,
+        on_click_action: AuthViewBodyAction,
+    ) -> Box<dyn Element> {
+        let (_, button_variant) = action_button_color_and_variant(appearance);
+        let bg_color: ColorU = appearance.theme().background().into();
+
+        let base_styles = UiComponentStyles {
+            font_size: Some(14.),
+            font_family_id: Some(appearance.ui_font_family()),
+            font_weight: Some(Weight::Bold),
+            font_color: Some(BRAIN_PINK),
+            background: Some(Fill::Solid(ColorU::transparent_black())),
+            border_width: Some(1.),
+            border_color: Some(Fill::Solid(BRAIN_PINK)),
+            border_radius: Some(CornerRadius::with_all(Radius::Pixels(4.))),
+            padding: Some(Coords {
+                top: 0.,
+                bottom: 0.,
+                left: 12.,
+                right: 12.,
+            }),
+            height: Some(40.),
+            ..Default::default()
+        };
+
+        let hover_styles = UiComponentStyles {
+            font_color: Some(bg_color),
+            background: Some(Fill::Solid(BRAIN_PINK)),
+            ..base_styles
+        };
+
+        let click_styles = UiComponentStyles {
+            background: Some(Fill::Solid(darken(BRAIN_PINK))),
+            ..hover_styles
+        };
+
+        let label_owned: String = label.to_string();
+
         ui_builder
             .button_with_custom_styles(
                 button_variant,
-                self.mouse_state_handles.sign_up_mouse_state_handle.clone(),
-                button_styles,
-                Some(hover_button_style),
-                Some(click_button_style),
+                mouse_state,
+                base_styles,
+                Some(hover_styles),
+                Some(click_styles),
                 None,
             )
-            .with_centered_text_label("Sign up".into())
+            .with_centered_text_label(label_owned.into())
             .build()
             .on_click(move |ctx, _, _| {
                 ctx.dispatch_typed_action(on_click_action);
@@ -486,6 +522,7 @@ impl AuthViewBody {
             .finish()
     }
 
+    #[allow(dead_code)]
     fn render_sign_in_row(&self, ui_builder: &UiBuilder) -> Box<dyn Element> {
         Flex::row()
             .with_child(
@@ -513,6 +550,7 @@ impl AuthViewBody {
             .finish()
     }
 
+    #[allow(dead_code)]
     fn render_sign_up_later_row(&self, ui_builder: &UiBuilder) -> Box<dyn Element> {
         Container::new(
             Flex::row()
@@ -640,7 +678,7 @@ impl AuthViewBody {
         };
 
         let text = match self.variant {
-            AuthViewVariant::Initial => "Welcome to Warp!",
+            AuthViewVariant::Initial => "Welcome to Cortex",
             AuthViewVariant::RequireLoginCloseable
             | AuthViewVariant::HitDriveObjectLimitCloseable
             | AuthViewVariant::ShareRequirementCloseable => "Sign up for Warp",
@@ -654,7 +692,26 @@ impl AuthViewBody {
     }
 
     fn render_logo_row(&self, appearance: &Appearance, ui_builder: &UiBuilder) -> Box<dyn Element> {
-        let logo = render_square_logo(appearance);
+        // Cortex variant of the upstream `render_square_logo` helper:
+        // same rounded-square dark wrapper, but with `Icon::Brain` tinted
+        // BRAIN_PINK instead of the Warp wordmark SVG. The upstream
+        // `render_square_logo` is preserved for the offline overlay /
+        // paste-token modal surfaces (auth_view_shared_helpers.rs:186, :365)
+        // until those are separately addressed.
+        let logo = ConstrainedBox::new(
+            Container::new(
+                Icon::Brain
+                    .to_warpui_icon(CoreFill::Solid(BRAIN_PINK))
+                    .finish(),
+            )
+            .with_background(appearance.theme().surface_2())
+            .with_corner_radius(CornerRadius::with_all(Radius::Pixels(10.)))
+            .with_horizontal_padding(11.)
+            .finish(),
+        )
+        .with_width(64.)
+        .with_height(64.)
+        .finish();
         let mut row = Flex::row()
             .with_main_axis_size(MainAxisSize::Max)
             .with_main_axis_alignment(MainAxisAlignment::SpaceBetween)
@@ -682,6 +739,95 @@ impl AuthViewBody {
         row.finish()
     }
 
+    /// Cortex variant of the Initial-variant header: horizontal row with the
+    /// brain glyph (still in the dark rounded square) on the left, and a
+    /// stacked "Welcome to" line + CORTEX ASCII figlet on the right. Used
+    /// only in the Initial variant of `render_select_auth_pathway_content`;
+    /// non-Initial variants keep `render_logo_row` + `render_header` so the
+    /// "Sign up for Warp" Warp-Drive-share-boundary flows stay upstream-shaped.
+    fn render_welcome_header(
+        &self,
+        appearance: &Appearance,
+        ui_builder: &UiBuilder,
+    ) -> Box<dyn Element> {
+        // No dark-square backdrop (was needed for the Warp wordmark's
+        // contrast on dark; the pink brain glyph stands on its own).
+        let logo = ConstrainedBox::new(
+            Icon::Brain
+                .to_warpui_icon(CoreFill::Solid(BRAIN_PINK))
+                .finish(),
+        )
+        .with_width(64.)
+        .with_height(64.)
+        .finish();
+
+        let welcome_to_styles = UiComponentStyles {
+            font_family_id: Some(appearance.ui_font_family()),
+            font_color: Some(appearance.theme().active_ui_text_color().into()),
+            font_size: Some(14.),
+            font_weight: Some(Weight::Medium),
+            ..Default::default()
+        };
+        let welcome_to = ui_builder
+            .span("Welcome to")
+            .with_style(welcome_to_styles)
+            .build()
+            .finish();
+
+        let monospace = appearance.monospace_font_family();
+        let cortex_ascii = FormattedTextElement::from_str(CORTEX_ASCII, monospace, 7.0)
+            .with_color(BRAIN_PINK)
+            .with_alignment(TextAlignment::Left)
+            .with_line_height_ratio(1.0)
+            .finish();
+
+        let right_column = Flex::column()
+            .with_main_axis_size(MainAxisSize::Min)
+            .with_cross_axis_alignment(CrossAxisAlignment::Start)
+            .with_child(welcome_to)
+            .with_child(Container::new(cortex_ascii).with_margin_top(4.).finish())
+            .finish();
+
+        Flex::row()
+            .with_main_axis_size(MainAxisSize::Max)
+            .with_main_axis_alignment(MainAxisAlignment::Center)
+            .with_cross_axis_alignment(CrossAxisAlignment::Center)
+            .with_child(logo)
+            .with_child(Container::new(right_column).with_margin_left(16.).finish())
+            .finish()
+    }
+
+    /// "Powered by [Warp wordmark]" credit line — same pattern as the
+    /// IntroSlide credit. Light-gray prefix text + the Warp logo-with-title
+    /// SVG, sized small. Sits between the welcome header and the three
+    /// action buttons on the Initial-variant modal.
+    fn render_powered_by_warp(&self, appearance: &Appearance) -> Box<dyn Element> {
+        let theme = appearance.theme();
+        let muted: ColorU = theme.sub_text_color(theme.background()).into();
+        let monospace = appearance.monospace_font_family();
+
+        let powered_by = FormattedTextElement::from_str("Powered by ", monospace, 12.0)
+            .with_color(muted)
+            .finish();
+
+        let warp_mark = ConstrainedBox::new(
+            Icon::WarpLogoWithLightTitle
+                .to_warpui_icon(CoreFill::Solid(muted))
+                .finish(),
+        )
+        .with_width(86.)
+        .with_height(20.)
+        .finish();
+
+        Flex::row()
+            .with_main_axis_size(MainAxisSize::Max)
+            .with_main_axis_alignment(MainAxisAlignment::Center)
+            .with_cross_axis_alignment(CrossAxisAlignment::Center)
+            .with_child(powered_by)
+            .with_child(warp_mark)
+            .finish()
+    }
+
     fn render_select_auth_pathway_content(
         &self,
         is_anonymous: bool,
@@ -696,14 +842,25 @@ impl AuthViewBody {
             .with_margin_bottom(AUTH_MODAL_GAP)
             .finish();
         let sign_up_button = self.render_sign_up_button(is_anonymous, appearance, ui_builder);
-        let sign_in_row = Container::new(self.render_sign_in_row(ui_builder))
-            .with_margin_top(AUTH_MODAL_GAP)
-            .finish();
+        let sign_in_button = Container::new(self.render_pink_outline_button(
+            appearance,
+            ui_builder,
+            "Sign in to your Warp account",
+            self.mouse_state_handles
+                .login_link_mouse_state_handle
+                .clone(),
+            AuthViewBodyAction::Login,
+        ))
+        .with_margin_top(AUTH_MODAL_GAP)
+        .finish();
         let force_login_disclaimer = self.render_force_login_disclaimer(appearance, ui_builder);
 
         match self.variant {
             AuthViewVariant::Initial => {
                 if !NetworkStatus::as_ref(app).is_online() {
+                    // Offline path keeps the upstream-style logo+header pair —
+                    // it's a degraded state, not a welcome, so the Cortex
+                    // welcome-header treatment doesn't apply.
                     let offline_contents = render_offline_contents(
                         appearance,
                         ui_builder,
@@ -714,16 +871,57 @@ impl AuthViewBody {
                     );
                     vec![logo, header, offline_contents]
                 } else if self.active_overlay.is_none() {
+                    // Cortex Initial-variant header: horizontal brain glyph +
+                    // "Welcome to / CORTEX" pair, followed by a "Powered by
+                    // [Warp logo+wordmark]" credit, then the three pink-outline
+                    // action buttons.
+                    let welcome_header =
+                        Container::new(self.render_welcome_header(appearance, ui_builder))
+                            .with_margin_bottom(AUTH_MODAL_GAP)
+                            .finish();
+                    let powered_by = Container::new(self.render_powered_by_warp(appearance))
+                        .with_margin_bottom(AUTH_MODAL_GAP)
+                        .finish();
+
                     let mut contents = if self.allow_loginless {
-                        let sign_up_later_row = match self.loginless_step {
-                            LoginlessStep::Start => self.render_sign_up_later_row(ui_builder),
-                            LoginlessStep::Initiated => {
-                                self.render_sign_in_later_confirm_row(ui_builder)
+                        match self.loginless_step {
+                            LoginlessStep::Start => {
+                                let skip_button = Container::new(self.render_pink_outline_button(
+                                    appearance,
+                                    ui_builder,
+                                    "Skip for now",
+                                    self.mouse_state_handles
+                                        .enter_login_later_mouse_state_handle
+                                        .clone(),
+                                    AuthViewBodyAction::InitiateLoginLater,
+                                ))
+                                .with_margin_top(AUTH_MODAL_GAP)
+                                .finish();
+                                vec![
+                                    welcome_header,
+                                    powered_by,
+                                    sign_up_button,
+                                    sign_in_button,
+                                    skip_button,
+                                ]
                             }
-                        };
-                        vec![logo, header, sign_up_button, sign_in_row, sign_up_later_row]
+                            LoginlessStep::Initiated => {
+                                let confirm_row = Container::new(
+                                    self.render_sign_in_later_confirm_row(ui_builder),
+                                )
+                                .with_margin_top(AUTH_MODAL_GAP)
+                                .finish();
+                                vec![
+                                    welcome_header,
+                                    powered_by,
+                                    sign_up_button,
+                                    sign_in_button,
+                                    confirm_row,
+                                ]
+                            }
+                        }
                     } else {
-                        vec![logo, header, sign_up_button, sign_in_row]
+                        vec![welcome_header, powered_by, sign_up_button, sign_in_button]
                     };
 
                     contents.append(&mut self.render_privacy_information(appearance, ui_builder));
@@ -998,7 +1196,7 @@ impl View for AuthViewBody {
 
     fn accessibility_contents(&self, _: &AppContext) -> Option<AccessibilityContent> {
         Some(AccessibilityContent::new(
-            "Welcome to Warp!",
+            "Welcome to Cortex",
             "Press enter to open your browser to Sign Up or Sign In.",
             WarpA11yRole::HelpRole,
         ))

@@ -1,5 +1,5 @@
 use crate::model::OnboardingStateModel;
-use crate::slides::{bottom_nav, layout, slide_content};
+use crate::slides::{bottom_nav, slide_content};
 use crate::telemetry::OnboardingEvent;
 use crate::visuals::project_visual;
 use ui_components::{button, keyboard_shortcut, Component as _, Options as _};
@@ -418,6 +418,7 @@ impl ProjectSlide {
             .finish()
     }
 
+    #[allow(dead_code)]
     fn render_visual(&self, appearance: &Appearance) -> Box<dyn Element> {
         let theme = appearance.theme();
         let panel_background = internal_colors::neutral_2(theme);
@@ -451,10 +452,10 @@ impl View for ProjectSlide {
         let settings = self.project_settings(app);
         let agent_modality_enabled = self.onboarding_state.as_ref(app).agent_modality_enabled();
 
-        layout::static_left(
-            || self.render_content(appearance, settings, agent_modality_enabled),
-            || self.render_visual(appearance),
-        )
+        // Cortex single-column layout: no right-side Warp visual.
+        // `render_visual` below is preserved upstream-shaped for merge clarity
+        // but no longer reached.
+        self.render_content(appearance, settings, agent_modality_enabled)
     }
 }
 

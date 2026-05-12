@@ -632,7 +632,12 @@ default = [
     "codex_notifications",
     "trim_trailing_blank_lines",
     "open_warp_new_settings_modes",
-    "skip_firebase_anonymous_user",
+    # Cortex fork: intentionally omit "skip_firebase_anonymous_user".
+    # Upstream's default short-circuits the post-login-not-found path
+    # into "anonymous logged-out workspace" — that's Warp's stance, not
+    # ours. Cortex ships the warp-account login slide as real first-run
+    # product behavior (reskinned per docs/roadmap/reskin.md). Re-omit
+    # on every upstream merge.
     "settings_file",
     "directory_tab_colors",
     "configurable_context_window",
