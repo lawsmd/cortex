@@ -1687,11 +1687,7 @@ impl RootView {
                     let should_show_pre_login_onboarding = FeatureFlag::OpenWarpNewSettingsModes.is_enabled()
                         && FeatureFlag::AgentOnboarding.is_enabled()
                         && !has_completed_local_onboarding;
-                    if crate::auth::SKIP_WARP_ACCOUNT_LOGIN {
-                        // Cortex dev opt-out: skip ForceLogin, pre-login onboarding,
-                        // and the login screen itself, dropping straight into the workspace.
-                        AuthOnboardingState::Terminal(workspace_args.create_workspace(ctx))
-                    } else if FeatureFlag::ForceLogin.is_enabled() {
+                    if FeatureFlag::ForceLogin.is_enabled() {
                         // ForceLogin is true for Preview
                         AuthOnboardingState::Auth(workspace_args.into())
                     } else if should_show_pre_login_onboarding {

@@ -479,6 +479,7 @@ impl ThemePickerSlide {
             .unwrap_or(&Self::VISUAL_IMAGE_PATHS[0])
     }
 
+    #[allow(dead_code)]
     fn render_theme_picker_visual(
         &self,
         appearance: &Appearance,
@@ -505,11 +506,14 @@ impl View for ThemePickerSlide {
     fn render(&self, app: &AppContext) -> Box<dyn Element> {
         let appearance = Appearance::as_ref(app);
 
-        // Background is rendered by the parent onboarding view (including background images).
-        layout::static_left(
-            || self.render_theme_picker_content(appearance, app),
-            || self.render_theme_picker_visual(appearance, app),
-        )
+        // Cortex single-column layout: no right-side Warp visual. Background
+        // is rendered by the parent onboarding view (including background
+        // images). `render_theme_picker_visual` below is preserved
+        // upstream-shaped for merge clarity but no longer reached. Note:
+        // upstream's visual previewed the selected theme on the right side;
+        // we lose that affordance here. If theme previewing matters, we can
+        // revisit with a Cortex-native preview.
+        self.render_theme_picker_content(appearance, app)
     }
 }
 

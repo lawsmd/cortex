@@ -5,8 +5,9 @@ use super::OnboardingSlide;
 use pathfinder_color::ColorU;
 use pathfinder_geometry::vector::vec2f;
 use ui_components::{button, Component as _, Options as _};
+use warp_core::cortex::{BRAIN_PINK, CORTEX_ASCII};
 use warp_core::send_telemetry_from_ctx;
-use warp_core::ui::{appearance::Appearance, theme::Fill, Icon};
+use warp_core::ui::{appearance::Appearance, color::coloru_with_opacity, theme::Fill, Icon};
 use warpui::{
     elements::{
         Align, ChildAnchor, ConstrainedBox, Container, CrossAxisAlignment, Flex,
@@ -19,15 +20,6 @@ use warpui::{
     ViewContext,
 };
 
-const CORTEX_ASCII: &str = include_str!("../../../../app/assets/cortex/ascii/CortexAscii5.txt");
-
-const BRAIN_PINK: ColorU = ColorU {
-    r: 244,
-    g: 182,
-    b: 194,
-    a: 255,
-};
-
 // Brain renders via the Cortex `Icon::Brain` SVG (OpenMoji 🧠 derivative,
 // app/assets/cortex/brain.svg). The SVG has internal padding (visible
 // brain shape fills ~60% of its 72×72 viewBox), so the constraint-box
@@ -35,8 +27,51 @@ const BRAIN_PINK: ColorU = ColorU {
 // height to make the *visible* brain shape match the visible CORTEX
 // glyph height. Tune both together if proportions drift.
 const CORTEX_FONT_SIZE: f32 = 14.0;
-const BRAIN_ICON_SIZE: f32 = 224.0;
+const BRAIN_ICON_SIZE: f32 = 146.0;
 const LINE_HEIGHT_RATIO: f32 = 1.0;
+
+/// Cortex fork version, displayed in the top-left of the IntroSlide alongside
+/// the Warp version (`ChannelState::app_version()`). See `docs/branding.md` for
+/// the bumping policy. Single source of truth — promote to a shared module if a
+/// second consumer emerges.
+const CORTEX_VERSION: &str = "0.1.0";
+
+/// Wordmark dimensions for the "Powered by Warp" credit. The source SVG
+/// (`warp-logo-with-light-title.svg`) is 764×179 (aspect ~4.27:1); 86×20 keeps
+/// the proportion intact at a height that pairs with 12pt prefix text.
+const WARP_WORDMARK_HEIGHT: f32 = 20.0;
+const WARP_WORDMARK_WIDTH: f32 = 86.0;
+
+/// Outline-only pink button that inverts on hover: pink border + pink text by
+/// default, fills to pink + bg-color text on hover/press. Used for the two
+/// "Create / Log in to Warp Account" buttons on this slide. Co-located here
+/// (not added to `ui_components::button::themes`) because it's currently a
+/// single-use Cortex visual; lift to a shared module if reused.
+struct CortexPinkOutline;
+
+impl button::Theme for CortexPinkOutline {
+    fn background(&self, state: button::State, _: &Appearance) -> Option<Fill> {
+        match state {
+            button::State::Default => None,
+            button::State::Hovered | button::State::Pressed => Some(Fill::Solid(BRAIN_PINK)),
+        }
+    }
+
+    fn text_color(&self, background: Option<Fill>, appearance: &Appearance) -> ColorU {
+        match background {
+            None => BRAIN_PINK,
+            Some(_) => appearance.theme().background().into(),
+        }
+    }
+
+    fn border(&self, _: &Appearance) -> Option<ColorU> {
+        Some(BRAIN_PINK)
+    }
+
+    fn keyboard_shortcut_border(&self, text_color: ColorU, _: &Appearance) -> Option<ColorU> {
+        Some(coloru_with_opacity(text_color, 60))
+    }
+}
 
 #[derive(Clone, Debug)]
 pub enum IntroSlideEvent {
@@ -80,9 +115,19 @@ impl View for IntroSlide {
         let centered = Container::new(Align::new(content).finish()).finish();
 
         let buttons_row = self.render_buttons_row(appearance);
+        let version_corner = self.render_version_corner(appearance);
 
         let mut stack = Stack::new();
         stack.add_child(centered);
+        stack.add_positioned_child(
+            version_corner,
+            OffsetPositioning::offset_from_parent(
+                vec2f(12., 12.),
+                ParentOffsetBounds::ParentBySize,
+                ParentAnchor::TopLeft,
+                ChildAnchor::TopLeft,
+            ),
+        );
         stack.add_positioned_child(
             buttons_row,
             OffsetPositioning::offset_from_parent(
@@ -115,6 +160,8 @@ impl OnboardingSlide for IntroSlide {
 impl IntroSlide {
     fn render_centered_content(&self, appearance: &Appearance) -> Box<dyn Element> {
         let monospace = appearance.monospace_font_family();
+        let theme = appearance.theme();
+        let muted: ColorU = theme.sub_text_color(theme.background()).into();
 
         let brain = ConstrainedBox::new(
             Icon::Brain
@@ -131,12 +178,45 @@ impl IntroSlide {
             .with_line_height_ratio(LINE_HEIGHT_RATIO)
             .finish();
 
+        let powered_by = FormattedTextElement::from_str("Powered by ", monospace, 12.0)
+            .with_color(muted)
+            .finish();
+
+        let warp_mark = ConstrainedBox::new(
+            Icon::WarpLogoWithLightTitle
+                .to_warpui_icon(Fill::Solid(muted))
+                .finish(),
+        )
+        .with_width(WARP_WORDMARK_WIDTH)
+        .with_height(WARP_WORDMARK_HEIGHT)
+        .finish();
+
+        let credit = Flex::row()
+            .with_main_axis_size(MainAxisSize::Min)
+            .with_cross_axis_alignment(CrossAxisAlignment::Center)
+            .with_child(powered_by)
+            .with_child(warp_mark)
+            .finish();
+
         Flex::column()
             .with_main_axis_size(MainAxisSize::Min)
             .with_main_axis_alignment(MainAxisAlignment::Center)
             .with_cross_axis_alignment(CrossAxisAlignment::Center)
-            .with_child(cortex)
-            .with_child(Container::new(brain).with_margin_top(24.).finish())
+            .with_child(brain)
+            .with_child(Container::new(cortex).with_margin_top(6.).finish())
+            .with_child(Container::new(credit).with_margin_top(16.).finish())
+            .finish()
+    }
+
+    fn render_version_corner(&self, appearance: &Appearance) -> Box<dyn Element> {
+        let monospace = appearance.monospace_font_family();
+        let theme = appearance.theme();
+        let muted: ColorU = theme.sub_text_color(theme.background()).into();
+
+        let cortex_label = format!("Cortex v{}", CORTEX_VERSION);
+
+        FormattedTextElement::from_str(cortex_label, monospace, 11.0)
+            .with_color(muted)
             .finish()
     }
 
@@ -147,7 +227,7 @@ impl IntroSlide {
             appearance,
             button::Params {
                 content: button::Content::Label("Create a Warp Account".into()),
-                theme: &button::themes::Primary,
+                theme: &CortexPinkOutline,
                 options: button::Options {
                     keystroke: Some(enter),
                     on_click: Some(Box::new(|ctx, _app, _pos| {
@@ -162,7 +242,7 @@ impl IntroSlide {
             appearance,
             button::Params {
                 content: button::Content::Label("Log in to Warp Account".into()),
-                theme: &button::themes::Primary,
+                theme: &CortexPinkOutline,
                 options: button::Options {
                     on_click: Some(Box::new(|ctx, _app, _pos| {
                         ctx.dispatch_typed_action(IntroSlideAction::LoginClicked);

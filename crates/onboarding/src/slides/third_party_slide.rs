@@ -309,6 +309,7 @@ impl ThirdPartySlide {
         )
     }
 
+    #[allow(dead_code)]
     fn render_visual(
         &self,
         cli_toolbar_enabled: bool,
@@ -354,16 +355,15 @@ impl View for ThirdPartySlide {
             .ui_customization()
             .use_vertical_tabs;
 
-        layout::static_left(
-            || {
-                self.render_content(
-                    appearance,
-                    cli_toolbar_enabled,
-                    show_agent_notifications,
-                    intention,
-                )
-            },
-            || self.render_visual(cli_toolbar_enabled, show_agent_notifications, vertical),
+        // Cortex single-column layout: no right-side Warp visual.
+        // `render_visual` below is preserved upstream-shaped for merge clarity
+        // but no longer reached.
+        let _ = vertical;
+        self.render_content(
+            appearance,
+            cli_toolbar_enabled,
+            show_agent_notifications,
+            intention,
         )
     }
 }
