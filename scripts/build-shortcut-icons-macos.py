@@ -181,6 +181,33 @@ def compose_macos_plate(brain_path: Path, dev_text: str | None = None) -> Image.
     return canvas
 
 
+def _strip_icns_info_chunk(icns_path: Path) -> None:
+    """Remove the trailing 'info' chunk iconutil adds since recent macOS.
+
+    iconutil writes an NSKeyedArchiver bplist `info` chunk containing an
+    `assetcatalog-reference` payload. When the icon ships standalone (not in
+    an asset catalog), some modern renderers — confirmed: Raycast on macOS
+    Sequoia — try to resolve that reference, fail, and paint a placeholder
+    white tile under the icon. Apple's own .icns files (e.g. Terminal.app)
+    don't carry this chunk; stripping it makes ours behave the same.
+    """
+    data = icns_path.read_bytes()
+    if data[:4] != b"icns":
+        return
+    pos = 8
+    kept: list[bytes] = []
+    while pos < len(data):
+        clen = int.from_bytes(data[pos + 4 : pos + 8], "big")
+        if clen < 8 or pos + clen > len(data):
+            break
+        if data[pos : pos + 4] != b"info":
+            kept.append(data[pos : pos + clen])
+        pos += clen
+    body = b"".join(kept)
+    new_total = 8 + len(body)
+    icns_path.write_bytes(b"icns" + new_total.to_bytes(4, "big") + body)
+
+
 def img_to_icns(img: Image.Image, out_icns: Path) -> None:
     """Render a multi-res .icns from a 2048x2048 RGBA Image via iconutil."""
     out_icns.parent.mkdir(parents=True, exist_ok=True)
@@ -194,6 +221,7 @@ def img_to_icns(img: Image.Image, out_icns: Path) -> None:
             ["iconutil", "--convert", "icns", "--output", str(out_icns), str(iconset_dir)],
             check=True,
         )
+    _strip_icns_info_chunk(out_icns)
     sizes_str = ", ".join(f"{px}x{px}" for _, px in ICONSET_LAYOUT)
     print(f"  wrote {out_icns}  (sizes: {sizes_str})")
 
