@@ -221,6 +221,18 @@ pub enum ScrollPositionUpdate {
     ScrollToTopOfBlock {
         block_index: BlockIndex,
     },
+    /// Like `ScrollToTopOfBlock`, but never collapses to
+    /// `FollowsBottomOfMostRecentBlock` when the block is short enough that its
+    /// top sits at/past `max_scroll_top`. Used for CLI-agent `/clear`, where
+    /// `clear_visible_screen` rebuilds the heights tree with a viewport-height
+    /// gap appended after the active block, and `trim_trailing_blank_rows`
+    /// shrinks the active block's height to ~0 lines once the visible grid is
+    /// cleared. Without this variant, `top_of_block ≥ max_scroll_top`, the
+    /// `FollowsBottom` fallback kicks in, and the viewport ends up showing the
+    /// gap with the agent's redrawn prompt sitting just above the viewport top.
+    ScrollToTopOfBlockPinned {
+        block_index: BlockIndex,
+    },
     ScrollToBottomOfBlock {
         block_index: BlockIndex,
     },
@@ -811,6 +823,15 @@ impl<'a> ViewportState<'a> {
             ScrollPositionUpdate::AfterClear => self.scroll_position_after_clear(),
             ScrollPositionUpdate::ScrollToTopOfBlock { block_index } => {
                 self.scroll_position_at_top_of_block(block_index)
+            }
+            ScrollPositionUpdate::ScrollToTopOfBlockPinned { block_index } => {
+                let scroll_top = self
+                    .top_of_block_in_lines(block_index)
+                    .min(self.max_scroll_top_in_lines())
+                    .max(Lines::zero());
+                ScrollPosition::FixedAtPosition {
+                    scroll_lines: self.scroll_lines_from_scroll_top(scroll_top),
+                }
             }
             ScrollPositionUpdate::ScrollToBottomOfBlock { block_index } => {
                 self.scroll_position_at_bottom_of_block(block_index)
