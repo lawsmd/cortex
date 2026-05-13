@@ -191,7 +191,7 @@ where
                 Container::new(
                     appearance
                         .ui_builder()
-                        .span("Using Warp Offline")
+                        .span("Using Cortex Offline")
                         .with_style(header_styles)
                         .build()
                         .finish(),

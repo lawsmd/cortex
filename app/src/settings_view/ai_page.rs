@@ -7690,9 +7690,9 @@ impl AwsBedrockWidget {
         let are_credentials_enabled = user_workspaces.is_aws_bedrock_credentials_enabled(app);
         let is_usage_enabled = is_section_enabled && are_credentials_enabled;
         let toggle_description = if is_admin_enforced {
-            "Warp loads and sends local AWS CLI credentials for Bedrock-supported models. This setting is managed by your organization.".to_string()
+            "Cortex loads and sends local AWS CLI credentials for Bedrock-supported models. This setting is managed by your organization.".to_string()
         } else {
-            "Warp loads and sends local AWS CLI credentials for Bedrock-supported models."
+            "Cortex loads and sends local AWS CLI credentials for Bedrock-supported models."
                 .to_string()
         };
 

@@ -1033,7 +1033,7 @@ define_settings_group!(AISettings, settings: [
         sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
         private: false,
         toml_path: "cloud_platform.third_party_api_keys.aws_bedrock_credentials_enabled",
-        description: "Whether Warp should use your local AWS credentials for Bedrock-enabled requests.",
+        description: "Whether Cortex should use your local AWS credentials for Bedrock-enabled requests.",
     }
     // Whether to automatically run the AWS login command when Bedrock credentials are expired.
     //

@@ -1361,7 +1361,7 @@ impl LoginSlideView {
         let body_text_str = if is_terminal {
             "Warp Drive lets you save workflows and knowledge across devices and share them with your team. By continuing, you won't have access to the following features:"
         } else {
-            "Warp is better with AI. By continuing, you won't have access to any of the following features:"
+            "Cortex is better with AI. By continuing, you won't have access to any of the following features:"
         };
         let body_text =
             FormattedTextElement::from_str(body_text_str, appearance.ui_font_family(), 14.)

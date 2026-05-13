@@ -46,7 +46,7 @@ impl Workspace {
         ctx: &mut ViewContext<Self>,
     ) -> ViewHandle<ActionButton> {
         ctx.add_typed_action_view(|_ctx| {
-            ActionButton::new("Open in Warp", PrimaryTheme).on_click(move |ctx| {
+            ActionButton::new("Open in Cortex", PrimaryTheme).on_click(move |ctx| {
                 // Get the current URL and dispatch action to open it on desktop
                 if let Some(url) = parse_current_url() {
                     ctx.dispatch_typed_action(WorkspaceAction::OpenLinkOnDesktop(url));
