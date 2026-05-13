@@ -122,7 +122,7 @@ impl View for IntroSlide {
         stack.add_positioned_child(
             version_corner,
             OffsetPositioning::offset_from_parent(
-                vec2f(12., 12.),
+                vec2f(12., 40.),
                 ParentOffsetBounds::ParentBySize,
                 ParentAnchor::TopLeft,
                 ChildAnchor::TopLeft,
