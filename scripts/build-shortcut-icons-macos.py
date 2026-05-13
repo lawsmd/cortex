@@ -88,7 +88,7 @@ MAC_PROD_FILL_RATIO = 0.60              # brain content / canvas (prod)
 MAC_DEV_FILL_RATIO = 0.48               # brain content / canvas (dev)
 MAC_DEV_BRAIN_Y_OFFSET_RATIO = -0.06    # brain y offset / canvas (negative = up)
 MAC_DEV_TEXT_TARGET_W_RATIO = 0.42      # DEV text width / canvas
-MAC_DEV_TEXT_BASELINE_Y_RATIO = 0.80    # DEV text baseline y / canvas
+MAC_DEV_TEXT_BASELINE_Y_RATIO = 0.76    # DEV text baseline y / canvas
 
 # Apple's canonical iconset layout. Each tuple is (filename, pixel_size).
 # @2x variants share a logical size with their non-@2x sibling but render at
