@@ -15,8 +15,11 @@ from typing import Callable
 
 from PIL import Image, ImageDraw, ImageFont
 
-PINK = (240, 0, 208, 255)
-DARK_PURPLE = (32, 0, 64, 255)
+# Match the brand palette: BRAIN_PINK (#F4B6C2) text wrapped in a black
+# outline, mirroring the master icon's pink-brain-with-black-halo design.
+# Defined in Rust at crates/warp_core/src/cortex.rs::BRAIN_PINK.
+BRAIN_PINK = (244, 182, 194, 255)
+OUTLINE_BLACK = (0, 0, 0, 255)
 
 
 def build_dev_master(
@@ -63,9 +66,9 @@ def build_dev_master(
         (text_x, text_y),
         text,
         font=font,
-        fill=PINK,
+        fill=BRAIN_PINK,
         stroke_width=stroke,
-        stroke_fill=DARK_PURPLE,
+        stroke_fill=OUTLINE_BLACK,
     )
 
     out_png.parent.mkdir(parents=True, exist_ok=True)
