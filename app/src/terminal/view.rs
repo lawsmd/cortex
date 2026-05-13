@@ -10901,7 +10901,15 @@ impl TerminalView {
                     if !model.is_alt_screen_active()
                         && self.detect_cli_agent_from_model(&model, ctx).is_some()
                     {
-                        Some(ScrollPositionUpdate::ScrollToTopOfBlock {
+                        // `ScrollToTopOfBlockPinned` (not `ScrollToTopOfBlock`)
+                        // because by this point `handle_terminal_wakeup` has
+                        // synced the active block's tree height to its current
+                        // (post-clear, trimmed) value — typically ~0 lines —
+                        // and the gap appended by `clear_visible_screen` makes
+                        // `top_of_block ≥ max_scroll_top`. The unpinned variant
+                        // would fall back to `FollowsBottomOfMostRecentBlock`
+                        // and leave the redrawn prompt just above the viewport.
+                        Some(ScrollPositionUpdate::ScrollToTopOfBlockPinned {
                             block_index: model.block_list().active_block_index(),
                         })
                     } else {
