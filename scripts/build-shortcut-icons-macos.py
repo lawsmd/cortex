@@ -69,19 +69,26 @@ COMMITTED_REFERENCE_ICNS = REPO_ROOT / "scripts" / "cortex-icon.icns"
 IN_TREE_DEV_ICO = REPO_ROOT / "app" / "channels" / "local" / "icon" / "no-padding" / "icon-dev.ico"
 ICO_SIZES = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
 
-# Mac plate ratios. The plate fills the entire icon canvas with a rounded-square
-# black tile (Apple's "squircle" approximated as a rounded rect with corner
-# radius ≈ 22.5% of canvas width). The brain glyph sits centered inside, sized
-# smaller than the plate so there's breathing room. Dev variant shrinks the
-# brain further and shifts it up to make room for a "DEV" label below.
+# Mac plate ratios. Apple's HIG (confirmed by inspecting Terminal.app's .icns)
+# expects the rounded-square tile to be INSET from the canvas to ~87.5% of
+# canvas width, with transparent margin around it. macOS / Raycast / Spotlight
+# render their own tile backdrop into that transparent margin; if the icon
+# fills the full canvas instead, downstream renderers paint over the corners
+# (giving a "white box around black plate" look in Raycast). The plate corner
+# radius is ≈22.5% of the *plate* size (not the canvas).
+#
+# The brain glyph sits centered inside the plate, sized small enough to
+# breathe inside it. Dev variant shrinks the brain further and shifts it up
+# to make room for a "DEV" label below.
 MAC_CANVAS = 2048
 MAC_PLATE_COLOR = (0, 0, 0, 255)
-MAC_PLATE_RADIUS_RATIO = 0.225
-MAC_PROD_FILL_RATIO = 0.65
-MAC_DEV_FILL_RATIO = 0.52
-MAC_DEV_BRAIN_Y_OFFSET_RATIO = -0.07
-MAC_DEV_TEXT_TARGET_W_RATIO = 0.46
-MAC_DEV_TEXT_BASELINE_Y_RATIO = 0.85
+MAC_PLATE_SIZE_RATIO = 0.875            # plate side / canvas side (Apple HIG)
+MAC_PLATE_RADIUS_RATIO = 0.225          # corner radius / plate side
+MAC_PROD_FILL_RATIO = 0.60              # brain content / canvas (prod)
+MAC_DEV_FILL_RATIO = 0.48               # brain content / canvas (dev)
+MAC_DEV_BRAIN_Y_OFFSET_RATIO = -0.06    # brain y offset / canvas (negative = up)
+MAC_DEV_TEXT_TARGET_W_RATIO = 0.42      # DEV text width / canvas
+MAC_DEV_TEXT_BASELINE_Y_RATIO = 0.80    # DEV text baseline y / canvas
 
 # Apple's canonical iconset layout. Each tuple is (filename, pixel_size).
 # @2x variants share a logical size with their non-@2x sibling but render at
@@ -139,8 +146,13 @@ def compose_macos_plate(brain_path: Path, dev_text: str | None = None) -> Image.
     """
     canvas = Image.new("RGBA", (MAC_CANVAS, MAC_CANVAS), (0, 0, 0, 0))
     draw = ImageDraw.Draw(canvas)
-    radius = int(MAC_CANVAS * MAC_PLATE_RADIUS_RATIO)
-    draw.rounded_rectangle((0, 0, MAC_CANVAS, MAC_CANVAS), radius=radius, fill=MAC_PLATE_COLOR)
+    plate_size = int(round(MAC_CANVAS * MAC_PLATE_SIZE_RATIO))
+    plate_x0 = (MAC_CANVAS - plate_size) // 2
+    plate_y0 = plate_x0
+    plate_x1 = plate_x0 + plate_size
+    plate_y1 = plate_y0 + plate_size
+    radius = int(round(plate_size * MAC_PLATE_RADIUS_RATIO))
+    draw.rounded_rectangle((plate_x0, plate_y0, plate_x1, plate_y1), radius=radius, fill=MAC_PLATE_COLOR)
 
     src = Image.open(brain_path).convert("RGBA")
     bbox = src.getbbox()
