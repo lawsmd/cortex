@@ -4,9 +4,9 @@
 Outputs:
   %LOCALAPPDATA%/Cortex/Cortex.ico       — copy of the master multi-res .ico
   %LOCALAPPDATA%/Cortex/Cortex-Dev.ico   — same icon with "DEV" overlay below
-                                            (pink #F000D0 letters, dark purple
-                                            #200040 outline — sampled from the
-                                            master icon's dominant clusters)
+                                            (BRAIN_PINK #F4B6C2 letters, black
+                                            outline — matches the master's
+                                            pink-brain + black-halo palette)
 
 Why this lives in scripts/: per-machine taskbar shortcut icons are a personal
 artifact, but the *recipe* should be reproducible — if the master icon ever

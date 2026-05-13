@@ -1,23 +1,45 @@
 #!/usr/bin/env python3
 """Generate macOS Raycast/Spotlight shortcut icons for Cortex prod + dev lanes.
 
+Mac variants composite the brain glyph onto a **black squircle plate** that
+fills the icon canvas (modern macOS app-icon convention; Apple's HIG since
+Big Sur). Without the plate, the line-art brain reads as "missing background"
+against Mac's light Dock/Finder. Windows is unaffected — its in-tree dev .ico
+keeps the transparent-brain style because a black plate would vanish into a
+dark Windows taskbar.
+
 Outputs:
-  ~/Library/Application Support/Cortex/Cortex.icns       — multi-resolution
-                                                            .icns from the
-                                                            master CortexIcon.png
-  ~/Library/Application Support/Cortex/Cortex-Dev.icns   — same icon with "DEV"
-                                                            overlay (pink
-                                                            #F000D0 letters,
-                                                            dark purple #200040
-                                                            outline)
+  ~/Library/Application Support/Cortex/Cortex.icns       — multi-res .icns of
+                                                            the brain on a
+                                                            black squircle plate.
+  ~/Library/Application Support/Cortex/Cortex-Dev.icns   — same plate + brain,
+                                                            plus a BRAIN_PINK
+                                                            "DEV" label below
+                                                            the brain (no
+                                                            outline; the plate
+                                                            provides contrast).
   ~/Library/Application Support/Cortex/Cortex-Dev.png    — intermediate 2048x2048
                                                             RGBA used to derive
                                                             the dev .icns. Kept
                                                             for visual reference.
+  scripts/cortex-icon.icns                               — committed reference
+                                                            .icns (mirror of the
+                                                            prod .icns above) so
+                                                            the in-repo asset
+                                                            matches what ships.
+  app/channels/local/icon/no-padding/icon-dev.ico        — in-tree, committed.
+                                                            Embedded into the
+                                                            Windows warp-oss.exe
+                                                            dev build by
+                                                            app/build.rs. Stays
+                                                            transparent (no
+                                                            plate) — see header
+                                                            note above.
 
 Mirror of scripts/build-shortcut-icons.py (which produces the .ico equivalents
-on Windows). The shared 2048x2048 "DEV" composite logic lives in
-_shortcut_icons_core.py and is imported by both entry points.
+on Windows). The transparent "DEV" composite logic lives in
+_shortcut_icons_core.py and is imported by both entry points; the Mac plate
+compositor below is a separate code path because the layout differs.
 
 Run from repo root:
     python3 scripts/build-shortcut-icons-macos.py
@@ -34,7 +56,7 @@ import sys
 import tempfile
 from pathlib import Path
 
-from PIL import Image, ImageFont
+from PIL import Image, ImageDraw, ImageFont
 
 _CORE_PATH = Path(__file__).resolve().parent / "_shortcut_icons_core.py"
 _spec = importlib.util.spec_from_file_location("_shortcut_icons_core", _CORE_PATH)
@@ -43,6 +65,23 @@ _spec.loader.exec_module(_core)
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 MASTER_PNG = REPO_ROOT / "app" / "assets" / "cortex" / "CortexIcon.png"
+COMMITTED_REFERENCE_ICNS = REPO_ROOT / "scripts" / "cortex-icon.icns"
+IN_TREE_DEV_ICO = REPO_ROOT / "app" / "channels" / "local" / "icon" / "no-padding" / "icon-dev.ico"
+ICO_SIZES = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
+
+# Mac plate ratios. The plate fills the entire icon canvas with a rounded-square
+# black tile (Apple's "squircle" approximated as a rounded rect with corner
+# radius ≈ 22.5% of canvas width). The brain glyph sits centered inside, sized
+# smaller than the plate so there's breathing room. Dev variant shrinks the
+# brain further and shifts it up to make room for a "DEV" label below.
+MAC_CANVAS = 2048
+MAC_PLATE_COLOR = (0, 0, 0, 255)
+MAC_PLATE_RADIUS_RATIO = 0.225
+MAC_PROD_FILL_RATIO = 0.65
+MAC_DEV_FILL_RATIO = 0.52
+MAC_DEV_BRAIN_Y_OFFSET_RATIO = -0.07
+MAC_DEV_TEXT_TARGET_W_RATIO = 0.46
+MAC_DEV_TEXT_BASELINE_Y_RATIO = 0.85
 
 # Apple's canonical iconset layout. Each tuple is (filename, pixel_size).
 # @2x variants share a logical size with their non-@2x sibling but render at
@@ -77,11 +116,62 @@ def find_bold_font(size_px: int) -> ImageFont.FreeTypeFont:
     return _core.fallback_default_font(size_px)
 
 
-def png_to_icns(src_png: Path, out_icns: Path) -> None:
-    """Render a multi-res .icns from a single high-res RGBA PNG via iconutil."""
-    img = Image.open(src_png).convert("RGBA")
-    out_icns.parent.mkdir(parents=True, exist_ok=True)
+def _autosize_font(text: str, target_w: int) -> ImageFont.FreeTypeFont:
+    """Walk font sizes upward until the text width meets target_w."""
+    font_size = 8
+    font = find_bold_font(font_size)
+    while font_size <= 1200:
+        next_font = find_bold_font(font_size + 8)
+        bbox = next_font.getbbox(text)
+        if (bbox[2] - bbox[0]) >= target_w:
+            return next_font
+        font = next_font
+        font_size += 8
+    return font
 
+
+def compose_macos_plate(brain_path: Path, dev_text: str | None = None) -> Image.Image:
+    """Composite the brain glyph onto a black squircle plate (macOS-style tile).
+
+    `dev_text=None` produces the prod variant (brain centered, ~65% canvas fill).
+    Passing `dev_text="DEV"` (or any short label) shrinks the brain, shifts it
+    up, and adds a BRAIN_PINK label below it within the plate.
+    """
+    canvas = Image.new("RGBA", (MAC_CANVAS, MAC_CANVAS), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(canvas)
+    radius = int(MAC_CANVAS * MAC_PLATE_RADIUS_RATIO)
+    draw.rounded_rectangle((0, 0, MAC_CANVAS, MAC_CANVAS), radius=radius, fill=MAC_PLATE_COLOR)
+
+    src = Image.open(brain_path).convert("RGBA")
+    bbox = src.getbbox()
+    if bbox is None:
+        raise ValueError(f"{brain_path} is fully transparent — cannot composite")
+    cropped = src.crop(bbox)
+    cw, ch = cropped.size
+    fill_ratio = MAC_DEV_FILL_RATIO if dev_text else MAC_PROD_FILL_RATIO
+    target = int(MAC_CANVAS * fill_ratio)
+    scale = min(target / cw, target / ch)
+    nw, nh = int(round(cw * scale)), int(round(ch * scale))
+    scaled = cropped.resize((nw, nh), Image.LANCZOS)
+
+    y_offset = int(MAC_CANVAS * MAC_DEV_BRAIN_Y_OFFSET_RATIO) if dev_text else 0
+    canvas.paste(scaled, ((MAC_CANVAS - nw) // 2, (MAC_CANVAS - nh) // 2 + y_offset), scaled)
+
+    if dev_text:
+        target_w = int(MAC_CANVAS * MAC_DEV_TEXT_TARGET_W_RATIO)
+        font = _autosize_font(dev_text, target_w)
+        bbox = font.getbbox(dev_text)
+        tw = bbox[2] - bbox[0]
+        text_x = (MAC_CANVAS - tw) // 2 - bbox[0]
+        text_y = int(MAC_CANVAS * MAC_DEV_TEXT_BASELINE_Y_RATIO) - bbox[1]
+        draw.text((text_x, text_y), dev_text, font=font, fill=_core.BRAIN_PINK)
+
+    return canvas
+
+
+def img_to_icns(img: Image.Image, out_icns: Path) -> None:
+    """Render a multi-res .icns from a 2048x2048 RGBA Image via iconutil."""
+    out_icns.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
         iconset_dir = Path(tmp) / "Cortex.iconset"
         iconset_dir.mkdir()
@@ -106,20 +196,33 @@ def main() -> int:
 
     print(f"Output: {install_dir}")
     print()
-    print("=== Prod icon (multi-res .icns from CortexIcon.png) ===")
-    prod_icns = install_dir / "Cortex.icns"
-    png_to_icns(MASTER_PNG, prod_icns)
+    print("=== Prod icon: brain on black squircle plate ===")
+    prod_img = compose_macos_plate(MASTER_PNG)
+    img_to_icns(prod_img, install_dir / "Cortex.icns")
+    img_to_icns(prod_img, COMMITTED_REFERENCE_ICNS)
 
     print()
-    print("=== Dev icon (with 'DEV' text overlay) ===")
-    dev_png = install_dir / "Cortex-Dev.png"
-    _core.build_dev_master(MASTER_PNG, dev_png, find_bold_font)
-    dev_icns = install_dir / "Cortex-Dev.icns"
-    png_to_icns(dev_png, dev_icns)
+    print("=== Dev icon: brain on plate + 'DEV' label below ===")
+    dev_img = compose_macos_plate(MASTER_PNG, dev_text="DEV")
+    dev_png_intermediate = install_dir / "Cortex-Dev.png"
+    dev_png_intermediate.parent.mkdir(parents=True, exist_ok=True)
+    dev_img.save(dev_png_intermediate, optimize=True)
+    print(f"  wrote {dev_png_intermediate}  ({dev_img.size[0]}x{dev_img.size[1]} RGBA)")
+    img_to_icns(dev_img, install_dir / "Cortex-Dev.icns")
 
     print()
-    print("Done. Both .icns files are referenced by ~/Applications/Cortex.app")
-    print("and ~/Applications/Cortex Dev.app via CFBundleIconFile in Info.plist.")
+    print("=== In-tree Windows dev .ico (transparent brain + DEV text — no plate) ===")
+    win_dev_png = Path(tempfile.gettempdir()) / "cortex-windev.png"
+    _core.build_dev_master(MASTER_PNG, win_dev_png, find_bold_font)
+    Image.open(win_dev_png).convert("RGBA").save(IN_TREE_DEV_ICO, format="ICO", sizes=ICO_SIZES)
+    print(f"  wrote {IN_TREE_DEV_ICO}  (sizes: {', '.join(f'{w}x{h}' for w, h in ICO_SIZES)})")
+
+    print()
+    print("Done. Mac .icns files include a black squircle plate; the committed")
+    print("scripts/cortex-icon.icns mirrors the prod plate variant. The in-tree")
+    print("icon-dev.ico stays transparent so Windows dark taskbars don't swallow")
+    print("the icon. Both Mac .icns are referenced by ~/Applications/Cortex.app +")
+    print("~/Applications/Cortex Dev.app via CFBundleIconFile in Info.plist.")
     return 0
 
 

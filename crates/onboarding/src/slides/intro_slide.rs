@@ -34,7 +34,7 @@ const LINE_HEIGHT_RATIO: f32 = 1.0;
 /// the Warp version (`ChannelState::app_version()`). See `docs/branding.md` for
 /// the bumping policy. Single source of truth — promote to a shared module if a
 /// second consumer emerges.
-const CORTEX_VERSION: &str = "0.1.0";
+const CORTEX_VERSION: &str = "0.1.1";
 
 /// Wordmark dimensions for the "Powered by Warp" credit. The source SVG
 /// (`warp-logo-with-light-title.svg`) is 764×179 (aspect ~4.27:1); 86×20 keeps
