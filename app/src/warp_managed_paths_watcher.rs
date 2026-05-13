@@ -252,7 +252,7 @@ impl WarpManagedPathsWatcher {
                 data_dir.clone(),
                 WatchFilter::with_filter(Arc::new(move |path| !path.starts_with(&worktrees_dir))),
                 RecursiveMode::Recursive,
-                "Warp data directory",
+                "Cortex data directory",
             );
             if should_register_config_local_dir {
                 Self::register_path(
@@ -261,7 +261,7 @@ impl WarpManagedPathsWatcher {
                     config_local_dir.clone(),
                     WatchFilter::accept_all(),
                     RecursiveMode::Recursive,
-                    "Warp config directory",
+                    "Cortex config directory",
                 );
             }
             if let Some(warp_home_skills_dir) = warp_home_skills_dir() {
@@ -276,7 +276,7 @@ impl WarpManagedPathsWatcher {
                         warp_home_skills_dir,
                         WatchFilter::accept_all(),
                         RecursiveMode::Recursive,
-                        "Warp home skills directory",
+                        "Cortex home skills directory",
                     );
                 }
             }
@@ -296,7 +296,7 @@ impl WarpManagedPathsWatcher {
                             path == warp_home_mcp_config_path
                         })),
                         RecursiveMode::NonRecursive,
-                        "Warp home MCP config directory",
+                        "Cortex home MCP config directory",
                     );
                 }
             }
