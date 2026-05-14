@@ -47,24 +47,23 @@ REM     warp_home_projects_file_path in crates/warp_core/src/paths.rs).
 REM     Mirrors scripts/launch-cortex-dev.sh:122-127 on macOS.
 set WARP_DATA_PROFILE=dev
 
-REM --- Reset the onboarding-completed flag so dev reliably surfaces the
-REM     IntroSlide on every launch. Without this, after iterating once,
-REM     `HasCompletedOnboarding=true` would route subsequent launches past
-REM     IntroSlide → AuthView (View #3), and we'd lose easy access to
-REM     IntroSlide (View #1) and LoginSlide (View #2 - reached by pressing
-REM     Enter on IntroSlide). The registry key isn't profile-suffixed on
-REM     Windows (see docs/investigations/auth-onboarding-three-views.md),
-REM     so this affects prod too: prod will show IntroSlide once on its
-REM     next launch, then mark itself completed when the user clicks
-REM     through. Acceptable trade-off for tight dev iteration on the
-REM     IntroSlide / LoginSlide reskins.
+REM --- Mark onboarding as complete so dev lands directly in the terminal
+REM     instead of replaying the IntroSlide (View #1) every launch. Combined
+REM     with the `skip_login` Cargo feature below (which auto-authenticates
+REM     as a test user, skipping LoginSlide / AuthView), this makes the dev
+REM     lane usable as a daily-driver / README-screenshot environment.
 REM
-REM     To temporarily iterate on View #3 (AuthView, the modal-style
-REM     steady-state login), swap the `reg delete` below for:
-REM         reg add "HKCU\Software\Warp.dev\WarpOss" /v HasCompletedOnboarding /t REG_SZ /d "true" /f >nul 2>&1
-REM     so launches land directly on AuthView. Revert to `reg delete` when
-REM     done.
-reg delete "HKCU\Software\Warp.dev\WarpOss" /v HasCompletedOnboarding /f >nul 2>&1
+REM     The registry key isn't profile-suffixed on Windows (see
+REM     docs/investigations/auth-onboarding-three-views.md), so this also
+REM     marks prod as onboarding-complete. That's fine — prod already shows
+REM     IntroSlide only once on a fresh install.
+REM
+REM     To flip back to iterating on the slides, swap this `reg add` for
+REM     `reg delete` (forces IntroSlide every launch) and drop `skip_login`
+REM     from the cargo features list down below (forces LoginSlide /
+REM     AuthView). Or to iterate on AuthView (View #3) specifically, keep
+REM     this `reg add` but still drop `skip_login`.
+reg add "HKCU\Software\Warp.dev\WarpOss" /v HasCompletedOnboarding /t REG_SZ /d "true" /f >nul 2>&1
 
 title Cortex Dev (rebuild + launch)
 REM cd to repo root via the script's own location so this works regardless
@@ -193,20 +192,25 @@ REM `--timings` writes a per-crate HTML report to
 REM target\cargo-timings\cargo-timing-<timestamp>.html.
 REM Open the latest one to see which crate dominated the build.
 REM
-REM `skip_login` is intentionally omitted: Cortex ships the warp-account
-REM login slide as real first-run product behavior (reskinned per
-REM docs/roadmap/reskin.md), so dev should render the same slide prod
-REM does. With `skip_login` on, the runtime auto-authenticates as a test
-REM user (auth_state.rs:137) and the slide never shows.
+REM `skip_login` is enabled so the dev lane auto-authenticates as a test
+REM user (auth_state.rs:137) and bypasses both LoginSlide and AuthView.
+REM Cortex still ships the login slide as real first-run product behavior
+REM in prod — that's intact in release builds since `skip_login` is a
+REM compile-time Cargo feature only enabled by this launcher. Prod is
+REM unaffected.
 REM
-REM Caveat: don't actually complete OAuth from a dev build. The
-REM `warposs://` callback re-launches the binary, and dev builds lack
-REM single-instance IPC (the mutex is gated on the `release_bundle`
-REM feature), producing an infinite restart loop. Visually iterate on
-REM the slide in dev; validate the real OAuth flow in prod.
+REM To visually iterate on LoginSlide / AuthView, drop `skip_login` from
+REM the features list below: change `gui,skip_login` to just `gui`. Pair
+REM with the `reg delete` form of the HasCompletedOnboarding handling
+REM above if you also want IntroSlide back. Caveat for that mode: don't
+REM actually complete OAuth from a dev build — the `warposs://` callback
+REM re-launches the binary, and dev builds lack single-instance IPC (the
+REM mutex is gated on the `release_bundle` feature), producing an
+REM infinite restart loop. Visually iterate on the slide in dev; validate
+REM the real OAuth flow in prod.
 set CARGO_TERM_COLOR=never
 set CARGO_TERM_PROGRESS_WHEN=never
-powershell -NoProfile -Command "$enc=New-Object System.Text.UTF8Encoding $false; [Console]::OutputEncoding=$enc; $sw=New-Object System.IO.StreamWriter('%LOG_PATH%',$true,$enc); $sw.AutoFlush=$true; $start=Get-Date; try { & { cmd /c 'cargo run --bin warp-oss --features gui --timings 2>&1' ; $script:rc=$LASTEXITCODE } | ForEach-Object { Write-Host $_; $sw.WriteLine($_) }; $line='=== Session duration: {0:hh\:mm\:ss} ===' -f ((Get-Date)-$start); Write-Host $line; $sw.WriteLine($line) } finally { $sw.Close() }; exit $script:rc"
+powershell -NoProfile -Command "$enc=New-Object System.Text.UTF8Encoding $false; [Console]::OutputEncoding=$enc; $sw=New-Object System.IO.StreamWriter('%LOG_PATH%',$true,$enc); $sw.AutoFlush=$true; $start=Get-Date; try { & { cmd /c 'cargo run --bin warp-oss --features gui,skip_login --timings 2>&1' ; $script:rc=$LASTEXITCODE } | ForEach-Object { Write-Host $_; $sw.WriteLine($_) }; $line='=== Session duration: {0:hh\:mm\:ss} ===' -f ((Get-Date)-$start); Write-Host $line; $sw.WriteLine($line) } finally { $sw.Close() }; exit $script:rc"
 
 set CARGO_EXIT=%ERRORLEVEL%
 
