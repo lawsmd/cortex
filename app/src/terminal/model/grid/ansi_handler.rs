@@ -847,19 +847,30 @@ impl ansi::Handler for GridHandler {
             }
             ansi::ClearMode::All => {
                 if self.ansi_handler_state.is_alt_screen {
+                    log::info!("[clear-diag] ESC[2J: alt-screen branch (in-place)");
                     self.grid.region_mut(..).each(|cell| *cell = bg.into());
                 } else if self.full_grid_clear_behavior == FullGridClearBehavior::Clear {
+                    log::info!(
+                        "[clear-diag] ESC[2J: in-place branch (full_grid_clear_behavior=Clear)"
+                    );
                     self.clear_visible_rows_in_place(bg);
                 } else {
+                    log::info!("[clear-diag] ESC[2J: scroll-to-history branch (clear_viewport)");
                     self.clear_viewport();
                 }
             }
             ansi::ClearMode::Saved if self.history_size() > 0 => {
+                log::info!(
+                    "[clear-diag] ESC[3J: clearing flat_storage history ({} rows)",
+                    self.history_size()
+                );
                 self.flat_storage.clear();
                 self.grid.clear_history();
             }
             // We have no history to clear.
-            ansi::ClearMode::Saved => (),
+            ansi::ClearMode::Saved => {
+                log::info!("[clear-diag] ESC[3J: no history to clear");
+            }
             ansi::ClearMode::ResetAndClear | ansi::ClearMode::ActiveBlock => {
                 self.flat_storage.clear();
                 self.grid.clear_and_reset_saving_cursor_line();
