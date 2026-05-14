@@ -77,19 +77,13 @@ pub fn warp_home_mcp_config_file_path() -> Option<PathBuf> {
 }
 
 /// Cortex-only: path to the saved-projects file consumed by the vertical tab
-/// panel's bottom "+" picker. Lives in the channel-aware home config dir
-/// (e.g. `~/.warp-oss/projects.json` on the OSS channel that Cortex ships
-/// under), but intentionally bypasses [`ChannelState::data_profile`] so the
-/// file stays *shared* between prod and dev lanes — adding a project in one
-/// shouldn't require manually re-adding it in the other. This is the only
-/// per-user state with that exception; everything else honors the profile
-/// suffix.
+/// panel's bottom "+" picker. Lives in the channel- *and* profile-aware home
+/// config dir (e.g. `~/.warp-oss/projects.json` for prod and
+/// `~/.warp-oss-dev/projects.json` for dev), so each lane maintains its own
+/// project list — useful when the dev lane is being used to record clean
+/// screenshots/GIFs without leaking real prod project names.
 pub fn warp_home_projects_file_path() -> Option<PathBuf> {
-    dirs::home_dir().map(|home_dir| {
-        home_dir
-            .join(base_warp_config_dir_name())
-            .join("projects.json")
-    })
+    warp_home_config_dir().map(|warp_config_dir| warp_config_dir.join("projects.json"))
 }
 
 /// Returns the macOS config directory name for the current channel and data profile.
