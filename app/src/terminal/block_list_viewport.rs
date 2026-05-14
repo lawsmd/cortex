@@ -233,6 +233,20 @@ pub enum ScrollPositionUpdate {
     ScrollToTopOfBlockPinned {
         block_index: BlockIndex,
     },
+    /// Cortex divergence: scroll so the active block's last row sits at the
+    /// viewport's top row. Used by the CLI-agent `/clear` rich-input intercept.
+    ///
+    /// Claude Code's `/clear` does not emit `ESC[2J` and does not shrink the
+    /// active block's height — the entire prior conversation remains in the
+    /// block's grid + flat_storage. To produce the desired UX (only the
+    /// post-clear prompt visible at the top of the viewport, prior content
+    /// reachable by scrolling up), the caller must first install an
+    /// `active_gap` of viewport height below the block (see
+    /// `BlockList::setup_active_gap_for_cli_agent_clear`). The gap is what
+    /// allows `scroll_top` to legitimately reach `bottom_of_block - 1`.
+    ScrollActiveBlockBottomToTop {
+        block_index: BlockIndex,
+    },
     ScrollToBottomOfBlock {
         block_index: BlockIndex,
     },
@@ -829,6 +843,27 @@ impl<'a> ViewportState<'a> {
                     .top_of_block_in_lines(block_index)
                     .min(self.max_scroll_top_in_lines())
                     .max(Lines::zero());
+                ScrollPosition::FixedAtPosition {
+                    scroll_lines: self.scroll_lines_from_scroll_top(scroll_top),
+                }
+            }
+            ScrollPositionUpdate::ScrollActiveBlockBottomToTop { block_index } => {
+                // bottom_of_block_in_lines = top_of_block + block_height. We
+                // want the block's last row at viewport row 0, so scroll_top =
+                // bottom - 1. Clamped to max_scroll_top, which (with the
+                // active_gap installed by `setup_active_gap_for_cli_agent_clear`
+                // in waterfall mode) equals exactly bottom_of_block — so the
+                // clamp is a no-op in the common case and the bottom row
+                // reliably reaches the top of the viewport.
+                let bottom = self.bottom_of_block_in_lines(block_index);
+                let scroll_top = (bottom - 1.0.into_lines())
+                    .max(Lines::zero())
+                    .min(self.max_scroll_top_in_lines());
+                log::info!(
+                    "[clear-diag] ScrollActiveBlockBottomToTop: block={block_index:?} \
+                     bottom={bottom:?} max_scroll_top={:?} scroll_top={scroll_top:?}",
+                    self.max_scroll_top_in_lines()
+                );
                 ScrollPosition::FixedAtPosition {
                     scroll_lines: self.scroll_lines_from_scroll_top(scroll_top),
                 }

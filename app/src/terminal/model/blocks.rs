@@ -872,6 +872,61 @@ impl BlockList {
         self.active_gap.as_ref()
     }
 
+    /// Cortex divergence: sets up an `active_gap` below the active block
+    /// (mirroring the gap-and-tree manipulation in [`Self::clear_visible_screen`])
+    /// but does **not** fire `TerminalClear`.
+    ///
+    /// Used by the CLI-agent `/clear` rich-input intercept in `TerminalView`:
+    /// Claude Code's `/clear` does not emit `ESC[2J`, so the terminal-grid
+    /// clear path never fires. To pin the agent's post-clear repaint area to
+    /// the top of the viewport (WezTerm-style), the rich-input layer needs to
+    /// over-scroll past the natural `max_scroll_top` — which requires an
+    /// `active_gap`. Going through `clear_visible_screen` would fire
+    /// `TerminalClear`, which races the immediate `update_scroll_position_locking`
+    /// call (the existing handler dispatches `ScrollToTopOfBlockPinned` —
+    /// scrolling to the start of flat_storage, not the bottom where the new
+    /// prompt is). This dedicated method lets the caller stage the scroll
+    /// without that race.
+    pub fn setup_active_gap_for_cli_agent_clear(&mut self) {
+        let mut new_sum_tree = SumTree::new();
+        for block in self.block_heights.cursor::<TotalIndex, ()>() {
+            if !matches!(block, BlockHeightItem::Gap(_)) {
+                new_sum_tree.push(*block);
+            }
+        }
+        self.block_heights = {
+            let mut cursor = new_sum_tree.cursor::<BlockIndex, ()>();
+            cursor.slice(&BlockIndex(self.blocks.len()), SeekBias::Left)
+        };
+
+        let gap_height = if let Some(height) = self.next_gap_height() {
+            height
+        } else {
+            log::error!(
+                "[clear-diag] setup_active_gap_for_cli_agent_clear: \
+                 next_gap_height is unset; clearing active_gap to keep model consistent"
+            );
+            self.active_gap = None;
+            return;
+        };
+
+        let gap = BlockHeightItem::Gap(gap_height.into());
+        let agent_view_state = self.agent_view_state.clone();
+        let active_block_height = self.active_block_mut().height(&agent_view_state).into();
+
+        // Active CLI-agent blocks are always `started()` (the long-running
+        // command is in flight), so we always push `[block, gap]`. The
+        // unstarted branch from `clear_visible_screen` doesn't apply here.
+        self.block_heights
+            .push(BlockHeightItem::Block(active_block_height));
+        self.block_heights.push(gap);
+        self.active_gap = Some(Gap {
+            index: self.block_heights.summary().total_count - 1,
+            current_height: gap_height,
+            original_height: gap_height,
+        });
+    }
+
     /// Clears the visible screen--moving everything that's currently visible into scrollback.
     pub fn clear_visible_screen(&mut self) {
         self.finish_background_block();
