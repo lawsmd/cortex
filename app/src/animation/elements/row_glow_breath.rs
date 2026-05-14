@@ -1,7 +1,15 @@
 //! Edge Halo Breath — sinusoidal pulse of a 2px frame inset 1px from the
 //! row's bounds, in the tab's project color (lightened for visibility on
-//! selected/filled rows). ~1.2s period, peak 70% opacity, returning to 0
-//! between cycles for the inhale-exhale-pause feel.
+//! selected/filled rows). ~1.2s period; opacity oscillates between
+//! `BREATH_FLOOR` and `BREATH_DEPTH` instead of returning to 0 — the floor
+//! keeps the project-color ring visible at every frame of the cycle.
+//!
+//! The row renderer in `app/src/workspace/view/vertical_tabs.rs` suppresses
+//! the row's static 1px gray border whenever AttentionNeeded is active, so
+//! this frame is the row's only visible boundary during the pulse. Without
+//! the opacity floor, the row would briefly read as borderless at every
+//! trough — flickery. The floor is the contract that makes the gray-border
+//! suppression safe.
 //!
 //! Replaces the prior warm-amber interior wash. The interior wash clashed
 //! with project-color tab titles on unselected tabs — yellow over a purple
@@ -28,6 +36,11 @@ use warpui::{AppContext, SingletonEntity};
 use crate::animation::AnimationClock;
 
 const BREATH_DEPTH: f32 = 0.70;
+/// Minimum opacity at the trough of the cycle. The row renderer drops the
+/// gray 1px border while AttentionNeeded is active, so this floor is what
+/// keeps the project-color ring visibly drawn at every frame — without it
+/// the row would briefly read as borderless every cycle.
+const BREATH_FLOOR: f32 = 0.30;
 const BREATH_PERIOD: Duration = Duration::from_millis(1200);
 const REPAINT_INTERVAL: Duration = Duration::from_millis(32);
 /// Frame thickness in logical pixels.
@@ -96,9 +109,11 @@ impl Element for RowGlowBreathElement {
         ctx.repaint_after(REPAINT_INTERVAL);
 
         let phase = AnimationClock::as_ref(app).phase(BREATH_PERIOD);
-        // sin(phase * π) traces 0 → 1 → 0 across one cycle, which gives the
-        // inhale-exhale-pause shape (both ends of the cycle are at 0).
-        let opacity = BREATH_DEPTH * (phase * PI).sin();
+        // sin(phase * π) traces 0 → 1 → 0 across one cycle. We map that into
+        // the [BREATH_FLOOR, BREATH_DEPTH] range so the ring brightens and
+        // dims but never disappears — see the module doc for why.
+        let pulse = (phase * PI).sin();
+        let opacity = BREATH_FLOOR + (BREATH_DEPTH - BREATH_FLOOR) * pulse;
         let alpha = (opacity.clamp(0.0, 1.0) * 255.0) as u8;
         if alpha == 0 {
             return;
