@@ -492,6 +492,7 @@ fn render_pane_row_element(
     padding: Padding,
     defer_events_to_children: bool,
     content: Box<dyn Element>,
+    tab_animation: Option<TabAnimationKind>,
     theme: &WarpTheme,
     app: &AppContext,
 ) -> Box<dyn Element> {
@@ -552,10 +553,19 @@ fn render_pane_row_element(
         //     the selection chrome).
         //   - Selected + inverse-fill OFF → Warp's existing 15% fg-overlay
         //     border on top of the overlay fill.
-        //   - Unselected (always)         → 1px gray, theme-independent. The
-        //     gray border is the unconditional Cortex outline; there is no
-        //     toggle to disable it.
-        let border_fill: ElementFill = if !is_selected {
+        //   - Unselected + AttentionNeeded → no border. The pulsing breath
+        //     frame layered on by `wrap_with_agent_animation_layers` is the
+        //     row's visible boundary for the duration of the pulse; keeping
+        //     the gray ring would clash concentrically with the project-color
+        //     frame. The breath element's opacity is floored above 0 so the
+        //     row is never visually borderless.
+        //   - Unselected (otherwise)      → 1px gray, theme-independent. The
+        //     gray border is the unconditional Cortex outline at rest.
+        let border_fill: ElementFill = if !is_selected
+            && matches!(tab_animation, Some(TabAnimationKind::AttentionNeeded))
+        {
+            ElementFill::None
+        } else if !is_selected {
             ThemeFill::Solid(VERTICAL_TAB_UNSELECTED_BORDER_GRAY).into()
         } else if cortex_inverse_fill {
             ElementFill::None
@@ -2193,6 +2203,7 @@ fn render_tab_group_internal(
                         .as_ref()
                         .expect("summary data must exist in summary mode"),
                     summary_pane_kind_icons,
+                    tab_animation,
                     app,
                 );
                 let summary_row = wrap_with_agent_animation_layers(
@@ -2248,8 +2259,12 @@ fn render_tab_group_internal(
                 };
                 let view_mode = *TabSettings::as_ref(app).vertical_tabs_view_mode.value();
                 let row = match view_mode {
-                    VerticalTabsViewMode::Compact => render_compact_pane_row(pane_props, app),
-                    VerticalTabsViewMode::Expanded => render_pane_row(pane_props, app),
+                    VerticalTabsViewMode::Compact => {
+                        render_compact_pane_row(pane_props, tab_animation, app)
+                    }
+                    VerticalTabsViewMode::Expanded => {
+                        render_pane_row(pane_props, tab_animation, app)
+                    }
                 };
                 let row =
                     wrap_with_agent_animation_layers(row, tab_animation, pane_color.as_ref());
@@ -2820,7 +2835,11 @@ fn render_title_row_layout(
     }
 }
 
-fn render_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn Element> {
+fn render_pane_row(
+    props: PaneProps<'_>,
+    tab_animation: Option<TabAnimationKind>,
+    app: &AppContext,
+) -> Box<dyn Element> {
     let effective_subtitle = props.subtitle.clone();
     let appearance = Appearance::as_ref(app);
     let theme = appearance.theme();
@@ -2939,7 +2958,15 @@ fn render_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn Element> {
     } else {
         Padding::uniform(14.)
     };
-    render_pane_row_element(props, row_padding, true, content, theme, app)
+    render_pane_row_element(
+        props,
+        row_padding,
+        true,
+        content,
+        tab_animation,
+        theme,
+        app,
+    )
 }
 
 enum TypedPane<'a> {
@@ -4056,6 +4083,7 @@ fn render_summary_tab_item(
     props: PaneProps<'_>,
     summary: &VerticalTabsSummaryData,
     summary_pane_kind_icons: Option<SummaryPaneKindIcons>,
+    tab_animation: Option<TabAnimationKind>,
     app: &AppContext,
 ) -> Box<dyn Element> {
     // Region caps for v2 per-line rendering: each region shows at most 3 visible lines
@@ -4228,7 +4256,15 @@ fn render_summary_tab_item(
         .with_child(Shrinkable::new(1., text_col.finish()).finish())
         .finish();
 
-    render_pane_row_element(props, Padding::uniform(8.), true, content, theme, app)
+    render_pane_row_element(
+        props,
+        Padding::uniform(8.),
+        true,
+        content,
+        tab_animation,
+        theme,
+        app,
+    )
 }
 
 fn render_summary_primary_label_line(
@@ -6640,7 +6676,11 @@ pub(super) fn render_detail_sidecar(
     })
 }
 
-fn render_compact_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn Element> {
+fn render_compact_pane_row(
+    props: PaneProps<'_>,
+    tab_animation: Option<TabAnimationKind>,
+    app: &AppContext,
+) -> Box<dyn Element> {
     let effective_subtitle = props.subtitle.clone();
     let appearance = Appearance::as_ref(app);
     let theme = appearance.theme();
@@ -6867,7 +6907,15 @@ fn render_compact_pane_row(props: PaneProps<'_>, app: &AppContext) -> Box<dyn El
         .with_child(Shrinkable::new(1., text_col.finish()).finish())
         .finish();
 
-    render_pane_row_element(props, Padding::uniform(8.), true, content, theme, app)
+    render_pane_row_element(
+        props,
+        Padding::uniform(8.),
+        true,
+        content,
+        tab_animation,
+        theme,
+        app,
+    )
 }
 
 impl Workspace {
