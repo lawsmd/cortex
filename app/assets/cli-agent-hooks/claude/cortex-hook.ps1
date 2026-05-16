@@ -125,9 +125,22 @@ switch -Regex ($eventName) {
         break
     }
     '^session_end$|^sessionend$' {
-        # Treat session-end as a final stop — clears any lingering Tier 1
-        # InProgress state when claude exits cleanly.
-        $cortexEvent = 'stop'
+        # `/clear` (and only `/clear`) ends the current claude session with
+        # `reason: "clear"` then immediately starts a fresh one — this is the
+        # ONLY hook signal that fires for `/clear`. UserPromptSubmit doesn't
+        # fire (claude intercepts slash commands before the hook chain), and
+        # claude's `/clear` doesn't emit ESC[2J either, so the terminal-grid
+        # path can't see it. Surface it as a distinct cortex event so the
+        # Cortex view layer can pin the post-clear prompt to the top of the
+        # viewport (WezTerm-style) without lying to the status state machine.
+        # Other reasons (`other`, future values) collapse to a normal `stop`.
+        if ($stdinObj -and $stdinObj.reason -eq 'clear') {
+            $cortexEvent = 'session_clear'
+        } else {
+            # Treat session-end as a final stop — clears any lingering Tier 1
+            # InProgress state when claude exits cleanly.
+            $cortexEvent = 'stop'
+        }
         break
     }
     '^permission_request$' {

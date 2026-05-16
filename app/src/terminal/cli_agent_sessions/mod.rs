@@ -234,6 +234,15 @@ impl CLIAgentSession {
             // IdlePrompt means the agent is sitting at its prompt waiting for input.
             // This should not affect status — otherwise it would override Success after a Stop event.
             CLIAgentEventType::IdlePrompt => return None,
+            // SessionClear (Cortex-only — claude's `/clear`) is a UI signal,
+            // not a status change. The previous turn's Stop has already set
+            // status to Success; the next user prompt will flip to InProgress
+            // naturally. Returning None keeps the status state machine quiet
+            // and prevents a false "running" tab indication during the gap
+            // between `/clear` and the user's next input. The view layer
+            // catches the Cleared model event below and triggers the pin-to-
+            // top scroll without going through StatusChanged.
+            CLIAgentEventType::SessionClear => return None,
             CLIAgentEventType::SessionStart => {
                 self.plugin_version = event.payload.plugin_version.clone();
                 return None;
@@ -279,6 +288,16 @@ pub enum CLIAgentSessionsModelEvent {
         terminal_view_id: EntityId,
         agent: CLIAgent,
     },
+    /// Cortex-only — the user ran the agent's `/clear` slash command. Drives
+    /// the post-clear viewport pin-to-top behavior in the view layer (the
+    /// agent's TUI re-renders its empty prompt at the bottom of its repaint
+    /// area; we want it pinned to the top of the visible viewport, WezTerm-
+    /// style). Status is intentionally unchanged — see the SessionClear arm
+    /// in `apply_event` for the rationale.
+    Cleared {
+        terminal_view_id: EntityId,
+        agent: CLIAgent,
+    },
 }
 
 impl CLIAgentSessionsModelEvent {
@@ -297,6 +316,9 @@ impl CLIAgentSessionsModelEvent {
                 terminal_view_id, ..
             }
             | CLIAgentSessionsModelEvent::SessionUpdated {
+                terminal_view_id, ..
+            }
+            | CLIAgentSessionsModelEvent::Cleared {
                 terminal_view_id, ..
             } => *terminal_view_id,
         }
@@ -566,6 +588,16 @@ impl CLIAgentSessionsModel {
                 | CLIAgentEventType::ToolComplete
         ) {
             ctx.emit(CLIAgentSessionsModelEvent::SessionUpdated {
+                terminal_view_id,
+                agent: session.agent,
+            });
+        }
+
+        // SessionClear (Cortex-only) doesn't transition status, so it never
+        // hits the StatusChanged branch above. Surface it as a dedicated
+        // Cleared event for the view layer to pick up.
+        if matches!(event_type, CLIAgentEventType::SessionClear) {
+            ctx.emit(CLIAgentSessionsModelEvent::Cleared {
                 terminal_view_id,
                 agent: session.agent,
             });

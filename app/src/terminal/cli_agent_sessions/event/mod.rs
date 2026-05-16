@@ -18,6 +18,13 @@ pub enum CLIAgentEventType {
     PromptSubmit,
     ToolComplete,
     Stop,
+    /// Cortex extension — claude's `/clear` slash command. Surfaced by
+    /// `cortex-hook.{ps1,sh}` when the SessionEnd hook fires with
+    /// `reason: "clear"` (the only definitive signal that `/clear` ran:
+    /// UserPromptSubmit doesn't fire for slash commands, and claude doesn't
+    /// emit ESC[2J for `/clear` either). Drives the post-clear viewport
+    /// pin-to-top behavior in the view layer; no status transition.
+    SessionClear,
     PermissionRequest,
     PermissionReplied,
     QuestionAsked,

@@ -12743,6 +12743,71 @@ impl TerminalView {
                     active_block.set_trim_trailing_blank_rows(false);
                 }
             }
+            // Cortex divergence — claude's `/clear` slash command. Routed
+            // here from `cortex-hook.{ps1,sh}` via the new SessionEnd
+            // reason="clear" → `session_clear` discriminator. Two prior
+            // attempts (commits 4e399552, 87f4d48b, and the StatusChanged
+            // hook in 6f29f406) hooked signals that don't fire for `/clear`:
+            // claude doesn't emit ESC[2J (so TerminalClear never arrives)
+            // and intercepts slash commands before UserPromptSubmit (so the
+            // query=="/clear" gate never fires). SessionEnd reason="clear"
+            // is the only hook signal that does fire — confirmed by the
+            // discovery log on 2026-05-15.
+            CLIAgentSessionsModelEvent::Cleared {
+                terminal_view_id, ..
+            } if *terminal_view_id == self.view_id
+                && *crate::settings::CortexSettings::as_ref(ctx)
+                    .cli_agent_clear_scrolls_to_top =>
+            {
+                // Order matters:
+                //   1. Push the active block's visible region into
+                //      flat_storage (scrollback), wiping the cells.
+                //   2. Install the active_gap so scroll_top can land
+                //      beyond the natural max_scroll_top.
+                //   3. Dispatch the scroll.
+                let active_idx = {
+                    let mut model = self.model.lock();
+                    let idx = model.block_list().active_block_index();
+                    let pre_clear_height = model
+                        .block_list()
+                        .active_block()
+                        .height(model.block_list().agent_view_state());
+                    log::info!(
+                        "[clear-diag] Cleared step 1 (pre-clear_viewport): \
+                         active_block.height()={pre_clear_height:?}"
+                    );
+                    let block_list = model.block_list_mut();
+                    block_list.clear_active_block_visible_for_cli_agent_clear();
+                    let post_clear_height = block_list
+                        .active_block()
+                        .height(block_list.agent_view_state());
+                    log::info!(
+                        "[clear-diag] Cleared step 2 (post-clear_viewport, pre-setup_active_gap): \
+                         active_block.height()={post_clear_height:?}"
+                    );
+                    block_list.setup_active_gap_for_cli_agent_clear();
+                    let post_gap_height = block_list
+                        .active_block()
+                        .height(block_list.agent_view_state());
+                    let gap_height = block_list.active_gap().map(|g| g.height());
+                    log::info!(
+                        "[clear-diag] Cleared step 3 (post-setup_active_gap): \
+                         active_block.height()={post_gap_height:?} gap_height={gap_height:?}"
+                    );
+                    idx
+                };
+                log::info!(
+                    "[clear-diag] Cleared event for view {:?}: dispatching scroll for \
+                     block {active_idx:?}",
+                    self.view_id
+                );
+                self.update_scroll_position_locking(
+                    ScrollPositionUpdate::ScrollActiveBlockBottomToTop {
+                        block_index: active_idx,
+                    },
+                    ctx,
+                );
+            }
             _ => {}
         }
         if event.terminal_view_id() == self.view_id
@@ -12770,53 +12835,6 @@ impl TerminalView {
 
         if *terminal_view_id != self.view_id {
             return;
-        }
-
-        // Cortex divergence — UNTESTED as of 2026-05-14: when the user
-        // submits `/clear` to a CLI agent, pin the active block's last row
-        // (where the agent will repaint its post-clear prompt) to the top
-        // of the viewport — WezTerm-style. Two prior fix attempts (commits
-        // 4e399552 and 87f4d48b) hooked the terminal-grid `TerminalClear`
-        // path; a `[clear-diag]` round on 2026-05-14 confirmed Claude
-        // Code's `/clear` never emits `ESC[2J` (it just clears its own
-        // in-memory context and re-renders), so that path was unreachable.
-        // It also confirmed users mostly type `/clear` directly into the
-        // agent's TUI, not through Cortex's rich-input chokepoint — so the
-        // intercept in `submit_cli_agent_rich_input` doesn't fire either.
-        // The Claude `UserPromptSubmit` hook is the only signal that fires
-        // for every prompt regardless of input path. It routes through
-        // `apply_event(PromptSubmit)`, which sets `session_context.query`
-        // to the submitted prompt and transitions status to `InProgress` —
-        // which is what we match on here. Verification still pending; see
-        // `[clear-diag]` log lines for the next round.
-        if matches!(status, CLIAgentSessionStatus::InProgress)
-            && session_context
-                .query
-                .as_deref()
-                .map(str::trim)
-                == Some("/clear")
-            && *crate::settings::CortexSettings::as_ref(ctx)
-                .cli_agent_clear_scrolls_to_top
-        {
-            let active_idx = {
-                let mut model = self.model.lock();
-                let idx = model.block_list().active_block_index();
-                model
-                    .block_list_mut()
-                    .setup_active_gap_for_cli_agent_clear();
-                idx
-            };
-            log::info!(
-                "[clear-diag] /clear detected via UserPromptSubmit hook for view {:?}: \
-                 pinning block {active_idx:?} bottom to viewport top",
-                self.view_id
-            );
-            self.update_scroll_position_locking(
-                ScrollPositionUpdate::ScrollActiveBlockBottomToTop {
-                    block_index: active_idx,
-                },
-                ctx,
-            );
         }
 
         if let Some(conversation_id) = self.child_conversation_id_for_cli_status_updates(ctx) {

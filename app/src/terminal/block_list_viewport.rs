@@ -848,21 +848,36 @@ impl<'a> ViewportState<'a> {
                 }
             }
             ScrollPositionUpdate::ScrollActiveBlockBottomToTop { block_index } => {
-                // bottom_of_block_in_lines = top_of_block + block_height. We
-                // want the block's last row at viewport row 0, so scroll_top =
-                // bottom - 1. Clamped to max_scroll_top, which (with the
-                // active_gap installed by `setup_active_gap_for_cli_agent_clear`
-                // in waterfall mode) equals exactly bottom_of_block — so the
-                // clamp is a no-op in the common case and the bottom row
-                // reliably reaches the top of the viewport.
+                // Cortex divergence — sole caller is the CLI-agent `/clear`
+                // handler in `TerminalView`. Round 7 strategy: use
+                // `bottom_of_block - viewport_height` math (the round-5
+                // approach that at least put styled content in the
+                // viewport) combined with the round-6 `clear_viewport`
+                // (which wipes the visible cells before the agent
+                // repaints, addressing the bug-1 "old content bleeds
+                // through" symptom from round 5). FixedAtPosition rather
+                // than WaterfallGap because the round-6 WaterfallGap
+                // experiment landed the viewport entirely in the gap
+                // region (blank pane). Snap-on-keystroke (bug 2) is
+                // handled separately, see view.rs Cleared handler.
                 let bottom = self.bottom_of_block_in_lines(block_index);
-                let scroll_top = (bottom - 1.0.into_lines())
+                let viewport_height = self.content_element_height_lines();
+                let max_scroll_top = self.max_scroll_top_in_lines();
+                let scroll_top = (bottom - viewport_height)
                     .max(Lines::zero())
-                    .min(self.max_scroll_top_in_lines());
+                    .min(max_scroll_top);
+                let active_block_height = self
+                    .block_list
+                    .block_at(block_index)
+                    .map(|b| b.height(self.block_list.agent_view_state()));
                 log::info!(
                     "[clear-diag] ScrollActiveBlockBottomToTop: block={block_index:?} \
-                     bottom={bottom:?} max_scroll_top={:?} scroll_top={scroll_top:?}",
-                    self.max_scroll_top_in_lines()
+                     bottom_of_block={bottom:?} viewport_height={viewport_height:?} \
+                     max_scroll_top={max_scroll_top:?} scroll_top={scroll_top:?} \
+                     active_block.height()={active_block_height:?} \
+                     active_gap={:?} input_mode={:?}",
+                    self.block_list.active_gap().map(|g| g.height()),
+                    self.input_mode,
                 );
                 ScrollPosition::FixedAtPosition {
                     scroll_lines: self.scroll_lines_from_scroll_top(scroll_top),

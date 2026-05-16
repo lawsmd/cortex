@@ -73,7 +73,6 @@ use crate::{
     },
 };
 
-use crate::terminal::block_list_viewport::ScrollPositionUpdate;
 use warp_terminal::model::escape_sequences::{BRACKETED_PASTE_END, BRACKETED_PASTE_START};
 
 use super::{RichContentInsertionPosition, TerminalAction, TerminalView};
@@ -653,41 +652,6 @@ impl TerminalView {
         }
         if text.trim().is_empty() {
             return;
-        }
-
-        // Cortex divergence: when the user submits `/clear` to a CLI agent,
-        // pin the active block's last row (where the agent will repaint its
-        // post-clear prompt) to the top of the viewport — WezTerm-style. The
-        // agent's `/clear` is its own slash command that does not emit
-        // `ESC[2J` (verified by tracing the Claude Code path with
-        // `[clear-diag]` logs), so the terminal-grid clear handler in
-        // `handle_terminal_event` never fires. Hook here, the only
-        // chokepoint where Cortex sees the user's typed text before
-        // forwarding to the PTY, and stage the gap + scroll directly.
-        let trimmed = text.trim();
-        let is_cli_agent_clear = trimmed == "/clear";
-        if is_cli_agent_clear
-            && *crate::settings::CortexSettings::as_ref(ctx)
-                .cli_agent_clear_scrolls_to_top
-        {
-            let active_idx = {
-                let mut model = self.model.lock();
-                let idx = model.block_list().active_block_index();
-                model
-                    .block_list_mut()
-                    .setup_active_gap_for_cli_agent_clear();
-                idx
-            };
-            log::info!(
-                "[clear-diag] /clear detected in rich input: pinning block \
-                 {active_idx:?} bottom to viewport top"
-            );
-            self.update_scroll_position_locking(
-                ScrollPositionUpdate::ScrollActiveBlockBottomToTop {
-                    block_index: active_idx,
-                },
-                ctx,
-            );
         }
 
         let prompt_length = text.chars().count();
