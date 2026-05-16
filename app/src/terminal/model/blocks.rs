@@ -927,6 +927,29 @@ impl BlockList {
         });
     }
 
+    /// Cortex divergence: pushes the active block's visible region into
+    /// `flat_storage` (scrollback) and resets the now-vacated visible cells,
+    /// without firing `TerminalClear`. Used by the CLI-agent `/clear`
+    /// handler in `TerminalView` together with
+    /// [`Self::setup_active_gap_for_cli_agent_clear`]: the CLI agent
+    /// (Claude Code, etc.) repaints only ~12 rows of post-`/clear` UI
+    /// (welcome banner + tip + prompt + status), so without this push the
+    /// remaining ~viewport_height rows of the visible region still display
+    /// the OLD pre-`/clear` content (because the agent's paint doesn't
+    /// touch those cells). Pushing the visible region to scrollback first
+    /// guarantees the only styled content the user sees post-`/clear` is
+    /// what the agent actually paints, with the prior conversation
+    /// preserved as scrollable history above the viewport (WezTerm-style).
+    ///
+    /// We bypass `clear_visible_screen` because that path fires
+    /// `TerminalClear`, which the existing handler in `view.rs` dispatches
+    /// `ScrollToTopOfBlockPinned` on — for a CLI-agent block the "top of
+    /// block" is the start of the agent's session (far above the new
+    /// prompt), so the resulting scroll is wrong.
+    pub fn clear_active_block_visible_for_cli_agent_clear(&mut self) {
+        self.active_block_mut().grid_handler_mut().clear_viewport();
+    }
+
     /// Clears the visible screen--moving everything that's currently visible into scrollback.
     pub fn clear_visible_screen(&mut self) {
         self.finish_background_block();

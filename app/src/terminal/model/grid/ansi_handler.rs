@@ -1684,7 +1684,12 @@ impl GridHandler {
         self.grid.region_mut(..).each(|cell| *cell = bg.into());
     }
 
-    fn clear_viewport(&mut self) {
+    /// Pushes the visible region's content into `flat_storage` (scrollback)
+    /// and resets the freshly-vacated visible cells. Called by the
+    /// `FullGridClearBehavior::Scroll` branch on `ESC[2J`, and by the
+    /// Cortex-side CLI-agent `/clear` handler (which routes through
+    /// [`BlockList::clear_active_block_visible_for_cli_agent_clear`]).
+    pub(in crate::terminal::model) fn clear_viewport(&mut self) {
         // Determine how many lines to scroll up by.
         let end = Point {
             row: 0,

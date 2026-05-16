@@ -103,6 +103,10 @@ mapping = {
     "user_prompt_submit": "prompt_submit",
     "userpromptsubmit":   "prompt_submit",
     "stop":               "stop",
+    # SessionEnd: routed below — `/clear` ends the session with
+    # reason="clear" and is the ONLY hook signal that fires for `/clear`
+    # (UserPromptSubmit doesn`t fire for slash commands; ESC[2J isn`t
+    # emitted either). Discriminate so the Cortex view layer can react.
     "session_end":        "stop",
     "sessionend":         "stop",
     "permission_request": "permission_request",
@@ -126,6 +130,13 @@ if not event_name:
     event_name = re.sub(r"([a-z])([A-Z])", r"\1_\2", raw_name).lower()
 
 cortex_event = mapping.get(event_name)
+
+# `/clear` end-of-session discriminator. SessionEnd fires with reason="clear"
+# only when the user runs `/clear` inside claude. Other reasons ("other",
+# future values) fall through to the normal stop mapping above.
+if cortex_event == "stop" and event_name in ("session_end", "sessionend") \
+        and obj.get("reason") == "clear":
+    cortex_event = "session_clear"
 
 # Stale invocation: an old matcher-less Notification entry left over from a
 # pre-Phase-C settings.json. Fall back to the legacy substring discrimination

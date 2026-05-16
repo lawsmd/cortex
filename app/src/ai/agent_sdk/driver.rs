@@ -2837,7 +2837,8 @@ impl AgentDriver {
                 }
                 CLIAgentSessionsModelEvent::Started { .. }
                 | CLIAgentSessionsModelEvent::InputSessionChanged { .. }
-                | CLIAgentSessionsModelEvent::Ended { .. } => {}
+                | CLIAgentSessionsModelEvent::Ended { .. }
+                | CLIAgentSessionsModelEvent::Cleared { .. } => {}
             },
         );
     }
