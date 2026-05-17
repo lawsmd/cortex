@@ -116,6 +116,12 @@ echo
 #
 # `script/run --dont-open` drives cargo bundle, the upstream codesign step,
 # Info.plist setup, and resource bundling. We post-process its output below.
+# `--features skip_login` enables Cortex's bypass of the warp-account login
+# splash so a fresh dev profile lands directly in the terminal. The Windows
+# dev launcher passes the same feature. `script/run` parses `--features` and
+# forwards it through to both `cargo bundle` and the build's `FEATURES` env
+# (see ./script/macos/run:99); an earlier note that `script/run` couldn't
+# forward features cleanly was outdated.
 export CARGO_TERM_COLOR=never
 export CARGO_TERM_PROGRESS_WHEN=never
 
@@ -127,7 +133,7 @@ export CARGO_TERM_PROGRESS_WHEN=never
 export WARP_DATA_PROFILE=dev
 
 set +e
-PATH="$HOME/.cargo/bin:$PATH" ./script/run --dont-open 2>&1 | tee -a "$LOG_PATH"
+PATH="$HOME/.cargo/bin:$PATH" ./script/run --features skip_login --dont-open 2>&1 | tee -a "$LOG_PATH"
 CARGO_EXIT=${PIPESTATUS[0]}
 set -e
 
