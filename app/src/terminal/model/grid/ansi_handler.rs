@@ -847,30 +847,18 @@ impl ansi::Handler for GridHandler {
             }
             ansi::ClearMode::All => {
                 if self.ansi_handler_state.is_alt_screen {
-                    log::info!("[clear-diag] ESC[2J: alt-screen branch (in-place)");
                     self.grid.region_mut(..).each(|cell| *cell = bg.into());
                 } else if self.full_grid_clear_behavior == FullGridClearBehavior::Clear {
-                    log::info!(
-                        "[clear-diag] ESC[2J: in-place branch (full_grid_clear_behavior=Clear)"
-                    );
                     self.clear_visible_rows_in_place(bg);
                 } else {
-                    log::info!("[clear-diag] ESC[2J: scroll-to-history branch (clear_viewport)");
                     self.clear_viewport();
                 }
             }
             ansi::ClearMode::Saved if self.history_size() > 0 => {
-                log::info!(
-                    "[clear-diag] ESC[3J: clearing flat_storage history ({} rows)",
-                    self.history_size()
-                );
                 self.flat_storage.clear();
                 self.grid.clear_history();
             }
-            // We have no history to clear.
-            ansi::ClearMode::Saved => {
-                log::info!("[clear-diag] ESC[3J: no history to clear");
-            }
+            ansi::ClearMode::Saved => {}
             ansi::ClearMode::ResetAndClear | ansi::ClearMode::ActiveBlock => {
                 self.flat_storage.clear();
                 self.grid.clear_and_reset_saving_cursor_line();
@@ -1684,12 +1672,7 @@ impl GridHandler {
         self.grid.region_mut(..).each(|cell| *cell = bg.into());
     }
 
-    /// Pushes the visible region's content into `flat_storage` (scrollback)
-    /// and resets the freshly-vacated visible cells. Called by the
-    /// `FullGridClearBehavior::Scroll` branch on `ESC[2J`, and by the
-    /// Cortex-side CLI-agent `/clear` handler (which routes through
-    /// [`BlockList::clear_active_block_visible_for_cli_agent_clear`]).
-    pub(in crate::terminal::model) fn clear_viewport(&mut self) {
+    fn clear_viewport(&mut self) {
         // Determine how many lines to scroll up by.
         let end = Point {
             row: 0,

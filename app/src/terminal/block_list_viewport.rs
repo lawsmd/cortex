@@ -38,24 +38,101 @@ use super::{
 /// Wraps a scroll position for the purposes of centralizing update logic.
 pub struct ScrollState {
     position: ScrollPosition,
+    /// Cortex divergence — true while the CLI-agent `/clear` handler's
+    /// `FixedAtPosition` is in effect for the active block. Causes keystroke-
+    /// like updates (`AfterKeydownOnTerminal` / `AfterTypedCharacters` /
+    /// `AfterWriteUserBytesToPty`) to be ignored so the user can type into
+    /// the post-`/clear` prompt without the viewport snapping back. Cleared
+    /// on: any user/programmatic scroll, the next command execution, or a
+    /// resize. Re-armed by a fresh `ScrollActiveBlockBottomToTop`.
+    post_clear_scroll_pinned: bool,
 }
 
 impl ScrollState {
     pub fn new(position: ScrollPosition) -> Self {
-        Self { position }
+        Self {
+            position,
+            post_clear_scroll_pinned: false,
+        }
     }
 
     pub fn position(&self) -> ScrollPosition {
         self.position
     }
 
+    /// Whether the scroll position is currently pinned by the CLI-agent
+    /// `/clear` handler. Used by the view's post-`/clear` re-scan loop to
+    /// know when the user has interacted (pin released) and we should stop
+    /// chasing the banner.
+    pub fn post_clear_scroll_pinned(&self) -> bool {
+        self.post_clear_scroll_pinned
+    }
+
     /// Possibly updates the scroll position, returning whether it was actually changed.
+
     pub fn update(
         &mut self,
         viewport: ViewportState,
         update: ScrollPositionUpdate,
         app: &AppContext,
+        is_cli_agent_active: bool,
     ) -> bool {
+        if self.post_clear_scroll_pinned {
+            match update {
+                ScrollPositionUpdate::AfterKeydownOnTerminal
+                | ScrollPositionUpdate::AfterTypedCharacters
+                | ScrollPositionUpdate::AfterWriteUserBytesToPty => {
+                    // Keep the `/clear` anchor; the user is typing into the
+                    // freshly-cleared prompt.
+                    return false;
+                }
+                ScrollPositionUpdate::AfterScrollEvent { .. }
+                | ScrollPositionUpdate::AfterCommandExecutionStarted
+                | ScrollPositionUpdate::AfterClear
+                | ScrollPositionUpdate::AfterResize
+                | ScrollPositionUpdate::AfterPageUp
+                | ScrollPositionUpdate::AfterPageDown
+                | ScrollPositionUpdate::AfterHome
+                | ScrollPositionUpdate::AfterEnd
+                | ScrollPositionUpdate::AfterFilter { .. }
+                | ScrollPositionUpdate::AfterFilterClear { .. }
+                | ScrollPositionUpdate::ScrollToTopOfBlock { .. }
+                | ScrollPositionUpdate::ScrollToTopOfBlockPinned { .. }
+                | ScrollPositionUpdate::ScrollToBottomOfBlock { .. }
+                | ScrollPositionUpdate::ScrollMostRecentBlockIntoView => {
+                    // User or system scroll / new command — release the pin.
+                    self.post_clear_scroll_pinned = false;
+                }
+                ScrollPositionUpdate::ScrollActiveBlockBottomToTop { .. } => {
+                    // Another `/clear` — keep the pin armed, fall through to
+                    // recompute the position.
+                }
+                _ => {}
+            }
+        } else if matches!(
+            update,
+            ScrollPositionUpdate::ScrollActiveBlockBottomToTop { .. }
+        ) {
+            self.post_clear_scroll_pinned = true;
+        } else if is_cli_agent_active
+            && matches!(
+                update,
+                ScrollPositionUpdate::AfterKeydownOnTerminal
+                    | ScrollPositionUpdate::AfterTypedCharacters
+                    | ScrollPositionUpdate::AfterWriteUserBytesToPty
+            )
+        {
+            // Cortex divergence — when a CLI agent (Claude Code, Codex, etc.)
+            // is attached to this view, the active block renders the agent's
+            // own TUI. A keystroke can grow the block's "bottom" when the
+            // agent paints an overlay (slash-command picker, autocomplete,
+            // status line), and `scroll_position_after_command_execution`
+            // would then snap the viewport to that new bottom, pushing the
+            // prompt off the top. Only PTY-side output and explicit command
+            // submission should reposition the viewport in a CLI-agent block.
+            return false;
+        }
+
         let next_position = viewport.next_scroll_position(update, app);
         if next_position != self.position {
             log::debug!(
@@ -233,8 +310,9 @@ pub enum ScrollPositionUpdate {
     ScrollToTopOfBlockPinned {
         block_index: BlockIndex,
     },
-    /// Cortex divergence: scroll so the active block's last row sits at the
-    /// viewport's top row. Used by the CLI-agent `/clear` rich-input intercept.
+    /// Cortex divergence: scroll so the agent's post-`/clear` banner row sits
+    /// at the viewport's top row. Used by the CLI-agent `/clear` handler in
+    /// `TerminalView`.
     ///
     /// Claude Code's `/clear` does not emit `ESC[2J` and does not shrink the
     /// active block's height — the entire prior conversation remains in the
@@ -244,8 +322,17 @@ pub enum ScrollPositionUpdate {
     /// `active_gap` of viewport height below the block (see
     /// `BlockList::setup_active_gap_for_cli_agent_clear`). The gap is what
     /// allows `scroll_top` to legitimately reach `bottom_of_block - 1`.
+    ///
+    /// `rows_below_banner` is computed by the view handler by scanning the
+    /// alt-screen grid for the banner's top-left corner (`╭`/`┌`/`┏`). It
+    /// represents the count of rows from the banner-top row to the bottom of
+    /// the block (inclusive of the banner row). The handler subtracts this
+    /// from `bottom_of_block_in_lines` to get the scroll target. `None`
+    /// means the view handler couldn't detect the banner; the scroll
+    /// handler falls back to a row-count heuristic.
     ScrollActiveBlockBottomToTop {
         block_index: BlockIndex,
+        rows_below_banner: Option<usize>,
     },
     ScrollToBottomOfBlock {
         block_index: BlockIndex,
@@ -847,38 +934,38 @@ impl<'a> ViewportState<'a> {
                     scroll_lines: self.scroll_lines_from_scroll_top(scroll_top),
                 }
             }
-            ScrollPositionUpdate::ScrollActiveBlockBottomToTop { block_index } => {
+            ScrollPositionUpdate::ScrollActiveBlockBottomToTop {
+                block_index,
+                rows_below_banner,
+            } => {
                 // Cortex divergence — sole caller is the CLI-agent `/clear`
-                // handler in `TerminalView`. Round 7 strategy: use
-                // `bottom_of_block - viewport_height` math (the round-5
-                // approach that at least put styled content in the
-                // viewport) combined with the round-6 `clear_viewport`
-                // (which wipes the visible cells before the agent
-                // repaints, addressing the bug-1 "old content bleeds
-                // through" symptom from round 5). FixedAtPosition rather
-                // than WaterfallGap because the round-6 WaterfallGap
-                // experiment landed the viewport entirely in the gap
-                // region (blank pane). Snap-on-keystroke (bug 2) is
-                // handled separately, see view.rs Cleared handler.
+                // handler in `TerminalView`. We want the agent's post-`/clear`
+                // UI (welcome banner + prompt + footer) to occupy the TOP of
+                // the viewport, with the pre-`/clear` conversation scrolled
+                // above (accessible by scrolling up).
+                //
+                // The view handler computes `rows_below_banner` by scanning
+                // the block's Output grid for the welcome banner's top-left
+                // corner (`╭`/`┌`/`┏`). Content-based detection makes the
+                // math self-correcting across window sizes, fonts, and
+                // Claude versions. The `active_gap` installed by
+                // `setup_active_gap_for_cli_agent_clear` extends
+                // `max_scroll_top` far enough that we can land the banner
+                // row at the viewport's top.
+                //
+                // Fallback: if no top-corner is detected (non-Claude agent or
+                // future banner redesign), use a 40-row heuristic — better
+                // to over-shoot slightly than to leave pre-`/clear` content
+                // visible.
                 let bottom = self.bottom_of_block_in_lines(block_index);
-                let viewport_height = self.content_element_height_lines();
                 let max_scroll_top = self.max_scroll_top_in_lines();
-                let scroll_top = (bottom - viewport_height)
+                let scroll_lines_below_top = match rows_below_banner {
+                    Some(rows) => Lines::new(rows as f64),
+                    None => Lines::new(40.0),
+                };
+                let scroll_top = (bottom - scroll_lines_below_top)
                     .max(Lines::zero())
                     .min(max_scroll_top);
-                let active_block_height = self
-                    .block_list
-                    .block_at(block_index)
-                    .map(|b| b.height(self.block_list.agent_view_state()));
-                log::info!(
-                    "[clear-diag] ScrollActiveBlockBottomToTop: block={block_index:?} \
-                     bottom_of_block={bottom:?} viewport_height={viewport_height:?} \
-                     max_scroll_top={max_scroll_top:?} scroll_top={scroll_top:?} \
-                     active_block.height()={active_block_height:?} \
-                     active_gap={:?} input_mode={:?}",
-                    self.block_list.active_gap().map(|g| g.height()),
-                    self.input_mode,
-                );
                 ScrollPosition::FixedAtPosition {
                     scroll_lines: self.scroll_lines_from_scroll_top(scroll_top),
                 }

@@ -261,6 +261,6 @@ define_settings_group!(CortexSettings, settings: [
         sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
         private: false,
         toml_path: "cortex.terminal.cli_agent_clear_scrolls_to_top",
-        description: "When a running CLI agent (Claude Code, Codex, Cursor, Gemini) emits a full-screen erase (ESC[2J — typically /clear), scroll the viewport so the agent's block is at the top of the visible pane. Prior blocks remain in scrollback. Off restores upstream Warp behavior.",
+        description: "When a running CLI agent (Claude Code, Codex, Cursor, Gemini) runs /clear, scroll the viewport so the agent's freshly-cleared UI sits at the top of the visible pane and the prior conversation remains in scrollback. Claude is wired via Cortex's OSC-777 → SessionEnd hook; other agents are detected when they emit ESC[2J. Off restores upstream Warp behavior.",
     }
 ]);
