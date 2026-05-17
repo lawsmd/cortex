@@ -8159,7 +8159,18 @@ impl TerminalView {
         }
         let input_mode = *InputModeSettings::as_ref(ctx).input_mode.value();
         let viewport = self.viewport_state(model.block_list(), input_mode, ctx);
-        if self.scroll_position.update(viewport, update, ctx) {
+        // Cortex divergence — let `ScrollState` know whether a CLI agent is
+        // attached to this view so it can suppress keystroke-triggered
+        // snap-to-bottom for the active CLI-agent block. `InteractionMode`
+        // can't be used as the predicate because user-started CLI agents
+        // (e.g., the human typed `claude`) keep the block in `User(_)` mode.
+        let is_cli_agent_active = CLIAgentSessionsModel::as_ref(ctx)
+            .session(self.view_id)
+            .is_some();
+        if self
+            .scroll_position
+            .update(viewport, update, ctx, is_cli_agent_active)
+        {
             ctx.notify();
             // Dismiss any visible tooltips when the scroll position changes
             drop(model);
@@ -10886,31 +10897,26 @@ impl TerminalView {
     fn handle_terminal_event(&mut self, event: &ModelEvent, ctx: &mut ViewContext<Self>) {
         match event {
             ModelEvent::TerminalClear => {
-                log::info!("[clear-diag] ModelEvent::TerminalClear received in view");
                 self.handle_terminal_wakeup((), ctx);
-                // Cortex divergence: when a running CLI agent (Claude Code, Codex, Cursor,
-                // Gemini) emits a full-screen erase — typically on `/clear` — scroll its
-                // block to the top of the viewport so the now-empty agent prompt sits at
-                // the top of the pane (WezTerm-style). Prior blocks stay in scrollback.
-                // Gated on a CortexSetting and skipped inside alt-screen so vim/less are
-                // unaffected; falls back to upstream's `AfterClear` behavior otherwise,
-                // including for plain shell `clear`.
+                // Cortex divergence: when a running CLI agent (Codex, Cursor,
+                // Gemini) emits a full-screen erase via ESC[2J on `/clear`,
+                // scroll its block to the top of the viewport so the now-empty
+                // agent prompt sits at the top of the pane (WezTerm-style).
+                // Claude Code uses a separate OSC-777 → `SessionEnd reason=clear`
+                // path handled in `CLIAgentSessionsModelEvent::Cleared`; this
+                // ESC[2J fallback only fires for agents that don't emit the
+                // OSC marker. Gated on `cli_agent_clear_scrolls_to_top` and
+                // skipped inside alt-screen so vim/less are unaffected; falls
+                // back to upstream `AfterClear` otherwise (including plain
+                // shell `clear`).
                 let setting_on = *crate::settings::CortexSettings::as_ref(ctx)
                     .cli_agent_clear_scrolls_to_top;
-                log::info!("[clear-diag] cli_agent_clear_scrolls_to_top setting = {setting_on}");
                 let cli_agent_scroll = if setting_on {
                     let model = self.model.lock();
                     let alt = model.is_alt_screen_active();
                     let detected = self.detect_cli_agent_from_model(&model, ctx);
-                    log::info!(
-                        "[clear-diag] alt_screen={alt}, detect_cli_agent_from_model={:?}",
-                        detected.as_ref().map(|(a, _)| a)
-                    );
                     if !alt && detected.is_some() {
                         let active = model.block_list().active_block_index();
-                        log::info!(
-                            "[clear-diag] dispatching ScrollToTopOfBlockPinned for block {active:?}"
-                        );
                         // `ScrollToTopOfBlockPinned` (not `ScrollToTopOfBlock`)
                         // because by this point `handle_terminal_wakeup` has
                         // synced the active block's tree height to its current
@@ -10923,13 +10929,9 @@ impl TerminalView {
                             block_index: active,
                         })
                     } else {
-                        log::info!("[clear-diag] gate failed; falling back to AfterClear");
                         None
                     }
                 } else {
-                    log::info!(
-                        "[clear-diag] cli_agent_clear_scrolls_to_top is OFF; using AfterClear"
-                    );
                     None
                 };
                 self.update_scroll_position_locking(
@@ -12544,19 +12546,29 @@ impl TerminalView {
         if !is_agent_supported(&notification.agent) {
             return;
         }
-        // register_cli_agent_listener_from_event creates the session +
+        // `register_cli_agent_listener_from_event` creates the session +
         // listener on the first event, and returns false on subsequent
-        // events because has_listener=true. Originally, the caller
-        // early-returned in that case — which silently dropped Stop /
-        // PermissionRequest / etc. on the floor, since update_from_event
-        // is what applies the event to the session's status state machine.
-        // Don't early-return: always run update_from_event so the status
-        // tracks the event stream.
-        let _ = self.register_cli_agent_listener_from_event(&notification, ctx);
-
-        CLIAgentSessionsModel::handle(ctx).update(ctx, |sessions_model, ctx| {
-            sessions_model.update_from_event(self.view_id, &notification, ctx);
-        });
+        // events because `has_listener=true`. The listener's own subscription
+        // to `PluggableNotification` (listener/mod.rs) calls
+        // `update_from_event` for every OSC after registration — but it
+        // can't catch the OSC that triggered registration, because
+        // `subscribe_to_model` registers for *future* dispatches and the
+        // in-flight emit has already been routed by the time the listener
+        // subscribes.
+        //
+        // So: on the registration event, the view calls `update_from_event`
+        // directly (otherwise SessionStart would be dropped); on subsequent
+        // events, the listener handles it and the view stays out of the way.
+        // Double-firing causes Claude's `/clear` to run twice during the
+        // repaint window, which freezes the UI. See
+        // `docs/investigations/cli-agent-slash-clear-viewport.md`.
+        let listener_just_registered =
+            self.register_cli_agent_listener_from_event(&notification, ctx);
+        if listener_just_registered {
+            CLIAgentSessionsModel::handle(ctx).update(ctx, |sessions_model, ctx| {
+                sessions_model.update_from_event(self.view_id, &notification, ctx);
+            });
+        }
 
         if notification.event == CLIAgentEventType::SessionStart {
             send_telemetry_from_ctx!(
@@ -12705,6 +12717,76 @@ impl TerminalView {
         }
     }
 
+    /// Cortex divergence — scan the alt-screen grid from the bottom upward
+    /// for the first cell whose `c` is a box-drawing top-left corner
+    /// (`╭`/`┌`/`┏`), the unique signature of a CLI agent's post-`/clear`
+    /// Scans the active CLI-agent block's Output grid for the row that
+    /// contains the welcome banner's top-left box-drawing corner
+    /// (`╭`/`┌`/`┏`), then returns "rows from that row to the bottom of
+    /// the grid (inclusive of the banner row)" so the scroll handler can
+    /// compute `scroll_top = bottom_of_block_in_lines - rows_below_banner`
+    /// and pin the banner at the viewport top. Claude Code does *not* use
+    /// the alt-screen — all its TUI cells live in the block's Output
+    /// grid, so this scans there directly.
+    ///
+    /// Returns `None` if no corner is found in the bottom `max_scan_rows`
+    /// rows of the grid (e.g., the agent hasn't yet repainted post-`/clear`,
+    /// or it's a non-Claude agent with a different banner). The caller's
+    /// `ScrollActiveBlockBottomToTop` handler falls back to a fixed-line
+    /// estimate in that case.
+    fn find_rows_below_banner_top_in_block_output_for_clear(
+        block: &crate::terminal::model::block::Block,
+        max_scan_rows: usize,
+    ) -> Option<usize> {
+        use crate::terminal::block_list_element::GridType;
+        use crate::terminal::model::grid::Dimensions;
+        let block_grid = block.grid_of_type(GridType::Output)?;
+        let grid = block_grid.grid_handler();
+        let total = grid.total_rows();
+        let scan_start = total.saturating_sub(max_scan_rows);
+        // Find the last non-blank row first. The block trims trailing blank
+        // rows from its rendered height (`block.height()`), so the bottom of
+        // the rendered area is the last row with any non-`\0`/non-whitespace
+        // cell — not `total - 1`. Without this, our `rows_below_banner` is
+        // inflated by however many trailing blank rows the grid currently
+        // has, and `bottom_of_block_in_lines - rows_below_banner` lands the
+        // viewport top above the actual banner.
+        let mut last_non_blank: Option<usize> = None;
+        for row_idx in (scan_start..total).rev() {
+            let Some(row) = grid.row(row_idx) else {
+                continue;
+            };
+            let has_content = (0..row.len()).any(|col| {
+                row.get(col)
+                    .is_some_and(|c| c.c != '\0' && !c.c.is_whitespace())
+            });
+            if has_content {
+                last_non_blank = Some(row_idx);
+                break;
+            }
+        }
+        let bottom_idx = last_non_blank?;
+        for row_idx in (scan_start..=bottom_idx).rev() {
+            let Some(row) = grid.row(row_idx) else {
+                continue;
+            };
+            for col in 0..row.len() {
+                if let Some(cell) = row.get(col) {
+                    if matches!(cell.c, '╭' | '┌' | '┏') {
+                        // `+ 3`: `+ 1` to make the count inclusive of the
+                        // banner row, plus `+ 2` for the block's bottom
+                        // padding (~1 line of divider/fractional pad below
+                        // the last content row). Without the extra `+ 2`
+                        // the viewport lands one row below the banner top
+                        // and clips the `╭─── Claude Code …` row.
+                        return Some(bottom_idx + 3 - row_idx);
+                    }
+                }
+            }
+        }
+        None
+    }
+
     /// Handles CLI agent session status changes from the singleton model.
     /// Sends a desktop notification when a CLI agent reaches a completed state
     /// (blocked or succeeded) and the user is in a different window.
@@ -12721,13 +12803,7 @@ impl TerminalView {
                 terminal_view_id, ..
             } if *terminal_view_id == self.view_id => {
                 let mut model = self.model.lock();
-                let active_idx = model.block_list().active_block_index();
                 let trim_on = FeatureFlag::TrimTrailingBlankLines.is_enabled();
-                log::info!(
-                    "[clear-diag] CLIAgentSessionsModelEvent::Started view={:?} \
-                     active_block={active_idx:?}: enabling full_grid_clear_behavior, trim={trim_on}",
-                    self.view_id
-                );
                 let active_block = model.block_list_mut().active_block_mut();
                 active_block.enable_full_grid_clear_behavior();
                 if trim_on {
@@ -12743,70 +12819,90 @@ impl TerminalView {
                     active_block.set_trim_trailing_blank_rows(false);
                 }
             }
-            // Cortex divergence — claude's `/clear` slash command. Routed
-            // here from `cortex-hook.{ps1,sh}` via the new SessionEnd
-            // reason="clear" → `session_clear` discriminator. Two prior
-            // attempts (commits 4e399552, 87f4d48b, and the StatusChanged
-            // hook in 6f29f406) hooked signals that don't fire for `/clear`:
-            // claude doesn't emit ESC[2J (so TerminalClear never arrives)
-            // and intercepts slash commands before UserPromptSubmit (so the
-            // query=="/clear" gate never fires). SessionEnd reason="clear"
-            // is the only hook signal that does fire — confirmed by the
-            // discovery log on 2026-05-15.
+            // Cortex divergence — Claude Code's `/clear` slash command.
+            // Routed here from `cortex-hook.{ps1,sh}` via the SessionEnd
+            // `reason="clear"` discriminator. Claude doesn't emit ESC[2J
+            // (so `ModelEvent::TerminalClear` never fires for this case),
+            // and it intercepts slash commands before `UserPromptSubmit`,
+            // so the SessionEnd hook is the only signal we get. See
+            // `docs/investigations/cli-agent-slash-clear-viewport.md`.
             CLIAgentSessionsModelEvent::Cleared {
                 terminal_view_id, ..
             } if *terminal_view_id == self.view_id
                 && *crate::settings::CortexSettings::as_ref(ctx)
                     .cli_agent_clear_scrolls_to_top =>
             {
-                // Order matters:
-                //   1. Push the active block's visible region into
-                //      flat_storage (scrollback), wiping the cells.
-                //   2. Install the active_gap so scroll_top can land
-                //      beyond the natural max_scroll_top.
-                //   3. Dispatch the scroll.
-                let active_idx = {
+                // Install an active_gap so the scroll target can land beyond
+                // the natural `max_scroll_top`, then scan the block's `Output`
+                // grid for the top-left corner of Claude's welcome banner
+                // (`╭`/`┌`/`┏`). That row index — expressed as "rows from the
+                // banner row to the bottom of the rendered block, inclusive"
+                // — becomes the offset that the scroll handler subtracts from
+                // `bottom_of_block_in_lines` to place the viewport. Note we
+                // scan the Output grid, not the alt-screen: Claude does NOT
+                // use the alt-screen, despite paint patterns that suggest it.
+                const MAX_BANNER_SCAN_ROWS: usize = 60;
+                // Claude's post-`/clear` repaint lands in multiple phases —
+                // an initial banner draw followed by a secondary phase 1–2s
+                // later that paints MCP status / session-info lines and may
+                // shift the banner row. A single deferred pin would catch
+                // the wrong row as soon as that secondary phase landed, so
+                // we run an immediate pass and then a series of deferred
+                // re-scans + re-pins at increasing delays. Each tick checks
+                // `post_clear_scroll_pinned` first: any user interaction
+                // (typing, scroll, page keys) releases the pin via
+                // `ScrollState::update`, and the chase aborts.
+                const POST_CLEAR_CHASE_DELAYS_MS: &[u64] = &[50, 200, 500, 1500, 3000];
+                let (active_idx, rows_below_banner) = {
                     let mut model = self.model.lock();
                     let idx = model.block_list().active_block_index();
-                    let pre_clear_height = model
-                        .block_list()
-                        .active_block()
-                        .height(model.block_list().agent_view_state());
-                    log::info!(
-                        "[clear-diag] Cleared step 1 (pre-clear_viewport): \
-                         active_block.height()={pre_clear_height:?}"
-                    );
                     let block_list = model.block_list_mut();
-                    block_list.clear_active_block_visible_for_cli_agent_clear();
-                    let post_clear_height = block_list
-                        .active_block()
-                        .height(block_list.agent_view_state());
-                    log::info!(
-                        "[clear-diag] Cleared step 2 (post-clear_viewport, pre-setup_active_gap): \
-                         active_block.height()={post_clear_height:?}"
-                    );
+                    let rows_below_banner = block_list.block_at(idx).and_then(|block| {
+                        Self::find_rows_below_banner_top_in_block_output_for_clear(
+                            block,
+                            MAX_BANNER_SCAN_ROWS,
+                        )
+                    });
                     block_list.setup_active_gap_for_cli_agent_clear();
-                    let post_gap_height = block_list
-                        .active_block()
-                        .height(block_list.agent_view_state());
-                    let gap_height = block_list.active_gap().map(|g| g.height());
-                    log::info!(
-                        "[clear-diag] Cleared step 3 (post-setup_active_gap): \
-                         active_block.height()={post_gap_height:?} gap_height={gap_height:?}"
-                    );
-                    idx
+                    (idx, rows_below_banner)
                 };
-                log::info!(
-                    "[clear-diag] Cleared event for view {:?}: dispatching scroll for \
-                     block {active_idx:?}",
-                    self.view_id
-                );
                 self.update_scroll_position_locking(
                     ScrollPositionUpdate::ScrollActiveBlockBottomToTop {
                         block_index: active_idx,
+                        rows_below_banner,
                     },
                     ctx,
                 );
+                for &delay_ms in POST_CLEAR_CHASE_DELAYS_MS {
+                    let _ = ctx.spawn(
+                        async move {
+                            warpui::r#async::Timer::after(Duration::from_millis(delay_ms)).await;
+                        },
+                        move |this, _, ctx| {
+                            if !this.scroll_position.post_clear_scroll_pinned() {
+                                return;
+                            }
+                            let redetected = {
+                                let model = this.model.lock();
+                                model.block_list().block_at(active_idx).and_then(|block| {
+                                    Self::find_rows_below_banner_top_in_block_output_for_clear(
+                                        block,
+                                        MAX_BANNER_SCAN_ROWS,
+                                    )
+                                })
+                            };
+                            if redetected.is_some() {
+                                this.update_scroll_position_locking(
+                                    ScrollPositionUpdate::ScrollActiveBlockBottomToTop {
+                                        block_index: active_idx,
+                                        rows_below_banner: redetected,
+                                    },
+                                    ctx,
+                                );
+                            }
+                        },
+                    );
+                }
             }
             _ => {}
         }
