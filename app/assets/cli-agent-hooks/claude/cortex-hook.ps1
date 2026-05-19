@@ -64,6 +64,21 @@ if (-not $protocolVersion) {
     exit 0
 }
 
+# ---- Lane guard ---------------------------------------------------------
+# Cortex's prod and dev lanes each install their own copy of this script
+# (cortex-hook.ps1 vs cortex-hook-dev.ps1) and each registers a hook entry
+# in ~/.claude/settings.json that points at their own copy. When claude
+# fires a hook event from a shell hosted by the prod Cortex window, BOTH
+# scripts get invoked. Only the one matching the active lane should emit;
+# the other must exit silently. Lane is encoded in the filename and the
+# active lane is signaled by `$env:WARP_DATA_PROFILE` (set to "dev" by
+# `scripts\launch-cortex-dev.bat`, unset by prod).
+$scriptLane = if ($PSCommandPath -match '-dev\.ps1$') { 'dev' } else { 'prod' }
+$envLane    = if ($env:WARP_DATA_PROFILE -eq 'dev')   { 'dev' } else { 'prod' }
+if ($scriptLane -ne $envLane) {
+    exit 0
+}
+
 # ---- Read claude's stdin JSON -------------------------------------------
 $stdinJson = ''
 $stdinObj  = $null
@@ -232,7 +247,13 @@ if ($stdinObj) {
 
 # Compact JSON keeps the OSC sequence small. Depth covers tool_input
 # blobs we might forward later; envelope is otherwise flat.
-$json = $envelope | ConvertTo-Json -Compress -Depth 8
+$json = ''
+try {
+    $json = $envelope | ConvertTo-Json -Compress -Depth 8
+} catch {
+    Write-CortexHookLog ("json serialize failed: {0}" -f $_.Exception.Message)
+    exit 0
+}
 
 # ---- OSC 777 byte sequence -----------------------------------------------
 # \x1b]777;notify;warp://cli-agent;<JSON>\x07

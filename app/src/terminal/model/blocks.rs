@@ -924,6 +924,27 @@ impl BlockList {
         });
     }
 
+    /// Cortex divergence: undo the active_gap installed by
+    /// [`Self::setup_active_gap_for_cli_agent_clear`]. Called by the view
+    /// when the CLI-agent `/clear` pin is released (user scrolls, runs a
+    /// new command, page-keys, etc.). Without retraction the gap keeps
+    /// `max_scroll_top` artificially extended by a viewport height past
+    /// the natural bound, which lets the user scroll the post-`/clear`
+    /// block off the top of the viewport into an empty black region. Idempotent — no-op if no gap is installed.
+    pub fn retract_active_gap_for_cli_agent_clear(&mut self) {
+        if self.active_gap.is_none() {
+            return;
+        }
+        let mut new_sum_tree = SumTree::new();
+        for block in self.block_heights.cursor::<TotalIndex, ()>() {
+            if !matches!(block, BlockHeightItem::Gap(_)) {
+                new_sum_tree.push(*block);
+            }
+        }
+        self.block_heights = new_sum_tree;
+        self.active_gap = None;
+    }
+
     /// Clears the visible screen--moving everything that's currently visible into scrollback.
     pub fn clear_visible_screen(&mut self) {
         self.finish_background_block();

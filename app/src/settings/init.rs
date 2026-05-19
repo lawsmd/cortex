@@ -67,6 +67,24 @@ pub fn register_all_settings(ctx: &mut AppContext) {
     TerminalSettings::register(ctx);
     PaneSettings::register(ctx);
     CortexSettings::register(ctx);
+    // Cortex divergence — surface a dev-build warning when the CLI-agent
+    // `/clear` viewport pin is disabled in dev's settings.toml. This is
+    // typically a debug-iteration leftover that silently disables the pin
+    // and consumed a full round of investigation when it bit us in dev.
+    // Gated on `debug_assertions` so prod (where the setting is correctly
+    // defaulted to true) stays quiet.
+    #[cfg(debug_assertions)]
+    {
+        let cli_agent_clear_scrolls_to_top =
+            *CortexSettings::as_ref(ctx).cli_agent_clear_scrolls_to_top;
+        if !cli_agent_clear_scrolls_to_top {
+            log::warn!(
+                "[cli-agent-clear] cli_agent_clear_scrolls_to_top=false in dev — \
+                 /clear viewport pin disabled. Restore to true (the prod default) \
+                 unless you're actively iterating on this code path."
+            );
+        }
+    }
     CommandSearchSettings::register(ctx);
     AliasExpansionSettings::register(ctx);
     CodeSettings::register(ctx);

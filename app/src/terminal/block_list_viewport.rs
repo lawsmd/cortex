@@ -46,6 +46,14 @@ pub struct ScrollState {
     /// on: any user/programmatic scroll, the next command execution, or a
     /// resize. Re-armed by a fresh `ScrollActiveBlockBottomToTop`.
     post_clear_scroll_pinned: bool,
+    /// Cortex divergence — the scroll_top of the active pin position.
+    /// While `post_clear_scroll_pinned` is true, any update that would push
+    /// `scroll_top` past this value is clamped here. Stops the user from
+    /// scrolling DOWN past the pin into the `active_gap` region (which is
+    /// an empty black void below the block). Set by the
+    /// `ScrollActiveBlockBottomToTop` arm of `update`; cleared on the same
+    /// paths that clear `post_clear_scroll_pinned`.
+    post_clear_max_scroll_top: Option<Lines>,
 }
 
 impl ScrollState {
@@ -53,6 +61,7 @@ impl ScrollState {
         Self {
             position,
             post_clear_scroll_pinned: false,
+            post_clear_max_scroll_top: None,
         }
     }
 
@@ -63,7 +72,8 @@ impl ScrollState {
     /// Whether the scroll position is currently pinned by the CLI-agent
     /// `/clear` handler. Used by the view's post-`/clear` re-scan loop to
     /// know when the user has interacted (pin released) and we should stop
-    /// chasing the banner.
+    /// chasing the banner. Also used by `update_scroll_position_locking` to
+    /// detect pin-just-released so the active_gap can be retracted.
     pub fn post_clear_scroll_pinned(&self) -> bool {
         self.post_clear_scroll_pinned
     }
@@ -102,10 +112,12 @@ impl ScrollState {
                 | ScrollPositionUpdate::ScrollMostRecentBlockIntoView => {
                     // User or system scroll / new command — release the pin.
                     self.post_clear_scroll_pinned = false;
+                    self.post_clear_max_scroll_top = None;
                 }
                 ScrollPositionUpdate::ScrollActiveBlockBottomToTop { .. } => {
                     // Another `/clear` — keep the pin armed, fall through to
-                    // recompute the position.
+                    // recompute the position. `post_clear_max_scroll_top`
+                    // gets refreshed below from the new pin.
                 }
                 _ => {}
             }
@@ -133,7 +145,34 @@ impl ScrollState {
             return false;
         }
 
-        let next_position = viewport.next_scroll_position(update, app);
+        let mut next_position = viewport.next_scroll_position(update, app);
+
+        // Cortex divergence — when a `/clear` pin places `scroll_top` past
+        // the natural `max_scroll_top - viewport_height` bound via the
+        // `active_gap`, subsequent updates (mouse-wheel down, PageDown when
+        // the chase loop re-pins, etc.) can compute a scroll_top deeper into
+        // the gap region, which renders as an empty black void below the
+        // block. Clamp any newly-computed `scroll_top` to the pin's value
+        // while the pin remains armed.
+        //
+        // For `ScrollActiveBlockBottomToTop` itself, the just-computed
+        // next_position IS the new pin; we re-capture its scroll_top as the
+        // clamp. Subsequent updates while pinned then use the same value.
+        if matches!(
+            update,
+            ScrollPositionUpdate::ScrollActiveBlockBottomToTop { .. }
+        ) {
+            if let ScrollPosition::FixedAtPosition { scroll_lines } = next_position {
+                let pin_scroll_top = scroll_lines
+                    .scroll_top(viewport.block_list, viewport.content_element_height_lines());
+                self.post_clear_max_scroll_top = Some(pin_scroll_top);
+            }
+        } else if self.post_clear_scroll_pinned {
+            if let Some(max) = self.post_clear_max_scroll_top {
+                next_position = clamp_scroll_position_to(next_position, max, &viewport);
+            }
+        }
+
         if next_position != self.position {
             log::debug!(
                 "updating scroll position from {:?} to {:?} for update {:?}",
@@ -145,6 +184,41 @@ impl ScrollState {
             return true;
         }
         false
+    }
+}
+
+/// Clamps a freshly-computed `ScrollPosition` so its effective `scroll_top`
+/// does not exceed `max`. Used while the CLI-agent `/clear` pin is armed to
+/// keep the user from scrolling DOWN past the pin into the `active_gap`
+/// region. `FollowsBottomOfMostRecentBlock` and the waterfall-gap variant
+/// are replaced with `FixedAtPosition(max)` since "follow the bottom" would
+/// land in the gap; other variants pass through unchanged.
+fn clamp_scroll_position_to(
+    position: ScrollPosition,
+    max: Lines,
+    viewport: &ViewportState<'_>,
+) -> ScrollPosition {
+    let make_fixed = |scroll_top: Lines| ScrollPosition::FixedAtPosition {
+        scroll_lines: ScrollLines::from_scroll_top(
+            scroll_top,
+            viewport.input_mode,
+            viewport.block_list,
+            viewport.content_element_height_lines(),
+        ),
+    };
+    match position {
+        ScrollPosition::FixedAtPosition { scroll_lines } => {
+            let current = scroll_lines
+                .scroll_top(viewport.block_list, viewport.content_element_height_lines());
+            if current > max {
+                make_fixed(max)
+            } else {
+                position
+            }
+        }
+        ScrollPosition::FollowsBottomOfMostRecentBlock
+        | ScrollPosition::WaterfallGapFollowsBottomOfMostRecentBlock { .. } => make_fixed(max),
+        ScrollPosition::FixedWithinLongRunningBlock { .. } => position,
     }
 }
 
@@ -323,16 +397,17 @@ pub enum ScrollPositionUpdate {
     /// `BlockList::setup_active_gap_for_cli_agent_clear`). The gap is what
     /// allows `scroll_top` to legitimately reach `bottom_of_block - 1`.
     ///
-    /// `rows_below_banner` is computed by the view handler by scanning the
-    /// alt-screen grid for the banner's top-left corner (`╭`/`┌`/`┏`). It
-    /// represents the count of rows from the banner-top row to the bottom of
-    /// the block (inclusive of the banner row). The handler subtracts this
-    /// from `bottom_of_block_in_lines` to get the scroll target. `None`
-    /// means the view handler couldn't detect the banner; the scroll
-    /// handler falls back to a row-count heuristic.
+    /// `lines_below_banner` is computed by the view handler by scanning the
+    /// active block's Output grid for the banner's top-left corner
+    /// (`╭`/`┌`/`┏`) and summing the rendered line components of the block
+    /// that sit below the banner row (output-grid remainder, footer padding,
+    /// footer height, bottom padding). The handler subtracts this from
+    /// `bottom_of_block_in_lines` to get the scroll target. `None` means the
+    /// view handler couldn't detect the banner; the scroll handler falls
+    /// back to a fixed-line heuristic.
     ScrollActiveBlockBottomToTop {
         block_index: BlockIndex,
-        rows_below_banner: Option<usize>,
+        lines_below_banner: Option<Lines>,
     },
     ScrollToBottomOfBlock {
         block_index: BlockIndex,
@@ -936,7 +1011,7 @@ impl<'a> ViewportState<'a> {
             }
             ScrollPositionUpdate::ScrollActiveBlockBottomToTop {
                 block_index,
-                rows_below_banner,
+                lines_below_banner,
             } => {
                 // Cortex divergence — sole caller is the CLI-agent `/clear`
                 // handler in `TerminalView`. We want the agent's post-`/clear`
@@ -944,25 +1019,27 @@ impl<'a> ViewportState<'a> {
                 // the viewport, with the pre-`/clear` conversation scrolled
                 // above (accessible by scrolling up).
                 //
-                // The view handler computes `rows_below_banner` by scanning
+                // The view handler computes `lines_below_banner` by scanning
                 // the block's Output grid for the welcome banner's top-left
-                // corner (`╭`/`┌`/`┏`). Content-based detection makes the
-                // math self-correcting across window sizes, fonts, and
-                // Claude versions. The `active_gap` installed by
+                // corner (`╭`/`┌`/`┏`) and summing the rendered line
+                // components below it from the block's actual geometry —
+                // grid-remainder + footer padding + footer height + bottom
+                // padding. Geometry-based math is self-correcting across
+                // window sizes, fonts, banner revisions, and platforms
+                // (an earlier magic-number `+3` worked on macOS but clipped
+                // the banner top row on Windows where the fractional padding
+                // accumulates differently). The `active_gap` installed by
                 // `setup_active_gap_for_cli_agent_clear` extends
                 // `max_scroll_top` far enough that we can land the banner
                 // row at the viewport's top.
                 //
                 // Fallback: if no top-corner is detected (non-Claude agent or
-                // future banner redesign), use a 40-row heuristic — better
+                // future banner redesign), use a 40-line heuristic — better
                 // to over-shoot slightly than to leave pre-`/clear` content
                 // visible.
                 let bottom = self.bottom_of_block_in_lines(block_index);
                 let max_scroll_top = self.max_scroll_top_in_lines();
-                let scroll_lines_below_top = match rows_below_banner {
-                    Some(rows) => Lines::new(rows as f64),
-                    None => Lines::new(40.0),
-                };
+                let scroll_lines_below_top = lines_below_banner.unwrap_or(Lines::new(40.0));
                 let scroll_top = (bottom - scroll_lines_below_top)
                     .max(Lines::zero())
                     .min(max_scroll_top);

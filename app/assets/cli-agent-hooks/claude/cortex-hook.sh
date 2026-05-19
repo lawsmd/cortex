@@ -43,6 +43,28 @@ if [ -z "${WARP_CLI_AGENT_PROTOCOL_VERSION:-}" ]; then
     exit 0
 fi
 
+# ---- Lane guard ---------------------------------------------------------
+# Cortex's prod and dev lanes each install their own copy of this script
+# (cortex-hook.sh vs cortex-hook-dev.sh) and each registers a hook entry in
+# ~/.claude/settings.json that points at their own copy. When claude fires
+# a hook event from a shell hosted by either Cortex window, BOTH scripts
+# get invoked. Only the one matching the active lane should emit; the
+# other must exit silently. Lane is encoded in the filename and the active
+# lane is signaled by $WARP_DATA_PROFILE (set to "dev" by
+# launch-cortex-dev.sh, unset by prod).
+case "$0" in
+    *-dev.sh) script_lane=dev ;;
+    *)        script_lane=prod ;;
+esac
+if [ "${WARP_DATA_PROFILE:-}" = "dev" ]; then
+    env_lane=dev
+else
+    env_lane=prod
+fi
+if [ "$script_lane" != "$env_lane" ]; then
+    exit 0
+fi
+
 # ---- Locate python3 ------------------------------------------------------
 # python3 handles JSON parse + envelope build because robust JSON in pure
 # bash is a tarpit. Reliably present on macOS (Xcode CLT, required for
