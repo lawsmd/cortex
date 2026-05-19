@@ -22,6 +22,7 @@
 use warpui::Action;
 
 use crate::appearance::Appearance;
+use crate::menu::cortex_extras::MenuItemFieldsCortexExt;
 use crate::menu::MenuItemFields;
 use crate::ui_components::icons;
 
