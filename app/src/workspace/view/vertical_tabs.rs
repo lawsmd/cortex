@@ -1,7 +1,12 @@
 mod content_sized_editor;
+mod cortex_extensions;
 pub mod telemetry;
 
 use self::content_sized_editor::ContentSizedEditor;
+use self::cortex_extensions::{
+    cortex_text_line, render_pane_icon_with_status, wrap_with_agent_animation_layers,
+    VERTICAL_TABS_SUMMARY_STATUS_ICON_SIZE, VERTICAL_TAB_UNSELECTED_BORDER_GRAY,
+};
 use crate::ai::agent::conversation::{ConversationStatus, StatusColorStyle};
 use crate::ai::agent_management::AgentNotificationsModel;
 use crate::ai::cloud_environments::CloudAmbientAgentEnvironment;
@@ -35,8 +40,6 @@ use crate::pane_group::TerminalPane;
 use crate::pane_group::{
     CodePane, NotebookPane, PaneGroup, PaneId, TabBarHoverIndex, WorkflowPane,
 };
-use crate::animation::elements::row_glow_breath::RowGlowBreathElement;
-use crate::animation::elements::traveling_comet::TravelingCometElement;
 use crate::tab::{
     aggregated_tab_animation, tab_position_id, SelectedTabColor, TabAnimationKind, TabData,
 };
@@ -90,85 +93,6 @@ use warpui::ui_components::slider::SliderStateHandle;
 use warpui::ui_components::text_input::TextInput;
 use warpui::{AppContext, EntityId, SingletonEntity, ViewHandle, WindowId};
 
-/// Theme-independent gray used for the 1px border on every unselected vertical
-/// tab in the Cortex appearance. Sits between Warp's existing 100-gray (used
-/// elsewhere in the panel) and white so it reads on both dark and light themes
-/// without being claimable by either.
-const VERTICAL_TAB_UNSELECTED_BORDER_GRAY: ColorU = ColorU {
-    r: 140,
-    g: 140,
-    b: 140,
-    a: 255,
-};
-
-/// Resolve a pane's color into a single `ColorU` for the comet outline. Saved
-/// projects use their accent color; unsaved projects fall back to the same
-/// 140-gray that draws the unselected row border, so the comet visually
-/// belongs to the row in both cases.
-fn comet_outline_color(pane_color: Option<&ThemeFill>) -> ColorU {
-    match pane_color {
-        Some(ThemeFill::Solid(c)) => *c,
-        _ => VERTICAL_TAB_UNSELECTED_BORDER_GRAY,
-    }
-}
-
-/// Resolve a pane's color into the un-lightened tint for the AttentionNeeded
-/// breath frame. Same sourcing as the comet outline (saved → project color,
-/// unsaved → 140-gray) so the two animations read as part of the same tab
-/// identity. The element lightens the result internally before painting,
-/// which is what keeps the frame visible when it's drawn over a row whose
-/// fill is already the project color (selected saved-project tabs).
-fn breath_frame_tint(pane_color: Option<&ThemeFill>) -> ColorU {
-    comet_outline_color(pane_color)
-}
-
-/// If the tab has an active animation state, wrap `content` in a `Stack` so
-/// the appropriate animation element renders alongside it. Returns `content`
-/// unchanged when there's no animation to layer.
-///
-/// `Running` overlays the comet on top of the content; `AttentionNeeded`
-/// puts the breath wash underneath. The two states are mutually exclusive
-/// at the aggregator level — see `aggregated_tab_animation` in `tab.rs`.
-///
-/// The animation element is added as a *positioned* child anchored to the
-/// row's top-left and bounded to the parent's size. This is required: the
-/// Flex column above us passes an unbounded y-constraint, and a regular
-/// (non-positioned) child whose `layout` returns `constraint.max` would
-/// poison the Stack with infinite height (see `scene.rs` rect-size assert).
-/// `ParentBySize` makes the Stack size from `content` alone, then re-layouts
-/// the animation element with a tight constraint matching the row's bounds.
-fn wrap_with_agent_animation_layers(
-    content: Box<dyn Element>,
-    tab_animation: Option<TabAnimationKind>,
-    pane_color: Option<&ThemeFill>,
-) -> Box<dyn Element> {
-    let Some(kind) = tab_animation else {
-        return content;
-    };
-    let fill_parent = OffsetPositioning::offset_from_parent(
-        Vector2F::zero(),
-        ParentOffsetBounds::ParentBySize,
-        ParentAnchor::TopLeft,
-        ChildAnchor::TopLeft,
-    );
-    let stack = match kind {
-        TabAnimationKind::Running => {
-            let outline = comet_outline_color(pane_color);
-            Stack::new().with_child(content).with_positioned_child(
-                TravelingCometElement::new(outline).finish(),
-                fill_parent,
-            )
-        }
-        TabAnimationKind::AttentionNeeded => {
-            let tint = breath_frame_tint(pane_color);
-            Stack::new()
-                .with_positioned_child(RowGlowBreathElement::new(tint).finish(), fill_parent)
-                .with_child(content)
-        }
-    };
-    stack.finish()
-}
-
 const PANEL_WIDTH: f32 = 200.;
 pub(super) const MIN_PANEL_WIDTH: f32 = 190.;
 pub(super) const MAX_PANEL_WIDTH_RATIO: f32 = 0.5;
@@ -197,18 +121,6 @@ pub(super) const VERTICAL_TABS_DETAIL_SIDECAR_POSITION_ID: &str = "vertical_tabs
 /// Total size of the icon-with-status component rendered for each vertical-tabs row.
 /// Sub-components (circle, badge, cloud) are derived inside `render_icon_with_status`.
 const VERTICAL_TABS_ICON_SIZE: f32 = 24.;
-
-/// Icon size for the per-line conversation status pill in Summary mode. Pairs with
-/// `STATUS_ELEMENT_PADDING` (2px) for an overall ~14px element next to a 12pt title.
-const VERTICAL_TABS_SUMMARY_STATUS_ICON_SIZE: f32 = 10.;
-
-/// Sizing override for the Cortex Settings tab's brain glyph. The brain SVG
-/// has more inherent whitespace inside its viewBox than the other neutral
-/// glyphs, so at the default 24px it reads optically smaller next to them.
-/// Bumped to 30 so the icon slot grows; the brain row's title sits ~6px
-/// farther right than other rows — a deliberate trade for the optical
-/// weight on this single tab.
-const VERTICAL_TABS_BRAIN_ICON_SIZE: f32 = 30.;
 
 fn vtab_pane_row_position_id(pane_group_id: EntityId, pane_id: PaneId) -> String {
     format!("vertical_tabs:pane_row:{pane_group_id:?}:{pane_id}")
@@ -336,36 +248,6 @@ enum TerminalPrimaryLineFont {
 
 fn oz_icon_fill(theme: &WarpTheme) -> WarpThemeFill {
     theme.main_text_color(theme.background())
-}
-
-fn render_pane_icon_with_status(
-    variant: IconWithStatusVariant,
-    typed: &TypedPane<'_>,
-    theme: &WarpTheme,
-    _app: &AppContext,
-) -> Box<dyn Element> {
-    // Cortex: brain glyph for the Cortex Settings tab gets a larger total_size
-    // because the SVG has more inherent whitespace inside its viewBox than the
-    // other neutral glyphs.
-    //
-    // NOTE: the `tabs_hide_icon_backdrop` Cortex setting is currently inert —
-    // upstream's 2026-05-05 refactor of `render_icon_with_status` to a single
-    // `total_size: f32` parameter dropped the per-variant struct that our
-    // hide-neutral-backdrop branch used. Re-implementing it on top of upstream's
-    // `render_neutral_circle` helper is a follow-up; until then the setting
-    // exists in CortexSettings but renders identically to the default.
-    let total_size = if matches!(typed, TypedPane::CortexSettings) {
-        VERTICAL_TABS_BRAIN_ICON_SIZE
-    } else {
-        VERTICAL_TABS_ICON_SIZE
-    };
-    render_icon_with_status(
-        variant,
-        total_size,
-        0.,
-        theme,
-        theme.background(),
-    )
 }
 
 #[derive(Clone, Default)]
@@ -4131,11 +4013,10 @@ fn render_summary_tab_item(
     ) {
         text_col.add_child(title_override);
     } else if summary.primary_labels.is_empty() {
-        text_col.add_child(render_text_line(
+        text_col.add_child(cortex_text_line(
             &props.title,
             main_text_color,
             ClipConfig::end(),
-            12.,
             appearance,
         ));
     } else {
@@ -4194,11 +4075,10 @@ fn render_summary_tab_item(
             INTRA_REGION_GAP
         };
         text_col.add_child(
-            Container::new(render_text_line(
+            Container::new(cortex_text_line(
                 working_dir,
                 sub_text_color,
                 ClipConfig::start(),
-                12.,
                 appearance,
             ))
             .with_margin_top(margin)
@@ -4279,7 +4159,7 @@ fn render_summary_primary_label_line(
     // the pill from `render_status_element`.
     const STATUS_ELEMENT_PADDING: f32 = 2.;
     let prefix_slot_size = VERTICAL_TABS_SUMMARY_STATUS_ICON_SIZE + STATUS_ELEMENT_PADDING * 2.;
-    let text = render_text_line(&label.text, text_color, ClipConfig::end(), 12., appearance);
+    let text = cortex_text_line(&label.text, text_color, ClipConfig::end(), appearance);
 
     let prefix: Option<Box<dyn Element>> = match (label.status.as_ref(), reserve_prefix_slot) {
         (Some(status), _) => Some(render_status_element(
