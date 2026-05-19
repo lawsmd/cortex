@@ -14,17 +14,27 @@ use pathfinder_geometry::vector::Vector2F;
 
 use crate::animation::elements::row_glow_breath::RowGlowBreathElement;
 use crate::animation::elements::traveling_comet::TravelingCometElement;
+use crate::appearance::Appearance;
 use crate::tab::TabAnimationKind;
 use crate::themes::theme::Fill as ThemeFill;
 use crate::ui_components::icon_with_status::{render_icon_with_status, IconWithStatusVariant};
-use warp_core::ui::theme::WarpTheme;
+use warp_core::ui::theme::{Fill as WarpThemeFill, WarpTheme};
 use warpui::elements::{
     ChildAnchor, Element, OffsetPositioning, ParentAnchor, ParentElement, ParentOffsetBounds,
     Stack,
 };
+use warpui::text_layout::ClipConfig;
 use warpui::AppContext;
 
 use super::TypedPane;
+
+/// Default font size for Cortex-side summary-tab text lines. Pulled out of
+/// the call-site literals so the wrapper below has a single knob for the
+/// `font_size` parameter upstream added to `render_text_line`. If upstream
+/// removes or renames `font_size`, only [`cortex_text_line`] needs an edit —
+/// not the three callers in `render_summary_tab_item` /
+/// `render_summary_primary_label_line`.
+pub(super) const CORTEX_SUMMARY_LINE_FONT_SIZE: f32 = 12.;
 
 /// Theme-independent gray used for the 1px border on every unselected vertical
 /// tab in the Cortex appearance. Sits between Warp's existing 100-gray (used
@@ -115,6 +125,29 @@ pub(super) fn wrap_with_agent_animation_layers(
         }
     };
     stack.finish()
+}
+
+/// Cortex-side wrapper around upstream's private `render_text_line` helper.
+///
+/// All three Cortex call sites in `render_summary_tab_item` /
+/// `render_summary_primary_label_line` pass the same 12pt font size, so we
+/// commit to that here and absorb upstream's signature in one place. When
+/// upstream changes the parameter list of `render_text_line` again — they
+/// already added `font_size: f32` once mid-rebase — this wrapper is the only
+/// thing that needs updating.
+pub(super) fn cortex_text_line(
+    text: &str,
+    text_color: WarpThemeFill,
+    clip: ClipConfig,
+    appearance: &Appearance,
+) -> Box<dyn Element> {
+    super::render_text_line(
+        text,
+        text_color,
+        clip,
+        CORTEX_SUMMARY_LINE_FONT_SIZE,
+        appearance,
+    )
 }
 
 /// Render the icon-with-status element for a pane row, bumping the total size
