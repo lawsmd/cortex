@@ -4135,6 +4135,7 @@ fn render_summary_tab_item(
             &props.title,
             main_text_color,
             ClipConfig::end(),
+            12.,
             appearance,
         ));
     } else {
@@ -4278,7 +4279,7 @@ fn render_summary_primary_label_line(
     // the pill from `render_status_element`.
     const STATUS_ELEMENT_PADDING: f32 = 2.;
     let prefix_slot_size = VERTICAL_TABS_SUMMARY_STATUS_ICON_SIZE + STATUS_ELEMENT_PADDING * 2.;
-    let text = render_text_line(&label.text, text_color, ClipConfig::end(), appearance);
+    let text = render_text_line(&label.text, text_color, ClipConfig::end(), 12., appearance);
 
     let prefix: Option<Box<dyn Element>> = match (label.status.as_ref(), reserve_prefix_slot) {
         (Some(status), _) => Some(render_status_element(
