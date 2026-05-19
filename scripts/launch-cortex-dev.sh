@@ -20,6 +20,11 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$REPO_ROOT"
 
+# --- Restore the CLAUDE.md <-> docs/CLAUDE.md hardlink if a recent edit
+#     (or rebase / atomic write-temp-rename) broke it. Idempotent; silent
+#     on the happy path. Without this the two paths can silently diverge.
+bash "$REPO_ROOT/scripts/restore-claude-md-hardlink.sh" || true
+
 # --- Secure storage backend: file-encrypted, not macOS Keychain.
 #     Set once for the user's launchd session so the `open -a` below inherits
 #     it. The app reads this in app/src/lib.rs and switches from Keychain to
