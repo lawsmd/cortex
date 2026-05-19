@@ -2,6 +2,9 @@ use std::cell::OnceCell;
 use std::sync::Arc;
 use std::{fmt, vec};
 
+pub mod cortex_extras;
+
+use self::cortex_extras::CortexMenuItemExtras;
 use crate::safe_triangle::SafeTriangle;
 use crate::themes::theme::Fill;
 use crate::util::time_format::format_approx_duration_from_now_sentence_case;
@@ -429,9 +432,11 @@ pub struct MenuItemFields<A: Action + Clone> {
     /// [`MenuItemLabel::Text`] labels — multiline/stacked/labeled/icon/custom
     /// variants ignore this field.
     clip_config: Option<ClipConfig>,
-    /// Optional override (in logical pixels) for the gap between the leading
-    /// icon and the label. When `None`, the gap is `icon_size / 2`.
-    icon_label_gap_override: Option<f32>,
+    /// Cortex-only attributes (icon-label gap, future knobs). Kept in a
+    /// nested struct so the upstream-shared `MenuItemFields` surface stops
+    /// growing as we add more Cortex menu knobs. See
+    /// [`self::cortex_extras`] for the trait + builder surface.
+    cortex_extras: CortexMenuItemExtras,
     /// Optional override for the title text color when this item is hovered or
     /// selected. When `None`, the hover state keeps the same text color as the
     /// non-hovered state. Set this to invert the title against a colored
@@ -483,7 +488,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: None,
             icon_size_override: None,
             clip_config: None,
-            icon_label_gap_override: None,
+            cortex_extras: CortexMenuItemExtras::default(),
             override_hover_text_color: None,
             centered_label: false,
         }
@@ -516,7 +521,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: None,
             icon_size_override: None,
             clip_config: None,
-            icon_label_gap_override: None,
+            cortex_extras: CortexMenuItemExtras::default(),
             override_hover_text_color: None,
             centered_label: false,
         }
@@ -552,7 +557,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: None,
             icon_size_override: None,
             clip_config: None,
-            icon_label_gap_override: None,
+            cortex_extras: CortexMenuItemExtras::default(),
             override_hover_text_color: None,
             centered_label: false,
         }
@@ -591,7 +596,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: None,
             icon_size_override: None,
             clip_config: None,
-            icon_label_gap_override: None,
+            cortex_extras: CortexMenuItemExtras::default(),
             override_hover_text_color: None,
             centered_label: false,
         }
@@ -628,7 +633,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: None,
             icon_size_override: None,
             clip_config: None,
-            icon_label_gap_override: None,
+            cortex_extras: CortexMenuItemExtras::default(),
             override_hover_text_color: None,
             centered_label: false,
         }
@@ -664,7 +669,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: None,
             icon_size_override: None,
             clip_config: None,
-            icon_label_gap_override: None,
+            cortex_extras: CortexMenuItemExtras::default(),
             override_hover_text_color: None,
             centered_label: false,
         }
@@ -697,7 +702,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: None,
             icon_size_override: None,
             clip_config: None,
-            icon_label_gap_override: None,
+            cortex_extras: CortexMenuItemExtras::default(),
             override_hover_text_color: None,
             centered_label: false,
         }
@@ -746,7 +751,7 @@ impl<A: Action + Clone> MenuItemFields<A> {
             override_hover_background_color: self.override_hover_background_color,
             icon_size_override: self.icon_size_override,
             clip_config: self.clip_config,
-            icon_label_gap_override: self.icon_label_gap_override,
+            cortex_extras: self.cortex_extras.clone(),
             override_hover_text_color: self.override_hover_text_color,
             centered_label: self.centered_label,
         }
@@ -829,13 +834,6 @@ impl<A: Action + Clone> MenuItemFields<A> {
     /// The default is `appearance.ui_font_size()`.
     pub fn with_icon_size_override(mut self, size: f32) -> Self {
         self.icon_size_override = Some(size);
-        self
-    }
-
-    /// Overrides the gap (in logical pixels) between the leading icon and
-    /// the label. The default is `icon_size / 2`.
-    pub fn with_icon_label_gap_override(mut self, gap: f32) -> Self {
-        self.icon_label_gap_override = Some(gap);
         self
     }
 
@@ -970,7 +968,10 @@ impl<A: Action + Clone> MenuItemFields<A> {
                 .icon_size_override
                 .unwrap_or_else(|| appearance.ui_font_size());
             let icon_color = self.override_icon_color.unwrap_or(color);
-            let gap = self.icon_label_gap_override.unwrap_or(icon_size / 2.);
+            let gap = self
+                .cortex_extras
+                .icon_label_gap_override
+                .unwrap_or(icon_size / 2.);
             Some(
                 Shrinkable::new(
                     1.,
