@@ -72,6 +72,11 @@ REM different drive). %~dp0 is this script's directory with a trailing
 REM backslash; cd resolves the .. immediately.
 cd /d "%~dp0.."
 
+REM --- Restore the CLAUDE.md <-> docs\CLAUDE.md hardlink if a recent edit
+REM     (or rebase / Edit-tool atomic write) broke it. Idempotent; silent
+REM     on the happy path. Without this the two paths can silently diverge.
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0restore-claude-md-hardlink.ps1"
+
 REM --- Setup capture path ---
 REM     Why this looks weird: capturing PowerShell stdout via `for /f` is fragile
 REM     in PS 5.1 - the output can include a UTF-16 BOM or extra blank lines that
