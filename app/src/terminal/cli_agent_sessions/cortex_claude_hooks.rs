@@ -32,9 +32,21 @@ const HOOK_SCRIPT: &[u8] =
 ///
 /// Per-OS so each platform only ever purges its own entries — defensive even
 /// though `~/.claude/settings.json` isn't currently synced across machines.
-#[cfg(target_os = "windows")]
+///
+/// Per-lane (`-dev` suffix in debug builds, none in release) so each lane only
+/// purges/manages its own entry. Lets the prod and dev Cortex apps coexist on
+/// the same machine — each writes its own hook script to a distinct on-disk
+/// path and registers a distinct hook entry in `settings.json`. When claude
+/// fires a hook event, both scripts are invoked but only the one matching
+/// `$WARP_DATA_PROFILE` (set by the dev launcher) actually emits — the lane
+/// guard at the top of `cortex-hook.{ps1,sh}` handles that.
+#[cfg(all(target_os = "windows", debug_assertions))]
+const COMMAND_MARKER: &str = "cortex-hook-dev.ps1";
+#[cfg(all(target_os = "windows", not(debug_assertions)))]
 const COMMAND_MARKER: &str = "cortex-hook.ps1";
-#[cfg(unix)]
+#[cfg(all(unix, debug_assertions))]
+const COMMAND_MARKER: &str = "cortex-hook-dev.sh";
+#[cfg(all(unix, not(debug_assertions)))]
 const COMMAND_MARKER: &str = "cortex-hook.sh";
 
 /// The claude hook events we route through. Each gets one or more
@@ -221,29 +233,52 @@ fn ensure_hook_script_extracted() -> Result<PathBuf, HookInstallError> {
     Ok(dst)
 }
 
-/// Stable, lane-independent location: prod and dev both extract here, so a
-/// single absolute path embedded in `settings.json` keeps working when the
-/// user switches between launching prod vs dev Cortex.
+/// Per-lane on-disk location for the hook script. Prod extracts to
+/// `cortex-hook.{ps1,sh}` and dev extracts to `cortex-hook-dev.{ps1,sh}`
+/// in the same directory. Each lane writes its own bytes; the lane is
+/// derived at build time from `cfg!(debug_assertions)`. Both lanes'
+/// entries can coexist in `~/.claude/settings.json` (each carries a
+/// distinct `COMMAND_MARKER` so the install path only purges its own
+/// entries). The script's runtime lane guard (top of cortex-hook.{ps1,sh})
+/// reads `$WARP_DATA_PROFILE` and exits silently if the running lane
+/// doesn't match, so claude can fire both hooks but only the active
+/// lane's emits.
 ///
 /// `dirs::data_local_dir()` resolves to:
 ///   - Windows: `%LOCALAPPDATA%`
 ///   - macOS:   `~/Library/Application Support`
 ///   - Linux:   `$XDG_DATA_HOME` or `~/.local/share`
-///
-/// All three are appropriate per-user, lane-independent locations.
 #[cfg(any(target_os = "windows", unix))]
 fn hook_script_path() -> Result<PathBuf, HookInstallError> {
     let local = dirs::data_local_dir().ok_or(HookInstallError::NoHomeDir)?;
-    let filename = if cfg!(target_os = "windows") {
-        "cortex-hook.ps1"
-    } else {
-        "cortex-hook.sh"
-    };
     Ok(local
         .join("Cortex")
         .join("hooks")
         .join("claude")
-        .join(filename))
+        .join(hook_script_filename()))
+}
+
+/// Filename for this build's hook script. Lane suffix (`-dev`) is added in
+/// debug builds so prod and dev can coexist on disk without overwriting
+/// each other's installed copy.
+#[cfg(any(target_os = "windows", unix))]
+const fn hook_script_filename() -> &'static str {
+    #[cfg(all(target_os = "windows", debug_assertions))]
+    {
+        "cortex-hook-dev.ps1"
+    }
+    #[cfg(all(target_os = "windows", not(debug_assertions)))]
+    {
+        "cortex-hook.ps1"
+    }
+    #[cfg(all(unix, debug_assertions))]
+    {
+        "cortex-hook-dev.sh"
+    }
+    #[cfg(all(unix, not(debug_assertions)))]
+    {
+        "cortex-hook.sh"
+    }
 }
 
 fn claude_settings_path() -> Result<PathBuf, HookInstallError> {

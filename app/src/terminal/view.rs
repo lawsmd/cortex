@@ -8167,10 +8167,21 @@ impl TerminalView {
         let is_cli_agent_active = CLIAgentSessionsModel::as_ref(ctx)
             .session(self.view_id)
             .is_some();
-        if self
+        let was_post_clear_pinned = self.scroll_position.post_clear_scroll_pinned();
+        let changed = self
             .scroll_position
-            .update(viewport, update, ctx, is_cli_agent_active)
-        {
+            .update(viewport, update, ctx, is_cli_agent_active);
+        // Cortex divergence — when the CLI-agent `/clear` pin just released,
+        // retract the `active_gap` installed for the pin. Without this, the
+        // gap stays in the heights tree and `max_scroll_top` remains
+        // artificially extended by a viewport height, letting the user
+        // scroll the post-`/clear` block off the top into a black void.
+        if was_post_clear_pinned && !self.scroll_position.post_clear_scroll_pinned() {
+            model
+                .block_list_mut()
+                .retract_active_gap_for_cli_agent_clear();
+        }
+        if changed {
             ctx.notify();
             // Dismiss any visible tooltips when the scroll position changes
             drop(model);
@@ -12717,74 +12728,82 @@ impl TerminalView {
         }
     }
 
-    /// Cortex divergence — scan the alt-screen grid from the bottom upward
-    /// for the first cell whose `c` is a box-drawing top-left corner
-    /// (`╭`/`┌`/`┏`), the unique signature of a CLI agent's post-`/clear`
     /// Scans the active CLI-agent block's Output grid for the row that
-    /// contains the welcome banner's top-left box-drawing corner
-    /// (`╭`/`┌`/`┏`), then returns "rows from that row to the bottom of
-    /// the grid (inclusive of the banner row)" so the scroll handler can
-    /// compute `scroll_top = bottom_of_block_in_lines - rows_below_banner`
-    /// and pin the banner at the viewport top. Claude Code does *not* use
-    /// the alt-screen — all its TUI cells live in the block's Output
-    /// grid, so this scans there directly.
+    /// contains the welcome banner's top-left corner glyph and returns the
+    /// exact number of rendered lines from that row's top edge down to the
+    /// bottom of the block (banner row inclusive), in fractional `Lines`
+    /// units. The scroll handler computes
+    /// `scroll_top = bottom_of_block_in_lines - lines_below_banner` to pin
+    /// the banner row at the viewport top.
     ///
-    /// Returns `None` if no corner is found in the bottom `max_scan_rows`
-    /// rows of the grid (e.g., the agent hasn't yet repainted post-`/clear`,
-    /// or it's a non-Claude agent with a different banner). The caller's
+    /// **Glyph set.** `╭` (light arc), `┌` (light corner), `┏` (heavy
+    /// corner) cover the Unicode box-drawing top-left chars Claude ships
+    /// today. An earlier widening to include `+` (for hypothetical
+    /// ASCII-fallback themes) was reverted — common terminal content has
+    /// `+` everywhere (e.g. Claude's footer "shift+tab"), and bottom-up
+    /// scanning picked them up as false banner tops. If Claude ever ships
+    /// a real ASCII-fallback banner, extend the set then — but match more
+    /// than just `+` alone (e.g. require the cell to the right to be `-`
+    /// so the match is structural, not stylistic).
+    ///
+    /// **Scan window.** The whole grid is scanned, not a fixed N-row tail.
+    /// Claude's post-`/clear` cursor lands at the top of the viewport,
+    /// then repaints banner + middle + prompt, so the banner can be
+    /// anywhere from a few rows above the prompt (small viewport) to ~80+
+    /// rows above (large monitor). The grid is bounded by the terminal's
+    /// history-size config, so O(N) over the whole grid is trivial.
+    ///
+    /// **Geometry.** The line count is derived from the block's actual
+    /// height components (`output_grid_displayed_height`, footer padding,
+    /// footer height, bottom padding), not a hardcoded offset. Hardcoded
+    /// offsets bite when fractional padding accumulates differently
+    /// across platforms / fonts / window sizes — see Gotcha 3 in
+    /// `docs/investigations/cli-agent-slash-clear-viewport.md`.
+    ///
+    /// Claude Code does *not* use the alt-screen — all its TUI cells live
+    /// in the block's Output grid, so this scans there directly.
+    ///
+    /// Returns `None` if no corner glyph is found (non-Claude agent,
+    /// banner not yet repainted, or a future banner redesign). A `warn!`
+    /// line is emitted on miss so a glyph-set or paint-target regression
+    /// leaves a trail in the runtime log. The caller's
     /// `ScrollActiveBlockBottomToTop` handler falls back to a fixed-line
-    /// estimate in that case.
-    fn find_rows_below_banner_top_in_block_output_for_clear(
+    /// estimate when this returns `None`.
+    fn find_lines_below_banner_top_in_block_output_for_clear(
         block: &crate::terminal::model::block::Block,
-        max_scan_rows: usize,
-    ) -> Option<usize> {
+    ) -> Option<Lines> {
         use crate::terminal::block_list_element::GridType;
         use crate::terminal::model::grid::Dimensions;
         let block_grid = block.grid_of_type(GridType::Output)?;
         let grid = block_grid.grid_handler();
         let total = grid.total_rows();
-        let scan_start = total.saturating_sub(max_scan_rows);
-        // Find the last non-blank row first. The block trims trailing blank
-        // rows from its rendered height (`block.height()`), so the bottom of
-        // the rendered area is the last row with any non-`\0`/non-whitespace
-        // cell — not `total - 1`. Without this, our `rows_below_banner` is
-        // inflated by however many trailing blank rows the grid currently
-        // has, and `bottom_of_block_in_lines - rows_below_banner` lands the
-        // viewport top above the actual banner.
-        let mut last_non_blank: Option<usize> = None;
-        for row_idx in (scan_start..total).rev() {
-            let Some(row) = grid.row(row_idx) else {
-                continue;
-            };
-            let has_content = (0..row.len()).any(|col| {
-                row.get(col)
-                    .is_some_and(|c| c.c != '\0' && !c.c.is_whitespace())
-            });
-            if has_content {
-                last_non_blank = Some(row_idx);
-                break;
-            }
-        }
-        let bottom_idx = last_non_blank?;
-        for row_idx in (scan_start..=bottom_idx).rev() {
+        let mut banner_row: Option<usize> = None;
+        'outer: for row_idx in (0..total).rev() {
             let Some(row) = grid.row(row_idx) else {
                 continue;
             };
             for col in 0..row.len() {
                 if let Some(cell) = row.get(col) {
                     if matches!(cell.c, '╭' | '┌' | '┏') {
-                        // `+ 3`: `+ 1` to make the count inclusive of the
-                        // banner row, plus `+ 2` for the block's bottom
-                        // padding (~1 line of divider/fractional pad below
-                        // the last content row). Without the extra `+ 2`
-                        // the viewport lands one row below the banner top
-                        // and clips the `╭─── Claude Code …` row.
-                        return Some(bottom_idx + 3 - row_idx);
+                        banner_row = Some(row_idx);
+                        break 'outer;
                     }
                 }
             }
         }
-        None
+        let Some(banner_row) = banner_row else {
+            log::warn!(
+                "[cli-agent-clear] no banner top corner found in {total} grid \
+                 rows; using fallback scroll target"
+            );
+            return None;
+        };
+        Some(
+            block.output_grid_displayed_height() - Lines::new(banner_row as f64)
+                + block.footer_top_padding()
+                + block.footer_height()
+                + block.padding_bottom(),
+        )
     }
 
     /// Handles CLI agent session status changes from the singleton model.
@@ -12833,43 +12852,38 @@ impl TerminalView {
                     .cli_agent_clear_scrolls_to_top =>
             {
                 // Install an active_gap so the scroll target can land beyond
-                // the natural `max_scroll_top`, then scan the block's `Output`
-                // grid for the top-left corner of Claude's welcome banner
-                // (`╭`/`┌`/`┏`). That row index — expressed as "rows from the
-                // banner row to the bottom of the rendered block, inclusive"
-                // — becomes the offset that the scroll handler subtracts from
-                // `bottom_of_block_in_lines` to place the viewport. Note we
-                // scan the Output grid, not the alt-screen: Claude does NOT
-                // use the alt-screen, despite paint patterns that suggest it.
-                const MAX_BANNER_SCAN_ROWS: usize = 60;
+                // the natural `max_scroll_top`, then scan the block's Output
+                // grid for the top-left corner of Claude's welcome banner.
+                // The full-grid scan + geometry-derived offset live in
+                // `find_lines_below_banner_top_in_block_output_for_clear`.
+                //
                 // Claude's post-`/clear` repaint lands in multiple phases —
                 // an initial banner draw followed by a secondary phase 1–2s
                 // later that paints MCP status / session-info lines and may
                 // shift the banner row. A single deferred pin would catch
                 // the wrong row as soon as that secondary phase landed, so
                 // we run an immediate pass and then a series of deferred
-                // re-scans + re-pins at increasing delays. Each tick checks
+                // re-scans + re-pins at increasing delays. The cadence is
+                // empirical (tied to Claude's paint timing — there is no
+                // principled way to derive it). Each tick checks
                 // `post_clear_scroll_pinned` first: any user interaction
                 // (typing, scroll, page keys) releases the pin via
                 // `ScrollState::update`, and the chase aborts.
                 const POST_CLEAR_CHASE_DELAYS_MS: &[u64] = &[50, 200, 500, 1500, 3000];
-                let (active_idx, rows_below_banner) = {
+                let (active_idx, lines_below_banner) = {
                     let mut model = self.model.lock();
                     let idx = model.block_list().active_block_index();
                     let block_list = model.block_list_mut();
-                    let rows_below_banner = block_list.block_at(idx).and_then(|block| {
-                        Self::find_rows_below_banner_top_in_block_output_for_clear(
-                            block,
-                            MAX_BANNER_SCAN_ROWS,
-                        )
+                    let lines_below_banner = block_list.block_at(idx).and_then(|block| {
+                        Self::find_lines_below_banner_top_in_block_output_for_clear(block)
                     });
                     block_list.setup_active_gap_for_cli_agent_clear();
-                    (idx, rows_below_banner)
+                    (idx, lines_below_banner)
                 };
                 self.update_scroll_position_locking(
                     ScrollPositionUpdate::ScrollActiveBlockBottomToTop {
                         block_index: active_idx,
-                        rows_below_banner,
+                        lines_below_banner,
                     },
                     ctx,
                 );
@@ -12885,9 +12899,8 @@ impl TerminalView {
                             let redetected = {
                                 let model = this.model.lock();
                                 model.block_list().block_at(active_idx).and_then(|block| {
-                                    Self::find_rows_below_banner_top_in_block_output_for_clear(
+                                    Self::find_lines_below_banner_top_in_block_output_for_clear(
                                         block,
-                                        MAX_BANNER_SCAN_ROWS,
                                     )
                                 })
                             };
@@ -12895,7 +12908,7 @@ impl TerminalView {
                                 this.update_scroll_position_locking(
                                     ScrollPositionUpdate::ScrollActiveBlockBottomToTop {
                                         block_index: active_idx,
-                                        rows_below_banner: redetected,
+                                        lines_below_banner: redetected,
                                     },
                                     ctx,
                                 );
@@ -15981,6 +15994,15 @@ impl TerminalView {
 
     pub fn scroll_position(&self) -> ScrollPosition {
         self.scroll_position.position()
+    }
+
+    /// Cortex divergence — exposed for integration tests of the CLI-agent
+    /// `/clear` viewport pin. Returns `true` between the moment the pin is
+    /// armed by a `ScrollActiveBlockBottomToTop` update and the moment a
+    /// user interaction (scroll, page-key, command-exec, resize) releases
+    /// it. See `ScrollState::post_clear_scroll_pinned`.
+    pub fn post_clear_scroll_pinned(&self) -> bool {
+        self.scroll_position.post_clear_scroll_pinned()
     }
 
     pub fn shell_family(&self, ctx: &mut ViewContext<Self>) -> ShellFamily {
@@ -27884,3 +27906,168 @@ fn is_rich_input_chip_in_cli_toolbar(app: &AppContext) -> bool {
 #[cfg(test)]
 #[path = "view_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+mod scan_tests {
+    //! Cortex divergence — focused unit tests for
+    //! `find_lines_below_banner_top_in_block_output_for_clear`. The helper
+    //! is private on `TerminalView`; this submodule reaches it through the
+    //! standard "child modules see private parent items" Rust rule. Kept
+    //! separate from the integration-style `tests` module above so these
+    //! stay independent of any Window/Presenter setup.
+    use super::TerminalView;
+    use crate::terminal::model::block::Block;
+    use crate::terminal::model::test_utils::create_test_block_with_grids;
+    use crate::terminal::model::terminal_model::BlockIndex;
+    use crate::test_util::mock_blockgrid;
+    use warpui::units::Lines;
+
+    /// Build a finished Block whose Output grid contains a single banner
+    /// top-corner glyph at `banner_row` plus a configurable number of
+    /// trailing content rows. The prompt and rprompt grids are tiny stubs
+    /// because the scan function only walks the Output grid.
+    fn block_with_banner_at_row(glyph: char, banner_row: usize, trailing_rows: usize) -> Block {
+        let mut content = String::new();
+        for _ in 0..banner_row {
+            content.push_str("filler\r\n");
+        }
+        content.push(glyph);
+        content.push_str(" banner\r\n");
+        for i in 0..trailing_rows {
+            content.push_str(&format!("trail{i}\r\n"));
+        }
+
+        let mut prompt = mock_blockgrid("$ claude\r\n");
+        prompt.finish();
+        let mut rprompt = mock_blockgrid("\r\n");
+        rprompt.finish();
+        let mut output_grid = mock_blockgrid(&content);
+        output_grid.finish();
+
+        let mut block = create_test_block_with_grids(
+            BlockIndex::zero(),
+            prompt,
+            rprompt,
+            output_grid,
+            true,
+        );
+        block.finish(0);
+        block
+    }
+
+    fn expected_lines_below_banner(block: &Block, banner_row: usize) -> Lines {
+        block.output_grid_displayed_height() - Lines::new(banner_row as f64)
+            + block.footer_top_padding()
+            + block.footer_height()
+            + block.padding_bottom()
+    }
+
+    #[test]
+    fn returns_geometry_derived_offset_for_arc_corner() {
+        let banner_row = 3;
+        let block = block_with_banner_at_row('╭', banner_row, 2);
+        let lines =
+            TerminalView::find_lines_below_banner_top_in_block_output_for_clear(&block)
+                .expect("scan should find the ╭ corner");
+        assert_eq!(lines, expected_lines_below_banner(&block, banner_row));
+    }
+
+    #[test]
+    fn returns_none_when_no_corner_glyph_is_present() {
+        let mut prompt = mock_blockgrid("$ claude\r\n");
+        prompt.finish();
+        let mut rprompt = mock_blockgrid("\r\n");
+        rprompt.finish();
+        let mut output_grid = mock_blockgrid("no corner here\r\nplain text\r\n");
+        output_grid.finish();
+        let mut block = create_test_block_with_grids(
+            BlockIndex::zero(),
+            prompt,
+            rprompt,
+            output_grid,
+            true,
+        );
+        block.finish(0);
+        assert!(
+            TerminalView::find_lines_below_banner_top_in_block_output_for_clear(&block).is_none(),
+            "scan should return None when no corner glyph is present"
+        );
+    }
+
+    #[test]
+    fn returns_the_lowest_corner_when_multiple_are_present() {
+        // Two banners: row 1 (older) and row 5 (newer post-`/clear` paint).
+        // Bottom-up scan order should pick row 5.
+        let mut prompt = mock_blockgrid("$ claude\r\n");
+        prompt.finish();
+        let mut rprompt = mock_blockgrid("\r\n");
+        rprompt.finish();
+        let mut output_grid = mock_blockgrid(
+            "row0\r\n\
+             ╭ first banner\r\n\
+             row2\r\n\
+             row3\r\n\
+             row4\r\n\
+             ╭ second banner\r\n\
+             row6\r\n",
+        );
+        output_grid.finish();
+        let mut block = create_test_block_with_grids(
+            BlockIndex::zero(),
+            prompt,
+            rprompt,
+            output_grid,
+            true,
+        );
+        block.finish(0);
+        let lines =
+            TerminalView::find_lines_below_banner_top_in_block_output_for_clear(&block)
+                .expect("scan should find a corner");
+        assert_eq!(lines, expected_lines_below_banner(&block, 5));
+    }
+
+    #[test]
+    fn each_supported_corner_glyph_is_detected() {
+        for glyph in ['╭', '┌', '┏'] {
+            let block = block_with_banner_at_row(glyph, 2, 1);
+            assert!(
+                TerminalView::find_lines_below_banner_top_in_block_output_for_clear(&block)
+                    .is_some(),
+                "scan should detect glyph {glyph:?} (U+{cp:04X})",
+                cp = glyph as u32,
+            );
+        }
+    }
+
+    #[test]
+    fn ascii_plus_in_content_is_not_a_false_banner_match() {
+        // Regression guard for the 2026-05-19 footer false-positive: Claude's
+        // footer line contains "shift+tab", and a previous version of the
+        // scan included `+` in the glyph set. Bottom-up scanning latched
+        // onto the `+` in "shift+tab" as a banner top, pinning the viewport
+        // at the footer instead of the actual `╭` banner row.
+        let mut prompt = mock_blockgrid("$ claude\r\n");
+        prompt.finish();
+        let mut rprompt = mock_blockgrid("\r\n");
+        rprompt.finish();
+        let mut output_grid = mock_blockgrid(
+            "row0\r\n\
+             ╭ real banner top\r\n\
+             row2\r\n\
+             bypass permissions on (shift+tab to cycle)\r\n",
+        );
+        output_grid.finish();
+        let mut block = create_test_block_with_grids(
+            BlockIndex::zero(),
+            prompt,
+            rprompt,
+            output_grid,
+            true,
+        );
+        block.finish(0);
+        let lines =
+            TerminalView::find_lines_below_banner_top_in_block_output_for_clear(&block)
+                .expect("scan should find the ╭ corner, not the + in 'shift+tab'");
+        assert_eq!(lines, expected_lines_below_banner(&block, 1));
+    }
+}

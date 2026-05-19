@@ -125,6 +125,7 @@ fn register_tests() -> HashMap<&'static str, BoxedBuilderFn> {
     }
 
     // Add new tests here
+    register_test!(test_cli_agent_session_clear_arms_post_clear_pin);
     register_test!(test_single_command);
     register_test!(test_add_and_close_session);
     register_test!(test_add_many_sessions);
