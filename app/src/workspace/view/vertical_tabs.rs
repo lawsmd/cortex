@@ -4,7 +4,7 @@ pub mod telemetry;
 
 use self::content_sized_editor::ContentSizedEditor;
 use self::cortex_extensions::{
-    render_pane_icon_with_status, wrap_with_agent_animation_layers,
+    cortex_text_line, render_pane_icon_with_status, wrap_with_agent_animation_layers,
     VERTICAL_TABS_SUMMARY_STATUS_ICON_SIZE, VERTICAL_TAB_UNSELECTED_BORDER_GRAY,
 };
 use crate::ai::agent::conversation::{ConversationStatus, StatusColorStyle};
@@ -4013,11 +4013,10 @@ fn render_summary_tab_item(
     ) {
         text_col.add_child(title_override);
     } else if summary.primary_labels.is_empty() {
-        text_col.add_child(render_text_line(
+        text_col.add_child(cortex_text_line(
             &props.title,
             main_text_color,
             ClipConfig::end(),
-            12.,
             appearance,
         ));
     } else {
@@ -4076,11 +4075,10 @@ fn render_summary_tab_item(
             INTRA_REGION_GAP
         };
         text_col.add_child(
-            Container::new(render_text_line(
+            Container::new(cortex_text_line(
                 working_dir,
                 sub_text_color,
                 ClipConfig::start(),
-                12.,
                 appearance,
             ))
             .with_margin_top(margin)
@@ -4161,7 +4159,7 @@ fn render_summary_primary_label_line(
     // the pill from `render_status_element`.
     const STATUS_ELEMENT_PADDING: f32 = 2.;
     let prefix_slot_size = VERTICAL_TABS_SUMMARY_STATUS_ICON_SIZE + STATUS_ELEMENT_PADDING * 2.;
-    let text = render_text_line(&label.text, text_color, ClipConfig::end(), 12., appearance);
+    let text = cortex_text_line(&label.text, text_color, ClipConfig::end(), appearance);
 
     let prefix: Option<Box<dyn Element>> = match (label.status.as_ref(), reserve_prefix_slot) {
         (Some(status), _) => Some(render_status_element(
