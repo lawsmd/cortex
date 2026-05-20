@@ -2,7 +2,7 @@
   <img src="app/assets/cortex/cortex-banner.svg" alt="Cortex" width="720" />
 </p>
 
-Cortex is a personal fork of [Warp](https://github.com/warpdotdev/warp) — a customization layer on top, not a rewrite. For the real, supported terminal, grab [Warp](https://www.warp.dev).
+Cortex is a personal fork of [Warp](https://github.com/warpdotdev/warp) — a customization and convenience layer for people who like Warp's terminal and IDE features but want fewer of its AI / Oz Agent bits.
 
 ## Tab appearance and agent-state animations
 
