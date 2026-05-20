@@ -262,5 +262,14 @@ define_settings_group!(CortexSettings, settings: [
         private: false,
         toml_path: "cortex.terminal.cli_agent_clear_scrolls_to_top",
         description: "When a running CLI agent (Claude Code, Codex, Cursor, Gemini) runs /clear, scroll the viewport so the agent's freshly-cleared UI sits at the top of the visible pane and the prior conversation remains in scrollback. Claude is wired via Cortex's OSC-777 → SessionEnd hook; other agents are detected when they emit ESC[2J. Off restores upstream Warp behavior.",
+    },
+    allow_local_claude_codex_child_harnesses: AllowLocalClaudeCodexChildHarnesses {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.ai.allow_local_claude_codex_child_harnesses",
+        description: "Whether /orchestrate's Local execution mode may spawn child agents using the Claude Code or Codex CLI harnesses instead of being limited to Oz. Upstream Warp keeps this gated behind FeatureFlag::LocalClaudeCodexChildHarnesses; Cortex hydrates that flag from this setting at startup and on each toggle, so checks at the existing call sites (local_child_harnesses.rs, orchestration_controls.rs) react without a restart. Default on — the whole point of the Cortex fork on this branch is to route /orchestrate children through your local Claude Code login.",
     }
 ]);

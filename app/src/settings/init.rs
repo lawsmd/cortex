@@ -67,6 +67,20 @@ pub fn register_all_settings(ctx: &mut AppContext) {
     TerminalSettings::register(ctx);
     PaneSettings::register(ctx);
     CortexSettings::register(ctx);
+    // Cortex divergence — hydrate `FeatureFlag::LocalClaudeCodexChildHarnesses`
+    // from the persisted `CortexSettings.allow_local_claude_codex_child_harnesses`
+    // toggle so the gate sites in `local_child_harnesses.rs` and
+    // `orchestration_controls.rs` reflect the user's last choice from frame
+    // zero (without needing a runtime-feature-flags debug menu, and without
+    // forcing every gate site to be ported to read the setting directly).
+    // The Cortex Settings → AI page mirrors any subsequent toggle back into
+    // the flag, so this read is only needed for the cold-start path.
+    {
+        let allow_local_claude_codex_child_harnesses =
+            *CortexSettings::as_ref(ctx).allow_local_claude_codex_child_harnesses;
+        FeatureFlag::LocalClaudeCodexChildHarnesses
+            .set_user_preference(allow_local_claude_codex_child_harnesses);
+    }
     // Cortex divergence — surface a dev-build warning when the CLI-agent
     // `/clear` viewport pin is disabled in dev's settings.toml. This is
     // typically a debug-iteration leftover that silently disables the pin
