@@ -13,6 +13,7 @@ use crate::settings::{
 pub enum CortexSettingsSection {
     WorkingPanes,
     Tabs,
+    Ai,
 }
 
 impl CortexSettingsSection {
@@ -20,11 +21,12 @@ impl CortexSettingsSection {
         match self {
             Self::WorkingPanes => "Working Panes",
             Self::Tabs => "Tabs",
+            Self::Ai => "AI",
         }
     }
 
     pub fn all() -> &'static [Self] {
-        &[Self::WorkingPanes, Self::Tabs]
+        &[Self::WorkingPanes, Self::Tabs, Self::Ai]
     }
 }
 
@@ -72,4 +74,11 @@ pub enum CortexSettingsAction {
     SetTabTitleFontWeight(Weight),
     /// Flip the italic toggle for tab titles.
     ToggleTabTitleItalic,
+    /// Flip the "Allow Claude Code / Codex as orchestrate child agents" toggle
+    /// on the AI page. Mirrors the persisted [`crate::settings::CortexSettings`]
+    /// bool *and* pushes the same value into
+    /// `FeatureFlag::LocalClaudeCodexChildHarnesses` via `set_user_preference`,
+    /// so the orchestration controls (`local_child_harnesses.rs`,
+    /// `orchestration_controls.rs`) react without a restart.
+    ToggleAllowLocalClaudeCodexChildHarnesses,
 }
