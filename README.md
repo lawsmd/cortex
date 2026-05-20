@@ -2,25 +2,23 @@
   <img src="app/assets/cortex/cortex-banner.svg" alt="Cortex" width="720" />
 </p>
 
-> A personal fork of [Warp](https://github.com/warpdotdev/warp) by [@lawsmd](https://github.com/lawsmd) — a customization and convenience layer on top of the upstream terminal. Use at your own risk; this is built for me, not as a product.
-
-Cortex is Warp with a different coat of paint and a handful of extra knobs. Almost all the work is still Warp's — Cortex is the layer on top, not a rewrite. If you want the real, supported terminal, grab [Warp](https://www.warp.dev). If you want my personal flavor of it, you're in the right place.
+Cortex is a personal fork of [Warp](https://github.com/warpdotdev/warp) — a customization layer on top, not a rewrite. For the real, supported terminal, grab [Warp](https://www.warp.dev).
 
 ## Tab appearance and agent-state animations
 
 ![Cortex tab states reflecting agent activity](./assets/readme/tab-states.gif)
 
-Cortex tabs visually reflect the state of the CLI agent (Claude Code, Codex, etc.) running inside each session. Project tabs get a colored ring. An idle session sits still; a session whose agent is actively working has its border breathe; a session whose agent is waiting on you flashes a "needs attention" indicator with a pulsing dot. Glance at the sidebar and you can tell which sessions are busy, which are blocked, and which are idle without switching into them.
+Cortex tabs visually reflect the state of the CLI agent running inside each session. Only Claude Code is supported for now.
 
-## Theme library (~1,079 themes)
+## Custom Theme Library
 
 ![Cortex theme picker with Favorites and Recents](./assets/readme/theme-picker.png)
 
-Cortex bundles around 1,079 terminal color schemes drawn from four open-source community projects (Gogh, iTerm2-Color-Schemes, base16, terminal.sexy). They live in the theme picker, are searchable, and you can star favorites — your stars surface in a dedicated "Favorites" section at the top of the list. None of these themes are original work in this repository; full credit is in the Credits section below.
+Cortex bundles a large collection of terminal color schemes from four open-source community projects (Gogh, iTerm2-Color-Schemes, base16, terminal.sexy) into a searchable picker, with the option to star favorites. See [Credits](#credits) below.
 
 ## Saved projects
 
-<!-- TODO: screenshot of the "+" picker showing saved projects + sub-projects -->
+![Cortex saved-projects picker with sub-projects](./assets/readme/saved-projects.png)
 
 A persistent saved-projects list lives in the vertical tab sidebar. Add a project once, then open a new session into it from the "+" picker any time after. Projects can also declare sub-projects — useful for monorepos and config trees where you frequently bounce between related working directories.
 
@@ -28,7 +26,7 @@ A persistent saved-projects list lives in the vertical tab sidebar. Add a projec
 
 Every Cortex-exclusive feature is individually toggleable, so you can dial Cortex anywhere from "just upstream Warp" to "fully customized" without forking again. The toggles live in a dedicated settings pane (separate from Warp's own settings), grouped into sections.
 
-## Building it yourself
+## Installation
 
 Cortex builds from source with Warp's existing build scripts.
 
@@ -63,6 +61,6 @@ That's the whole flow. See [`WARP.md`](WARP.md) for Warp's engineering guide, or
 
 Cortex inherits Warp's licensing. The `warpui_core` and `warpui` crates are [MIT](LICENSE-MIT); everything else is [AGPL-3.0](LICENSE-AGPL).
 
-## Support
+## Issues and contributions
 
-There isn't any. Cortex is a personal fork — I don't accept bug reports or PRs against it. If you find something broken upstream in Warp, file it on [`warpdotdev/warp`](https://github.com/warpdotdev/warp/issues).
+Cortex doesn't ship with formal support, but I use it every day and I'm open to looking at issues or PRs that touch Cortex-specific code — no promises on response time. For bugs in upstream Warp behavior, file at [`warpdotdev/warp`](https://github.com/warpdotdev/warp/issues).
