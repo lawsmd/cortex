@@ -32,6 +32,11 @@ set +e
 hook_event="${1:-}"
 log_path="$HOME/.claude/cortex-hook.log"
 discovery_log="$HOME/.claude/cortex-hook-discovery.log"
+# Phase A1 diagnostic. Captures errno / bash error / pid tree / tty status
+# on every `/dev/tty` write failure so we can pinpoint why the OSC bridge
+# stops reaching Cortex. Safe to leave on — only writes on failure.
+# See docs/ai/external-status-injection.md (Layer A diagnostic, 2026-05-19).
+diag_log="$HOME/.claude/cortex-hook.log.diagnostic"
 
 # ---- Cortex detection ---------------------------------------------------
 # Short-circuit cleanly when claude is running outside Cortex (e.g. macOS
@@ -236,12 +241,43 @@ fi
 # them. No process-tree walking or AttachConsole equivalent is needed
 # because Unix has no ConPTY-style private-console boundary.
 emit_status=fail
-# Brace group + outer 2>/dev/null so bash-level redirect-open errors
-# (e.g. "Device not configured" when /dev/tty isn't available) don't leak
-# to the user's terminal. The inner printf 2>/dev/null is redundant for
-# the redirection but harmless.
-if { printf '\033]777;notify;warp://cli-agent;%s\a' "$envelope" > /dev/tty; } 2>/dev/null; then
-    emit_status=ok
+# Capture bash's stderr from the redirect (e.g. "Device not configured" when
+# /dev/tty isn't available) so we can write it to the diagnostic log without
+# leaking it to the user's terminal. Stdout of the brace group is consumed
+# by `> /dev/tty`, so only stderr reaches the command substitution after
+# `2>&1`.
+emit_err=$({ printf '\033]777;notify;warp://cli-agent;%s\a' "$envelope" > /dev/tty; } 2>&1) && emit_status=ok
+
+if [ "$emit_status" = fail ]; then
+    # Diagnostic block: errno-equivalent info to figure out WHY /dev/tty
+    # isn't writable. Cheapest possible probe — `tty`, `ps`, `ls` are all
+    # standard utilities present on every macOS/Linux box Cortex targets.
+    {
+        printf '[%s] DIAG event=%s envelope_len=%d\n' \
+            "$(date +'%Y-%m-%d %H:%M:%S')" \
+            "$cortex_event" \
+            "${#envelope}"
+        printf '  bash_err=%s\n' "$emit_err"
+        printf '  tty=%s\n' "$(tty 2>&1)"
+        printf '  dev_tty_ls=%s\n' "$(ls -la /dev/tty 2>&1)"
+        printf '  ids: pid=%d ppid=%d uid=%s sid=%s pgid=%s\n' \
+            "$$" "$PPID" \
+            "$(id -u 2>/dev/null)" \
+            "$(ps -o sid= -p $$ 2>/dev/null | tr -d ' ')" \
+            "$(ps -o pgid= -p $$ 2>/dev/null | tr -d ' ')"
+        printf '  proc_tree (root→leaf):\n'
+        # Walk up from $$ collecting (pid ppid sid pgid command) until we
+        # hit PID 1 or 12 hops, whichever first.
+        cur=$$
+        depth=0
+        while [ -n "$cur" ] && [ "$cur" != "1" ] && [ "$depth" -lt 12 ]; do
+            line=$(ps -o pid,ppid,sid,pgid,command= -p "$cur" 2>/dev/null | tail -n +2)
+            [ -z "$line" ] && break
+            printf '    %s\n' "$line"
+            cur=$(ps -o ppid= -p "$cur" 2>/dev/null | tr -d ' ')
+            depth=$((depth + 1))
+        done
+    } >> "$diag_log" 2>/dev/null
 fi
 
 # ---- Per-emit log line ---------------------------------------------------
