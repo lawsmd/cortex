@@ -1,6 +1,24 @@
 // On Windows, we don't want to display a console window when the application is running in release
 // builds. See https://doc.rust-lang.org/reference/runtime.html#the-windows_subsystem-attribute.
-#![cfg_attr(feature = "release_bundle", windows_subsystem = "windows")]
+//
+// Cortex prod (`scripts\install-cortex-prod.cmd`) builds with `--features gui,skip_login` and does
+// NOT enable `release_bundle` (that feature would also activate the single-instance mutex, which
+// Cortex's two-lane workflow intentionally does not want). Without the windows_subsystem switch,
+// Cortex.exe ships as console-subsystem on Windows, which has a load-bearing side effect: every
+// launch attaches a TTY to stdout, so `warp_logging::init_internal`'s default-`use_logfile`
+// detection (`!stdout_is_a_tty && !in_ci && !integration_test` at `crates/warp_logging/src/native.rs`)
+// resolves to `false` and the file logger is silently disabled — leaving
+// `%LOCALAPPDATA%\warp\WarpOss\data\logs\warp-oss.log` frozen at the last build that happened to
+// satisfy the gate. Forcing GUI-subsystem on Windows release builds detaches stdout from any TTY
+// and re-enables the file logger. Dev (debug builds) intentionally stays console-subsystem so
+// `scripts\launch-cortex-dev.bat`'s tee-to-cargo-log keeps working.
+#![cfg_attr(
+    any(
+        feature = "release_bundle",
+        all(target_os = "windows", not(debug_assertions))
+    ),
+    windows_subsystem = "windows"
+)]
 
 use anyhow::Result;
 use warp_core::{
