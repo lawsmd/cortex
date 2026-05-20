@@ -1180,9 +1180,18 @@ impl<A: Action + Clone> MenuItemFields<A> {
                 None => menu_background_color,
             };
 
+            // Cortex: also treat "submenu being shown for me" as a hover-ish
+            // state for text color. Without this, a row that overrides
+            // background-on-hover (e.g. saved-project picker rows) ends up
+            // with same-colored text on same-colored background when the user
+            // moves the mouse into the sub-flyout, since the background still
+            // shows the override color but `is_hovered_or_selected` is false.
+            let is_hovered_or_selected_or_submenu_open =
+                is_hovered_or_selected || submenu_being_shown_for_item;
+
             let primary_color = if self.disabled {
                 theme.disabled_text_color(text_background_color)
-            } else if is_hovered_or_selected
+            } else if is_hovered_or_selected_or_submenu_open
                 && !self.no_interaction_on_hover
                 && self.override_hover_text_color.is_some()
             {

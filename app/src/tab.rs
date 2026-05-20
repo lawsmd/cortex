@@ -119,6 +119,22 @@ pub enum NewSessionMenuItem {
     /// `~/.warp-oss/projects.json`. Triggered by the bottom "+" button on the
     /// vertical tab panel.
     OpenProject(crate::saved_projects::Project),
+    /// Cortex: opens a tab in a sub-project's cwd with the sub-project's
+    /// gradient accent color (pre-computed when the flyout was built so the
+    /// tab matches the row the user clicked).
+    OpenSubProject {
+        parent: crate::saved_projects::Project,
+        sub: crate::saved_projects::SubProject,
+        color_hex: String,
+    },
+    /// Cortex: opens `~/.warp-oss/projects.json` in the user's configured
+    /// editor. Surfaced from the "+" → Configs sub-menu.
+    OpenCortexSavedProjectsFile,
+    /// Cortex: opens an existing tab-config `.toml` file in the user's editor.
+    /// Carries the on-disk path of the .toml.
+    OpenTabConfigFile(std::path::PathBuf),
+    /// Cortex: deletes a tab-config `.toml` file after a confirmation prompt.
+    DeleteTabConfigFile(std::path::PathBuf),
     OpenLaunchConfig(LaunchConfig),
     OpenLaunchConfigDocs,
     CreateNewTabConfig,
