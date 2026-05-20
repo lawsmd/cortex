@@ -2368,8 +2368,13 @@ impl BlockListElement {
         app: &AppContext,
     ) {
         let block_height = block.height(agent_view_state).as_f64() as f32 * cell_size.y();
+        // CORTEX-BEGIN: panes-flat-recap
+        let recap_matches_terminal_style =
+            *crate::settings::CortexSettings::as_ref(app).recap_matches_terminal_style;
         if block.is_restored()
+            && !recap_matches_terminal_style
             && (!FeatureFlag::AgentView.is_enabled() || !agent_view_state.is_fullscreen())
+        // CORTEX-END: panes-flat-recap
         {
             ctx.scene
                 .draw_rect_with_hit_recording(RectF::new(

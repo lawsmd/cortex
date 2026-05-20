@@ -438,6 +438,14 @@ impl TerminalManager {
         let should_show_restoration_separator = (has_conversation_restoration
             || has_restored_command_blocks)
             && !should_use_live_appearance;
+        // CORTEX-BEGIN: panes-blank-on-launch
+        // Suppress the "Previous session" separator bar when the Cortex toggle
+        // hides the recap entirely — otherwise a blank-recap pane still gets a
+        // one-row gray header that clicks nowhere. Same setting as the
+        // restored_blocks gate in app/src/terminal/terminal_manager.rs.
+        let should_show_restoration_separator = should_show_restoration_separator
+            && !*crate::settings::CortexSettings::as_ref(ctx).start_with_blank_pane_on_launch;
+        // CORTEX-END: panes-blank-on-launch
 
         if should_show_restoration_separator {
             model

@@ -104,8 +104,18 @@ pub(super) fn create_terminal_model(
     let is_ai_ugc_telemetry_enabled =
         should_collect_ai_ugc_telemetry(ctx, PrivacySettings::as_ref(ctx).is_telemetry_enabled);
 
+    // CORTEX-BEGIN: panes-blank-on-launch
+    let restored_blocks_arg = if *crate::settings::CortexSettings::as_ref(ctx)
+        .start_with_blank_pane_on_launch
+    {
+        None
+    } else {
+        restored_blocks.map(|v| v.as_slice())
+    };
+    // CORTEX-END: panes-blank-on-launch
+
     TerminalModel::new(
-        restored_blocks.map(|v| v.as_slice()),
+        restored_blocks_arg,
         sizes,
         terminal_colors_list(ctx),
         channel_event_proxy,

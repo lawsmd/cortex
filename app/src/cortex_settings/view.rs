@@ -159,6 +159,32 @@ impl CortexSettingsView {
         ctx.notify();
     }
 
+    fn toggle_start_with_blank_pane_on_launch(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .start_with_blank_pane_on_launch
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_recap_matches_terminal_style(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .recap_matches_terminal_style
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
     fn toggle_tabs_panel_matches_terminal_bg(&mut self, ctx: &mut ViewContext<Self>) {
         use crate::settings::CortexSettings;
         use settings::ToggleableSetting;
@@ -521,6 +547,12 @@ impl warpui::TypedActionView for CortexSettingsView {
         match action {
             CortexSettingsAction::SelectSection(section) => self.select_section(*section, ctx),
             CortexSettingsAction::ToggleHidePaneSeparators => self.toggle_hide_pane_separators(ctx),
+            CortexSettingsAction::ToggleStartWithBlankPaneOnLaunch => {
+                self.toggle_start_with_blank_pane_on_launch(ctx)
+            }
+            CortexSettingsAction::ToggleRecapMatchesTerminalStyle => {
+                self.toggle_recap_matches_terminal_style(ctx)
+            }
             CortexSettingsAction::ToggleTabsPanelMatchesTerminalBg => {
                 self.toggle_tabs_panel_matches_terminal_bg(ctx)
             }

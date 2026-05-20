@@ -19,7 +19,7 @@ pub enum CortexSettingsSection {
 impl CortexSettingsSection {
     pub fn label(self) -> &'static str {
         match self {
-            Self::WorkingPanes => "Working Panes",
+            Self::WorkingPanes => "Panes",
             Self::Tabs => "Tabs",
             Self::Ai => "AI",
         }
@@ -43,8 +43,12 @@ impl Default for CortexSettingsSection {
 pub enum CortexSettingsAction {
     /// Switch the active sidebar section.
     SelectSection(CortexSettingsSection),
-    /// Flip the `hide_pane_separators` toggle on the Working Panes page.
+    /// Flip the `hide_pane_separators` toggle on the Panes page.
     ToggleHidePaneSeparators,
+    /// Flip the "Hide Previous Session Recap on Launch" toggle on the Panes page.
+    ToggleStartWithBlankPaneOnLaunch,
+    /// Flip the "Match Recap Style to Active Terminal" toggle on the Panes page.
+    ToggleRecapMatchesTerminalStyle,
     /// Flip the "Bar/Panel Background Matches Terminal Background" toggle.
     ToggleTabsPanelMatchesTerminalBg,
     /// Flip the "Inverse Fill on Selection" toggle.
