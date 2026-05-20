@@ -553,6 +553,25 @@ impl CLIAgentSessionsModel {
         ctx: &mut ModelContext<Self>,
     ) {
         let Some(session) = self.sessions.get_mut(&terminal_view_id) else {
+            // CORTEX-BEGIN: cli-agent-clear-no-session-warn
+            // Cortex-only diagnostic: a `session_clear` arriving for a view
+            // with no registered session means the post-`/clear` scroll-pin
+            // (see docs/investigations/cli-agent-slash-clear-viewport.md)
+            // will silently no-op for this pane. The most common cause is a
+            // plugin-load miss on the user's first `clauded` launch after
+            // a fresh prod build — `register_cli_agent_listener_from_event`
+            // never ran because no `warp://cli-agent` OSC ever reached this
+            // view. Loud so the next investigator can grep
+            // `[cli-agent-clear]` and find the failing pane immediately.
+            if matches!(event.event, CLIAgentEventType::SessionClear) {
+                log::warn!(
+                    "[cli-agent-clear] session_clear OSC arrived for view {terminal_view_id:?} \
+                     with no registered CLIAgentSession; scroll-pin will not fire. \
+                     Likely cause: plugin didn't emit session_start for this pane, \
+                     or session was previously removed."
+                );
+            }
+            // CORTEX-END: cli-agent-clear-no-session-warn
             return;
         };
 
