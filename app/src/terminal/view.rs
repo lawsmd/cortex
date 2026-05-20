@@ -12729,22 +12729,43 @@ impl TerminalView {
     }
 
     /// Scans the active CLI-agent block's Output grid for the row that
-    /// contains the welcome banner's top-left corner glyph and returns the
-    /// exact number of rendered lines from that row's top edge down to the
-    /// bottom of the block (banner row inclusive), in fractional `Lines`
-    /// units. The scroll handler computes
+    /// contains the welcome banner's top edge and returns the exact number
+    /// of rendered lines from that row's top down to the bottom of the
+    /// block (banner row inclusive), in fractional `Lines` units. The
+    /// scroll handler computes
     /// `scroll_top = bottom_of_block_in_lines - lines_below_banner` to pin
     /// the banner row at the viewport top.
     ///
-    /// **Glyph set.** `╭` (light arc), `┌` (light corner), `┏` (heavy
-    /// corner) cover the Unicode box-drawing top-left chars Claude ships
-    /// today. An earlier widening to include `+` (for hypothetical
-    /// ASCII-fallback themes) was reverted — common terminal content has
-    /// `+` everywhere (e.g. Claude's footer "shift+tab"), and bottom-up
-    /// scanning picked them up as false banner tops. If Claude ever ships
-    /// a real ASCII-fallback banner, extend the set then — but match more
-    /// than just `+` alone (e.g. require the cell to the right to be `-`
-    /// so the match is structural, not stylistic).
+    /// **Two anchors, bottom-up.** Claude's banner has shifted styles
+    /// twice now (box-drawing in v2.1.133, block-art ornaments in
+    /// v2.1.145), so the scan tries two anchors in order:
+    ///
+    /// 1. **Top-edge glyph match.** `╭` `┌` `┏` cover the old box-drawing
+    ///    top-left corners; `▐` covers v2.1.145's left-side block-art
+    ///    ornament (`▐▛███▜▌` top row, `▝▜█████▛▘` bottom row). `▐`
+    ///    appears *only* on the top row of the v2.1.145 banner — the
+    ///    other top-row block-art glyphs (`▛`, `▜`, `█`, `▌`) overlap
+    ///    with the bottom row except for `▌`; `▐` is the leftmost
+    ///    glyph and the cleanest top-row anchor.
+    /// 2. **`Claude Code v…` text marker.** If no glyph row is found, a
+    ///    second bottom-up pass looks for any row whose text contains
+    ///    `Claude Code v`. Every Claude banner shipped to date has this
+    ///    literal version line; it is the most durable anchor across
+    ///    future redesigns.
+    ///
+    /// Both passes are bottom-up so the *latest* (post-`/clear`) match
+    /// wins — pre-clear conversation can contain block-art or the
+    /// "Claude Code v…" string from earlier history, but the banner is
+    /// always below those because Claude paints it after every prior
+    /// content row.
+    ///
+    /// An earlier widening of the glyph set to include `+` (for
+    /// hypothetical ASCII-fallback themes) was reverted — common terminal
+    /// content has `+` everywhere (e.g. Claude's footer "shift+tab"), and
+    /// bottom-up scanning picked them up as false banner tops. If Claude
+    /// ever ships a real ASCII-fallback banner, extend the set then — but
+    /// match more than just `+` alone (e.g. require the cell to the right
+    /// to be `-` so the match is structural, not stylistic).
     ///
     /// **Scan window.** The whole grid is scanned, not a fixed N-row tail.
     /// Claude's post-`/clear` cursor lands at the top of the viewport,
@@ -12763,12 +12784,13 @@ impl TerminalView {
     /// Claude Code does *not* use the alt-screen — all its TUI cells live
     /// in the block's Output grid, so this scans there directly.
     ///
-    /// Returns `None` if no corner glyph is found (non-Claude agent,
-    /// banner not yet repainted, or a future banner redesign). A `warn!`
-    /// line is emitted on miss so a glyph-set or paint-target regression
-    /// leaves a trail in the runtime log. The caller's
-    /// `ScrollActiveBlockBottomToTop` handler falls back to a fixed-line
-    /// estimate when this returns `None`.
+    /// Returns `None` only if both passes miss (non-Claude agent, banner
+    /// not yet repainted, or a future banner redesign that drops both
+    /// the glyph and the version-line text). A `warn!` line is emitted
+    /// on miss so a glyph-set or paint-target regression leaves a trail
+    /// in the runtime log. The caller's `ScrollActiveBlockBottomToTop`
+    /// handler falls back to a fixed-line estimate when this returns
+    /// `None`.
     fn find_lines_below_banner_top_in_block_output_for_clear(
         block: &crate::terminal::model::block::Block,
     ) -> Option<Lines> {
@@ -12777,33 +12799,51 @@ impl TerminalView {
         let block_grid = block.grid_of_type(GridType::Output)?;
         let grid = block_grid.grid_handler();
         let total = grid.total_rows();
-        let mut banner_row: Option<usize> = None;
-        'outer: for row_idx in (0..total).rev() {
+
+        // Single bottom-up pass: prefer the latest glyph match
+        // (short-circuit return); otherwise capture the latest
+        // "Claude Code v" text row as a fallback anchor.
+        let mut version_row: Option<usize> = None;
+        for row_idx in (0..total).rev() {
             let Some(row) = grid.row(row_idx) else {
                 continue;
             };
+            let mut row_text = String::new();
             for col in 0..row.len() {
                 if let Some(cell) = row.get(col) {
-                    if matches!(cell.c, '╭' | '┌' | '┏') {
-                        banner_row = Some(row_idx);
-                        break 'outer;
+                    if matches!(cell.c, '╭' | '┌' | '┏' | '▐') {
+                        return Some(Self::lines_below_row_index_in_block(block, row_idx));
                     }
+                    row_text.push(cell.c);
                 }
             }
+            if version_row.is_none() && row_text.contains("Claude Code v") {
+                version_row = Some(row_idx);
+            }
         }
-        let Some(banner_row) = banner_row else {
-            log::warn!(
-                "[cli-agent-clear] no banner top corner found in {total} grid \
-                 rows; using fallback scroll target"
-            );
-            return None;
-        };
-        Some(
-            block.output_grid_displayed_height() - Lines::new(banner_row as f64)
-                + block.footer_top_padding()
-                + block.footer_height()
-                + block.padding_bottom(),
-        )
+        if let Some(row_idx) = version_row {
+            return Some(Self::lines_below_row_index_in_block(block, row_idx));
+        }
+        log::warn!(
+            "[cli-agent-clear] no banner top corner or 'Claude Code v' \
+             marker found in {total} grid rows; using fallback scroll target"
+        );
+        None
+    }
+
+    /// Geometry formula used by the banner-scan caller. Extracted so the
+    /// glyph-match short-circuit and the text-marker fallback both compute
+    /// the same offset. See Gotcha 3 in
+    /// `docs/investigations/cli-agent-slash-clear-viewport.md` for why this
+    /// is derived from real block components, not a hardcoded constant.
+    fn lines_below_row_index_in_block(
+        block: &crate::terminal::model::block::Block,
+        row_idx: usize,
+    ) -> Lines {
+        block.output_grid_displayed_height() - Lines::new(row_idx as f64)
+            + block.footer_top_padding()
+            + block.footer_height()
+            + block.padding_bottom()
     }
 
     /// Handles CLI agent session status changes from the singleton model.
@@ -28028,7 +28068,12 @@ mod scan_tests {
 
     #[test]
     fn each_supported_corner_glyph_is_detected() {
-        for glyph in ['╭', '┌', '┏'] {
+        // `╭` `┌` `┏` cover Claude ≤ v2.1.133's box-drawing banner.
+        // `▐` covers v2.1.145's block-art ornament — it's the leftmost
+        // glyph of the top row (`▐▛███▜▌`) and the only block-art
+        // glyph that does not also appear on the bottom row
+        // (`▝▜█████▛▘`), so a `▐` match always lands on the top row.
+        for glyph in ['╭', '┌', '┏', '▐'] {
             let block = block_with_banner_at_row(glyph, 2, 1);
             assert!(
                 TerminalView::find_lines_below_banner_top_in_block_output_for_clear(&block)
@@ -28037,6 +28082,108 @@ mod scan_tests {
                 cp = glyph as u32,
             );
         }
+    }
+
+    #[test]
+    fn returns_top_row_for_v2_1_145_block_art_banner() {
+        // Regression for 2026-05-20: Claude Code v2.1.145 shipped a banner
+        // with no surrounding box — just block-art ornaments to the left of
+        // the version line:
+        //   `▐▛███▜▌   Claude Code v2.1.145`
+        //   `▝▜█████▛▘  Opus 4.7 (1M context) with xhigh effort · Claude Max`
+        // The pre-v2.1.145 scan matched only `╭`/`┌`/`┏` and silently
+        // missed this banner, leaving the 40-line fallback to pin
+        // mid-block. The fix is to recognize `▐`/`▛` (top-row glyphs).
+        let mut prompt = mock_blockgrid("$ claude\r\n");
+        prompt.finish();
+        let mut rprompt = mock_blockgrid("\r\n");
+        rprompt.finish();
+        let mut output_grid = mock_blockgrid(
+            "old conversation row\r\n\
+             ▐▛███▜▌   Claude Code v2.1.145\r\n\
+             ▝▜█████▛▘  Opus 4.7 (1M context) with xhigh effort · Claude Max\r\n\
+             trail0\r\n",
+        );
+        output_grid.finish();
+        let mut block = create_test_block_with_grids(
+            BlockIndex::zero(),
+            prompt,
+            rprompt,
+            output_grid,
+            true,
+        );
+        block.finish(0);
+        let lines =
+            TerminalView::find_lines_below_banner_top_in_block_output_for_clear(&block)
+                .expect("scan should find the ▐ top-row glyph");
+        // Banner top is row 1 (after the "old conversation row" filler).
+        assert_eq!(lines, expected_lines_below_banner(&block, 1));
+    }
+
+    #[test]
+    fn falls_back_to_claude_code_v_text_when_glyphs_are_absent() {
+        // Future-proofing: if Claude ships a third banner style that uses
+        // neither box-drawing nor block-art glyphs, we still want to land
+        // on the banner's top row. Every Claude banner shipped to date
+        // includes a literal `Claude Code v<version>` line; that's the
+        // text-marker fallback.
+        let mut prompt = mock_blockgrid("$ claude\r\n");
+        prompt.finish();
+        let mut rprompt = mock_blockgrid("\r\n");
+        rprompt.finish();
+        let mut output_grid = mock_blockgrid(
+            "filler0\r\n\
+             filler1\r\n\
+             Claude Code v9.9.9  Opus 5\r\n\
+             trail0\r\n",
+        );
+        output_grid.finish();
+        let mut block = create_test_block_with_grids(
+            BlockIndex::zero(),
+            prompt,
+            rprompt,
+            output_grid,
+            true,
+        );
+        block.finish(0);
+        let lines =
+            TerminalView::find_lines_below_banner_top_in_block_output_for_clear(&block)
+                .expect("scan should fall back to the 'Claude Code v' text marker");
+        assert_eq!(lines, expected_lines_below_banner(&block, 2));
+    }
+
+    #[test]
+    fn glyph_match_wins_over_version_text_when_both_present() {
+        // The glyph scan short-circuits on first hit; the text fallback
+        // is only consulted when the loop completes without a glyph match.
+        // If both anchors are present, the glyph's row index wins —
+        // independent of which is bottom-most in the grid.
+        let mut prompt = mock_blockgrid("$ claude\r\n");
+        prompt.finish();
+        let mut rprompt = mock_blockgrid("\r\n");
+        rprompt.finish();
+        // version text on row 1 (top), glyph banner on row 4 (below).
+        let mut output_grid = mock_blockgrid(
+            "row0\r\n\
+             Claude Code v2.1.133 (echo from chat)\r\n\
+             row2\r\n\
+             row3\r\n\
+             ╭ real banner\r\n\
+             trail0\r\n",
+        );
+        output_grid.finish();
+        let mut block = create_test_block_with_grids(
+            BlockIndex::zero(),
+            prompt,
+            rprompt,
+            output_grid,
+            true,
+        );
+        block.finish(0);
+        let lines =
+            TerminalView::find_lines_below_banner_top_in_block_output_for_clear(&block)
+                .expect("scan should find the ╭ banner, not the version-text echo");
+        assert_eq!(lines, expected_lines_below_banner(&block, 4));
     }
 
     #[test]

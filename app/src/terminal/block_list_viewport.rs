@@ -398,13 +398,16 @@ pub enum ScrollPositionUpdate {
     /// allows `scroll_top` to legitimately reach `bottom_of_block - 1`.
     ///
     /// `lines_below_banner` is computed by the view handler by scanning the
-    /// active block's Output grid for the banner's top-left corner
-    /// (`╭`/`┌`/`┏`) and summing the rendered line components of the block
-    /// that sit below the banner row (output-grid remainder, footer padding,
-    /// footer height, bottom padding). The handler subtracts this from
-    /// `bottom_of_block_in_lines` to get the scroll target. `None` means the
-    /// view handler couldn't detect the banner; the scroll handler falls
-    /// back to a fixed-line heuristic.
+    /// active block's Output grid for the banner's top row — first by
+    /// glyph (`╭`/`┌`/`┏` for box-drawing banners, `▐` for v2.1.145-style
+    /// block-art banners) and falling back to the literal
+    /// `Claude Code v…` version line if no glyph row is found — then
+    /// summing the rendered line components of the block that sit below
+    /// the banner row (output-grid remainder, footer padding, footer
+    /// height, bottom padding). The handler subtracts this from
+    /// `bottom_of_block_in_lines` to get the scroll target. `None` means
+    /// both anchors miss; the scroll handler falls back to a fixed-line
+    /// heuristic.
     ScrollActiveBlockBottomToTop {
         block_index: BlockIndex,
         lines_below_banner: Option<Lines>,
@@ -1020,8 +1023,10 @@ impl<'a> ViewportState<'a> {
                 // above (accessible by scrolling up).
                 //
                 // The view handler computes `lines_below_banner` by scanning
-                // the block's Output grid for the welcome banner's top-left
-                // corner (`╭`/`┌`/`┏`) and summing the rendered line
+                // the block's Output grid for the welcome banner's top row —
+                // glyph anchors (`╭`/`┌`/`┏` for v2.1.133-style box-drawing,
+                // `▐` for v2.1.145-style block-art) with a `Claude Code v…`
+                // text-marker fallback — and summing the rendered line
                 // components below it from the block's actual geometry —
                 // grid-remainder + footer padding + footer height + bottom
                 // padding. Geometry-based math is self-correcting across
@@ -1033,10 +1038,10 @@ impl<'a> ViewportState<'a> {
                 // `max_scroll_top` far enough that we can land the banner
                 // row at the viewport's top.
                 //
-                // Fallback: if no top-corner is detected (non-Claude agent or
-                // future banner redesign), use a 40-line heuristic — better
-                // to over-shoot slightly than to leave pre-`/clear` content
-                // visible.
+                // Fallback: if neither the glyph nor the text-marker anchor
+                // matches (non-Claude agent, or a future banner that drops
+                // both), use a 40-line heuristic — better to over-shoot
+                // slightly than to leave pre-`/clear` content visible.
                 let bottom = self.bottom_of_block_in_lines(block_index);
                 let max_scroll_top = self.max_scroll_top_in_lines();
                 let scroll_lines_below_top = lines_below_banner.unwrap_or(Lines::new(40.0));
