@@ -626,6 +626,20 @@ const NEW_SESSION_SIDECAR_WIDTH: f32 = 300.;
 const PROJECTS_PICKER_TAB_CONFIGS_FLYOUT_POSITION_ID: &str =
     "projects_picker_tab_configs_flyout";
 const PROJECTS_PICKER_TAB_CONFIGS_FLYOUT_WIDTH: f32 = 268.;
+
+/// Cortex: position ID + width for the sub-projects hover fly-out that
+/// pops out of a parent project row in the picker. Mirrors the structure
+/// of the tab-configs flyout but its contents (the sub-project rows) are
+/// rebuilt per-hover from the hovered project's `resolved_sub_projects()`.
+const PROJECTS_PICKER_SUB_PROJECTS_FLYOUT_POSITION_ID: &str =
+    "projects_picker_sub_projects_flyout";
+const PROJECTS_PICKER_SUB_PROJECTS_FLYOUT_WIDTH: f32 = 220.;
+
+/// Cortex: position ID + width for the "Warp Tab Configs" sub-flyout that
+/// lists each `.toml` in `tab_configs_dir()` with open + delete rows.
+const PROJECTS_PICKER_WARP_TAB_CONFIGS_FLYOUT_POSITION_ID: &str =
+    "projects_picker_warp_tab_configs_flyout";
+const PROJECTS_PICKER_WARP_TAB_CONFIGS_FLYOUT_WIDTH: f32 = 268.;
 const NEW_SESSION_SIDECAR_SEARCH_BOX_HEIGHT: f32 = 32.;
 const NEW_SESSION_SIDECAR_SEARCH_BOX_HORIZONTAL_PADDING: f32 = 12.;
 const NEW_SESSION_SIDECAR_SEARCH_BOX_VERTICAL_PADDING: f32 = 6.;
@@ -1160,6 +1174,16 @@ pub struct Workspace {
     /// view handle so it can render alongside the projects picker.
     projects_picker_tab_configs_flyout: ViewHandle<Menu<WorkspaceAction>>,
     show_projects_picker_tab_configs_flyout: bool,
+    /// Cortex: hover fly-out shown next to a project row that declares
+    /// `sub_projects`. Populated from the hovered project's
+    /// `resolved_sub_projects()` when the user hovers the parent row.
+    projects_picker_sub_projects_flyout: ViewHandle<Menu<WorkspaceAction>>,
+    show_projects_picker_sub_projects_flyout: bool,
+    /// Cortex: hover fly-out shown next to the "Warp Tab Configs" row inside
+    /// the Configs flyout. Lists each tab-config `.toml` with an open row
+    /// followed by a delete row, separated.
+    projects_picker_warp_tab_configs_flyout: ViewHandle<Menu<WorkspaceAction>>,
+    show_projects_picker_warp_tab_configs_flyout: bool,
 }
 
 /// Returns the cwd of the first terminal leaf reachable from a snapshot tree,
@@ -1253,6 +1277,8 @@ impl Workspace {
         self.show_new_session_dropdown_menu = None;
         self.show_projects_picker_menu = false;
         self.show_projects_picker_tab_configs_flyout = false;
+        self.show_projects_picker_sub_projects_flyout = false;
+        self.show_projects_picker_warp_tab_configs_flyout = false;
         self.tab_config_action_sidecar_item = None;
         self.clear_worktree_sidecar_state(ctx);
         self.new_session_dropdown_menu.update(ctx, |menu, _| {
@@ -1260,6 +1286,14 @@ impl Workspace {
             menu.set_submenu_being_shown_for_item_index(None);
         });
         self.projects_picker_tab_configs_flyout
+            .update(ctx, |menu, view_ctx| {
+                menu.reset_selection(view_ctx);
+            });
+        self.projects_picker_sub_projects_flyout
+            .update(ctx, |menu, view_ctx| {
+                menu.reset_selection(view_ctx);
+            });
+        self.projects_picker_warp_tab_configs_flyout
             .update(ctx, |menu, view_ctx| {
                 menu.reset_selection(view_ctx);
             });
@@ -2743,6 +2777,42 @@ impl Workspace {
             },
         );
 
+        // Cortex: hover fly-out anchored to a parent project row when that
+        // project declares `sub_projects`. Populated per-hover from the parent's
+        // resolved sub-project list.
+        let projects_picker_sub_projects_flyout = ctx.add_typed_action_view(|_ctx| {
+            let mut menu = Menu::new()
+                .with_width(PROJECTS_PICKER_SUB_PROJECTS_FLYOUT_WIDTH)
+                .with_menu_variant(crate::menu::MenuVariant::scrollable())
+                .with_ignore_hover_when_covered();
+            menu.set_height(400.);
+            menu
+        });
+        ctx.subscribe_to_view(
+            &projects_picker_sub_projects_flyout,
+            move |me, _, event, ctx| {
+                me.handle_projects_picker_sub_projects_flyout_event(event, ctx);
+            },
+        );
+
+        // Cortex: third-level fly-out anchored to the "Warp Tab Configs" row
+        // inside the Configs flyout. Lists each tab-config .toml with an
+        // open row and a delete row.
+        let projects_picker_warp_tab_configs_flyout = ctx.add_typed_action_view(|_ctx| {
+            let mut menu = Menu::new()
+                .with_width(PROJECTS_PICKER_WARP_TAB_CONFIGS_FLYOUT_WIDTH)
+                .with_menu_variant(crate::menu::MenuVariant::scrollable())
+                .with_ignore_hover_when_covered();
+            menu.set_height(400.);
+            menu
+        });
+        ctx.subscribe_to_view(
+            &projects_picker_warp_tab_configs_flyout,
+            move |me, _, event, ctx| {
+                me.handle_projects_picker_warp_tab_configs_flyout_event(event, ctx);
+            },
+        );
+
         // Subscribe to network changes
         ctx.subscribe_to_model(
             &NetworkStatus::handle(ctx),
@@ -3367,6 +3437,10 @@ impl Workspace {
             tab_config_action_sidecar_mouse_states: Default::default(),
             projects_picker_tab_configs_flyout,
             show_projects_picker_tab_configs_flyout: false,
+            projects_picker_sub_projects_flyout,
+            show_projects_picker_sub_projects_flyout: false,
+            projects_picker_warp_tab_configs_flyout,
+            show_projects_picker_warp_tab_configs_flyout: false,
             remove_tab_config_confirmation_dialog:
                 Self::build_remove_tab_config_confirmation_dialog(ctx),
             handoff_environment_creation_modal: None,
@@ -3822,17 +3896,11 @@ impl Workspace {
 
                         if !saved_projects.is_empty() {
                             if let Some(cwd) = primary_terminal_cwd(&saved_tab.root) {
-                                if let Some(project) = crate::saved_projects::project_for_path(
+                                if let Some(coloru) = crate::saved_projects::accent_for_path(
                                     std::path::Path::new(cwd),
                                     &saved_projects,
                                 ) {
-                                    if let Ok(coloru) =
-                                        warp_core::ui::color::hex_color::coloru_from_hex_string(
-                                            &project.color,
-                                        )
-                                    {
-                                        self.tabs[tab_index].cortex_accent = Some(coloru);
-                                    }
+                                    self.tabs[tab_index].cortex_accent = Some(coloru);
                                 }
                             }
                         }
@@ -6657,11 +6725,20 @@ impl Workspace {
         for project in projects {
             let coloru =
                 warp_core::ui::color::hex_color::coloru_from_hex_string(&project.color).ok();
+            // Cortex: if this project declares sub-projects, render a trailing
+            // chevron indicator. We deliberately don't use `new_submenu` here
+            // because clicking the parent row should still open the parent
+            // directory (today's behavior) — the chevron just announces that
+            // a hover fly-out is available.
+            let has_subs = !project.resolved_sub_projects().is_empty();
             let mut item = MenuItemFields::new(project.name.clone())
                 .with_on_select_action(WorkspaceAction::SelectNewSessionMenuItem(
                     NewSessionMenuItem::OpenProject(project),
                 ))
                 .with_centered_label();
+            if has_subs {
+                item = item.with_right_side_icon(icons::Icon::ChevronRight);
+            }
             if let Some(c) = coloru {
                 item = item
                     .with_override_text_color(c)
@@ -6778,36 +6855,45 @@ impl Workspace {
         match new_session_menu_item {
             NewSessionMenuItem::OpenProject(project) => {
                 self.close_new_session_dropdown_menu(ctx);
-                self.add_tab_with_pane_layout(
-                    PanesLayout::SingleTerminal(Box::new(NewTerminalOptions {
-                        initial_directory: Some(project.cwd.clone()),
-                        ..Default::default()
-                    })),
-                    Arc::new(HashMap::new()),
-                    Some(project.name.clone()),
+                self.open_saved_project_directory(
+                    project.cwd.clone(),
+                    project.name.clone(),
+                    &project.color,
                     ctx,
                 );
-                // Cortex: saved-project tabs always go to the end of the tab
-                // list so the order reflects the chronological order in which
-                // the user opened them, overriding `general.new_tab_placement`.
-                let last_idx = self.tab_count().saturating_sub(1);
-                if self.active_tab_index != last_idx {
-                    let new_tab = self.tabs.remove(self.active_tab_index);
-                    self.tabs.push(new_tab);
-                    self.set_active_tab_index(last_idx, ctx);
-                }
-                // Cortex: carry the saved project's hex color through to the
-                // new tab so vertical-tab rendering can use it as the tab's
-                // accent (border / fill / title text). Mirrors the pattern in
-                // `open_tab_config_with_params` for ANSI tab-config colors.
-                if let Ok(coloru) =
-                    warp_core::ui::color::hex_color::coloru_from_hex_string(&project.color)
-                {
-                    if let Some(tab) = self.tabs.get_mut(self.active_tab_index) {
-                        tab.cortex_accent = Some(coloru);
-                    }
-                }
             }
+            NewSessionMenuItem::OpenSubProject {
+                parent,
+                sub,
+                color_hex,
+            } => {
+                self.close_new_session_dropdown_menu(ctx);
+                // Cortex: sub-project tab title is "<Parent>: <Sub>" so the
+                // affinity to its parent is obvious in the tab strip.
+                let title = format!("{}: {}", parent.name, sub.name);
+                self.open_saved_project_directory(sub.cwd.clone(), title, &color_hex, ctx);
+            }
+            NewSessionMenuItem::OpenCortexSavedProjectsFile => {
+                self.close_new_session_dropdown_menu(ctx);
+                #[cfg(feature = "local_fs")]
+                self.open_cortex_saved_projects_file(ctx);
+                #[cfg(not(feature = "local_fs"))]
+                let _ = ctx;
+            }
+            #[cfg(feature = "local_fs")]
+            NewSessionMenuItem::OpenTabConfigFile(path) => {
+                self.close_new_session_dropdown_menu(ctx);
+                self.open_existing_tab_config_file(path, ctx);
+            }
+            #[cfg(not(feature = "local_fs"))]
+            NewSessionMenuItem::OpenTabConfigFile(_) => {}
+            #[cfg(feature = "local_fs")]
+            NewSessionMenuItem::DeleteTabConfigFile(path) => {
+                self.close_new_session_dropdown_menu(ctx);
+                self.delete_tab_config_file(path, ctx);
+            }
+            #[cfg(not(feature = "local_fs"))]
+            NewSessionMenuItem::DeleteTabConfigFile(_) => {}
             NewSessionMenuItem::OpenLaunchConfig(launch_config) => ctx.dispatch_global_action(
                 "root_view:open_launch_config",
                 OpenLaunchConfigArg {
@@ -6825,6 +6911,126 @@ impl Workspace {
             }
             #[cfg(not(feature = "local_fs"))]
             NewSessionMenuItem::CreateNewTabConfig => {}
+        }
+    }
+
+    /// Cortex: shared body of `OpenProject` and `OpenSubProject` — opens a
+    /// single-terminal tab at `cwd`, retitles it, pins it to the end of the
+    /// tab list, and applies the accent color parsed from `color_hex`.
+    fn open_saved_project_directory(
+        &mut self,
+        cwd: std::path::PathBuf,
+        title: String,
+        color_hex: &str,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        self.add_tab_with_pane_layout(
+            PanesLayout::SingleTerminal(Box::new(NewTerminalOptions {
+                initial_directory: Some(cwd),
+                ..Default::default()
+            })),
+            Arc::new(HashMap::new()),
+            Some(title),
+            ctx,
+        );
+        // Cortex: saved-project tabs always go to the end of the tab list so
+        // the order reflects the chronological order in which the user opened
+        // them, overriding `general.new_tab_placement`.
+        let last_idx = self.tab_count().saturating_sub(1);
+        if self.active_tab_index != last_idx {
+            let new_tab = self.tabs.remove(self.active_tab_index);
+            self.tabs.push(new_tab);
+            self.set_active_tab_index(last_idx, ctx);
+        }
+        if let Ok(coloru) = warp_core::ui::color::hex_color::coloru_from_hex_string(color_hex) {
+            if let Some(tab) = self.tabs.get_mut(self.active_tab_index) {
+                tab.cortex_accent = Some(coloru);
+            }
+        }
+    }
+
+    /// Cortex: opens `~/.warp-oss/projects.json` in the user's configured
+    /// editor. Creates a stub `{ "projects": [] }` if the file doesn't yet
+    /// exist so the editor opens onto valid JSON.
+    #[cfg(feature = "local_fs")]
+    fn open_cortex_saved_projects_file(&mut self, ctx: &mut ViewContext<Self>) {
+        let Some(path) = warp_core::paths::warp_home_projects_file_path() else {
+            log::warn!("Could not resolve saved projects file path");
+            return;
+        };
+        if !path.exists() {
+            if let Some(parent) = path.parent() {
+                let _ = std::fs::create_dir_all(parent);
+            }
+            if let Err(e) = std::fs::write(&path, "{\n  \"projects\": []\n}\n") {
+                log::warn!("Failed to create stub projects.json at {}: {e:?}", path.display());
+                return;
+            }
+        }
+        let settings = EditorSettings::as_ref(ctx);
+        let target = resolve_file_target_with_editor_choice(
+            &path,
+            *settings.open_code_panels_file_editor,
+            *settings.prefer_markdown_viewer,
+            *settings.open_file_layout,
+            None,
+        );
+        self.open_file_with_target(
+            path.clone(),
+            target,
+            None,
+            CodeSource::Link {
+                path,
+                range_start: None,
+                range_end: None,
+            },
+            ctx,
+        );
+    }
+
+    /// Cortex: opens an existing tab-config `.toml` in the user's configured
+    /// editor. Mirrors `create_and_open_new_tab_config` but skips the template
+    /// write step since the file already exists.
+    #[cfg(feature = "local_fs")]
+    fn open_existing_tab_config_file(
+        &mut self,
+        path: std::path::PathBuf,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        let settings = EditorSettings::as_ref(ctx);
+        let target = resolve_file_target_with_editor_choice(
+            &path,
+            *settings.open_code_panels_file_editor,
+            *settings.prefer_markdown_viewer,
+            *settings.open_file_layout,
+            None,
+        );
+        self.open_file_with_target(
+            path.clone(),
+            target,
+            None,
+            CodeSource::Link {
+                path,
+                range_start: None,
+                range_end: None,
+            },
+            ctx,
+        );
+    }
+
+    /// Cortex: deletes a tab-config `.toml` file. The user-config file watcher
+    /// already in place picks up the deletion and refreshes the in-memory list,
+    /// so we only need to remove the file from disk. No telemetry for V1.
+    /// TODO(cortex): wire a confirmation modal once the menu dispatcher's
+    /// reentrancy story is settled; current V1 deletes immediately.
+    #[cfg(feature = "local_fs")]
+    fn delete_tab_config_file(
+        &mut self,
+        path: std::path::PathBuf,
+        _ctx: &mut ViewContext<Self>,
+    ) {
+        if let Err(e) = std::fs::remove_file(&path) {
+            log::warn!("Failed to delete tab config {}: {e:?}", path.display());
         }
     }
 
@@ -9422,14 +9628,26 @@ impl Workspace {
             return;
         };
 
-        // Cortex: in projects-picker mode, only the "Tab Configs" row uses
-        // the fly-out — every other row clears it. Short-circuit before the
-        // regular Tab Configs sidecar matching below so we don't mis-route.
+        // Cortex: in projects-picker mode, hovered rows can open one of two
+        // fly-outs:
+        // - "Configs" → tab-configs flyout (Cortex Saved Projects / Warp Tab
+        //   Configs / existing tab configs).
+        // - A project row whose name has sub-projects → sub-projects flyout.
+        // Everything else hides both.
         if self.show_projects_picker_menu {
             if label == "Configs" {
+                self.hide_projects_picker_sub_projects_flyout(ctx);
                 self.configure_projects_picker_tab_configs_flyout(hovered_index, ctx);
+            } else if let Some(project) = self.find_picker_project_with_subs(&label) {
+                self.hide_projects_picker_tab_configs_flyout(ctx);
+                self.configure_projects_picker_sub_projects_flyout(
+                    hovered_index,
+                    project,
+                    ctx,
+                );
             } else {
                 self.hide_projects_picker_tab_configs_flyout(ctx);
+                self.hide_projects_picker_sub_projects_flyout(ctx);
             }
             ctx.notify();
             return;
@@ -9470,16 +9688,44 @@ impl Workspace {
         ctx.notify();
     }
 
+    /// Cortex: build the Configs hover fly-out items for the projects picker.
+    /// Prepends two Cortex-specific shortcuts at the very top — "Cortex Saved
+    /// Projects" (opens `projects.json` in the editor) and "Warp Tab Configs"
+    /// (a sub-flyout to open or delete individual `.toml` files) — before the
+    /// rest of the regular tab-configs menu. Kept separate from
+    /// `unified_new_session_menu_items` so the *top* tab-configs menu
+    /// (keyboard shortcut / chevron) isn't polluted by picker-specific rows.
+    fn projects_picker_configs_flyout_items(
+        &self,
+        ctx: &mut ViewContext<Self>,
+    ) -> Vec<MenuItem<WorkspaceAction>> {
+        let mut items: Vec<MenuItem<WorkspaceAction>> = vec![
+            MenuItemFields::new("Cortex Saved Projects")
+                .with_on_select_action(WorkspaceAction::SelectNewSessionMenuItem(
+                    NewSessionMenuItem::OpenCortexSavedProjectsFile,
+                ))
+                .with_icon(icons::Icon::Brain)
+                .into_item(),
+            MenuItemFields::new_submenu("Warp Tab Configs")
+                .with_icon(icons::Icon::LayoutAlt01)
+                .into_item(),
+            MenuItem::Separator,
+        ];
+        items.extend(self.unified_new_session_menu_items(ctx));
+        items
+    }
+
     /// Cortex: populate and show the Tab Configs hover fly-out for the
     /// projects-picker menu. Mirrors `configure_worktree_new_session_sidecar`
-    /// but uses `unified_new_session_menu_items` so the contents match the
-    /// regular Tab Configs menu, and dispatches via Menu's standard pipeline.
+    /// but uses `unified_new_session_menu_items` (via the picker-flyout
+    /// wrapper) so the contents match the regular Tab Configs menu *plus*
+    /// the Cortex-specific shortcuts at the top.
     fn configure_projects_picker_tab_configs_flyout(
         &mut self,
         hovered_index: usize,
         ctx: &mut ViewContext<Self>,
     ) {
-        let items = self.unified_new_session_menu_items(ctx);
+        let items = self.projects_picker_configs_flyout_items(ctx);
         self.projects_picker_tab_configs_flyout
             .update(ctx, |menu, view_ctx| {
                 menu.set_items(items, view_ctx);
@@ -9513,14 +9759,239 @@ impl Workspace {
         event: &MenuEvent,
         ctx: &mut ViewContext<Self>,
     ) {
+        match event {
+            MenuEvent::Close { via_select_item } => {
+                if *via_select_item {
+                    // The flyout's item already dispatched its action through
+                    // Menu's pipeline; close the parent picker too so the user
+                    // doesn't see a dangling projects picker.
+                    self.close_new_session_dropdown_menu(ctx);
+                } else {
+                    self.hide_projects_picker_tab_configs_flyout(ctx);
+                    self.hide_projects_picker_warp_tab_configs_flyout(ctx);
+                    ctx.notify();
+                }
+            }
+            MenuEvent::ItemHovered => {
+                // Cortex: cascade hover to the Warp Tab Configs sub-flyout
+                // when the user mouses over that row inside the Configs
+                // flyout. Any other hover hides the sub-flyout.
+                let hovered = self
+                    .projects_picker_tab_configs_flyout
+                    .read(ctx, |menu, _| {
+                        menu.hovered_index().and_then(|idx| {
+                            menu.items().get(idx).and_then(|item| match item {
+                                MenuItem::Item(fields) => Some(fields.label().to_string()),
+                                _ => None,
+                            })
+                        })
+                    });
+                if hovered.as_deref() == Some("Warp Tab Configs") {
+                    self.configure_projects_picker_warp_tab_configs_flyout(ctx);
+                } else {
+                    self.hide_projects_picker_warp_tab_configs_flyout(ctx);
+                }
+                ctx.notify();
+            }
+            _ => {}
+        }
+    }
+
+    /// Cortex: find the project (currently visible in the picker) whose name
+    /// matches the hovered row label and which has at least one resolved
+    /// sub-project. Returns `None` when the label is `"Configs"` or any other
+    /// non-project row, or when the matching project declares no sub-projects.
+    fn find_picker_project_with_subs(
+        &self,
+        label: &str,
+    ) -> Option<crate::saved_projects::Project> {
+        let projects = crate::saved_projects::load_projects();
+        projects.into_iter().find(|p| {
+            p.name == label && !p.resolved_sub_projects().is_empty()
+        })
+    }
+
+    /// Cortex: populate and show the sub-projects hover fly-out for a parent
+    /// project row in the picker. The flyout rows are colored on a fixed-range
+    /// gradient from the parent's hex toward white via
+    /// `saved_projects::gradient::sub_project_color`. The endpoint is constant
+    /// regardless of how many sub-projects exist, so 2 sub-projects span the
+    /// same color distance as 100 do.
+    fn configure_projects_picker_sub_projects_flyout(
+        &mut self,
+        hovered_index: usize,
+        project: crate::saved_projects::Project,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        let theme = Appearance::as_ref(ctx).theme();
+        let menu_surface_color: ColorU = internal_colors::neutral_2(theme);
+        let subs = project.resolved_sub_projects();
+        let total = subs.len();
+        let mut items: Vec<MenuItem<WorkspaceAction>> = Vec::with_capacity(total);
+        for (idx, sub) in subs.into_iter().enumerate() {
+            let color_hex = crate::saved_projects::gradient::sub_project_color(
+                &project.color,
+                idx,
+                total,
+            )
+            .unwrap_or_else(|| project.color.clone());
+            let coloru =
+                warp_core::ui::color::hex_color::coloru_from_hex_string(&color_hex).ok();
+            let mut item = MenuItemFields::new(sub.name.clone())
+                .with_on_select_action(WorkspaceAction::SelectNewSessionMenuItem(
+                    NewSessionMenuItem::OpenSubProject {
+                        parent: project.clone(),
+                        sub: sub.clone(),
+                        color_hex: color_hex.clone(),
+                    },
+                ))
+                .with_centered_label();
+            if let Some(c) = coloru {
+                item = item
+                    .with_override_text_color(c)
+                    .with_override_hover_background_color(Fill::Solid(c))
+                    .with_override_hover_text_color(menu_surface_color);
+            }
+            items.push(item.into_item());
+        }
+        self.projects_picker_sub_projects_flyout
+            .update(ctx, |menu, view_ctx| {
+                menu.set_items(items, view_ctx);
+                menu.reset_selection(view_ctx);
+            });
+        self.show_projects_picker_sub_projects_flyout = true;
+
+        let flyout_rect = ctx.element_position_by_id_at_last_frame(
+            self.window_id,
+            PROJECTS_PICKER_SUB_PROJECTS_FLYOUT_POSITION_ID,
+        );
+        self.new_session_dropdown_menu.update(ctx, |menu, _| {
+            menu.set_safe_zone_target(flyout_rect);
+            menu.set_submenu_being_shown_for_item_index(Some(hovered_index));
+        });
+    }
+
+    fn hide_projects_picker_sub_projects_flyout(&mut self, _ctx: &mut ViewContext<Self>) {
+        if !self.show_projects_picker_sub_projects_flyout {
+            return;
+        }
+        self.show_projects_picker_sub_projects_flyout = false;
+        // Don't clobber the main menu's safe-zone here — it may already
+        // belong to the Configs flyout. Only the configure_* path sets it.
+    }
+
+    fn handle_projects_picker_sub_projects_flyout_event(
+        &mut self,
+        event: &MenuEvent,
+        ctx: &mut ViewContext<Self>,
+    ) {
         if let MenuEvent::Close { via_select_item } = event {
             if *via_select_item {
-                // The flyout's item already dispatched its action through
-                // Menu's pipeline; close the parent picker too so the user
-                // doesn't see a dangling projects picker.
                 self.close_new_session_dropdown_menu(ctx);
             } else {
-                self.hide_projects_picker_tab_configs_flyout(ctx);
+                self.hide_projects_picker_sub_projects_flyout(ctx);
+                ctx.notify();
+            }
+        }
+    }
+
+    /// Cortex: populate and show the "Warp Tab Configs" sub-flyout that lists
+    /// each `.toml` in `tab_configs_dir()`. For each config we emit two rows:
+    /// an "Open: <name>" row and a "Delete: <name>" row, separated by a
+    /// MenuItem::Separator between configs so the open/delete pair is
+    /// visually grouped.
+    fn configure_projects_picker_warp_tab_configs_flyout(
+        &mut self,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        let mut items: Vec<MenuItem<WorkspaceAction>> = Vec::new();
+        #[cfg(feature = "local_fs")]
+        {
+            let dir = tab_configs_dir();
+            let read = std::fs::read_dir(&dir);
+            let mut paths: Vec<std::path::PathBuf> = match read {
+                Ok(entries) => entries
+                    .filter_map(|e| e.ok())
+                    .map(|e| e.path())
+                    .filter(|p| p.extension().map(|x| x == "toml").unwrap_or(false))
+                    .collect(),
+                Err(_) => Vec::new(),
+            };
+            paths.sort_by_key(|p| {
+                p.file_stem()
+                    .map(|s| s.to_string_lossy().to_lowercase())
+                    .unwrap_or_default()
+            });
+            if paths.is_empty() {
+                items.push(
+                    MenuItemFields::new("No tab configs yet")
+                        .with_disabled(true)
+                        .into_item(),
+                );
+            } else {
+                for (i, path) in paths.iter().enumerate() {
+                    if i > 0 {
+                        items.push(MenuItem::Separator);
+                    }
+                    let stem = path
+                        .file_stem()
+                        .map(|s| s.to_string_lossy().into_owned())
+                        .unwrap_or_else(|| path.display().to_string());
+                    items.push(
+                        MenuItemFields::new(format!("Open: {stem}"))
+                            .with_icon(icons::Icon::LayoutAlt01)
+                            .with_on_select_action(WorkspaceAction::SelectNewSessionMenuItem(
+                                NewSessionMenuItem::OpenTabConfigFile(path.clone()),
+                            ))
+                            .into_item(),
+                    );
+                    items.push(
+                        MenuItemFields::new(format!("Delete: {stem}"))
+                            .with_icon(icons::Icon::Trash)
+                            .with_on_select_action(WorkspaceAction::SelectNewSessionMenuItem(
+                                NewSessionMenuItem::DeleteTabConfigFile(path.clone()),
+                            ))
+                            .into_item(),
+                    );
+                }
+            }
+        }
+        #[cfg(not(feature = "local_fs"))]
+        {
+            items.push(
+                MenuItemFields::new("Tab configs unavailable (no local FS)")
+                    .with_disabled(true)
+                    .into_item(),
+            );
+        }
+        self.projects_picker_warp_tab_configs_flyout
+            .update(ctx, |menu, view_ctx| {
+                menu.set_items(items, view_ctx);
+                menu.reset_selection(view_ctx);
+            });
+        self.show_projects_picker_warp_tab_configs_flyout = true;
+    }
+
+    fn hide_projects_picker_warp_tab_configs_flyout(
+        &mut self,
+        _ctx: &mut ViewContext<Self>,
+    ) {
+        if !self.show_projects_picker_warp_tab_configs_flyout {
+            return;
+        }
+        self.show_projects_picker_warp_tab_configs_flyout = false;
+    }
+
+    fn handle_projects_picker_warp_tab_configs_flyout_event(
+        &mut self,
+        event: &MenuEvent,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        if let MenuEvent::Close { via_select_item } = event {
+            if *via_select_item {
+                self.close_new_session_dropdown_menu(ctx);
+            } else {
+                self.hide_projects_picker_warp_tab_configs_flyout(ctx);
                 ctx.notify();
             }
         }
@@ -24691,6 +25162,79 @@ impl View for Workspace {
                         ),
                     );
                 }
+            }
+
+            // Cortex: projects-picker → sub-projects hover fly-out. Anchored
+            // to the hovered parent project row in the picker.
+            if self.show_projects_picker_sub_projects_flyout {
+                let anchor_label = self.new_session_dropdown_menu.read(app, |menu, _| {
+                    menu.hovered_index().and_then(|idx| {
+                        menu.items().get(idx).and_then(|item| match item {
+                            MenuItem::Item(fields) => Some(fields.label().to_string()),
+                            _ => None,
+                        })
+                    })
+                });
+
+                if let Some(anchor_label) = anchor_label {
+                    let flyout_element = SavePosition::new(
+                        ChildView::new(&self.projects_picker_sub_projects_flyout).finish(),
+                        PROJECTS_PICKER_SUB_PROJECTS_FLYOUT_POSITION_ID,
+                    )
+                    .finish();
+
+                    let render_left = self.should_render_sidecar_left(
+                        &anchor_label,
+                        PROJECTS_PICKER_SUB_PROJECTS_FLYOUT_WIDTH,
+                        app,
+                    );
+                    let (offset, parent_anchor, child_anchor) = if render_left {
+                        (
+                            vec2f(-4., 0.),
+                            PositionedElementAnchor::TopLeft,
+                            ChildAnchor::TopRight,
+                        )
+                    } else {
+                        (
+                            vec2f(4., 0.),
+                            PositionedElementAnchor::TopRight,
+                            ChildAnchor::TopLeft,
+                        )
+                    };
+
+                    stack.add_positioned_overlay_child(
+                        flyout_element,
+                        OffsetPositioning::offset_from_save_position_element(
+                            anchor_label,
+                            offset,
+                            PositionedElementOffsetBounds::WindowByPosition,
+                            parent_anchor,
+                            child_anchor,
+                        ),
+                    );
+                }
+            }
+
+            // Cortex: third-level fly-out anchored to the "Warp Tab Configs"
+            // row inside the Configs flyout (one level deeper than the
+            // tab-configs flyout above).
+            if self.show_projects_picker_warp_tab_configs_flyout {
+                let flyout_element = SavePosition::new(
+                    ChildView::new(&self.projects_picker_warp_tab_configs_flyout).finish(),
+                    PROJECTS_PICKER_WARP_TAB_CONFIGS_FLYOUT_POSITION_ID,
+                )
+                .finish();
+
+                stack.add_positioned_overlay_child(
+                    flyout_element,
+                    OffsetPositioning::offset_from_save_position_element(
+                        "Warp Tab Configs",
+                        vec2f(4., 0.),
+                        PositionedElementOffsetBounds::WindowByPosition,
+                        PositionedElementAnchor::TopRight,
+                        ChildAnchor::TopLeft,
+                    ),
+                );
             }
         }
 
