@@ -24,6 +24,7 @@ use warpui::{
 
 use crate::appearance::Appearance;
 use crate::cortex_settings::action::{CortexSettingsAction, CortexSettingsSection};
+use crate::cortex_settings::ai_page::{ai_page_search_terms, render_ai_page, AiPageState};
 use crate::cortex_settings::brand::{
     BRAND_HEADER_ICON_TO_TITLE_FONT_RATIO, BRAND_HEADER_TITLE_TO_FONT_RATIO,
     BRAND_MENU_ICON_LABEL_GAP_RATIO,
@@ -81,6 +82,7 @@ pub struct CortexSettingsView {
     sidebar_states: Vec<(CortexSettingsSection, MouseStateHandle)>,
     working_panes_state: WorkingPanesPageState,
     tabs_state: TabsPageState,
+    ai_state: AiPageState,
     search_editor: ViewHandle<EditorView>,
 }
 
@@ -119,6 +121,7 @@ impl CortexSettingsView {
             sidebar_states,
             working_panes_state: WorkingPanesPageState::default(),
             tabs_state: TabsPageState::new(ctx),
+            ai_state: AiPageState::default(),
             search_editor,
         }
     }
@@ -321,6 +324,32 @@ impl CortexSettingsView {
         ctx.notify();
     }
 
+    fn toggle_allow_local_claude_codex_child_harnesses(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warp_core::features::FeatureFlag;
+        use warpui::SingletonEntity;
+
+        // Read pre-toggle value so we can compute the post-toggle value and push
+        // it into the feature flag without re-reading after the closure (which
+        // would race with rendering threads that have already snapshotted).
+        let previous_value = *CortexSettings::as_ref(ctx).allow_local_claude_codex_child_harnesses;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .allow_local_claude_codex_child_harnesses
+                .toggle_and_save_value(ctx);
+        });
+
+        // Mirror the setting into the runtime feature flag so the existing
+        // gate sites (`local_child_harnesses.rs`, `orchestration_controls.rs`)
+        // pick up the change on the next `is_enabled()` call without needing
+        // to be ported to read the setting directly.
+        FeatureFlag::LocalClaudeCodexChildHarnesses.set_user_preference(!previous_value);
+
+        ctx.notify();
+    }
+
     fn handle_search_editor_event(
         &mut self,
         _editor: ViewHandle<EditorView>,
@@ -442,6 +471,7 @@ impl CortexSettingsView {
                 render_working_panes_page(&self.working_panes_state, appearance, app)
             }
             CortexSettingsSection::Tabs => render_tabs_page(&self.tabs_state, appearance, app),
+            CortexSettingsSection::Ai => render_ai_page(&self.ai_state, appearance, app),
         }
     }
 }
@@ -523,6 +553,9 @@ impl warpui::TypedActionView for CortexSettingsView {
                 self.set_tab_title_font_weight(*value, ctx)
             }
             CortexSettingsAction::ToggleTabTitleItalic => self.toggle_tab_title_italic(ctx),
+            CortexSettingsAction::ToggleAllowLocalClaudeCodexChildHarnesses => {
+                self.toggle_allow_local_claude_codex_child_harnesses(ctx)
+            }
         }
     }
 }
@@ -628,8 +661,9 @@ impl BackingView for CortexSettingsView {
 #[allow(dead_code)]
 pub fn cortex_settings_search_terms() -> String {
     format!(
-        "cortex settings {} {}",
+        "cortex settings {} {} {}",
         working_panes_page_search_terms().join(" "),
-        tabs_page_search_terms().join(" ")
+        tabs_page_search_terms().join(" "),
+        ai_page_search_terms().join(" ")
     )
 }
