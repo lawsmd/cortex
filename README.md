@@ -1,126 +1,57 @@
-> [!NOTE]
-> **This is [Cortex](https://github.com/lawsmd/cortex), a personal fork of [Warp](https://github.com/warpdotdev/warp)** by [@lawsmd](https://github.com/lawsmd). The Cortex layer adds a TUI-flavored re-skin, a ~1,079-theme picker bundled from open-source community schemes, and ergonomic tweaks for solo use; it's additive where possible. Build instructions in this README target upstream Warp — for the Cortex two-lane Windows/macOS dev workflow, see `scripts/launch-cortex-dev.{bat,sh}`. If you're working on Cortex with an AI assistant (Claude Code, Codex, etc.), drop your own `CLAUDE.md` at the repo root — it's gitignored, so it stays local to your machine. Upstream lives at [warpdotdev/warp](https://github.com/warpdotdev/warp); the Warp content below is theirs unchanged except where noted.
+# Cortex
 
-<a href="https://www.warp.dev">
-    <img width="1024" alt="Warp Agentic Development Environment product preview" src="https://github.com/user-attachments/assets/9976b2da-2edd-4604-a36c-8fd53719c6d4" />
-</a>
-&nbsp;
-<p align="center">
-  <a href="https://www.warp.dev"><img height="20" alt="Built with Warp" src="https://raw.githubusercontent.com/warpdotdev/brand-assets/main/Github/Built-With-Warp-Export@2x.png" /></a>
-  &nbsp;
-  <a href="https://oz.warp.dev"><img height="20" alt="Powered by Oz" src="https://raw.githubusercontent.com/warpdotdev/brand-assets/main/Github/Powered-By-Oz-Export@2x.png" /></a>
-</p>
+> A personal fork of [Warp](https://github.com/warpdotdev/warp) by [@lawsmd](https://github.com/lawsmd) — a customization and convenience layer on top of the upstream terminal. Use at your own risk; this is built for me, not as a product.
 
-<p align="center">
-  <a href="https://www.warp.dev">Website</a>
-  ·
-  <a href="https://www.warp.dev/code">Code</a>
-  ·
-  <a href="https://www.warp.dev/agents">Agents</a>
-  ·
-  <a href="https://www.warp.dev/terminal">Terminal</a>
-  ·
-  <a href="https://www.warp.dev/drive">Drive</a>
-  ·
-  <a href="https://docs.warp.dev">Docs</a>
-  ·
-  <a href="https://www.warp.dev/blog/how-warp-works">How Warp Works</a>
-</p>
+<!-- TODO: drop the tabs/animation GIF here once it's pulled off the home machine -->
 
-> [!NOTE]
-> OpenAI is the founding sponsor of the new, open-source Warp repository, and the new agentic management workflows are powered by GPT models.
+## What Cortex is
 
-<h1></h1>
+Cortex is Warp with a different coat of paint and a handful of extra knobs. Almost all the work is still Warp's — Cortex is the layer on top, not a rewrite.
 
-## About
+If you want the real, supported terminal, grab [Warp](https://www.warp.dev). If you want my personal flavor of it, you're in the right place.
 
-[Warp](https://www.warp.dev) is an agentic development environment, born out of the terminal. Use Warp's built-in coding agent, or bring your own CLI agent (Claude Code, Codex, Gemini CLI, and others).
+## What's different
 
-## Installation
+### A library of ~1,079 themes
+Cortex bundles around 1,079 terminal color schemes drawn from open-source community projects. They live in the theme picker, are searchable, and you can star favorites. None of these themes are original work in this repository — full credit is in the Credits section below.
 
-You can [download Warp](https://www.warp.dev/download) and [read our docs](https://docs.warp.dev/) for platform-specific instructions.
+### Tabs that show what each session is doing
+<!-- GIF goes here once it's available -->
 
-## Warp Contributions Overview Dashboard
+Cortex tabs pulse, breathe, and animate based on the state of the CLI agent (Claude Code, Codex, etc.) running inside them. You can glance at the sidebar and see which sessions are busy and which are idle. Each project also gets a color ring on its tab.
 
-Explore [build.warp.dev](https://build.warp.dev) to:
-- Watch thousands of Oz agents triage issues, write specs, implement changes, and review PRs
-- View top contributors and in-flight features
-- Track your own issues with GitHub sign-in
-- Click into active agent sessions in a web-compiled Warp terminal
+### Saved Projects, with sub-projects
+A persistent saved-projects list in the vertical tab sidebar. Add a project once, open a session into it from the "+" picker any time after. Projects can also declare sub-projects — handy for monorepos and config trees.
 
-## Oz for OSS
+### A Cortex Settings panel
+A dedicated settings pane (separate from Warp's own settings) for Cortex-only knobs: tab styling, working-pane separators, and an AI section with a toggle to let `/orchestrate` spawn local Claude Code or Codex agents as children. Open it from the command menu.
 
-Maintaining a popular open-source project? [Apply for Oz credits](https://tally.so/r/LZWxqG) to explore [Oz for OSS](https://github.com/warpdotdev/oz-for-oss).
+## Building it yourself
 
-Oz for OSS is our partner program for bringing the same agentic open-source management workflows used in this repository to select partner repositories. We work directly with maintainers to implement workflows for issue triage, PR review, community management, and contributor coordination in a way that fits each project.
-
-## Licensing
-
-Warp's UI framework (the `warpui_core` and `warpui` crates) are licensed under the [MIT license](LICENSE-MIT).
-
-The rest of the code in this repository is licensed under the [AGPL v3](LICENSE-AGPL).
-
-## Open Source & Contributing
-
-Warp's client codebase is open source and lives in this repository. We welcome community contributions and have designed a lightweight workflow to help new contributors get started. For the full contribution flow, read our [CONTRIBUTING.md](CONTRIBUTING.md) guide.
-
-> [!TIP]
-> **Chat with contributors and the Warp team** in the [`#oss-contributors`](https://warpcommunity.slack.com/archives/C0B0LM8N4DB) Slack channel — a good place for ad-hoc questions, design discussion, and pairing with maintainers. New here? [Join the Warp Slack community](https://go.warp.dev/join-preview) first, then jump into `#oss-contributors`.
-
-### Issue to PR
-
-Before filing, [search existing issues](https://github.com/warpdotdev/warp/issues?q=is%3Aissue+is%3Aopen+sort%3Areactions-%2B1-desc) for your bug or feature request. If nothing exists, [file an issue](https://github.com/warpdotdev/warp/issues/new/choose) using our templates. Security vulnerabilities should be reported privately as described in [CONTRIBUTING.md](CONTRIBUTING.md#reporting-security-issues).
-
-Once filed, a Warp maintainer reviews the issue and may apply a readiness label: [`ready-to-spec`](https://github.com/warpdotdev/warp/issues?q=is%3Aissue+is%3Aopen+label%3Aready-to-spec) signals the design is open for contributors to spec out, and [`ready-to-implement`](https://github.com/warpdotdev/warp/issues?q=is%3Aissue+is%3Aopen+label%3Aready-to-implement) signals the design is settled and code PRs are welcome. Anyone can pick up a labeled issue — mention **@oss-maintainers** on an issue if you'd like it considered for a readiness label.
-
-### Building the Repo Locally
-
-To build and run Warp from source:
+Cortex uses Warp's build scripts:
 
 ```bash
 ./script/bootstrap   # platform-specific setup
-./script/run         # build and run Warp
-./script/presubmit   # fmt, clippy, and tests
+./script/run         # build and run
 ```
 
-See [WARP.md](WARP.md) for the full engineering guide, including coding style, testing, and platform-specific notes.
+On macOS and Windows, Cortex adds a two-lane prod/dev workflow — a stable daily-driver build, plus a separate live-rebuild dev build. The launchers are in `scripts/launch-cortex-dev.{sh,bat}`. See `WARP.md` for Warp's engineering guide and the `CLAUDE.md` in the repo root for Cortex-specific dev notes.
 
-## Joining the Team
+## Credits
 
-Interested in joining the team? See our [open roles](https://www.warp.dev/careers).
+- **[Warp](https://github.com/warpdotdev/warp)** — the terminal Cortex sits on top of. None of this exists without their work, and especially their decision to open-source the client. Cortex inherits Warp's license split (MIT for `warpui_core` and `warpui`, AGPL-3.0 for the rest).
+- **Color themes** — bundled from four open-source community libraries:
+  - [Gogh](https://github.com/Gogh-Co/Gogh) — ~361 schemes (MIT)
+  - [iTerm2-Color-Schemes](https://github.com/mbadolato/iTerm2-Color-Schemes) — ~381 schemes (MIT; individual schemes retain their original copyright)
+  - [base16](https://github.com/chriskempson/base16) — ~179 schemes (MIT)
+  - [terminal.sexy](https://github.com/stayradiated/terminal.sexy) — ~157 schemes (MIT)
 
-## Support and Questions
+  Each theme's display name preserves its source tag (e.g. *"3024 (base16)"*, *"Adventure Time (Gogh)"*). The hand-curated default themes shipped with Warp are separate from this bundled library.
 
-1. See our [docs](https://docs.warp.dev/) for a comprehensive guide to Warp's features.
-2. Join our [Slack Community](https://go.warp.dev/join-preview) to connect with other users and get help from the Warp team — contributors hang out in [`#oss-contributors`](https://warpcommunity.slack.com/archives/C0B0LM8N4DB).
-3. Try our [Preview build](https://www.warp.dev/download-preview) to test the latest experimental features.
-4. Mention **@oss-maintainers** on any issue to escalate to the team — for example, if you encounter problems with the automated agents.
+## License
 
-## Code of Conduct
+Cortex inherits Warp's licensing. The `warpui_core` and `warpui` crates are [MIT](LICENSE-MIT); everything else is [AGPL-3.0](LICENSE-AGPL).
 
-We ask everyone to be respectful and empathetic. Warp follows the [Code of Conduct](CODE_OF_CONDUCT.md). To report violations, email warp-coc at warp.dev.
+## Support
 
-## Open Source Dependencies
-
-We'd like to call out a few of the [open source dependencies](https://docs.warp.dev/help/licenses) that have helped Warp to get off the ground:
-
-- [Tokio](https://github.com/tokio-rs/tokio)
-- [NuShell](https://github.com/nushell/nushell)
-- [Fig Completion Specs](https://github.com/withfig/autocomplete)
-- [Warp Server Framework](https://github.com/seanmonstar/warp)
-- [Alacritty](https://github.com/alacritty/alacritty)
-- [Hyper HTTP library](https://github.com/hyperium/hyper)
-- [FontKit](https://github.com/servo/font-kit)
-- [Core-foundation](https://github.com/servo/core-foundation-rs)
-- [Smol](https://github.com/smol-rs/smol)
-
-## Color Themes
-
-This fork bundles ~1,078 terminal color schemes drawn from open-source community projects. None of these themes are original work in this repository; full credit goes to the upstream maintainers and the individual scheme authors:
-
-- [**Gogh**](https://github.com/Gogh-Co/Gogh) — ~361 schemes (MIT)
-- [**iTerm2-Color-Schemes**](https://github.com/mbadolato/iTerm2-Color-Schemes) — ~381 schemes (MIT; individual schemes retain their original copyright)
-- [**base16**](https://github.com/chriskempson/base16) — ~179 schemes (MIT)
-- [**terminal.sexy**](https://github.com/stayradiated/terminal.sexy) — ~157 schemes (MIT)
-
-Each theme's display name preserves its source tag (e.g. *"3024 (base16)"*, *"Adventure Time (Gogh)"*). The hand-curated default themes shipped with Warp are separate from this bundled library.
+There isn't any. Cortex is a personal fork — I don't accept bug reports or PRs against it. If you find something broken upstream in Warp, file it on [`warpdotdev/warp`](https://github.com/warpdotdev/warp/issues).
