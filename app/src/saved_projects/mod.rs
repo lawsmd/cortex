@@ -1,8 +1,7 @@
 //! Cortex saved-projects list, fed into the vertical tab panel's bottom "+" picker.
 //!
 //! Lives at `~/.warp-oss/projects.json` (channel-aware via `warp_core::paths`).
-//! See `docs/roadmap/reskin.md` and the SideQuest reference at
-//! `~/.config/terminal/docs/sidequest/data-files.md` for design rationale.
+//! The on-disk format is a flat list of `Project` entries serialized to JSON.
 //!
 //! Named `saved_projects` (not `projects`) to avoid colliding with Warp's
 //! existing `projects` module which manages the in-app project list.

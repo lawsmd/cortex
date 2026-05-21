@@ -69,7 +69,7 @@ __pycache__/
 # Project notes
 .note/
 
-# Personal Cortex docs — Syncthing-synced across Michael's machines, not for the public repo.
+# Personal Cortex docs — Syncthing-synced across the maintainer's machines, not for the public repo.
 # See docs/CLAUDE.md "Note on the docs/ directory" for the rationale.
 /docs/
 
@@ -86,3 +86,6 @@ __pycache__/
 
 # Personal updatecortex skill — local-only, not for the public repo.
 /.agents/skills/updatecortex/
+
+# Personal build helpers — local-only utilities tied to the maintainer's other configs.
+/scripts/refresh-wezterm-schemes.sh
