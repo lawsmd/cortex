@@ -362,9 +362,17 @@ impl CodeEditorModel {
         let hidden_lines =
             ctx.add_model(|_| HiddenLinesModel::new(content.clone(), selection_model.clone()));
 
+        // CORTEX-BEGIN: editor-wrap-long-lines
+        let width_setting = if *crate::settings::CortexSettings::as_ref(ctx).editor_wrap_long_lines
+        {
+            WidthSetting::FitViewport
+        } else {
+            WidthSetting::InfiniteWidth
+        };
+        // CORTEX-END: editor-wrap-long-lines
         let render_state = ctx.add_model(|ctx| {
             RenderState::new(text_styles, lazy_layout, Some(hidden_lines.clone()), ctx)
-                .with_width_setting(WidthSetting::InfiniteWidth)
+                .with_width_setting(width_setting)
         });
         ctx.subscribe_to_model(&render_state, |me, event, ctx| {
             me.handle_render_state_model_event(event, ctx);

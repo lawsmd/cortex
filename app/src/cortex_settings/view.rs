@@ -29,6 +29,9 @@ use crate::cortex_settings::brand::{
     BRAND_HEADER_ICON_TO_TITLE_FONT_RATIO, BRAND_HEADER_TITLE_TO_FONT_RATIO,
     BRAND_MENU_ICON_LABEL_GAP_RATIO,
 };
+use crate::cortex_settings::editor_page::{
+    editor_page_search_terms, render_editor_page, EditorPageState,
+};
 use crate::cortex_settings::tabs_page::{render_tabs_page, tabs_page_search_terms, TabsPageState};
 use crate::cortex_settings::working_panes_page::{
     render_working_panes_page, working_panes_page_search_terms, WorkingPanesPageState,
@@ -82,6 +85,7 @@ pub struct CortexSettingsView {
     sidebar_states: Vec<(CortexSettingsSection, MouseStateHandle)>,
     working_panes_state: WorkingPanesPageState,
     tabs_state: TabsPageState,
+    editor_state: EditorPageState,
     ai_state: AiPageState,
     search_editor: ViewHandle<EditorView>,
 }
@@ -121,6 +125,7 @@ impl CortexSettingsView {
             sidebar_states,
             working_panes_state: WorkingPanesPageState::default(),
             tabs_state: TabsPageState::new(ctx),
+            editor_state: EditorPageState::default(),
             ai_state: AiPageState::default(),
             search_editor,
         }
@@ -376,6 +381,17 @@ impl CortexSettingsView {
         ctx.notify();
     }
 
+    fn toggle_editor_wrap_long_lines(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.editor_wrap_long_lines.toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
     fn handle_search_editor_event(
         &mut self,
         _editor: ViewHandle<EditorView>,
@@ -497,6 +513,9 @@ impl CortexSettingsView {
                 render_working_panes_page(&self.working_panes_state, appearance, app)
             }
             CortexSettingsSection::Tabs => render_tabs_page(&self.tabs_state, appearance, app),
+            CortexSettingsSection::Editor => {
+                render_editor_page(&self.editor_state, appearance, app)
+            }
             CortexSettingsSection::Ai => render_ai_page(&self.ai_state, appearance, app),
         }
     }
@@ -587,6 +606,9 @@ impl warpui::TypedActionView for CortexSettingsView {
             CortexSettingsAction::ToggleTabTitleItalic => self.toggle_tab_title_italic(ctx),
             CortexSettingsAction::ToggleAllowLocalClaudeCodexChildHarnesses => {
                 self.toggle_allow_local_claude_codex_child_harnesses(ctx)
+            }
+            CortexSettingsAction::ToggleEditorWrapLongLines => {
+                self.toggle_editor_wrap_long_lines(ctx)
             }
         }
     }
@@ -693,9 +715,10 @@ impl BackingView for CortexSettingsView {
 #[allow(dead_code)]
 pub fn cortex_settings_search_terms() -> String {
     format!(
-        "cortex settings {} {} {}",
+        "cortex settings {} {} {} {}",
         working_panes_page_search_terms().join(" "),
         tabs_page_search_terms().join(" "),
+        editor_page_search_terms().join(" "),
         ai_page_search_terms().join(" ")
     )
 }
