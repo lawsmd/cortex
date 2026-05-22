@@ -9640,11 +9640,39 @@ impl Workspace {
                 self.configure_projects_picker_tab_configs_flyout(hovered_index, ctx);
             } else if let Some(project) = self.find_picker_project_with_subs(&label) {
                 self.hide_projects_picker_tab_configs_flyout(ctx);
-                self.configure_projects_picker_sub_projects_flyout(
-                    hovered_index,
-                    project,
-                    ctx,
-                );
+                // Cortex: only open the sub-flyout when the cursor is in the
+                // row's right-edge "chevron zone" — the rightmost
+                // ~2 * ui_font_size pixels. Without this gate the flyout pops
+                // open on every parent-project row the cursor crosses, which
+                // is noisy. The zone width pairs with the centered-label +
+                // right-aligned-chevron layout from
+                // CORTEX-BEGIN: centered-label-with-right-aligned-icon
+                // in `app/src/menu.rs`.
+                let last_pos = self
+                    .new_session_dropdown_menu
+                    .read(ctx, |menu, _| menu.last_hovered_position());
+                let row_rect =
+                    ctx.element_position_by_id_at_last_frame(self.window_id, &label);
+                let trigger_zone_width = Appearance::as_ref(ctx).ui_font_size() * 2.0;
+                let in_trigger_zone = match (last_pos, row_rect) {
+                    (Some(pos), Some(rect)) => {
+                        pos.x() >= rect.max_x() - trigger_zone_width
+                    }
+                    // Missing position or rect: fail open, preserving the
+                    // pre-Cortex hover-anywhere behavior rather than silently
+                    // breaking the feature when a frame's worth of geometry
+                    // hasn't settled yet.
+                    _ => true,
+                };
+                if in_trigger_zone {
+                    self.configure_projects_picker_sub_projects_flyout(
+                        hovered_index,
+                        project,
+                        ctx,
+                    );
+                } else {
+                    self.hide_projects_picker_sub_projects_flyout(ctx);
+                }
             } else {
                 self.hide_projects_picker_tab_configs_flyout(ctx);
                 self.hide_projects_picker_sub_projects_flyout(ctx);

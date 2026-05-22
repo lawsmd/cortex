@@ -131,6 +131,14 @@ pub struct Menu<A: Action + Clone = ()> {
     /// If false, selecting a menu item updates selection and emits menu events
     /// without dispatching the item's typed action directly from the menu.
     dispatch_item_actions: bool,
+
+    // CORTEX-BEGIN: track-hover-position-for-cortex-picker
+    /// Cortex: last pointer position (window coords) recorded when an
+    /// `Event::ItemHovered` is emitted. Read by the projects-picker hover
+    /// dispatcher in `workspace::view` to gate the sub-projects flyout on
+    /// "cursor near the chevron" instead of "cursor anywhere on the row".
+    last_hovered_position: Option<Vector2F>,
+    // CORTEX-END: track-hover-position-for-cortex-picker
 }
 
 #[derive(Clone, Default)]
@@ -1233,6 +1241,14 @@ impl<A: Action + Clone> MenuItemFields<A> {
                 app,
             );
 
+            // CORTEX-BEGIN: centered-label-with-right-aligned-icon
+            // Populated below in the non-multiline branch when both
+            // `centered_label` and a right-side icon are set; consumed after
+            // `container_element` is built to overlay the chevron on the row's
+            // right edge.
+            let mut cortex_overlay_right_icon: Option<Box<dyn Element>> = None;
+            // CORTEX-END: centered-label-with-right-aligned-icon
+
             if matches!(self.element, MenuItemLabel::MultilineText { .. }) {
                 // In multiline labels, the timestamp is positioned underneath the label.
                 let mut content_column = Flex::column()
@@ -1279,9 +1295,23 @@ impl<A: Action + Clone> MenuItemFields<A> {
                     }
                 }
 
+                // CORTEX-BEGIN: centered-label-with-right-aligned-icon
+                // Upstream adds the right-side icon to the label_row directly.
+                // For Cortex picker rows we render `centered_label` AND a
+                // right-side chevron; MainAxisAlignment::Center then packs the
+                // [label][icon] group at the row's center, which is what the
+                // Cortex "+" picker wants to avoid. Defer the icon to an overlay
+                // when both flags are set so the chevron lands at the row's
+                // right edge (matching `render_right_aligned_chevron` used by
+                // Configs / submenu rows).
                 if let Some(right_icon) = self.render_right_side_icon(appearance, primary_color) {
-                    label_row.add_child(right_icon);
+                    if self.centered_label {
+                        cortex_overlay_right_icon = Some(right_icon);
+                    } else {
+                        label_row.add_child(right_icon);
+                    }
                 }
+                // CORTEX-END: centered-label-with-right-aligned-icon
             }
 
             // If menu item doesn't have an icon but we want to indent it, add left padding so it aligns with menu items that do have icons
@@ -1320,6 +1350,29 @@ impl<A: Action + Clone> MenuItemFields<A> {
             } else {
                 container.finish()
             };
+
+            // CORTEX-BEGIN: centered-label-with-right-aligned-icon
+            // Overlay the deferred right-side icon at the row's right edge.
+            // Uses the same Stack + Positioned pattern as the tooltip block
+            // below; the chevron is layered above the container so the label
+            // remains visually centered while the chevron pins to the right.
+            let container_element = if let Some(right_icon) = cortex_overlay_right_icon {
+                let mut stack = Stack::new();
+                stack.add_child(container_element);
+                stack.add_positioned_child(
+                    right_icon,
+                    OffsetPositioning::offset_from_parent(
+                        vec2f(-horizontal_padding, 0.),
+                        ParentOffsetBounds::WindowByPosition,
+                        ParentAnchor::MiddleRight,
+                        ChildAnchor::MiddleRight,
+                    ),
+                );
+                stack.finish()
+            } else {
+                container_element
+            };
+            // CORTEX-END: centered-label-with-right-aligned-icon
 
             // Render tooltip if present and hovered
             if let Some(tooltip_text) = &self.tooltip {
@@ -2233,6 +2286,9 @@ impl<A: Action + Clone> Menu<A> {
             content_top_padding_override: None,
             content_bottom_padding_override: None,
             dispatch_item_actions: true,
+            // CORTEX-BEGIN: track-hover-position-for-cortex-picker
+            last_hovered_position: None,
+            // CORTEX-END: track-hover-position-for-cortex-picker
         }
     }
 
@@ -2293,6 +2349,15 @@ impl<A: Action + Clone> Menu<A> {
         self.safe_triangle = Some(SafeTriangle::new());
         self
     }
+
+    // CORTEX-BEGIN: track-hover-position-for-cortex-picker
+    /// Cortex: last pointer position recorded alongside an `Event::ItemHovered`
+    /// emission, in window coordinates. Returns `None` if no leaf-node hover
+    /// has fired since the menu was constructed.
+    pub fn last_hovered_position(&self) -> Option<Vector2F> {
+        self.last_hovered_position
+    }
+    // CORTEX-END: track-hover-position-for-cortex-picker
 
     /// Set or clear the target rect for the safe triangle. The rect should be the
     /// bounding box of the sidecar/submenu panel that the user is moving toward.
@@ -2653,6 +2718,13 @@ impl<A: Action + Clone> TypedActionView for Menu<A> {
                 }
                 st.update_position(*position);
             }
+            // CORTEX-BEGIN: track-hover-position-for-cortex-picker
+            // Record the pointer position before delegating to SubMenu (which
+            // emits Event::ItemHovered). The Cortex projects-picker reads this
+            // in its ItemHovered handler to decide whether the cursor is near
+            // the row's chevron or just passing through the row body.
+            self.last_hovered_position = Some(*position);
+            // CORTEX-END: track-hover-position-for-cortex-picker
         }
 
         self.menu
