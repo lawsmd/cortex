@@ -1,5 +1,5 @@
 mod content_sized_editor;
-mod cortex_extensions;
+pub(crate) mod cortex_extensions;
 pub mod telemetry;
 
 use self::content_sized_editor::ContentSizedEditor;
@@ -329,35 +329,22 @@ fn cortex_row_appearance(
 ) -> CortexRowAppearance {
     let cortex = crate::settings::CortexSettings::as_ref(app);
     let accent_fill: ThemeFill = pane_color.cloned().unwrap_or_else(ThemeFill::white);
-    let inverse_fill_active = is_selected && *cortex.tabs_inverse_fill_on_selection.value();
+    let inverse_fill_active =
+        is_selected && cortex_extensions::cortex_inverse_fill_active(&cortex);
     let title_color: ThemeFill = if inverse_fill_active {
         theme.background()
     } else {
         accent_fill
     };
     let metadata_color = title_color.with_opacity(70);
-    let title_centered = if is_selected {
-        matches!(
-            *cortex.tabs_selected_title_alignment.value(),
-            crate::settings::TabsSelectedTitleAlignment::Centered
-        )
-    } else {
-        matches!(
-            *cortex.tabs_unselected_title_alignment.value(),
-            crate::settings::TabsUnselectedTitleAlignment::Centered
-        )
-    };
-    let metadata_centered = if is_selected {
-        matches!(
-            *cortex.tabs_selected_metadata_alignment.value(),
-            crate::settings::TabsSelectedMetadataAlignment::Centered
-        )
-    } else {
-        matches!(
-            *cortex.tabs_unselected_metadata_alignment.value(),
-            crate::settings::TabsUnselectedMetadataAlignment::Centered
-        )
-    };
+    let title_centered = matches!(
+        *cortex.tabs_title_alignment.value(),
+        crate::settings::TabsTitleAlignment::Centered
+    );
+    let metadata_centered = matches!(
+        *cortex.tabs_metadata_alignment.value(),
+        crate::settings::TabsMetadataAlignment::Centered
+    );
     let neutral_icon_color = inverse_fill_active.then(|| theme.background());
     CortexRowAppearance {
         title_color,
@@ -386,9 +373,9 @@ fn render_pane_row_element(
         )
     });
     let row_position_id = vtab_pane_row_position_id(props.pane_group_id, props.pane_id);
-    let cortex_inverse_fill = *crate::settings::CortexSettings::as_ref(app)
-        .tabs_inverse_fill_on_selection
-        .value();
+    let cortex_inverse_fill = cortex_extensions::cortex_inverse_fill_active(
+        &crate::settings::CortexSettings::as_ref(app),
+    );
     let PaneProps {
         pane_id,
         pane_group_id,
@@ -2636,7 +2623,7 @@ const RENAME_EDITOR_FONT_SIZE: f32 = 12.;
 /// Vertical tabs already differentiate active/inactive rows by color (and
 /// optionally by inverse fill), so unlike `tab.rs` this resolver does not
 /// apply an active-weight bump — the user's chosen weight applies uniformly.
-fn cortex_tab_title_style(
+pub(crate) fn cortex_tab_title_style(
     appearance: &crate::appearance::Appearance,
     app: &AppContext,
 ) -> (FamilyId, f32, Properties) {

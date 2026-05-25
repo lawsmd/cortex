@@ -2,10 +2,7 @@
 
 use warpui::fonts::Weight;
 
-use crate::settings::{
-    SearchBarStyle, TabsSelectedMetadataAlignment, TabsSelectedTitleAlignment,
-    TabsUnselectedMetadataAlignment, TabsUnselectedTitleAlignment,
-};
+use crate::settings::{SearchBarStyle, TabStyle, TabsMetadataAlignment, TabsTitleAlignment};
 
 /// Top-level categories shown down the left side of the Cortex Settings pane.
 /// Add new sections here as the toggle set grows.
@@ -64,18 +61,14 @@ pub enum CortexSettingsAction {
     ToggleRecapMatchesTerminalStyle,
     /// Flip the "Bar/Panel Background Matches Terminal Background" toggle.
     ToggleTabsPanelMatchesTerminalBg,
-    /// Flip the "Inverse Fill on Selection" toggle.
-    ToggleTabsInverseFillOnSelection,
     /// Flip the "Hide Icon Backdrop" toggle (Tab Icons section).
     ToggleTabsHideIconBackdrop,
-    /// Set the selected-tab title alignment.
-    SetTabsSelectedTitleAlignment(TabsSelectedTitleAlignment),
-    /// Set the selected-tab metadata alignment.
-    SetTabsSelectedMetadataAlignment(TabsSelectedMetadataAlignment),
-    /// Set the unselected-tab title alignment.
-    SetTabsUnselectedTitleAlignment(TabsUnselectedTitleAlignment),
-    /// Set the unselected-tab metadata alignment.
-    SetTabsUnselectedMetadataAlignment(TabsUnselectedMetadataAlignment),
+    /// Set the tab style preset (e.g. Cortex Modern).
+    SetTabStyle(TabStyle),
+    /// Set the unified title alignment for all vertical tabs.
+    SetTabsTitleAlignment(TabsTitleAlignment),
+    /// Set the unified metadata alignment for all vertical tabs.
+    SetTabsMetadataAlignment(TabsMetadataAlignment),
     /// Flip the "Stack vertical tabs over side panel" toggle. Stacks the
     /// vertical tab bar on top of the side panel (Agent Conversations / File
     /// Explorer / Global Search / Warp Drive) in a single left-rail column

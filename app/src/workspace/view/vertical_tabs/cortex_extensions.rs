@@ -11,6 +11,7 @@
 
 use pathfinder_color::ColorU;
 use pathfinder_geometry::vector::Vector2F;
+use settings::Setting;
 
 use crate::animation::elements::row_glow_breath::RowGlowBreathElement;
 use crate::animation::elements::traveling_comet::TravelingCometElement;
@@ -40,7 +41,7 @@ pub(super) const CORTEX_SUMMARY_LINE_FONT_SIZE: f32 = 12.;
 /// tab in the Cortex appearance. Sits between Warp's existing 100-gray (used
 /// elsewhere in the panel) and white so it reads on both dark and light themes
 /// without being claimable by either.
-pub(super) const VERTICAL_TAB_UNSELECTED_BORDER_GRAY: ColorU = ColorU {
+pub(crate) const VERTICAL_TAB_UNSELECTED_BORDER_GRAY: ColorU = ColorU {
     r: 140,
     g: 140,
     b: 140,
@@ -59,11 +60,21 @@ pub(super) const VERTICAL_TABS_SUMMARY_STATUS_ICON_SIZE: f32 = 10.;
 /// weight on this single tab.
 pub(super) const VERTICAL_TABS_BRAIN_ICON_SIZE: f32 = 30.;
 
+/// Whether the current tab style implies inverse fill on selected tabs.
+pub(crate) fn cortex_inverse_fill_active(
+    cortex: &crate::settings::CortexSettings,
+) -> bool {
+    matches!(
+        *cortex.tab_style.value(),
+        crate::settings::TabStyle::CortexModern
+    )
+}
+
 /// Resolve a pane's color into a single `ColorU` for the comet outline. Saved
 /// projects use their accent color; unsaved projects fall back to the same
 /// 140-gray that draws the unselected row border, so the comet visually
 /// belongs to the row in both cases.
-pub(super) fn comet_outline_color(pane_color: Option<&ThemeFill>) -> ColorU {
+pub(crate) fn comet_outline_color(pane_color: Option<&ThemeFill>) -> ColorU {
     match pane_color {
         Some(ThemeFill::Solid(c)) => *c,
         _ => VERTICAL_TAB_UNSELECTED_BORDER_GRAY,
@@ -76,7 +87,7 @@ pub(super) fn comet_outline_color(pane_color: Option<&ThemeFill>) -> ColorU {
 /// identity. The element lightens the result internally before painting,
 /// which is what keeps the frame visible when it's drawn over a row whose
 /// fill is already the project color (selected saved-project tabs).
-pub(super) fn breath_frame_tint(pane_color: Option<&ThemeFill>) -> ColorU {
+pub(crate) fn breath_frame_tint(pane_color: Option<&ThemeFill>) -> ColorU {
     comet_outline_color(pane_color)
 }
 
@@ -95,7 +106,7 @@ pub(super) fn breath_frame_tint(pane_color: Option<&ThemeFill>) -> ColorU {
 /// poison the Stack with infinite height (see `scene.rs` rect-size assert).
 /// `ParentBySize` makes the Stack size from `content` alone, then re-layouts
 /// the animation element with a tight constraint matching the row's bounds.
-pub(super) fn wrap_with_agent_animation_layers(
+pub(crate) fn wrap_with_agent_animation_layers(
     content: Box<dyn Element>,
     tab_animation: Option<TabAnimationKind>,
     pane_color: Option<&ThemeFill>,

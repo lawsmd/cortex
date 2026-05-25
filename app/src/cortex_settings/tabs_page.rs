@@ -1,13 +1,10 @@
 //! Content rendered on the right side of the Cortex Settings pane when the
 //! "Tabs" section is selected.
 //!
-//! Layout: subsection headers (`Vertical Tab Bar/Panel`, `Selected Tabs`,
-//! `Unselected Tabs`, `Tab Icons`), each followed by its toggles/selectors and
-//! separated from the next by a 2 px outline-colored bottom border —
-//! mirroring Warp's `render_separator` between categories. Subsection
-//! headers are plain styled `Text` rows; row layout follows the Warp
-//! `build_toggle_element` shape (label hugs the left edge of the centered
-//! max-width column, control hugs the right).
+//! Layout (top to bottom): Tab Style selector, live animated preview,
+//! Tab Title font controls, unified Title/Metadata Alignment radios,
+//! Tab Icons toggle, Vertical Tab Bar/Panel toggles. Sections are
+//! separated by 2 px outline-colored bottom borders.
 use std::rc::Rc;
 
 use settings::Setting;
@@ -28,79 +25,48 @@ use warpui::{
 
 use crate::appearance::Appearance;
 use crate::cortex_settings::action::CortexSettingsAction;
+use crate::cortex_settings::tabs_preview;
 use crate::cortex_settings::view::CortexSettingsView;
 use crate::settings::{
-    CortexSettings, TabsSelectedMetadataAlignment, TabsSelectedTitleAlignment,
-    TabsUnselectedMetadataAlignment, TabsUnselectedTitleAlignment,
+    CortexSettings, TabStyle, TabsMetadataAlignment, TabsTitleAlignment,
 };
 use crate::view_components::{Dropdown, DropdownItem};
 
 const ROW_VERTICAL_PADDING: f32 = 6.0;
 const CONTROL_RIGHT_PADDING: f32 = 5.0;
-// Mirror Warp's `SUBHEADER_FONT_SIZE` / `SUBHEADER_MARGIN_BOTTOM` /
-// `HEADER_PADDING` so the section headers across both Settings menus render
-// at identical size, weight, and spacing.
 const SUBSECTION_HEADER_FONT_SIZE: f32 = 16.0;
 const SUBSECTION_HEADER_MARGIN_BOTTOM: f32 = 4.0;
 const SUBSECTION_HEADER_PADDING_BOTTOM: f32 = 15.0;
-// Section separator — matches Warp's `render_separator` (2 px bottom border
-// in the theme outline color, with `HEADER_PADDING = 15` margin below), used
-// to space neighboring section groups apart.
 const SECTION_SEPARATOR_BORDER_WIDTH: f32 = 2.0;
 const SECTION_SEPARATOR_MARGIN_BOTTOM: f32 = 15.0;
-// Tab Title controls need explicit widths — `ChildView` reports infinite
-// width to the parent flex unless constrained, and the label-control row
-// helper only shrinks the label side.
 const TAB_TITLE_FONT_NAME_DROPDOWN_WIDTH: f32 = 200.0;
 const TAB_TITLE_FONT_SIZE_SLIDER_WIDTH: f32 = 160.0;
-// Slider range — kept narrower than the on-disk clamp (8..=32 in
-// `app/src/settings/cortex.rs`) because below 10 the title is unreadable in
-// tab chrome and above 20 the tab bar height starts to drift. The wider
-// on-disk range stays so a hand-edited TOML value doesn't get silently
-// rejected.
 const TAB_TITLE_FONT_SIZE_MIN: f32 = 10.0;
 const TAB_TITLE_FONT_SIZE_MAX: f32 = 20.0;
 
-/// Per-toggle/selector UI state that has to outlive a single render frame
-/// (mouse-state handles for hover detection, switch animation, radio-button
-/// selection state, slider thumb position, plus the dropdown view handle for
-/// the Tab Title font family). Owned by `CortexSettingsView` and threaded into
-/// the render fns via `&self`.
-///
-/// No `Default` impl — the dropdown handle needs a `ViewContext` to construct,
-/// so this is built via [`TabsPageState::new`] from `CortexSettingsView::new`.
 pub struct TabsPageState {
-    panel_bg_switch: SwitchStateHandle,
-    inverse_fill_switch: SwitchStateHandle,
+    // Tab Style
+    tab_style_radio: RadioButtonStateHandle,
+    tab_style_mouse_states: Vec<MouseStateHandle>,
+    // Alignment (unified)
+    title_alignment_radio: RadioButtonStateHandle,
+    title_alignment_mouse_states: Vec<MouseStateHandle>,
+    metadata_alignment_radio: RadioButtonStateHandle,
+    metadata_alignment_mouse_states: Vec<MouseStateHandle>,
+    // Tab Icons
     hide_icon_backdrop_switch: SwitchStateHandle,
+    // Vertical Tab Bar/Panel
+    panel_bg_switch: SwitchStateHandle,
     stack_left_column_switch: SwitchStateHandle,
-    selected_title_radio: RadioButtonStateHandle,
-    selected_title_mouse_states: Vec<MouseStateHandle>,
-    selected_metadata_radio: RadioButtonStateHandle,
-    selected_metadata_mouse_states: Vec<MouseStateHandle>,
-    unselected_title_radio: RadioButtonStateHandle,
-    unselected_title_mouse_states: Vec<MouseStateHandle>,
-    unselected_metadata_radio: RadioButtonStateHandle,
-    unselected_metadata_mouse_states: Vec<MouseStateHandle>,
-
-    /// Tab Title subsection — font family dropdown. Three bundled options:
-    /// `(use UI font)` (empty string), `Hack`, `Roboto`.
+    // Tab Title (font)
     pub(crate) title_font_name_dropdown: ViewHandle<Dropdown<CortexSettingsAction>>,
-    /// Tab Title subsection — font size slider (integer steps,
-    /// [`TAB_TITLE_FONT_SIZE_MIN`]..=[`TAB_TITLE_FONT_SIZE_MAX`]).
     title_font_size_slider: SliderStateHandle,
-    /// Tab Title subsection — font weight radio (3 options: Normal / Medium / Bold).
     title_font_weight_radio: RadioButtonStateHandle,
     title_font_weight_mouse_states: Vec<MouseStateHandle>,
-    /// Tab Title subsection — italic toggle.
     title_italic_switch: SwitchStateHandle,
 }
 
 impl TabsPageState {
-    /// Build the page state inside `CortexSettingsView::new`.
-    ///
-    /// Constructs the font-family dropdown (3 bundled options) and pre-selects
-    /// the row matching the current `cortex.tabs.title.font_name` setting.
     pub fn new(ctx: &mut ViewContext<CortexSettingsView>) -> Self {
         let title_font_name_dropdown = ctx.add_typed_action_view(|ctx| {
             let mut dropdown = Dropdown::new(ctx);
@@ -114,30 +80,21 @@ impl TabsPageState {
         });
 
         Self {
-            panel_bg_switch: SwitchStateHandle::default(),
-            inverse_fill_switch: SwitchStateHandle::default(),
+            tab_style_radio: RadioButtonStateHandle::default(),
+            tab_style_mouse_states: vec![MouseStateHandle::default()],
+            title_alignment_radio: RadioButtonStateHandle::default(),
+            title_alignment_mouse_states: vec![
+                MouseStateHandle::default(),
+                MouseStateHandle::default(),
+            ],
+            metadata_alignment_radio: RadioButtonStateHandle::default(),
+            metadata_alignment_mouse_states: vec![
+                MouseStateHandle::default(),
+                MouseStateHandle::default(),
+            ],
             hide_icon_backdrop_switch: SwitchStateHandle::default(),
+            panel_bg_switch: SwitchStateHandle::default(),
             stack_left_column_switch: SwitchStateHandle::default(),
-            selected_title_radio: RadioButtonStateHandle::default(),
-            selected_title_mouse_states: vec![
-                MouseStateHandle::default(),
-                MouseStateHandle::default(),
-            ],
-            selected_metadata_radio: RadioButtonStateHandle::default(),
-            selected_metadata_mouse_states: vec![
-                MouseStateHandle::default(),
-                MouseStateHandle::default(),
-            ],
-            unselected_title_radio: RadioButtonStateHandle::default(),
-            unselected_title_mouse_states: vec![
-                MouseStateHandle::default(),
-                MouseStateHandle::default(),
-            ],
-            unselected_metadata_radio: RadioButtonStateHandle::default(),
-            unselected_metadata_mouse_states: vec![
-                MouseStateHandle::default(),
-                MouseStateHandle::default(),
-            ],
             title_font_name_dropdown,
             title_font_size_slider: SliderStateHandle::default(),
             title_font_weight_radio: RadioButtonStateHandle::default(),
@@ -151,10 +108,6 @@ impl TabsPageState {
     }
 }
 
-/// Bundled font choices presented in the Tab Title > Font Family dropdown.
-/// Tuple shape: `(visible label, persisted setting value)`. The empty string
-/// is the documented "fall back to UI font" sentinel for
-/// `cortex.tabs.title.font_name`.
 const TAB_TITLE_FONT_FAMILY_OPTIONS: &[(&str, &str)] = &[
     ("(use UI font)", ""),
     ("Hack", "Hack"),
@@ -173,12 +126,6 @@ fn font_family_dropdown_items() -> Vec<DropdownItem<CortexSettingsAction>> {
         .collect()
 }
 
-/// Maps a stored `cortex.tabs.title.font_name` value back to the dropdown
-/// label so the closed-state header reflects the current selection. Falls back
-/// to "(use UI font)" for any value that isn't in the bundled list — this
-/// keeps the UI sensible even if the user hand-edited TOML to an unbundled
-/// font name (the consumption sites already fall back to the UI font in that
-/// case, so the visible state stays consistent with the rendered behavior).
 fn font_family_label_for_value(value: &str) -> &'static str {
     TAB_TITLE_FONT_FAMILY_OPTIONS
         .iter()
@@ -194,14 +141,15 @@ pub fn tabs_page_search_terms() -> &'static [&'static str] {
         "vertical",
         "panel",
         "background",
-        "selected",
-        "unselected",
+        "style",
+        "modern",
+        "preview",
+        "animation",
+        "text",
         "title",
         "metadata",
         "alignment",
         "centered",
-        "inverse",
-        "fill",
         "icon",
         "icons",
         "backdrop",
@@ -222,22 +170,93 @@ pub fn render_tabs_page(
     app: &AppContext,
 ) -> Box<dyn Element> {
     let settings = CortexSettings::as_ref(app);
-    let panel_bg = *settings.tabs_panel_matches_terminal_bg.value();
-    let inverse_fill = *settings.tabs_inverse_fill_on_selection.value();
+    let tab_style_idx = tab_style_idx(*settings.tab_style.value());
+    let title_alignment_idx = alignment_idx_title(*settings.tabs_title_alignment.value());
+    let metadata_alignment_idx = alignment_idx_metadata(*settings.tabs_metadata_alignment.value());
     let hide_icon_backdrop = *settings.tabs_hide_icon_backdrop.value();
+    let panel_bg = *settings.tabs_panel_matches_terminal_bg.value();
     let stack_left_column = *settings.stack_left_column.value();
-    let selected_title_idx =
-        alignment_idx_selected_title(*settings.tabs_selected_title_alignment.value());
-    let selected_metadata_idx =
-        alignment_idx_selected_metadata(*settings.tabs_selected_metadata_alignment.value());
-    let unselected_title_idx =
-        alignment_idx_unselected_title(*settings.tabs_unselected_title_alignment.value());
-    let unselected_metadata_idx =
-        alignment_idx_unselected_metadata(*settings.tabs_unselected_metadata_alignment.value());
 
     Flex::column()
         .with_cross_axis_alignment(CrossAxisAlignment::Stretch)
-        // Vertical Tab Bar/Panel
+        // 1. Tab Style
+        .with_child(render_subsection_header("Tab Style", appearance))
+        .with_child(render_alignment_row(
+            "Style",
+            "Cortex Modern",
+            "",
+            state.tab_style_radio.clone(),
+            state.tab_style_mouse_states.clone(),
+            tab_style_idx,
+            |index| {
+                let value = match index {
+                    _ => TabStyle::CortexModern,
+                };
+                CortexSettingsAction::SetTabStyle(value)
+            },
+            appearance,
+        ))
+        .with_child(render_section_separator(appearance))
+        // 2. Preview
+        .with_child(render_subsection_header("Preview", appearance))
+        .with_child(tabs_preview::render_preview_section(appearance, app))
+        .with_child(render_section_separator(appearance))
+        // 3. Tab Text (font + alignment, merged)
+        .with_child(render_subsection_header("Tab Text", appearance))
+        .with_child(render_tab_title_font_family_row(state, appearance))
+        .with_child(render_tab_title_font_size_row(state, appearance, app))
+        .with_child(render_tab_title_font_weight_row(state, appearance, app))
+        .with_child(render_toggle_row(
+            "Italic",
+            state.title_italic_switch.clone(),
+            *settings.tabs_title_italic.value(),
+            CortexSettingsAction::ToggleTabTitleItalic,
+            appearance,
+        ))
+        .with_child(render_alignment_row(
+            "Title Alignment",
+            "Centered",
+            "Warp Default",
+            state.title_alignment_radio.clone(),
+            state.title_alignment_mouse_states.clone(),
+            title_alignment_idx,
+            |index| {
+                let value = match index {
+                    0 => TabsTitleAlignment::Centered,
+                    _ => TabsTitleAlignment::WarpDefault,
+                };
+                CortexSettingsAction::SetTabsTitleAlignment(value)
+            },
+            appearance,
+        ))
+        .with_child(render_alignment_row(
+            "Metadata Alignment",
+            "Centered Under Tab Title",
+            "Warp Default (Left Aligned with Title)",
+            state.metadata_alignment_radio.clone(),
+            state.metadata_alignment_mouse_states.clone(),
+            metadata_alignment_idx,
+            |index| {
+                let value = match index {
+                    0 => TabsMetadataAlignment::Centered,
+                    _ => TabsMetadataAlignment::WarpDefault,
+                };
+                CortexSettingsAction::SetTabsMetadataAlignment(value)
+            },
+            appearance,
+        ))
+        .with_child(render_section_separator(appearance))
+        // 6. Tab Icons
+        .with_child(render_subsection_header("Tab Icons", appearance))
+        .with_child(render_toggle_row(
+            "Hide Icon Backdrop",
+            state.hide_icon_backdrop_switch.clone(),
+            hide_icon_backdrop,
+            CortexSettingsAction::ToggleTabsHideIconBackdrop,
+            appearance,
+        ))
+        .with_child(render_section_separator(appearance))
+        // 7. Vertical Tab Bar/Panel (moved to bottom)
         .with_child(render_subsection_header("Vertical Tab Bar/Panel", appearance))
         .with_child(render_toggle_row(
             "Bar/Panel Background Matches Terminal Background",
@@ -251,107 +270,6 @@ pub fn render_tabs_page(
             state.stack_left_column_switch.clone(),
             stack_left_column,
             CortexSettingsAction::ToggleStackLeftColumn,
-            appearance,
-        ))
-        .with_child(render_section_separator(appearance))
-        // Selected Tabs
-        .with_child(render_subsection_header("Selected Tabs", appearance))
-        .with_child(render_toggle_row(
-            "Inverse Fill on Selection",
-            state.inverse_fill_switch.clone(),
-            inverse_fill,
-            CortexSettingsAction::ToggleTabsInverseFillOnSelection,
-            appearance,
-        ))
-        .with_child(render_alignment_row(
-            "Title Alignment",
-            "Centered",
-            "Warp Default",
-            state.selected_title_radio.clone(),
-            state.selected_title_mouse_states.clone(),
-            selected_title_idx,
-            |index| {
-                let value = match index {
-                    0 => TabsSelectedTitleAlignment::Centered,
-                    _ => TabsSelectedTitleAlignment::WarpDefault,
-                };
-                CortexSettingsAction::SetTabsSelectedTitleAlignment(value)
-            },
-            appearance,
-        ))
-        .with_child(render_alignment_row(
-            "Metadata Alignment",
-            "Centered Under Tab Title",
-            "Warp Default (Left Aligned with Title)",
-            state.selected_metadata_radio.clone(),
-            state.selected_metadata_mouse_states.clone(),
-            selected_metadata_idx,
-            |index| {
-                let value = match index {
-                    0 => TabsSelectedMetadataAlignment::Centered,
-                    _ => TabsSelectedMetadataAlignment::WarpDefault,
-                };
-                CortexSettingsAction::SetTabsSelectedMetadataAlignment(value)
-            },
-            appearance,
-        ))
-        .with_child(render_section_separator(appearance))
-        // Unselected Tabs
-        .with_child(render_subsection_header("Unselected Tabs", appearance))
-        .with_child(render_alignment_row(
-            "Title Alignment",
-            "Centered",
-            "Warp Default",
-            state.unselected_title_radio.clone(),
-            state.unselected_title_mouse_states.clone(),
-            unselected_title_idx,
-            |index| {
-                let value = match index {
-                    0 => TabsUnselectedTitleAlignment::Centered,
-                    _ => TabsUnselectedTitleAlignment::WarpDefault,
-                };
-                CortexSettingsAction::SetTabsUnselectedTitleAlignment(value)
-            },
-            appearance,
-        ))
-        .with_child(render_alignment_row(
-            "Metadata Alignment",
-            "Centered Under Tab Title",
-            "Warp Default (Left Aligned with Title)",
-            state.unselected_metadata_radio.clone(),
-            state.unselected_metadata_mouse_states.clone(),
-            unselected_metadata_idx,
-            |index| {
-                let value = match index {
-                    0 => TabsUnselectedMetadataAlignment::Centered,
-                    _ => TabsUnselectedMetadataAlignment::WarpDefault,
-                };
-                CortexSettingsAction::SetTabsUnselectedMetadataAlignment(value)
-            },
-            appearance,
-        ))
-        .with_child(render_section_separator(appearance))
-        // Tab Icons
-        .with_child(render_subsection_header("Tab Icons", appearance))
-        .with_child(render_toggle_row(
-            "Hide Icon Backdrop",
-            state.hide_icon_backdrop_switch.clone(),
-            hide_icon_backdrop,
-            CortexSettingsAction::ToggleTabsHideIconBackdrop,
-            appearance,
-        ))
-        .with_child(render_section_separator(appearance))
-        // Tab Title — font customizations (apply to both horizontal tab bar
-        // and vertical tab rail; metadata/subtitle lines stay on the UI font).
-        .with_child(render_subsection_header("Tab Title", appearance))
-        .with_child(render_tab_title_font_family_row(state, appearance))
-        .with_child(render_tab_title_font_size_row(state, appearance, app))
-        .with_child(render_tab_title_font_weight_row(state, appearance, app))
-        .with_child(render_toggle_row(
-            "Italic",
-            state.title_italic_switch.clone(),
-            *settings.tabs_title_italic.value(),
-            CortexSettingsAction::ToggleTabTitleItalic,
             appearance,
         ))
         .finish()
@@ -391,9 +309,6 @@ fn render_tab_title_font_size_row(
         .with_default_value(current)
         .with_style(UiComponentStyles {
             width: Some(TAB_TITLE_FONT_SIZE_SLIDER_WIDTH),
-            // Vertical margin matches the opacity slider in
-            // `app/src/settings_view/appearance_page.rs` — keeps the row's
-            // baseline aligned with the other label-control rows on this page.
             margin: Some(Coords::default().top(3.).bottom(3.)),
             ..Default::default()
         })
@@ -444,15 +359,6 @@ fn render_tab_title_font_weight_row(
     label_control_row(label, radio)
 }
 
-/// Two-rung weight radio: Normal / Bold. We dropped the middle "Medium" rung
-/// because the bundled monospace font (Hack) ships only Regular and Bold
-/// variants, so an intermediate weight (Medium / Semibold / either) can only
-/// match Regular or Bold — there's no real third weight to render. Roboto and
-/// Segoe UI do have intermediate variants, but a control whose middle option
-/// silently collapses to one of the outer two on the most-used font choice is
-/// worse than just not offering it. Existing on-disk values for any weight in
-/// the Light–Semibold range round-trip to the Normal radio; Bold and heavier
-/// round-trip to Bold.
 fn weight_to_radio_index(weight: Weight) -> usize {
     match weight {
         Weight::Thin
@@ -481,10 +387,6 @@ fn render_subsection_header(label: &'static str, appearance: &Appearance) -> Box
         .with_color(theme.active_ui_text_color().into())
         .finish();
 
-    // `Align::left` reports a finite width for the text. A bare
-    // `Text::new_inline` placed directly inside the page's stretched column
-    // can report infinite width and crashes scene painting
-    // (`!rect.size().x().is_infinite()`).
     let header = Container::new(Align::new(text).left().finish())
         .with_margin_bottom(SUBSECTION_HEADER_MARGIN_BOTTOM)
         .finish();
@@ -494,9 +396,6 @@ fn render_subsection_header(label: &'static str, appearance: &Appearance) -> Box
         .finish()
 }
 
-/// Mirrors Warp's `render_separator` (settings_page.rs:381): a 2 px bottom
-/// border in the theme outline color with `HEADER_PADDING` margin below, used
-/// to space neighboring section groups apart.
 fn render_section_separator(appearance: &Appearance) -> Box<dyn Element> {
     Container::new(Empty::new().finish())
         .with_border(
@@ -507,10 +406,6 @@ fn render_section_separator(appearance: &Appearance) -> Box<dyn Element> {
         .finish()
 }
 
-/// Lays out a row in the same shape Warp Settings uses
-/// (`build_toggle_element` in `settings_view/settings_page.rs`): the label
-/// expands to fill the available width and pushes the control to the right
-/// edge of the centered max-width column.
 fn label_control_row(
     label_element: Box<dyn Element>,
     control: Box<dyn Element>,
@@ -579,13 +474,15 @@ where
 
     let action_for_index = Rc::new(action_for_index);
 
+    let mut items = vec![RadioButtonItem::text(centered_label)];
+    if !warp_default_label.is_empty() {
+        items.push(RadioButtonItem::text(warp_default_label));
+    }
+
     let radio = ui_builder
         .radio_buttons(
             mouse_states,
-            vec![
-                RadioButtonItem::text(centered_label),
-                RadioButtonItem::text(warp_default_label),
-            ],
+            items,
             radio_state,
             Some(selected_index),
             appearance.ui_font_size(),
@@ -602,30 +499,22 @@ where
     label_control_row(label_element, radio)
 }
 
-fn alignment_idx_selected_title(value: TabsSelectedTitleAlignment) -> usize {
+fn tab_style_idx(value: TabStyle) -> usize {
     match value {
-        TabsSelectedTitleAlignment::Centered => 0,
-        TabsSelectedTitleAlignment::WarpDefault => 1,
+        TabStyle::CortexModern => 0,
     }
 }
 
-fn alignment_idx_selected_metadata(value: TabsSelectedMetadataAlignment) -> usize {
+fn alignment_idx_title(value: TabsTitleAlignment) -> usize {
     match value {
-        TabsSelectedMetadataAlignment::Centered => 0,
-        TabsSelectedMetadataAlignment::WarpDefault => 1,
+        TabsTitleAlignment::Centered => 0,
+        TabsTitleAlignment::WarpDefault => 1,
     }
 }
 
-fn alignment_idx_unselected_title(value: TabsUnselectedTitleAlignment) -> usize {
+fn alignment_idx_metadata(value: TabsMetadataAlignment) -> usize {
     match value {
-        TabsUnselectedTitleAlignment::Centered => 0,
-        TabsUnselectedTitleAlignment::WarpDefault => 1,
-    }
-}
-
-fn alignment_idx_unselected_metadata(value: TabsUnselectedMetadataAlignment) -> usize {
-    match value {
-        TabsUnselectedMetadataAlignment::Centered => 0,
-        TabsUnselectedMetadataAlignment::WarpDefault => 1,
+        TabsMetadataAlignment::Centered => 0,
+        TabsMetadataAlignment::WarpDefault => 1,
     }
 }

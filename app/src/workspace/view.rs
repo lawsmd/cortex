@@ -16,7 +16,7 @@ mod startup_directory;
 #[cfg(test)]
 #[path = "view_tests.rs"]
 mod tests;
-mod vertical_tabs;
+pub(crate) mod vertical_tabs;
 #[cfg(target_family = "wasm")]
 mod wasm_view;
 
@@ -1241,9 +1241,12 @@ impl Workspace {
     /// only sensible per-tab-tint behavior we can reproduce without
     /// duplicating `cortex_row_appearance`'s pane-color resolution.
     fn cortex_rename_editor_text_colors(ctx: &AppContext) -> TextColors {
-        let inverse_fill_active = *crate::settings::CortexSettings::as_ref(ctx)
-            .tabs_inverse_fill_on_selection
-            .value();
+        let inverse_fill_active = matches!(
+            *crate::settings::CortexSettings::as_ref(ctx)
+                .tab_style
+                .value(),
+            crate::settings::TabStyle::CortexModern
+        );
         if inverse_fill_active {
             let title_fill = Appearance::as_ref(ctx).theme().background();
             TextColors {

@@ -3,15 +3,10 @@ use settings::{
 };
 use warpui::fonts::Weight;
 
-/// Horizontal alignment of a line of text in a Cortex vertical-tab row.
+/// Visual style preset for vertical tabs.
 ///
-/// Four separate enums (one per setting field) all share this two-variant shape
-/// because `implement_setting_for_enum!` binds the `Setting` impl to a single
-/// concrete type — collapsing them into one shared enum would force all four
-/// settings to share a single TOML key. Same trick Warp’s `tab_settings.rs`
-/// uses for `VerticalTabsPrimaryInfo` / `VerticalTabsCompactSubtitle` (different
-/// enums, same shape). The variants serialize as `centered` and `warp_default`
-/// respectively.
+/// `CortexModern` implies inverse fill on selected tabs (accent-colored
+/// background, terminal-background text). More styles will be added later.
 #[derive(
     Default,
     Debug,
@@ -26,22 +21,23 @@ use warpui::fonts::Weight;
     settings_value::SettingsValue,
 )]
 #[schemars(rename_all = "snake_case")]
-pub enum TabsSelectedTitleAlignment {
+pub enum TabStyle {
     #[default]
-    Centered,
-    WarpDefault,
+    CortexModern,
 }
 
 settings::macros::implement_setting_for_enum!(
-    TabsSelectedTitleAlignment,
+    TabStyle,
     CortexSettings,
     SupportedPlatforms::ALL,
     SyncToCloud::Globally(RespectUserSyncSetting::Yes),
     private: false,
-    toml_path: "cortex.tabs.selected.title_alignment",
-    description: "Horizontal alignment of the title line on a selected Cortex vertical tab.",
+    toml_path: "cortex.tabs.style",
+    description: "Visual style preset for vertical tabs. cortex_modern uses inverse fill on selected tabs.",
 );
 
+/// Horizontal alignment of the title line on vertical tabs (both selected and
+/// unselected).
 #[derive(
     Default,
     Debug,
@@ -56,22 +52,24 @@ settings::macros::implement_setting_for_enum!(
     settings_value::SettingsValue,
 )]
 #[schemars(rename_all = "snake_case")]
-pub enum TabsSelectedMetadataAlignment {
+pub enum TabsTitleAlignment {
     #[default]
     Centered,
     WarpDefault,
 }
 
 settings::macros::implement_setting_for_enum!(
-    TabsSelectedMetadataAlignment,
+    TabsTitleAlignment,
     CortexSettings,
     SupportedPlatforms::ALL,
     SyncToCloud::Globally(RespectUserSyncSetting::Yes),
     private: false,
-    toml_path: "cortex.tabs.selected.metadata_alignment",
-    description: "Horizontal alignment of the metadata subtitle line on a selected Cortex vertical tab.",
+    toml_path: "cortex.tabs.title_alignment",
+    description: "Horizontal alignment of the title line on Cortex vertical tabs.",
 );
 
+/// Horizontal alignment of the metadata subtitle line on vertical tabs (both
+/// selected and unselected).
 #[derive(
     Default,
     Debug,
@@ -86,50 +84,20 @@ settings::macros::implement_setting_for_enum!(
     settings_value::SettingsValue,
 )]
 #[schemars(rename_all = "snake_case")]
-pub enum TabsUnselectedTitleAlignment {
+pub enum TabsMetadataAlignment {
     #[default]
     Centered,
     WarpDefault,
 }
 
 settings::macros::implement_setting_for_enum!(
-    TabsUnselectedTitleAlignment,
+    TabsMetadataAlignment,
     CortexSettings,
     SupportedPlatforms::ALL,
     SyncToCloud::Globally(RespectUserSyncSetting::Yes),
     private: false,
-    toml_path: "cortex.tabs.unselected.title_alignment",
-    description: "Horizontal alignment of the title line on an unselected Cortex vertical tab.",
-);
-
-#[derive(
-    Default,
-    Debug,
-    serde::Serialize,
-    serde::Deserialize,
-    PartialEq,
-    Eq,
-    Copy,
-    Clone,
-    Hash,
-    schemars::JsonSchema,
-    settings_value::SettingsValue,
-)]
-#[schemars(rename_all = "snake_case")]
-pub enum TabsUnselectedMetadataAlignment {
-    #[default]
-    Centered,
-    WarpDefault,
-}
-
-settings::macros::implement_setting_for_enum!(
-    TabsUnselectedMetadataAlignment,
-    CortexSettings,
-    SupportedPlatforms::ALL,
-    SyncToCloud::Globally(RespectUserSyncSetting::Yes),
-    private: false,
-    toml_path: "cortex.tabs.unselected.metadata_alignment",
-    description: "Horizontal alignment of the metadata subtitle line on an unselected Cortex vertical tab.",
+    toml_path: "cortex.tabs.metadata_alignment",
+    description: "Horizontal alignment of the metadata subtitle line on Cortex vertical tabs.",
 );
 
 /// Visual style of the title-bar search bar.
@@ -249,10 +217,9 @@ define_settings_group!(CortexSettings, settings: [
         toml_path: "cortex.tabs.icon.hide_backdrop",
         description: "Whether the small circular backdrop rendered behind a vertical tab's leading icon is hidden. Affects neutral pane icons (terminal, settings, code, etc.); CLI/Oz agent badge backgrounds are unchanged because their colors carry identity meaning.",
     },
-    tabs_selected_title_alignment: TabsSelectedTitleAlignment,
-    tabs_selected_metadata_alignment: TabsSelectedMetadataAlignment,
-    tabs_unselected_title_alignment: TabsUnselectedTitleAlignment,
-    tabs_unselected_metadata_alignment: TabsUnselectedMetadataAlignment,
+    tab_style: TabStyle,
+    tabs_title_alignment: TabsTitleAlignment,
+    tabs_metadata_alignment: TabsMetadataAlignment,
     stack_left_column: StackLeftColumn {
         type: bool,
         default: true,

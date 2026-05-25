@@ -213,19 +213,6 @@ impl CortexSettingsView {
         ctx.notify();
     }
 
-    fn toggle_tabs_inverse_fill_on_selection(&mut self, ctx: &mut ViewContext<Self>) {
-        use crate::settings::CortexSettings;
-        use settings::ToggleableSetting;
-        use warpui::SingletonEntity;
-
-        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
-            let _ = settings
-                .tabs_inverse_fill_on_selection
-                .toggle_and_save_value(ctx);
-        });
-        ctx.notify();
-    }
-
     fn toggle_tabs_hide_icon_backdrop(&mut self, ctx: &mut ViewContext<Self>) {
         use crate::settings::CortexSettings;
         use settings::ToggleableSetting;
@@ -248,9 +235,9 @@ impl CortexSettingsView {
         ctx.notify();
     }
 
-    fn set_tabs_selected_title_alignment(
+    fn set_tab_style(
         &mut self,
-        value: crate::settings::TabsSelectedTitleAlignment,
+        value: crate::settings::TabStyle,
         ctx: &mut ViewContext<Self>,
     ) {
         use crate::settings::CortexSettings;
@@ -258,14 +245,14 @@ impl CortexSettingsView {
         use warpui::SingletonEntity;
 
         CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
-            let _ = settings.tabs_selected_title_alignment.set_value(value, ctx);
+            let _ = settings.tab_style.set_value(value, ctx);
         });
         ctx.notify();
     }
 
-    fn set_tabs_selected_metadata_alignment(
+    fn set_tabs_title_alignment(
         &mut self,
-        value: crate::settings::TabsSelectedMetadataAlignment,
+        value: crate::settings::TabsTitleAlignment,
         ctx: &mut ViewContext<Self>,
     ) {
         use crate::settings::CortexSettings;
@@ -273,16 +260,14 @@ impl CortexSettingsView {
         use warpui::SingletonEntity;
 
         CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
-            let _ = settings
-                .tabs_selected_metadata_alignment
-                .set_value(value, ctx);
+            let _ = settings.tabs_title_alignment.set_value(value, ctx);
         });
         ctx.notify();
     }
 
-    fn set_tabs_unselected_title_alignment(
+    fn set_tabs_metadata_alignment(
         &mut self,
-        value: crate::settings::TabsUnselectedTitleAlignment,
+        value: crate::settings::TabsMetadataAlignment,
         ctx: &mut ViewContext<Self>,
     ) {
         use crate::settings::CortexSettings;
@@ -290,26 +275,7 @@ impl CortexSettingsView {
         use warpui::SingletonEntity;
 
         CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
-            let _ = settings
-                .tabs_unselected_title_alignment
-                .set_value(value, ctx);
-        });
-        ctx.notify();
-    }
-
-    fn set_tabs_unselected_metadata_alignment(
-        &mut self,
-        value: crate::settings::TabsUnselectedMetadataAlignment,
-        ctx: &mut ViewContext<Self>,
-    ) {
-        use crate::settings::CortexSettings;
-        use settings::Setting;
-        use warpui::SingletonEntity;
-
-        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
-            let _ = settings
-                .tabs_unselected_metadata_alignment
-                .set_value(value, ctx);
+            let _ = settings.tabs_metadata_alignment.set_value(value, ctx);
         });
         ctx.notify();
     }
@@ -665,23 +631,15 @@ impl warpui::TypedActionView for CortexSettingsView {
             CortexSettingsAction::ToggleTabsPanelMatchesTerminalBg => {
                 self.toggle_tabs_panel_matches_terminal_bg(ctx)
             }
-            CortexSettingsAction::ToggleTabsInverseFillOnSelection => {
-                self.toggle_tabs_inverse_fill_on_selection(ctx)
-            }
             CortexSettingsAction::ToggleTabsHideIconBackdrop => {
                 self.toggle_tabs_hide_icon_backdrop(ctx)
             }
-            CortexSettingsAction::SetTabsSelectedTitleAlignment(value) => {
-                self.set_tabs_selected_title_alignment(*value, ctx)
+            CortexSettingsAction::SetTabStyle(value) => self.set_tab_style(*value, ctx),
+            CortexSettingsAction::SetTabsTitleAlignment(value) => {
+                self.set_tabs_title_alignment(*value, ctx)
             }
-            CortexSettingsAction::SetTabsSelectedMetadataAlignment(value) => {
-                self.set_tabs_selected_metadata_alignment(*value, ctx)
-            }
-            CortexSettingsAction::SetTabsUnselectedTitleAlignment(value) => {
-                self.set_tabs_unselected_title_alignment(*value, ctx)
-            }
-            CortexSettingsAction::SetTabsUnselectedMetadataAlignment(value) => {
-                self.set_tabs_unselected_metadata_alignment(*value, ctx)
+            CortexSettingsAction::SetTabsMetadataAlignment(value) => {
+                self.set_tabs_metadata_alignment(*value, ctx)
             }
             CortexSettingsAction::ToggleStackLeftColumn => self.toggle_stack_left_column(ctx),
             CortexSettingsAction::SetTabTitleFontName(value) => {
