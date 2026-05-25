@@ -192,3 +192,23 @@ else
     printf '%s\n' "${GREEN}  All candidates are registered. You have a pre-decided rule for each.${RESET}"
 fi
 echo
+
+# --- Check for Warp-internal workflows that the rebase may re-introduce.
+warp_workflows=()
+for f in .github/workflows/*.yml; do
+    [[ ! -f "$f" ]] && continue
+    base="$(basename "$f")"
+    case "$base" in
+        ci.yml|cortex-*) continue ;;
+        *) warp_workflows+=("$base") ;;
+    esac
+done
+if [[ ${#warp_workflows[@]} -gt 0 ]]; then
+    echo "${YELLOW}--- Warp-internal workflows detected (purge after rebase) ---${RESET}"
+    for wf in "${warp_workflows[@]}"; do
+        printf "${YELLOW}  .github/workflows/%s${RESET}\n" "$wf"
+    done
+    printf "${YELLOW}  These cause daily failure-notification emails. Delete them before pushing.${RESET}\n"
+    printf "${YELLOW}  See: docs/upstream-updates.md § Post-merge: purge re-introduced Warp workflows${RESET}\n"
+    echo
+fi

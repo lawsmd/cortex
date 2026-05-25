@@ -162,3 +162,17 @@ if ($unregisteredCount -gt 0) {
     Write-Host '  All candidates are registered. You have a pre-decided rule for each.' -ForegroundColor Green
 }
 Write-Host ''
+
+# --- Check for Warp-internal workflows that the rebase may re-introduce.
+$warpWorkflows = @(Get-ChildItem -Path '.github/workflows/*.yml' -ErrorAction SilentlyContinue |
+    Where-Object { $_.Name -notmatch '^(ci|cortex-)' } |
+    Select-Object -ExpandProperty Name)
+if ($warpWorkflows.Count -gt 0) {
+    Write-Host '--- Warp-internal workflows detected (purge after rebase) ---' -ForegroundColor Yellow
+    foreach ($wf in $warpWorkflows) {
+        Write-Host ("  .github/workflows/{0}" -f $wf) -ForegroundColor Yellow
+    }
+    Write-Host '  These cause daily failure-notification emails. Delete them before pushing.' -ForegroundColor Yellow
+    Write-Host '  See: docs/upstream-updates.md § Post-merge: purge re-introduced Warp workflows' -ForegroundColor Yellow
+    Write-Host ''
+}
