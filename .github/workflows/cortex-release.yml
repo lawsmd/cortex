@@ -1,0 +1,165 @@
+# Cortex release pipeline.
+#
+# Builds the shareable Windows installer (Cortex-Setup.exe) and macOS disk
+# image (Cortex.dmg), then publishes them as assets on a GitHub Release.
+#
+# Triggers:
+#   - push of a tag matching cortex-v* (e.g. cortex-v1.0.0): builds + publishes.
+#   - workflow_dispatch: builds artifacts only; publishing is opt-in via the
+#     `publish` input (defaults to false so manual runs don't accidentally
+#     mint a release).
+#
+# This is intentionally separate from .github/workflows/create_release.yml,
+# which still drives Warp's upstream multi-channel release matrix. That
+# workflow needs workload-identity, Trunk.io tokens, Sentry org access, and
+# the rest of Warp-internal infra — none of which a personal fork has. The
+# Cortex pipeline is the small, standalone path: build the two artifacts,
+# upload, done.
+
+name: Cortex Release
+
+on:
+  push:
+    tags:
+      - 'cortex-v*'
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish a GitHub Release with the built artifacts.
+        type: boolean
+        default: false
+      tag:
+        description: Tag to use when publishing (only honored if publish=true). Defaults to cortex-v<run_number>-manual.
+        type: string
+        default: ''
+
+permissions:
+  contents: write
+
+jobs:
+  windows-installer:
+    name: Windows installer
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # cargo build needs full tag history for git describe to produce a
+          # meaningful version string (CORTEX_VERSION pickup in
+          # scripts/build-cortex-installer.cmd).
+          fetch-depth: 0
+
+      # windows-latest images ship Rust stable + MSVC build tools by default,
+      # so no toolchain install step is needed. If GitHub ever rotates that
+      # image, add `rustup default stable` here.
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: |
+          # GitHub-hosted windows-latest images ship Inno Setup pre-installed,
+          # but pin via winget as a belt-and-braces fallback in case the image
+          # rotates and the tool falls off.
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) {
+            winget install --id JRSoftware.InnoSetup --silent --accept-package-agreements --accept-source-agreements
+          }
+          Get-Command "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" | Select-Object -ExpandProperty Source
+
+      - name: Derive version
+        id: version
+        shell: pwsh
+        run: |
+          if ("${{ github.ref_type }}" -eq "tag" -and "${{ github.ref_name }}".StartsWith("cortex-v")) {
+            # Strip the cortex-v prefix → AppVerName reads "Cortex 1.2.3".
+            $v = "${{ github.ref_name }}".Substring(8)
+          } else {
+            $v = "0.0.0-${{ github.run_number }}"
+          }
+          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+          Write-Output "CORTEX_INSTALLER_VERSION=$v"
+
+      - name: Build installer
+        shell: cmd
+        env:
+          CORTEX_INSTALLER_VERSION: ${{ steps.version.outputs.version }}
+        run: scripts\build-cortex-installer.cmd
+
+      - name: Upload installer
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: Cortex-Setup-windows-x64
+          path: dist/Cortex-Setup.exe
+          if-no-files-found: error
+          retention-days: 14
+
+  macos-dmg:
+    name: macOS DMG
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          fetch-depth: 0
+
+      # macos-14 images ship Rust stable. cargo-bundle is installed below.
+
+      - name: Install build deps
+        run: |
+          brew update >/dev/null
+          brew install protobuf create-dmg
+          # cargo-bundle is pinned to the same rev as script/macos/bootstrap.
+          cargo install cargo-bundle --git=https://github.com/burtonageo/cargo-bundle --rev ae4c76e92c08774bf54ff077b1c52e3d1cd6c16d --locked
+
+      - name: Build DMG
+        run: scripts/build-cortex-dmg.sh
+
+      - name: Upload DMG
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: Cortex-macos-arm64
+          path: dist/Cortex.dmg
+          if-no-files-found: error
+          retention-days: 14
+
+  publish:
+    name: Publish GitHub Release
+    needs: [windows-installer, macos-dmg]
+    runs-on: ubuntu-latest
+    # Tag-triggered runs publish automatically; manual runs publish only if
+    # the operator opted in via the `publish` input.
+    if: github.event_name == 'push' || inputs.publish == true
+    steps:
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        with:
+          path: artifacts
+
+      - name: Stage release assets
+        run: |
+          mkdir -p release
+          cp artifacts/Cortex-Setup-windows-x64/Cortex-Setup.exe release/
+          cp artifacts/Cortex-macos-arm64/Cortex.dmg              release/
+          ls -la release/
+
+      - name: Resolve release tag
+        id: tag
+        run: |
+          if [[ "${{ github.event_name }}" == "push" ]]; then
+            echo "tag=${{ github.ref_name }}" >> "$GITHUB_OUTPUT"
+          else
+            requested="${{ inputs.tag }}"
+            if [[ -z "$requested" ]]; then
+              requested="cortex-v0.0.0-${{ github.run_number }}-manual"
+            fi
+            echo "tag=$requested" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create or update release
+        uses: softprops/action-gh-release@da05d552573ad5aba039eaac05058a918a7bf631 # v2.2.2
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: ${{ steps.tag.outputs.tag }}
+          # GitHub flags any release with an `-` in the version as a prerelease
+          # by default; we explicitly mark dispatch-built releases as prerelease
+          # so manual smoke-test runs don't get promoted to "latest".
+          prerelease: ${{ github.event_name != 'push' }}
+          fail_on_unmatched_files: true
+          files: |
+            release/Cortex-Setup.exe
+            release/Cortex.dmg

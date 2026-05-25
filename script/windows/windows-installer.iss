@@ -2,8 +2,6 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 #include "environment.iss"
 
-#define MyAppPublisher "Denver Technologies, Inc."
-#define MyAppURL "https://www.warp.dev/"
 #ifndef MyAppName
   #define MyAppName "WarpDev"
 #endif
@@ -21,6 +19,32 @@
 #endif
 #define AssetsDir "..\..\app\assets\windows"
 
+; CORTEX-BEGIN: installer-branding
+; For the oss channel we ship as Cortex (lawsmd's personal fork), so override
+; publisher / homepage / URL scheme / AUMID without touching the upstream
+; defaults used by Warp's own release matrix.
+;
+; MyAppScheme   — protocol handler scheme registered under HKCR\<scheme>.
+;                 Must match Channel::Oss::url_scheme() in the Rust source
+;                 (crates/warp_core/src/channel/state.rs) — "warposs" in
+;                 release builds.
+; MyAumid       — Application User Model ID stamped onto Start Menu / Desktop
+;                 shortcuts. Must match the AUMID the running EXE sets at
+;                 startup (app/src/lib.rs Windows block) and the
+;                 $ProdAumid constant in scripts/install-shortcuts.ps1.
+#if ReleaseChannel == "oss"
+  #define MyAppPublisher "lawsmd"
+  #define MyAppURL "https://github.com/lawsmd/cortex"
+  #define MyAppScheme "warposs"
+  #define MyAumid "dev.warp.WarpOss"
+#else
+  #define MyAppPublisher "Denver Technologies, Inc."
+  #define MyAppURL "https://www.warp.dev/"
+  #define MyAppScheme MyAppName
+  #define MyAumid "dev.warp." + MyAppName
+#endif
+; CORTEX-END: installer-branding
+
 // The mutex name must match what the Rust app creates in single_instance_manager.rs:
 #define ChannelPascalCase \
   (ReleaseChannel == "stable") ? "Stable" : \
@@ -36,7 +60,16 @@
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
+; CORTEX-BEGIN: appid
+; Distinct AppId so the Add/Remove Programs entry and the
+; HKCU\Software\<AppId>_is1 uninstall key live in their own namespace and
+; don't collide with an Inno-installed upstream Warp on the same machine.
+#if ReleaseChannel == "oss"
+AppId=dev.lawsmd.Cortex
+#else
 AppId=warp-terminal-{#ReleaseChannel}
+#endif
+; CORTEX-END: appid
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppVerName={#MyAppName} {#MyAppVersion}
@@ -110,25 +143,39 @@ Source: "{#TargetProfileDir}\resources\*"; DestDir: "{app}\resources"; Flags: ig
 [Registry]
 Root: HKCU; Subkey: "SOFTWARE\Warp.dev\{#MyAppName}"; Flags: uninsdeletekey
 Root: HKCU; Subkey: "SOFTWARE\Warp.dev\{#MyAppName}"; ValueType: string; ValueName: "InstallationPath"; ValueData: "{app}\{#MyAppExeName}"; Flags: uninsdeletevalue
+; CORTEX-BEGIN: url-scheme
+; Register the warposs:// protocol handler so Warp's auth server can deep-link
+; back into Cortex after "Take me to Warp". Without this, the auth redirect
+; either dead-ends or — if a dev build of Cortex is also installed — gets
+; ad-hoc claimed by whichever variant launched most recently. Scoped to the
+; oss channel only; upstream Warp registers its scheme through a different
+; path (the running EXE) and we don't want to double-register it here.
+#if ReleaseChannel == "oss"
+Root: HKA; Subkey: "Software\Classes\{#MyAppScheme}"; ValueType: string; ValueName: ""; ValueData: "URL:{#MyAppName} Protocol"; Flags: uninsdeletekey
+Root: HKA; Subkey: "Software\Classes\{#MyAppScheme}"; ValueType: string; ValueName: "URL Protocol"; ValueData: ""
+Root: HKA; Subkey: "Software\Classes\{#MyAppScheme}\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"",0"
+Root: HKA; Subkey: "Software\Classes\{#MyAppScheme}\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""%1"""
+#endif
+; CORTEX-END: url-scheme
 ; cleanup "Open Warp Here" registry entries
 Root: HKA; Subkey: "Software\Classes\Directory\shell\{#MyAppName}"; Flags: deletekey
 Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\{#MyAppName}"; Flags: deletekey
 ; Add "Open Warp in new tab" to directory context menu
 Root: HKA; Subkey: "Software\Classes\Directory\shell\{#MyAppName}Tab"; ValueType: string; ValueName: ""; ValueData: "Open {#MyAppName} in new tab"; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\Directory\shell\{#MyAppName}Tab"; ValueType: string; ValueName: "Icon"; ValueData: "{app}\icon.ico"
-Root: HKA; Subkey: "Software\Classes\Directory\shell\{#MyAppName}Tab\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""{#MyAppName}://action/new_tab?path=%1"""
+Root: HKA; Subkey: "Software\Classes\Directory\shell\{#MyAppName}Tab\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""{#MyAppScheme}://action/new_tab?path=%1"""
 ; Add "Open Warp in new tab" to directory background context menu
 Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\{#MyAppName}Tab"; ValueType: string; ValueName: ""; ValueData: "Open {#MyAppName} in new tab"; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\{#MyAppName}Tab"; ValueType: string; ValueName: "Icon"; ValueData: "{app}\icon.ico"
-Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\{#MyAppName}Tab\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""{#MyAppName}://action/new_tab?path=%V"""
+Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\{#MyAppName}Tab\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""{#MyAppScheme}://action/new_tab?path=%V"""
 ; Add "Open Warp in new window" to directory context menu
 Root: HKA; Subkey: "Software\Classes\Directory\shell\{#MyAppName}Window"; ValueType: string; ValueName: ""; ValueData: "Open {#MyAppName} in new window"; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\Directory\shell\{#MyAppName}Window"; ValueType: string; ValueName: "Icon"; ValueData: "{app}\icon.ico"
-Root: HKA; Subkey: "Software\Classes\Directory\shell\{#MyAppName}Window\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""{#MyAppName}://action/new_window?path=%1"""
+Root: HKA; Subkey: "Software\Classes\Directory\shell\{#MyAppName}Window\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""{#MyAppScheme}://action/new_window?path=%1"""
 ; Add "Open Warp in new window" to directory background context menu
 Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\{#MyAppName}Window"; ValueType: string; ValueName: ""; ValueData: "Open {#MyAppName} in new window"; Flags: uninsdeletekey
 Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\{#MyAppName}Window"; ValueType: string; ValueName: "Icon"; ValueData: "{app}\icon.ico"
-Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\{#MyAppName}Window\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""{#MyAppName}://action/new_window?path=%V"""
+Root: HKA; Subkey: "Software\Classes\Directory\Background\shell\{#MyAppName}Window\command"; ValueType: string; ValueName: ""; ValueData: """{app}\{#MyAppExeName}"" ""{#MyAppScheme}://action/new_window?path=%V"""
 
 [Tasks]
 Name: addToPath; Description: "Add Warp to PATH"
@@ -139,8 +186,14 @@ Type: filesandordirs; Name: "{localappdata}\warp\{#MyAppName}"
 Type: filesandordirs; Name: "{app}\bin"
 
 [Icons]
-Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\icon.ico"; AppUserModelID: "dev.warp.{#MyAppName}"
-Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\icon.ico"; AppUserModelID: "dev.warp.{#MyAppName}"; Tasks: desktopicon
+; CORTEX-BEGIN: aumid
+; AppUserModelID is sourced from {#MyAumid} so the oss channel can pin the
+; AUMID to dev.warp.WarpOss (matching the running EXE's startup registration
+; and scripts/install-shortcuts.ps1's $ProdAumid) instead of dev.warp.Cortex.
+; Upstream channels still get dev.warp.{MyAppName} via the MyAumid fallback.
+Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\icon.ico"; AppUserModelID: "{#MyAumid}"
+Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\icon.ico"; AppUserModelID: "{#MyAumid}"; Tasks: desktopicon
+; CORTEX-END: aumid
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: postinstall runhidden nowait
