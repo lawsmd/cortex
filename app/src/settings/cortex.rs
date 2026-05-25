@@ -297,6 +297,6 @@ define_settings_group!(CortexSettings, settings: [
         sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
         private: false,
         toml_path: "cortex.editor.wrap_long_lines",
-        description: "When on, the file editor soft-wraps long lines to the viewport width instead of horizontally scrolling. Read once at editor model construction; reopen the file to apply a change.",
+        description: "When on, the Raw file viewer soft-wraps lines to the viewport width instead of horizontally scrolling. Read once at editor model construction; reopen the file to apply a change.",
     }
 ]);

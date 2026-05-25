@@ -31,8 +31,9 @@ pub fn editor_page_search_terms() -> &'static [&'static str] {
     &[
         "editor",
         "wrap",
-        "long",
         "lines",
+        "raw",
+        "view",
         "soft",
         "wrap",
         "line",
@@ -64,7 +65,7 @@ fn render_wrap_long_lines_row(
     let current_value = *CortexSettings::as_ref(app).editor_wrap_long_lines;
 
     let label = ui_builder
-        .span("Wrap Long Lines".to_string())
+        .span("Wrap Lines in 'Raw' View".to_string())
         .build()
         .finish();
 

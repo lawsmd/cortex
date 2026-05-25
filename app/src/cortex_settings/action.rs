@@ -87,7 +87,7 @@ pub enum CortexSettingsAction {
     /// so the orchestration controls (`local_child_harnesses.rs`,
     /// `orchestration_controls.rs`) react without a restart.
     ToggleAllowLocalClaudeCodexChildHarnesses,
-    /// Flip the "Wrap long lines" toggle on the Editor page. Persisted to
+    /// Flip the "Wrap Lines in 'Raw' View" toggle on the Editor page. Persisted to
     /// [`crate::settings::CortexSettings::editor_wrap_long_lines`]; read at
     /// editor model construction (reopen the file to apply a change).
     ToggleEditorWrapLongLines,
