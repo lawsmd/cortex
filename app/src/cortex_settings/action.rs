@@ -3,8 +3,8 @@
 use warpui::fonts::Weight;
 
 use crate::settings::{
-    TabsSelectedMetadataAlignment, TabsSelectedTitleAlignment, TabsUnselectedMetadataAlignment,
-    TabsUnselectedTitleAlignment,
+    SearchBarStyle, TabsSelectedMetadataAlignment, TabsSelectedTitleAlignment,
+    TabsUnselectedMetadataAlignment, TabsUnselectedTitleAlignment,
 };
 
 /// Top-level categories shown down the left side of the Cortex Settings pane.
@@ -13,6 +13,8 @@ use crate::settings::{
 pub enum CortexSettingsSection {
     WorkingPanes,
     Tabs,
+    TopBar,
+    Toolbar,
     Editor,
     Ai,
 }
@@ -22,13 +24,22 @@ impl CortexSettingsSection {
         match self {
             Self::WorkingPanes => "Panes",
             Self::Tabs => "Tabs",
+            Self::TopBar => "Top Bar",
+            Self::Toolbar => "Toolbar",
             Self::Editor => "Editor",
             Self::Ai => "AI",
         }
     }
 
     pub fn all() -> &'static [Self] {
-        &[Self::WorkingPanes, Self::Tabs, Self::Editor, Self::Ai]
+        &[
+            Self::WorkingPanes,
+            Self::Tabs,
+            Self::TopBar,
+            Self::Toolbar,
+            Self::Editor,
+            Self::Ai,
+        ]
     }
 }
 
@@ -91,4 +102,19 @@ pub enum CortexSettingsAction {
     /// [`crate::settings::CortexSettings::editor_wrap_long_lines`]; read at
     /// editor model construction (reopen the file to apply a change).
     ToggleEditorWrapLongLines,
+    /// Flip the "Top Bar Matches Terminal Background Color" toggle on the
+    /// Top Bar page.
+    ToggleTopBarMatchesTerminalBg,
+    /// Flip the "Hide Top Bar Divider Line" toggle on the Top Bar page.
+    ToggleTopBarHideDivider,
+    /// Set the title-bar search bar visual style (Cortex Default / Warp Default).
+    SetTopBarSearchBarStyle(SearchBarStyle),
+    /// Toggle visibility of the File Explorer icon in the toolbar.
+    ToggleToolbarShowFileExplorer,
+    /// Toggle visibility of the Global Search icon in the toolbar.
+    ToggleToolbarShowGlobalSearch,
+    /// Toggle visibility of the Warp Drive icon in the toolbar.
+    ToggleToolbarShowWarpDrive,
+    /// Toggle visibility of the Agent Conversations icon in the toolbar.
+    ToggleToolbarShowAgentConversations,
 }

@@ -5,7 +5,7 @@
 //! (Entity / BackingView / pane header chrome). The layout is purpose-built
 //! and intentionally minimal — sidebar of clickable category labels + content
 //! area — rather than the heavier `SettingsView` framework Warp uses for its
-//! own settings pane. Cortex's setting count is small for now and a simpler
+//! own settings pane. Cortex’s setting count is small for now and a simpler
 //! layout keeps this module independent of the `settings_view` crate (the
 //! surface we want to keep clean for upstream merges).
 use warp_core::ui::theme::Fill;
@@ -33,6 +33,12 @@ use crate::cortex_settings::editor_page::{
     editor_page_search_terms, render_editor_page, EditorPageState,
 };
 use crate::cortex_settings::tabs_page::{render_tabs_page, tabs_page_search_terms, TabsPageState};
+use crate::cortex_settings::toolbar_page::{
+    render_toolbar_page, toolbar_page_search_terms, ToolbarPageState,
+};
+use crate::cortex_settings::top_bar_page::{
+    render_top_bar_page, top_bar_page_search_terms, TopBarPageState,
+};
 use crate::cortex_settings::working_panes_page::{
     render_working_panes_page, working_panes_page_search_terms, WorkingPanesPageState,
 };
@@ -85,6 +91,8 @@ pub struct CortexSettingsView {
     sidebar_states: Vec<(CortexSettingsSection, MouseStateHandle)>,
     working_panes_state: WorkingPanesPageState,
     tabs_state: TabsPageState,
+    top_bar_state: TopBarPageState,
+    toolbar_state: ToolbarPageState,
     editor_state: EditorPageState,
     ai_state: AiPageState,
     search_editor: ViewHandle<EditorView>,
@@ -125,6 +133,8 @@ impl CortexSettingsView {
             sidebar_states,
             working_panes_state: WorkingPanesPageState::default(),
             tabs_state: TabsPageState::new(ctx),
+            top_bar_state: TopBarPageState::default(),
+            toolbar_state: ToolbarPageState::default(),
             editor_state: EditorPageState::default(),
             ai_state: AiPageState::default(),
             search_editor,
@@ -156,7 +166,7 @@ impl CortexSettingsView {
             // blanket impl for any boolean `Setting`. It flips the value,
             // persists it through the settings system, and returns the new
             // value (or an error). We discard the result — the settings system
-            // surfaces persistence errors via its own banner, and there's
+            // surfaces persistence errors via its own banner, and there’s
             // nothing useful to do at this call site beyond re-rendering with
             // the new state on the next frame.
             let _ = settings.hide_pane_separators.toggle_and_save_value(ctx);
@@ -321,7 +331,7 @@ impl CortexSettingsView {
         use warpui::SingletonEntity;
 
         // Clamp at the write boundary as well as the consumption site —
-        // belt-and-suspenders against typo'd hand-edits in `user_preferences.toml`.
+        // belt-and-suspenders against typo’d hand-edits in `user_preferences.toml`.
         let value = value.clamp(8.0, 32.0);
         CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
             let _ = settings.tabs_title_font_size.set_value(value, ctx);
@@ -361,9 +371,6 @@ impl CortexSettingsView {
         use warp_core::features::FeatureFlag;
         use warpui::SingletonEntity;
 
-        // Read pre-toggle value so we can compute the post-toggle value and push
-        // it into the feature flag without re-reading after the closure (which
-        // would race with rendering threads that have already snapshotted).
         let previous_value = *CortexSettings::as_ref(ctx).allow_local_claude_codex_child_harnesses;
 
         CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
@@ -372,10 +379,6 @@ impl CortexSettingsView {
                 .toggle_and_save_value(ctx);
         });
 
-        // Mirror the setting into the runtime feature flag so the existing
-        // gate sites (`local_child_harnesses.rs`, `orchestration_controls.rs`)
-        // pick up the change on the next `is_enabled()` call without needing
-        // to be ported to read the setting directly.
         FeatureFlag::LocalClaudeCodexChildHarnesses.set_user_preference(!previous_value);
 
         ctx.notify();
@@ -392,15 +395,103 @@ impl CortexSettingsView {
         ctx.notify();
     }
 
+    fn toggle_top_bar_matches_terminal_bg(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .top_bar_matches_terminal_bg
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_top_bar_hide_divider(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.top_bar_hide_divider.toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn set_top_bar_search_bar_style(
+        &mut self,
+        value: crate::settings::SearchBarStyle,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        use crate::settings::CortexSettings;
+        use settings::Setting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.top_bar_search_bar_style.set_value(value, ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_toolbar_show_file_explorer(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .toolbar_show_file_explorer
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_toolbar_show_global_search(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .toolbar_show_global_search
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_toolbar_show_warp_drive(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .toolbar_show_warp_drive
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_toolbar_show_agent_conversations(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .toolbar_show_agent_conversations
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
     fn handle_search_editor_event(
         &mut self,
         _editor: ViewHandle<EditorView>,
         event: &EditorEvent,
         ctx: &mut ViewContext<Self>,
     ) {
-        // Re-render whenever the search text changes so the sidebar filter
-        // reflects the latest query. We don't need to keep a copy of the
-        // query — `render_sidebar` reads it on demand from the editor.
         if matches!(event, EditorEvent::Edited(_)) {
             ctx.notify();
         }
@@ -482,9 +573,6 @@ impl CortexSettingsView {
             nav_column = nav_column.with_child(row);
         }
 
-        // Search bar sits flush with the top, then 15 px of breathing room
-        // before the first nav item — matches Warp's `HEADER_PADDING`-padded
-        // scroll wrapper around the nav list.
         let column = Flex::column()
             .with_cross_axis_alignment(CrossAxisAlignment::Stretch)
             .with_child(self.render_search_bar(appearance))
@@ -513,6 +601,12 @@ impl CortexSettingsView {
                 render_working_panes_page(&self.working_panes_state, appearance, app)
             }
             CortexSettingsSection::Tabs => render_tabs_page(&self.tabs_state, appearance, app),
+            CortexSettingsSection::TopBar => {
+                render_top_bar_page(&self.top_bar_state, appearance, app)
+            }
+            CortexSettingsSection::Toolbar => {
+                render_toolbar_page(&self.toolbar_state, appearance, app)
+            }
             CortexSettingsSection::Editor => {
                 render_editor_page(&self.editor_state, appearance, app)
             }
@@ -533,10 +627,6 @@ impl View for CortexSettingsView {
     fn render(&self, app: &AppContext) -> Box<dyn Element> {
         let appearance = Appearance::as_ref(app);
 
-        // Mirror Warp Settings: page content is centered in a max-800px column
-        // with `Align::top_center`, wrapped in 28 px page padding. Pages
-        // themselves continue to use the full inner width via
-        // `CrossAxisAlignment::Stretch`.
         let centered_content = Container::new(
             Align::new(
                 ConstrainedBox::new(self.render_content(appearance, app))
@@ -610,6 +700,27 @@ impl warpui::TypedActionView for CortexSettingsView {
             CortexSettingsAction::ToggleEditorWrapLongLines => {
                 self.toggle_editor_wrap_long_lines(ctx)
             }
+            CortexSettingsAction::ToggleTopBarMatchesTerminalBg => {
+                self.toggle_top_bar_matches_terminal_bg(ctx)
+            }
+            CortexSettingsAction::ToggleTopBarHideDivider => {
+                self.toggle_top_bar_hide_divider(ctx)
+            }
+            CortexSettingsAction::SetTopBarSearchBarStyle(value) => {
+                self.set_top_bar_search_bar_style(*value, ctx)
+            }
+            CortexSettingsAction::ToggleToolbarShowFileExplorer => {
+                self.toggle_toolbar_show_file_explorer(ctx)
+            }
+            CortexSettingsAction::ToggleToolbarShowGlobalSearch => {
+                self.toggle_toolbar_show_global_search(ctx)
+            }
+            CortexSettingsAction::ToggleToolbarShowWarpDrive => {
+                self.toggle_toolbar_show_warp_drive(ctx)
+            }
+            CortexSettingsAction::ToggleToolbarShowAgentConversations => {
+                self.toggle_toolbar_show_agent_conversations(ctx)
+            }
         }
     }
 }
@@ -643,21 +754,6 @@ impl BackingView for CortexSettingsView {
         let appearance = Appearance::as_ref(app);
         let theme = appearance.theme();
 
-        // The Cortex Settings header reads as a section heading, so the title
-        // is bumped above the standard pane-title font size and the brain
-        // glyph above the avatar-menu's icon-to-text ratio — both via the
-        // header-specific brand ratios in `brand.rs`. Glyph and title share
-        // `theme.accent()` so the brand mark renders as one tinted unit. The
-        // icon shader's red-channel-as-alpha rule means the SVG itself just
-        // needs non-zero red pixels (white-stroked); the call-site color
-        // wins. See docs/branding.md. Never the U+1F9E0 emoji.
-        //
-        // The framework's `StandardHeader` hard-codes the title text size to
-        // `ui_font_size()` (see `app/src/pane_group/pane/view/header/mod.rs`)
-        // and `Properties` carries weight/style only — no font-size lever.
-        // Rather than fork that upstream file, we render glyph + title as a
-        // single flex row passed via `left_of_title` and leave the framework's
-        // `title` slot empty.
         let base_font = appearance.ui_font_size();
         let title_font = base_font * BRAND_HEADER_TITLE_TO_FONT_RATIO;
         let icon_size = title_font * BRAND_HEADER_ICON_TO_TITLE_FONT_RATIO;
@@ -709,15 +805,14 @@ impl BackingView for CortexSettingsView {
     }
 }
 
-/// Search terms for surfacing the Cortex Settings pane in command palettes —
-/// not consumed yet, but kept here so a future palette integration has a
-/// single point to draw from.
 #[allow(dead_code)]
 pub fn cortex_settings_search_terms() -> String {
     format!(
-        "cortex settings {} {} {} {}",
+        "cortex settings {} {} {} {} {} {}",
         working_panes_page_search_terms().join(" "),
         tabs_page_search_terms().join(" "),
+        top_bar_page_search_terms().join(" "),
+        toolbar_page_search_terms().join(" "),
         editor_page_search_terms().join(" "),
         ai_page_search_terms().join(" ")
     )

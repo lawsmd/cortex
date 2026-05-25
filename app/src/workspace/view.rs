@@ -3117,7 +3117,17 @@ impl Workspace {
         // to piggyback on and silently no-op'd at the consumer.
         ctx.subscribe_to_model(
             &crate::settings::CortexSettings::handle(ctx),
-            |_me, _handle, _event, ctx| {
+            |me, _handle, event, ctx| {
+                use crate::settings::CortexSettingsChangedEvent;
+                if matches!(
+                    event,
+                    CortexSettingsChangedEvent::ToolbarShowFileExplorer { .. }
+                        | CortexSettingsChangedEvent::ToolbarShowGlobalSearch { .. }
+                        | CortexSettingsChangedEvent::ToolbarShowWarpDrive { .. }
+                        | CortexSettingsChangedEvent::ToolbarShowAgentConversations { .. }
+                ) {
+                    me.update_left_panel_available_views(ctx);
+                }
                 ctx.notify();
             },
         );
@@ -19209,13 +19219,29 @@ impl Workspace {
         Shrinkable::new(1.0, inner).finish()
     }
 
-    fn render_title_bar_search_bar(&self, appearance: &Appearance) -> Box<dyn Element> {
+    fn render_title_bar_search_bar(
+        &self,
+        appearance: &Appearance,
+        // CORTEX-BEGIN: top-bar-search-bar-style
+        ctx: &AppContext,
+        // CORTEX-END: top-bar-search-bar-style
+    ) -> Box<dyn Element> {
         let theme = appearance.theme();
         let text_color = theme.sub_text_color(theme.background());
+        // CORTEX-BEGIN: top-bar-search-bar-style
+        let cortex_search_style = {
+            use ::settings::Setting as _;
+            *crate::settings::CortexSettings::as_ref(ctx)
+                .top_bar_search_bar_style
+                .value()
+                == crate::settings::SearchBarStyle::CortexDefault
+        };
+        let hover_border_color = theme.font_color(theme.background());
+        // CORTEX-END: top-bar-search-bar-style
 
         Hoverable::new(
             self.mouse_states.title_bar_search_bar.clone(),
-            |mouse_state| {
+            move |mouse_state| {
                 let row = Flex::row()
                     .with_cross_axis_alignment(CrossAxisAlignment::Center)
                     .with_spacing(10.)
@@ -19243,13 +19269,27 @@ impl Workspace {
                     )
                     .finish();
 
+                // CORTEX-BEGIN: top-bar-search-bar-style
+                let mut container = Container::new(row);
+                if cortex_search_style {
+                    let border_fill = if mouse_state.is_hovered() {
+                        hover_border_color
+                    } else {
+                        text_color
+                    };
+                    container = container
+                        .with_border(Border::all(1.).with_border_fill(border_fill));
+                } else {
+                    container = container.with_background(if mouse_state.is_hovered() {
+                        internal_colors::fg_overlay_2(theme)
+                    } else {
+                        internal_colors::fg_overlay_1(theme)
+                    });
+                }
+                // CORTEX-END: top-bar-search-bar-style
+
                 ConstrainedBox::new(
-                    Container::new(row)
-                        .with_background(if mouse_state.is_hovered() {
-                            internal_colors::fg_overlay_2(theme)
-                        } else {
-                            internal_colors::fg_overlay_1(theme)
-                        })
+                    container
                         .with_corner_radius(CornerRadius::with_all(Radius::Pixels(4.)))
                         .with_padding_left(16.)
                         .with_padding_right(16.)
@@ -19453,7 +19493,7 @@ impl Workspace {
                         1.,
                         Clipped::new(
                             Container::new(
-                                Align::new(self.render_title_bar_search_bar(appearance)).finish(),
+                                Align::new(self.render_title_bar_search_bar(appearance, ctx)).finish(),
                             )
                             .with_padding_left(TITLE_BAR_SEARCH_BAR_SLOT_PADDING)
                             .with_padding_right(TITLE_BAR_SEARCH_BAR_SLOT_PADDING)
@@ -19867,6 +19907,11 @@ impl Workspace {
         let tab_bar_border =
             Border::bottom(TAB_BAR_BORDER_HEIGHT).with_border_fill(appearance.theme().outline());
 
+        // CORTEX-BEGIN: top-bar-hide-divider
+        let cortex_hide_divider =
+            *crate::settings::CortexSettings::as_ref(ctx).top_bar_hide_divider;
+        // CORTEX-END: top-bar-hide-divider
+
         let mut tab_bar_container = Container::new(
             EventHandler::new(Clipped::new(self.render_tab_bar_hoverable(bar_contents)).finish())
                 .on_back_mouse_down(move |ctx, _app, _position| {
@@ -19878,9 +19923,17 @@ impl Workspace {
                     DispatchEventResult::StopPropagation
                 })
                 .finish(),
-        )
-        .with_border(tab_bar_border);
-        if FeatureFlag::NewTabStyling.is_enabled() {
+        );
+        // CORTEX-BEGIN: top-bar-hide-divider
+        if !cortex_hide_divider {
+            tab_bar_container = tab_bar_container.with_border(tab_bar_border);
+        }
+        // CORTEX-END: top-bar-hide-divider
+        // CORTEX-BEGIN: top-bar-matches-terminal-bg
+        let cortex_top_bar_transparent =
+            *crate::settings::CortexSettings::as_ref(ctx).top_bar_matches_terminal_bg;
+        if FeatureFlag::NewTabStyling.is_enabled() && !cortex_top_bar_transparent {
+            // CORTEX-END: top-bar-matches-terminal-bg
             tab_bar_container = tab_bar_container
                 .with_background(internal_colors::fg_overlay_1(appearance.theme()));
         }
@@ -22221,24 +22274,34 @@ impl Workspace {
     /// monopolizing the default slot.
     fn compute_left_panel_views(ctx: &AppContext) -> Vec<ToolPanelView> {
         let mut views = vec![];
+        // CORTEX-BEGIN: toolbar-visibility-settings
+        let cortex = crate::settings::CortexSettings::as_ref(ctx);
+        // CORTEX-END: toolbar-visibility-settings
 
-        if cfg!(feature = "local_fs") && *CodeSettings::as_ref(ctx).show_project_explorer.value() {
+        if cfg!(feature = "local_fs")
+            && *CodeSettings::as_ref(ctx).show_project_explorer.value()
+            && *cortex.toolbar_show_file_explorer
+        {
             views.push(ToolPanelView::ProjectExplorer);
         }
         if cfg!(feature = "local_fs")
             && FeatureFlag::GlobalSearch.is_enabled()
             && *CodeSettings::as_ref(ctx).show_global_search.value()
+            && *cortex.toolbar_show_global_search
         {
             views.push(ToolPanelView::GlobalSearch {
                 entry_focus: GlobalSearchEntryFocus::Results,
             });
         }
-        if WarpDriveSettings::is_warp_drive_enabled(ctx) {
+        if WarpDriveSettings::is_warp_drive_enabled(ctx)
+            && *cortex.toolbar_show_warp_drive
+        {
             views.push(ToolPanelView::WarpDrive);
         }
         if FeatureFlag::AgentViewConversationListView.is_enabled()
             && AISettings::as_ref(ctx).is_any_ai_enabled(ctx)
             && *AISettings::as_ref(ctx).show_conversation_history
+            && *cortex.toolbar_show_agent_conversations
         {
             views.push(ToolPanelView::ConversationListView);
         }

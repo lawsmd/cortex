@@ -8,7 +8,7 @@ use warpui::fonts::Weight;
 /// Four separate enums (one per setting field) all share this two-variant shape
 /// because `implement_setting_for_enum!` binds the `Setting` impl to a single
 /// concrete type — collapsing them into one shared enum would force all four
-/// settings to share a single TOML key. Same trick Warp's `tab_settings.rs`
+/// settings to share a single TOML key. Same trick Warp’s `tab_settings.rs`
 /// uses for `VerticalTabsPrimaryInfo` / `VerticalTabsCompactSubtitle` (different
 /// enums, same shape). The variants serialize as `centered` and `warp_default`
 /// respectively.
@@ -130,6 +130,41 @@ settings::macros::implement_setting_for_enum!(
     private: false,
     toml_path: "cortex.tabs.unselected.metadata_alignment",
     description: "Horizontal alignment of the metadata subtitle line on an unselected Cortex vertical tab.",
+);
+
+/// Visual style of the title-bar search bar.
+///
+/// `CortexDefault` replaces the filled background with a thin border in the
+/// search-text color (brighter on hover). `WarpDefault` keeps the upstream
+/// semi-transparent pill background.
+#[derive(
+    Default,
+    Debug,
+    serde::Serialize,
+    serde::Deserialize,
+    PartialEq,
+    Eq,
+    Copy,
+    Clone,
+    Hash,
+    schemars::JsonSchema,
+    settings_value::SettingsValue,
+)]
+#[schemars(rename_all = "snake_case")]
+pub enum SearchBarStyle {
+    #[default]
+    CortexDefault,
+    WarpDefault,
+}
+
+settings::macros::implement_setting_for_enum!(
+    SearchBarStyle,
+    CortexSettings,
+    SupportedPlatforms::ALL,
+    SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+    private: false,
+    toml_path: "cortex.top_bar.search_bar_style",
+    description: "Visual style of the title-bar search bar. cortex_default replaces the filled background with a thin border; warp_default keeps the upstream pill background.",
 );
 
 define_settings_group!(CortexSettings, settings: [
@@ -298,5 +333,60 @@ define_settings_group!(CortexSettings, settings: [
         private: false,
         toml_path: "cortex.editor.wrap_long_lines",
         description: "When on, the Raw file viewer soft-wraps lines to the viewport width instead of horizontally scrolling. Read once at editor model construction; reopen the file to apply a change.",
+    },
+    top_bar_matches_terminal_bg: TopBarMatchesTerminalBg {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.top_bar.matches_terminal_background",
+        description: "Whether the top/title bar background matches the terminal background instead of the theme's semi-transparent foreground overlay. Cortex default: on (fully transparent).",
+    },
+    top_bar_hide_divider: TopBarHideDivider {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.top_bar.hide_divider",
+        description: "Whether the thin horizontal divider line at the bottom of the top bar is hidden. Cortex default: on (hidden).",
+    },
+    top_bar_search_bar_style: SearchBarStyle,
+    toolbar_show_file_explorer: ToolbarShowFileExplorer {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.toolbar.show_file_explorer",
+        description: "Show the File Explorer icon in the toolbar.",
+    },
+    toolbar_show_global_search: ToolbarShowGlobalSearch {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.toolbar.show_global_search",
+        description: "Show the Global Search icon in the toolbar.",
+    },
+    toolbar_show_warp_drive: ToolbarShowWarpDrive {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.toolbar.show_warp_drive",
+        description: "Show the Warp Drive icon in the toolbar.",
+    },
+    toolbar_show_agent_conversations: ToolbarShowAgentConversations {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.toolbar.show_agent_conversations",
+        description: "Show the Agent Conversations icon in the toolbar.",
     }
 ]);

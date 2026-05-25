@@ -24,6 +24,8 @@ pub mod brand;
 pub mod editor_page;
 pub mod pane_manager;
 pub mod tabs_page;
+pub mod toolbar_page;
+pub mod top_bar_page;
 pub mod view;
 pub mod working_panes_page;
 
