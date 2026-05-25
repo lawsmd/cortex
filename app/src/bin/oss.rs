@@ -72,7 +72,21 @@ fn main() -> Result<()> {
 }
 
 // If we're not using an external plist, embed the following as the Info.plist.
-#[cfg(all(not(feature = "extern_plist"), target_os = "macos"))]
+//
+// In practice Cortex always runs from a `cargo bundle`-produced .app, so the
+// bundle's own Info.plist (mutated by `script/update_plist`) is what macOS
+// reads at launch — the embedded plist here is a fallback for running the
+// bare binary outside a bundle. We still gate the URL scheme on
+// `debug_assertions` so that fallback path stays consistent with the dev/prod
+// scheme split done in `ChannelState::url_scheme()` (warpossdev for debug,
+// warposs for release). embed_plist::embed_info_plist_bytes! writes a
+// __TEXT,__info_plist section in the Mach-O, so we can't call it twice in
+// the same crate — only one of the two cfg arms is compiled in.
+#[cfg(all(
+    not(feature = "extern_plist"),
+    target_os = "macos",
+    not(debug_assertions)
+))]
 embed_plist::embed_info_plist_bytes!(r#"
     <?xml version="1.0" encoding="UTF-8"?>
     <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -102,6 +116,46 @@ embed_plist::embed_info_plist_bytes!(r#"
     <true/>
     <key>CFBundleURLTypes</key>
     <array><dict><key>CFBundleURLName</key><string>Custom App</string><key>CFBundleURLSchemes</key><array><string>warposs</string></array></dict></array>
+    <key>NSHumanReadableCopyright</key>
+    <string>© 2026, Denver Technologies, Inc</string>
+    </dict>
+    </plist>
+"#.as_bytes());
+
+#[cfg(all(
+    not(feature = "extern_plist"),
+    target_os = "macos",
+    debug_assertions
+))]
+embed_plist::embed_info_plist_bytes!(r#"
+    <?xml version="1.0" encoding="UTF-8"?>
+    <!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+    <plist version="1.0">
+    <dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>English</string>
+    <key>CFBundleDisplayName</key>
+    <string>WarpOssDev</string>
+    <key>CFBundleExecutable</key>
+    <string>warp-oss</string>
+    <key>CFBundleIdentifier</key>
+    <string>dev.warp.WarpOssDev</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>WarpOssDev</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>0.1.0</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.developer-tools</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>UIDesignRequiresCompatibility</key>
+    <true/>
+    <key>CFBundleURLTypes</key>
+    <array><dict><key>CFBundleURLName</key><string>Custom App</string><key>CFBundleURLSchemes</key><array><string>warpossdev</string></array></dict></array>
     <key>NSHumanReadableCopyright</key>
     <string>© 2026, Denver Technologies, Inc</string>
     </dict>

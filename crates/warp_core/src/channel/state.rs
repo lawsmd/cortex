@@ -385,7 +385,21 @@ impl ChannelState {
             // Dummy value--integration tests shouldn't support URL schemes.
             Channel::Integration => "warpintegration",
             Channel::Local => "warplocal",
-            Channel::Oss => "warposs",
+            // Debug Cortex builds claim a distinct scheme so they don't steal
+            // the prod build's `warposs://` routing on the host OS (macOS
+            // Launch Services, Windows HKCU\Software\Classes). Prod still
+            // owns `warposs://`; dev gets a parallel `warpossdev://` that
+            // nothing has to handle by default — the "Take me to Warp"
+            // deep-link from a dev login will simply no-op, which is
+            // acceptable because contributors already use the copy-URL
+            // fallback. See plan: Cortex first-install UX cleanup, issue 2.
+            Channel::Oss => {
+                if cfg!(debug_assertions) {
+                    "warpossdev"
+                } else {
+                    "warposs"
+                }
+            }
         }
     }
 }

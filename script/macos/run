@@ -26,7 +26,14 @@ if [ "$WARP_CHANNEL" = "local" ]; then
     WARP_SCHEME_NAME="warplocal"
 else
     WARP_APP_PATH="target/debug/bundle/osx/Cortex.app"
-    WARP_SCHEME_NAME="warposs"
+    # Default to the dev scheme; promoted to `warposs` below when --release
+    # is parsed. The split exists so dev Cortex builds (this script's
+    # debug-mode path) don't claim the same `warposs://` URL scheme as the
+    # daily-driver prod bundle on macOS Launch Services — otherwise whichever
+    # variant was bundled last wins routing for "Take me to Warp" deep-links.
+    # Must stay in sync with `ChannelState::url_scheme()` in
+    # crates/warp_core/src/channel/state.rs.
+    WARP_SCHEME_NAME="warpossdev"
 fi
 DONT_OPEN=false
 # Launches the binary with "open", meaning the Warp process is
@@ -63,6 +70,10 @@ while (( "$#" )); do
           WARP_APP_PATH="target/release/bundle/osx/WarpLocal.app"
       else
           WARP_APP_PATH="target/release/bundle/osx/Cortex.app"
+          # Release Cortex owns `warposs://` — the dev default above gets
+          # promoted here so prod's "Take me to Warp" deep-link routes back
+          # to the daily-driver bundle.
+          WARP_SCHEME_NAME="warposs"
       fi
       PARAMS="$PARAMS $1"
       shift

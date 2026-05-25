@@ -1,12 +1,22 @@
 # Cortex shortcut installer (Windows). Creates two .lnk files on the Desktop
-# and in the Start Menu, both with the cmd-wrapper target pattern so they
-# can be pinned to the taskbar (raw .bat targets aren't pinnable; cmd.exe
-# is, and `cmd /c <script>` survives the pin).
+# and in the Start Menu:
 #
-#   Cortex.lnk       — daily-driver prod, custom Cortex.ico
-#   Cortex Dev.lnk   — live-rebuild dev loop, Cortex-Dev.ico (with "DEV"
-#                       overlay text in pink #F000D0 with dark purple
-#                       #200040 outline, sampled from the master icon)
+#   Cortex.lnk       — daily-driver prod. Target is Cortex.exe directly
+#                       (NOT a cmd wrapper), so launching it never opens
+#                       a Windows console window. Custom Cortex.ico.
+#   Cortex Dev.lnk   — live-rebuild dev loop. Target is `cmd /c
+#                       launch-cortex-dev.bat` because dev intentionally
+#                       wants the console for tee'd cargo output.
+#                       Cortex-Dev.ico (with "DEV" overlay text in pink
+#                       #F000D0 with dark purple #200040 outline, sampled
+#                       from the master icon).
+#
+# Prod and dev targets are deliberately asymmetric: prod must never spawn a
+# console (end-user UX), dev must keep one (build output visibility). Don't
+# "fix" this back to a uniform cmd-wrapper pattern.
+#
+# Both .lnks are taskbar-pinnable: prod because Cortex.exe is a regular EXE,
+# dev because cmd.exe is pinnable and `cmd /c <script>` survives the pin.
 #
 # Idempotent — re-running just refreshes the targets and icons. Run once
 # after install-cortex-prod.cmd completes (so prod EXE exists), or run
@@ -21,7 +31,7 @@ $RepoRoot = Split-Path -Parent $PSScriptRoot
 $InstallDir = Join-Path $env:LOCALAPPDATA 'Cortex'
 $ProdIco = Join-Path $InstallDir 'Cortex.ico'
 $DevIco = Join-Path $InstallDir 'Cortex-Dev.ico'
-$ProdScript = Join-Path $RepoRoot 'scripts\launch-cortex.cmd'
+$ProdExe = Join-Path $InstallDir 'Cortex.exe'
 $DevScript = Join-Path $RepoRoot 'scripts\launch-cortex-dev.bat'
 
 # --- Generate icons if missing -------------------------------------------
@@ -36,8 +46,8 @@ if (-not (Test-Path $ProdIco) -or -not (Test-Path $DevIco)) {
 }
 
 # --- Validate prerequisites ----------------------------------------------
-if (-not (Test-Path $ProdScript)) {
-    Write-Error "Missing $ProdScript - did you intend to run install-cortex-prod.cmd first?"
+if (-not (Test-Path $ProdExe)) {
+    Write-Error "Missing $ProdExe - run install-cortex-prod.cmd first."
     exit 1
 }
 if (-not (Test-Path $DevScript)) {
@@ -173,9 +183,6 @@ function New-Shortcut {
     $sc.IconLocation = $IconLocation
     $sc.Description = $Description
     $sc.WorkingDirectory = $WorkingDirectory
-    # Window style 7 = "minimized" so the cmd wrapper window doesn't grab focus
-    # for prod (which detaches the EXE immediately via `start ""` and exits).
-    # Dev keeps the default 1 (normal) so the build output is visible.
     $sc.WindowStyle = 1
     $sc.Save()
 }
@@ -186,7 +193,6 @@ $StartMenu = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'
 
 $cmdExe = "$env:WINDIR\System32\cmd.exe"
 
-$prodArgs = "/c `"$ProdScript`""
 $devArgs = "/c `"$DevScript`""
 
 $prodDesc = 'Cortex Terminal (daily driver)'
@@ -198,14 +204,16 @@ foreach ($Dir in @($Desktop, $StartMenu)) {
     $prodLnk = Join-Path $Dir 'Cortex.lnk'
     $devLnk = Join-Path $Dir 'Cortex Dev.lnk'
 
+    # Prod: target Cortex.exe directly. No cmd wrapper => no console window.
     New-Shortcut `
         -Path $prodLnk `
-        -Target $cmdExe `
-        -Arguments $prodArgs `
+        -Target $ProdExe `
+        -Arguments '' `
         -IconLocation "$ProdIco,0" `
         -Description $prodDesc `
         -WorkingDirectory $env:USERPROFILE
 
+    # Dev: keep the cmd wrapper. Dev wants the console for tee'd build output.
     New-Shortcut `
         -Path $devLnk `
         -Target $cmdExe `
@@ -224,5 +232,5 @@ Write-Host "  1. Right-click 'Cortex' on Desktop -> 'Show more options' -> 'Pin 
 Write-Host "  2. Same for 'Cortex Dev'"
 Write-Host ""
 Write-Host "Targets:"
-Write-Host "  Cortex.lnk      -> cmd /c $ProdScript     (icon: Cortex.ico,     AUMID: $ProdAumid)"
+Write-Host "  Cortex.lnk      -> $ProdExe              (icon: Cortex.ico,     AUMID: $ProdAumid)"
 Write-Host "  Cortex Dev.lnk  -> cmd /c $DevScript      (icon: Cortex-Dev.ico, AUMID: $DevAumid)"

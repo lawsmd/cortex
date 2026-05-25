@@ -6,8 +6,9 @@ REM independent of target/, so Cloud agents and dev rebuilds never lock the
 REM running prod EXE. Run this whenever you want prod to catch up to main.
 REM
 REM Pair with:
-REM   scripts\launch-cortex.cmd       - daily-driver launcher (delegates here on R-rebuild)
-REM   scripts\launch-cortex-dev.bat   - live-rebuild dev loop (sibling lane)
+REM   scripts\launch-cortex.cmd          - thin EXE launcher
+REM   scripts\check-cortex-staleness.cmd - dev tool: prod vs HEAD comparison
+REM   scripts\launch-cortex-dev.bat      - live-rebuild dev loop (sibling lane)
 REM
 REM This script and launch-cortex-dev.bat are intentionally near-mirror
 REM images of each other in section structure (header, identity, log
@@ -105,7 +106,7 @@ REM     Route git output through a temp file + `set /p` instead of
 REM     `for /f ('git ...')`. The `for /f` capture path empirically
 REM     injects a leading 0x0C (form feed) byte into the captured value
 REM     on this machine's Git-for-Windows install -- the same bug the
-REM     launch-cortex.cmd staleness check works around. With the bug,
+REM     check-cortex-staleness.cmd script works around. With the bug,
 REM     the build-stamp commit= line ends up `commit=^L<sha>`, which
 REM     then makes the launcher's `git rev-list --count BUILD..HEAD`
 REM     fail silently (BUILD is invalid) and the staleness prompt fires
@@ -257,20 +258,89 @@ if errorlevel 1 (
     exit /b 1
 )
 
-REM --- Write build-stamp so launch-cortex.cmd can detect when prod is
-REM     stale relative to the current working tree. Format: simple key=val
-REM     lines (commit/branch/dirty/built) so the launcher can parse with
-REM     `findstr "^commit=" | for /f "tokens=2 delims==" ...`. If git is
-REM     unavailable for any reason we just skip the stamp - the launcher
-REM     handles a missing stamp by launching unconditionally.
+REM --- Verify the installed Cortex.exe is GUI-subsystem (no console).
+REM     The conditional at app\src\bin\oss.rs:15-20 should produce a
+REM     windows-subsystem EXE for any release build, but if it silently
+REM     mis-fires (unusual feature combo, stale incremental artifact,
+REM     etc.) the resulting EXE is console-subsystem and the .lnk shortcut
+REM     spawns a visible terminal window on every launch - the exact UX
+REM     bug we're trying to prevent for end users.
+REM
+REM     dumpbin /headers ships with Visual Studio Build Tools. When it's
+REM     not on PATH (some dev machines don't have VS tooling installed)
+REM     we soft-warn rather than fail.
+REM
+REM     We use goto rather than a nested if-block here to avoid cmd's
+REM     paren-matching grief with `findstr /C:"subsystem ("` patterns.
+where dumpbin >nul 2>&1
+if errorlevel 1 (
+    echo.
+    echo Skipping subsystem verification: dumpbin not on PATH.
+    echo   ^(Install Visual Studio Build Tools to enable this check.^)
+    goto :subsystem_check_done
+)
+dumpbin /headers "%INSTALL_PATH%" | findstr /C:"Windows GUI" >nul
+if errorlevel 1 (
+    echo.
+    echo Cortex.exe was built as console-subsystem, not GUI-subsystem.
+    echo Launching the prod shortcut would open a visible console window.
+    echo This usually means app\src\bin\oss.rs:15-20's conditional failed
+    echo to set windows_subsystem = "windows" for the release build.
+    echo Try a clean rebuild:
+    echo     cargo clean -p warp ^&^& cargo clean -p warp-oss
+    echo     scripts\install-cortex-prod.cmd
+    if not defined CORTEX_NONINTERACTIVE pause
+    exit /b 1
+)
+echo Subsystem check: GUI ^(no console window will appear on launch^).
+:subsystem_check_done
+
+REM --- Register the `warposs://` URL scheme to point at the freshly
+REM     installed prod Cortex.exe.
+REM
+REM     Cortex.exe also registers this scheme itself on every startup via
+REM     `register_uri_handler` in app/src/app_services/windows/registry.rs,
+REM     but doing it here at install time means the auth-flow "Take me to
+REM     Warp" deep-link works even before the user's first launch -- and
+REM     it overrides any stale registration left behind by a previous dev
+REM     build that still claimed `warposs` before the dev/prod scheme split
+REM     landed (see ChannelState::url_scheme in
+REM     crates/warp_core/src/channel/state.rs: prod=warposs, dev=warpossdev).
+REM
+REM     The key layout below matches what the Rust startup registration
+REM     writes:
+REM       HKCU\Software\Classes\warposs
+REM         (Default)       = "WarpOss"      (display name, channel app name)
+REM         URL Protocol    = ""             (marker telling shell this is a URL handler)
+REM       HKCU\Software\Classes\warposs\shell\open\command
+REM         (Default)       = "<exe>" "%1"
+REM
+REM     `%%1` is the cmd-escaped form of the `%1` placeholder Windows
+REM     substitutes with the full URL when invoking the handler. The
+REM     surrounding quotes mean URLs with spaces survive the round-trip.
+REM     Errors are swallowed (`>nul 2>&1`) because reg.exe is unreliable
+REM     about exit codes across Windows builds and a failed registry write
+REM     should not abort the install -- the next launch's Rust-side
+REM     registration will retry.
+set REG_KEY=HKCU\Software\Classes\warposs
+reg add "%REG_KEY%" /ve /d "WarpOss" /f >nul 2>&1
+reg add "%REG_KEY%" /v "URL Protocol" /d "" /f >nul 2>&1
+reg add "%REG_KEY%\shell\open\command" /ve /d "\"%INSTALL_PATH%\" \"%%1\"" /f >nul 2>&1
+echo Registered `warposs://` URL scheme -^> %INSTALL_PATH%
+
+REM --- Write build-stamp so check-cortex-staleness.cmd can detect when
+REM     prod is stale relative to the current working tree. Format: simple
+REM     key=val lines (commit/branch/dirty/built) so the staleness script
+REM     can parse with `findstr "^commit=" | for /f "tokens=2 delims==" ...`.
+REM     If git is unavailable for any reason we just skip the stamp - the
+REM     staleness script handles a missing stamp gracefully.
 REM
 REM     Same temp-file + set /p pattern as the GIT_REV/BRANCH header
-REM     gathering above (and as launch-cortex.cmd's staleness check)
-REM     to avoid the 0x0C-byte injection that `for /f ('git ...')` and
+REM     gathering above (and as check-cortex-staleness.cmd) to avoid the
+REM     0x0C-byte injection that `for /f ('git ...')` and
 REM     `for /f ('powershell ...')` exhibit on this machine. Without
 REM     this fix, the stamp file ends up with form-feed bytes on every
-REM     value line, which makes the staleness check misfire on every
-REM     launch.
+REM     value line, which makes the staleness check misfire on every run.
 set BUILD_COMMIT=
 set BUILD_BRANCH=
 set BUILD_TIME=
@@ -318,7 +388,7 @@ echo Idempotent - re-run anytime to refresh shortcut targets/icons.
 echo.
 echo Finished: %date% %time%
 echo === Cortex prod build exited code=%CARGO_EXIT% at %date% %time% === >> "%LOG_PATH%"
-REM CORTEX_NONINTERACTIVE=1 from launch-cortex.cmd's [R]ebuild path skips the
-REM trailing pause so the launcher can immediately start the new EXE.
+REM CORTEX_NONINTERACTIVE=1 lets callers (CI, scripts, etc.) skip the
+REM trailing pause and chain immediately to the next step.
 if not defined CORTEX_NONINTERACTIVE pause
 endlocal
