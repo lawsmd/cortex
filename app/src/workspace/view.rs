@@ -19413,15 +19413,20 @@ impl Workspace {
                 .into_iter()
                 .filter_map(|item| self.render_header_toolbar_button(&item, appearance, ctx))
                 .collect::<Vec<_>>();
-            let left_toolbar_button_count = left_toolbar_buttons.len();
-            for (index, button) in left_toolbar_buttons.into_iter().enumerate() {
-                let is_last_left_toolbar_button = index + 1 == left_toolbar_button_count;
-                if !vertical_tabs_active && is_last_left_toolbar_button {
-                    tab_bar.add_child(Container::new(button).with_margin_right(8.).finish());
-                } else {
-                    tab_bar.add_child(button);
-                }
+            for button in left_toolbar_buttons {
+                tab_bar.add_child(button);
             }
+
+            // CORTEX-BEGIN: theme-picker-button
+            let theme_picker = self.render_theme_picker_button(appearance).finish();
+            if !vertical_tabs_active {
+                tab_bar.add_child(
+                    Container::new(theme_picker).with_margin_right(8.).finish(),
+                );
+            } else {
+                tab_bar.add_child(theme_picker);
+            }
+            // CORTEX-END: theme-picker-button
         }
 
         if vertical_tabs_active {
@@ -20511,6 +20516,21 @@ impl Workspace {
         .build()
         .on_click(move |ctx, _, _| ctx.dispatch_typed_action(WorkspaceAction::ShowCortexSettings))
     }
+
+    // CORTEX-BEGIN: theme-picker-button
+    fn render_theme_picker_button(&self, appearance: &Appearance) -> Hoverable {
+        self.render_tab_bar_icon_button(
+            appearance,
+            icons::Icon::PaintBrush,
+            &self.mouse_states.theme_picker_icon,
+            WorkspaceAction::ShowThemeChooserForActiveTheme,
+            "Theme Picker".to_string(),
+            None,
+            false,
+            false,
+        )
+    }
+    // CORTEX-END: theme-picker-button
 
     fn render_tab_overflow_menu(
         &self,

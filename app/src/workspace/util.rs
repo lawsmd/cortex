@@ -43,6 +43,8 @@ pub(super) struct WorkspaceMouseStates {
     pub(super) tools_panel_icon: MouseStateHandle,
     /// Cortex fork: brain button at the top-left that opens Cortex Settings.
     pub(super) cortex_settings_icon: MouseStateHandle,
+    /// Cortex fork: theme picker button in the header toolbar.
+    pub(super) theme_picker_icon: MouseStateHandle,
     pub(super) title_bar_search_bar: MouseStateHandle,
     #[cfg(target_family = "wasm")]
     pub(super) warp_logo: MouseStateHandle,
