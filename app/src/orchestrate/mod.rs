@@ -21,6 +21,7 @@ use crate::pane_group::pane::{build_local_claude_child_command, ClaudePermission
 use crate::pane_group::Direction;
 use crate::root_view::active_workspace;
 use crate::settings::CortexSettings;
+use crate::workspace::WorkspaceRegistry;
 
 mod cli;
 mod service;
@@ -59,9 +60,22 @@ pub struct OrchestrateBridge {
 impl OrchestrateBridge {
     pub fn new(ctx: &mut ModelContext<Self>) -> Self {
         let (tx, rx) = async_channel::unbounded();
-        let build_result = ServerBuilder::default()
-            .with_service(OrchestrateServiceImpl::new(tx))
-            .build_and_run(ctx.background_executor());
+        let builder = ServerBuilder::default()
+            .with_service(OrchestrateServiceImpl::new(tx));
+
+        // On Windows, the default `ConnectionAddress::new()` generates a
+        // `/tmp/warp-ipc-{random}.sock` path.  MSYS2 bash (Cortex's default
+        // shell on Windows) mangles env-var values that start with `/tmp/`
+        // into `C:/Users/.../AppData/Local/Temp/...`, so the client sees a
+        // different string than the server bound — pipe-name mismatch.
+        // Use a bare name with no Unix-path prefix to dodge the mangling.
+        #[cfg(windows)]
+        let builder = builder.with_fixed_address(format!(
+            "cortex-orchestrate-{}",
+            rand::random::<i64>().unsigned_abs()
+        ));
+
+        let build_result = builder.build_and_run(ctx.background_executor());
 
         let server = match build_result {
             Ok((server, connection_address)) => {
@@ -135,11 +149,21 @@ fn handle_orchestrate_request(
         ClaudePermissionMode::DangerouslySkip
     };
 
-    let Some(workspace) = active_workspace(ctx) else {
+    // Prefer the focused window; fall back to any registered workspace so
+    // orchestrate works even when this Cortex instance isn't OS-focused
+    // (e.g., user is working in a separate prod Cortex alongside a dev build).
+    let workspace = active_workspace(ctx).or_else(|| {
+        WorkspaceRegistry::as_ref(ctx)
+            .all_workspaces(ctx)
+            .into_iter()
+            .next()
+            .map(|(_, ws)| ws)
+    });
+    let Some(workspace) = workspace else {
         return OrchestrateResponse {
             pane_ids: Vec::new(),
             error: Some(
-                "No active Cortex window/workspace found; cannot split panes.".to_string(),
+                "No Cortex window/workspace found; cannot split panes.".to_string(),
             ),
         };
     };
