@@ -1,9 +1,14 @@
-//! Seeds Cortex-shipped skills into the user's home skills directory at app start.
+//! Seeds Cortex-shipped skills into the user's home skills directories at app start.
 //!
-//! Skills are embedded into the binary via `include_str!` and written to the
-//! agent-CLI-agnostic skills root (`~/.agents/skills/cortex-<name>/SKILL.md`)
-//! on launch. A `.cortex-shipped-hash` sidecar records what we last shipped,
-//! so we can upgrade in place without clobbering user edits.
+//! Skills are embedded into the binary via `include_str!` and written to each
+//! target provider's skills root on launch. A `.cortex-shipped-hash` sidecar
+//! records what we last shipped, so we can upgrade in place without clobbering
+//! user edits.
+//!
+//! Each skill is seeded once per target provider. For example, the orchestrate
+//! skill is written to both `~/.agents/skills/cortex-orchestrate/` (Cortex's
+//! own skill palette) and `~/.claude/skills/cortex-orchestrate/` (Claude Code's
+//! `/slash` command autocomplete).
 //!
 //! Source of truth for content lives at `cortex-skills/` in the repo root.
 
@@ -25,17 +30,24 @@ struct CortexSkill {
     /// The `cortex-` prefix keeps Cortex-shipped skills visually distinct from
     /// any upstream `warpdotdev/common-skills` sync into the same root.
     dest_subdir: &'static str,
-    /// Provider whose home skills directory the skill is written into. For
-    /// v1 every shipped skill lives under `SkillProvider::Agents`
-    /// (`~/.agents/skills`), the agent-CLI-agnostic root.
+    /// Provider whose home skills directory the skill is written into.
     provider: SkillProvider,
 }
 
-const SHIPPED_SKILLS: &[CortexSkill] = &[CortexSkill {
-    content: include_str!("../../cortex-skills/orchestrate/SKILL.md"),
-    dest_subdir: "cortex-orchestrate",
-    provider: SkillProvider::Agents,
-}];
+const ORCHESTRATE_SKILL: &str = include_str!("../../cortex-skills/orchestrate/SKILL.md");
+
+const SHIPPED_SKILLS: &[CortexSkill] = &[
+    CortexSkill {
+        content: ORCHESTRATE_SKILL,
+        dest_subdir: "cortex-orchestrate",
+        provider: SkillProvider::Agents,
+    },
+    CortexSkill {
+        content: ORCHESTRATE_SKILL,
+        dest_subdir: "cortex-orchestrate",
+        provider: SkillProvider::Claude,
+    },
+];
 
 /// Write Cortex-shipped skills to the user's home skills directory if they
 /// are missing, or upgrade them in place if the shipped content has changed
