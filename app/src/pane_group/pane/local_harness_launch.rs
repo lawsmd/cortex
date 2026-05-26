@@ -50,14 +50,35 @@ pub(super) fn validate_local_harness_shell(shell_type: Option<ShellType>) -> Res
     }
 }
 
-pub(super) fn build_local_claude_child_command(prompt: &str) -> String {
-    let session_id = Uuid::new_v4();
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum ClaudePermissionMode {
+    DangerouslySkip,
+    Plan,
+}
+
+pub(crate) fn build_local_claude_child_command(
+    prompt: &str,
+    mode: ClaudePermissionMode,
+) -> String {
     let quoted_prompt = shell_quote(prompt);
-    // Local child harness panes are launched off-screen. We intentionally skip
-    // Claude's own permission prompts here so the child can start unattended
-    // instead of hanging on an approval UI the user cannot see in that hidden
-    // pane.
-    format!("claude --session-id {session_id} --dangerously-skip-permissions {quoted_prompt}")
+    match mode {
+        ClaudePermissionMode::DangerouslySkip => {
+            let session_id = Uuid::new_v4();
+            // Local child harness panes are launched off-screen. We intentionally skip
+            // Claude's own permission prompts here so the child can start unattended
+            // instead of hanging on an approval UI the user cannot see in that hidden
+            // pane.
+            format!(
+                "claude --session-id {session_id} --dangerously-skip-permissions {quoted_prompt}"
+            )
+        }
+        ClaudePermissionMode::Plan => {
+            // Drop --session-id: pairing it with --permission-mode plan is unverified
+            // against the Claude CLI, and orchestrated sub-agents are user-visible
+            // panes that don't need session resumption.
+            format!("claude --permission-mode plan {quoted_prompt}")
+        }
+    }
 }
 
 pub(super) fn build_local_opencode_child_command(prompt: &str) -> String {
@@ -155,7 +176,7 @@ pub(super) async fn prepare_local_harness_child_launch(
                 }
             }
 
-            build_local_claude_child_command(&prompt)
+            build_local_claude_child_command(&prompt, ClaudePermissionMode::DangerouslySkip)
         }
         Harness::Codex => {
             let HarnessKind::ThirdParty(third_party_harness) =

@@ -91,6 +91,12 @@ pub enum CortexSettingsAction {
     /// so the orchestration controls (`local_child_harnesses.rs`,
     /// `orchestration_controls.rs`) react without a restart.
     ToggleAllowLocalClaudeCodexChildHarnesses,
+    /// Flip the "Orchestrated sub-agents start in Plan Mode" toggle on the AI
+    /// page. Controls whether Cortex's `/orchestrate` skill spawns each child
+    /// Claude Code sub-agent with `--permission-mode plan` (on) or
+    /// `--dangerously-skip-permissions` (off). Read by the orchestrate IPC
+    /// bridge at request time.
+    ToggleOrchestratedSubagentsStartInPlanMode,
     /// Flip the "Wrap Lines in 'Raw' View" toggle on the Editor page. Persisted to
     /// [`crate::settings::CortexSettings::editor_wrap_long_lines`]; read at
     /// editor model construction (reopen the file to apply a change).

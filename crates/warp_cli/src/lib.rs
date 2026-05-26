@@ -29,6 +29,7 @@ pub mod integration;
 pub mod json_filter;
 pub mod mcp;
 pub mod model;
+pub mod orchestrate;
 pub mod provider;
 pub mod schedule;
 pub mod secret;
@@ -555,6 +556,12 @@ pub enum CliCommand {
     /// Manage API keys.
     #[command(subcommand)]
     ApiKey(crate::api_key::ApiKeyCommand),
+
+    /// Cortex-internal: fan an orchestrator's plan out into N sibling
+    /// sub-agent panes via the in-process `OrchestrateService` IPC.
+    /// Invoked by the `cortex-orchestrate` skill, not by end users.
+    #[command(hide = true)]
+    Orchestrate(crate::orchestrate::OrchestrateArgs),
 }
 
 /// A subcommand of the main Warp application. This includes all [`WorkerCommand`]s as well as app-specific debugging tools.

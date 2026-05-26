@@ -204,6 +204,12 @@ fn dispatch_command(
             }
             api_key::run(ctx, global_options, api_key_cmd)
         }
+        // Cortex-internal IPC bridge — short-circuited in `app::run`
+        // before `agent_sdk::run` is invoked. If a future refactor
+        // routes it here, fail loudly rather than silently no-op.
+        CliCommand::Orchestrate(_) => Err(anyhow::anyhow!(
+            "`orchestrate` is a Cortex-internal subcommand and must be dispatched before agent_sdk::run"
+        )),
     }
 }
 
@@ -1408,6 +1414,10 @@ fn command_requires_auth(command: &CliCommand) -> bool {
         CliCommand::HarnessSupport(_) => true,
         CliCommand::Artifact(_) => true,
         CliCommand::ApiKey(_) => true,
+        // Cortex-internal IPC bridge. Short-circuited in `app::run`
+        // before this auth check; if anything ever reaches here, we
+        // don't want to gate it on Warp login.
+        CliCommand::Orchestrate(_) => false,
     }
 }
 
@@ -1637,6 +1647,11 @@ fn command_to_telemetry_event(command: &CliCommand) -> CliTelemetryEvent {
             ApiKeyCommand::Create(_) => CliTelemetryEvent::ApiKeyCreate,
             ApiKeyCommand::Expire(_) => CliTelemetryEvent::ApiKeyExpire,
         },
+        // Cortex-internal IPC bridge — short-circuited in `app::run`
+        // before `agent_sdk::run` (and thus telemetry mapping) runs.
+        // Reuse `Whoami` (a no-op no-payload event) as a defensive
+        // fallback rather than emit a misleading server event.
+        CliCommand::Orchestrate(_) => CliTelemetryEvent::Whoami,
     }
 }
 

@@ -515,7 +515,7 @@ fn maybe_register_global_window_shortcuts(
 }
 
 /// Find the root [`Workspace`] view for the active window.
-fn active_workspace(ctx: &mut AppContext) -> Option<ViewHandle<Workspace>> {
+pub(crate) fn active_workspace(ctx: &mut AppContext) -> Option<ViewHandle<Workspace>> {
     let window_id = ctx.windows().active_window()?;
     WorkspaceRegistry::as_ref(ctx).get(window_id, ctx)
 }

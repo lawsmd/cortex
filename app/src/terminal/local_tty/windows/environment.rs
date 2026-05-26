@@ -1,6 +1,7 @@
 use std::os::windows::ffi::{OsStrExt, OsStringExt};
 use std::{collections::BTreeMap, ffi::OsString};
 
+use crate::orchestrate::{orchestrate_ipc_socket_path, CORTEX_IPC_SOCKET_ENV};
 use crate::terminal::cli_agent_sessions::event::current_protocol_version;
 use crate::terminal::local_tty::shell::{extra_path_entries, ssh_socket_dir};
 use itertools::Itertools;
@@ -141,6 +142,22 @@ pub(super) fn get_shell_environment_variables(options: &PtyOptions) -> Vec<u16> 
             value: path_append.into(),
         },
     );
+
+    // Expose the Cortex `/orchestrate` IPC socket path so that `claude`
+    // (or any other CLI agent) running inside this pane can dispatch a
+    // request via the `cortex orchestrate` subcommand. Intentionally NOT
+    // added to `wsl_env_allowlist`: the host-side unix-socket path is not
+    // reachable from inside a WSL distro, so forwarding it would just
+    // mislead a child trying to connect.
+    if let Some(socket_path) = orchestrate_ipc_socket_path() {
+        env.insert(
+            map_key(CORTEX_IPC_SOCKET_ENV.into()),
+            EnvEntry {
+                preferred_key: CORTEX_IPC_SOCKET_ENV.into(),
+                value: socket_path.into(),
+            },
+        );
+    }
 
     match &options.shell_starter {
         ShellStarter::MSYS2(_) => {

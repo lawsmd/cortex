@@ -2,6 +2,7 @@
 // Apache license; see: crates/warp_terminal/src/model/LICENSE-ALACRITTY.
 
 //! TTY related functionality.
+use crate::orchestrate::{orchestrate_ipc_socket_path, CORTEX_IPC_SOCKET_ENV};
 use crate::terminal::bootstrap::raw_init_shell_script_for_shell;
 use crate::terminal::cli_agent_sessions::event::current_protocol_version;
 use crate::terminal::local_tty::docker_sandbox::{
@@ -363,6 +364,13 @@ fn build_host_shell_command(
     // shell bootstrap avoids that.
     if let Some(start_dir) = start_dir {
         builder.env("WARP_INITIAL_WORKING_DIR", start_dir);
+    }
+
+    // Expose the Cortex `/orchestrate` IPC socket so that `claude` (or any
+    // other CLI agent) running inside this pane can dispatch a request via
+    // the `cortex orchestrate` subcommand to spawn sibling sub-agent panes.
+    if let Some(socket_path) = orchestrate_ipc_socket_path() {
+        builder.env(CORTEX_IPC_SOCKET_ENV, socket_path);
     }
 
     // Apply any caller-provided environment overrides last, so they win.
@@ -818,6 +826,16 @@ fn build_docker_sandbox_command(
     // Intentionally do NOT set `WARP_INITIAL_WORKING_DIR` for sandboxes:
     // the container's init script cds into the sandbox home dir, not
     // the host's startup dir.
+
+    // Expose the Cortex `/orchestrate` IPC socket so that `claude` (or any
+    // other CLI agent) running inside this sandbox can dispatch a request
+    // via the `cortex orchestrate` subcommand. Note: the host unix socket
+    // path is only reachable from inside the sandbox if `sbx` bind-mounts
+    // it; today it will most likely be unreachable, but exposing the env
+    // var costs nothing and keeps host/sandbox behaviour symmetric.
+    if let Some(socket_path) = orchestrate_ipc_socket_path() {
+        builder.env(CORTEX_IPC_SOCKET_ENV, socket_path);
+    }
 
     // Apply any caller-provided environment overrides last, so they win.
     for (key, value) in env_vars {

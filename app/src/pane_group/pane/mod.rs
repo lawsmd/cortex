@@ -70,6 +70,11 @@ pub use self::view::PaneHeaderCustomAction;
 pub use self::view::PaneView;
 pub use self::view::PaneViewEvent;
 
+#[cfg(not(target_family = "wasm"))]
+pub(crate) use self::local_harness_launch::{
+    build_local_claude_child_command, ClaudePermissionMode,
+};
+
 use welcome_view::WelcomeView;
 
 use super::{ActivationReason, LeafContents, PaneGroup, PaneGroupAction};

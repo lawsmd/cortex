@@ -6,7 +6,7 @@ use warp_cli::agent::Harness;
 use super::{
     build_local_claude_child_command, build_local_codex_child_command,
     build_local_opencode_child_command, local_child_task_config, normalize_local_child_harness,
-    prepare_local_harness_child_launch, validate_local_harness_shell,
+    prepare_local_harness_child_launch, validate_local_harness_shell, ClaudePermissionMode,
 };
 use crate::ai::ambient_agents::task::{normalize_orchestrator_agent_name, HarnessConfig};
 use crate::server::server_api::ai::MockAIClient;
@@ -124,10 +124,18 @@ fn validate_local_harness_shell_rejects_unsupported_shells() {
 
 #[test]
 fn build_local_claude_child_command_quotes_the_prompt() {
-    let command = build_local_claude_child_command("hello world");
+    let command =
+        build_local_claude_child_command("hello world", ClaudePermissionMode::DangerouslySkip);
 
     assert!(command.starts_with("claude --session-id "));
     assert!(command.ends_with(" --dangerously-skip-permissions 'hello world'"));
+}
+
+#[test]
+fn build_local_claude_child_command_plan_mode_drops_session_id() {
+    let command = build_local_claude_child_command("hello world", ClaudePermissionMode::Plan);
+
+    assert_eq!(command, "claude --permission-mode plan 'hello world'");
 }
 
 #[test]

@@ -24,6 +24,8 @@ mod command_palette;
 mod completer;
 #[allow(dead_code)]
 mod context_chips;
+#[cfg(not(target_family = "wasm"))]
+mod cortex_skills_seeding;
 #[cfg(enable_crash_recovery)]
 mod crash_recovery;
 #[cfg(feature = "crash_reporting")]
@@ -52,6 +54,8 @@ mod modal;
 mod network;
 mod notebooks;
 mod notification;
+#[cfg(not(target_family = "wasm"))]
+mod orchestrate;
 mod palette;
 mod persistence;
 mod platform;
@@ -727,6 +731,16 @@ pub fn run() -> Result<()> {
                 return warp_cli::completions::generate_to_stdout(*shell);
             }
             warp_cli::Command::CommandLine(cmd) => {
+                // Cortex-internal `orchestrate` is a thin IPC client; it
+                // doesn't need the full headless-app boot done by
+                // `run_internal` (feature flags, AI client, etc.). Short-
+                // circuit it here so we just connect to the running
+                // `OrchestrateService` socket and exit.
+                #[cfg(not(target_family = "wasm"))]
+                if let warp_cli::CliCommand::Orchestrate(orchestrate_args) = cmd.as_ref() {
+                    return orchestrate::run_cli(orchestrate_args);
+                }
+
                 let (is_sandboxed, computer_use_override) = match cmd.as_ref() {
                     warp_cli::CliCommand::Agent(warp_cli::agent::AgentCommand::Run(run_args)) => (
                         run_args.sandboxed,
@@ -1380,6 +1394,8 @@ pub(crate) fn initialize_app(
 
     if let LaunchMode::App { .. } = launch_mode {
         autoupdate::check_and_report_update_errors(ctx);
+        #[cfg(not(target_family = "wasm"))]
+        cortex_skills_seeding::seed_cortex_skills();
     }
 
     ctx.set_fallback_font_source_provider(|url| ::asset_cache::url_source(url));
@@ -1442,6 +1458,12 @@ pub(crate) fn initialize_app(
     ctx.add_singleton_model(remote_server::codebase_index_model::RemoteCodebaseIndexModel::new);
     #[cfg(not(target_family = "wasm"))]
     remote_server::wire_auth_token_rotation(ctx);
+
+    // Boot the Cortex `/orchestrate` IPC bridge before any terminal is
+    // spawned so the env-var injector (Phase 4) sees a populated
+    // `CORTEX_IPC_SOCKET` path on every child terminal.
+    #[cfg(not(target_family = "wasm"))]
+    ctx.add_singleton_model(orchestrate::OrchestrateBridge::new);
 
     log::info!(
         "Starting warp with channel state {} and version {:?}",

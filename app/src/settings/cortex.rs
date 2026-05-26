@@ -292,6 +292,15 @@ define_settings_group!(CortexSettings, settings: [
         toml_path: "cortex.ai.allow_local_claude_codex_child_harnesses",
         description: "Whether /orchestrate's Local execution mode may spawn child agents using the Claude Code or Codex CLI harnesses instead of being limited to Oz. Upstream Warp keeps this gated behind FeatureFlag::LocalClaudeCodexChildHarnesses; Cortex hydrates that flag from this setting at startup and on each toggle, so checks at the existing call sites (local_child_harnesses.rs, orchestration_controls.rs) react without a restart. Default on — the whole point of the Cortex fork on this branch is to route /orchestrate children through your local Claude Code login.",
     },
+    orchestrated_subagents_start_in_plan_mode: OrchestratedSubagentsStartInPlanMode {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.ai.orchestrated_subagents_start_in_plan_mode",
+        description: "Whether Cortex's `/orchestrate` skill spawns each child Claude Code sub-agent in Plan Mode (`--permission-mode plan`). When off, sub-agents launch with `--dangerously-skip-permissions`. Default on so the user reviews each sub-agent's plan before execution.",
+    },
     editor_wrap_long_lines: EditorWrapLongLines {
         type: bool,
         default: false,

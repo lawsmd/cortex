@@ -350,6 +350,19 @@ impl CortexSettingsView {
         ctx.notify();
     }
 
+    fn toggle_orchestrated_subagents_start_in_plan_mode(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .orchestrated_subagents_start_in_plan_mode
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
     fn toggle_editor_wrap_long_lines(&mut self, ctx: &mut ViewContext<Self>) {
         use crate::settings::CortexSettings;
         use settings::ToggleableSetting;
@@ -654,6 +667,9 @@ impl warpui::TypedActionView for CortexSettingsView {
             CortexSettingsAction::ToggleTabTitleItalic => self.toggle_tab_title_italic(ctx),
             CortexSettingsAction::ToggleAllowLocalClaudeCodexChildHarnesses => {
                 self.toggle_allow_local_claude_codex_child_harnesses(ctx)
+            }
+            CortexSettingsAction::ToggleOrchestratedSubagentsStartInPlanMode => {
+                self.toggle_orchestrated_subagents_start_in_plan_mode(ctx)
             }
             CortexSettingsAction::ToggleEditorWrapLongLines => {
                 self.toggle_editor_wrap_long_lines(ctx)

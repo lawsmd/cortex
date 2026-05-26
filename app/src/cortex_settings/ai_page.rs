@@ -28,6 +28,7 @@ const CONTROL_RIGHT_PADDING: f32 = 5.0;
 #[derive(Default)]
 pub struct AiPageState {
     allow_local_claude_codex_child_harnesses_switch: SwitchStateHandle,
+    orchestrated_subagents_start_in_plan_mode_switch: SwitchStateHandle,
 }
 
 pub fn ai_page_search_terms() -> &'static [&'static str] {
@@ -43,6 +44,9 @@ pub fn ai_page_search_terms() -> &'static [&'static str] {
         "harness",
         "subagent",
         "sub-agent",
+        "plan mode",
+        "plan",
+        "permission",
     ]
 }
 
@@ -54,6 +58,9 @@ pub fn render_ai_page(
     Flex::column()
         .with_cross_axis_alignment(CrossAxisAlignment::Stretch)
         .with_child(render_allow_local_claude_codex_child_harnesses_row(
+            state, appearance, app,
+        ))
+        .with_child(render_orchestrated_subagents_start_in_plan_mode_row(
             state, appearance, app,
         ))
         .finish()
@@ -83,6 +90,55 @@ fn render_allow_local_claude_codex_child_harnesses_row(
         .on_click(move |ctx, _, _| {
             ctx.dispatch_typed_action(
                 CortexSettingsAction::ToggleAllowLocalClaudeCodexChildHarnesses,
+            );
+        })
+        .finish();
+
+    let header = Shrinkable::new(
+        1.0,
+        Container::new(Align::new(label).left().finish()).finish(),
+    )
+    .finish();
+
+    let control = Container::new(switch)
+        .with_padding_right(CONTROL_RIGHT_PADDING)
+        .finish();
+
+    let row = Flex::row()
+        .with_cross_axis_alignment(CrossAxisAlignment::Center)
+        .with_child(header)
+        .with_child(control)
+        .finish();
+
+    Container::new(row)
+        .with_padding(Padding::uniform(ROW_VERTICAL_PADDING))
+        .finish()
+}
+
+fn render_orchestrated_subagents_start_in_plan_mode_row(
+    state: &AiPageState,
+    appearance: &Appearance,
+    app: &AppContext,
+) -> Box<dyn Element> {
+    let ui_builder = appearance.ui_builder();
+    let current_value = *CortexSettings::as_ref(app).orchestrated_subagents_start_in_plan_mode;
+
+    let label = ui_builder
+        .span("Orchestrated sub-agents start in Plan Mode".to_string())
+        .build()
+        .finish();
+
+    let switch = ui_builder
+        .switch(
+            state
+                .orchestrated_subagents_start_in_plan_mode_switch
+                .clone(),
+        )
+        .check(current_value)
+        .build()
+        .on_click(move |ctx, _, _| {
+            ctx.dispatch_typed_action(
+                CortexSettingsAction::ToggleOrchestratedSubagentsStartInPlanMode,
             );
         })
         .finish();
