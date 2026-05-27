@@ -21537,7 +21537,17 @@ impl Workspace {
                     );
                 }
             } else {
+                // CORTEX-BEGIN: stacked-column-unit-collapse
+                let suppress_tools = stack_setting
+                    && !self.vertical_tabs_panel_open
+                    && left_items.contains(&HeaderToolbarItemKind::TabsPanel);
+                // CORTEX-END: stacked-column-unit-collapse
                 for item in left_items {
+                    if suppress_tools
+                        && matches!(item, HeaderToolbarItemKind::ToolsPanel)
+                    {
+                        continue;
+                    }
                     Self::add_panel_with_separator(
                         &mut panels_view,
                         &mut prev_panel_added,
