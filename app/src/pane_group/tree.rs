@@ -15,7 +15,7 @@ use warpui::{
         Rect, Shrinkable,
     },
     platform::Cursor,
-    EntityId, ViewContext,
+    EntityId, SingletonEntity, ViewContext,
 };
 
 use super::{ActivationReason, PaneGroup, PaneId};
@@ -1116,13 +1116,20 @@ impl PaneBranch {
         let mut stack = Stack::new().with_constrain_absolute_children();
         stack.add_child(parent.finish());
 
+        // Cortex: when the rounded pane-border setting is on, the per-pane
+        // rounded border replaces the inter-pane separator line. We still
+        // emit the divider element so the hoverable resize hit-target stays
+        // alive, but we suppress the visible fill.
+        let paint_divider =
+            !*crate::settings::CortexSettings::as_ref(app).rounded_pane_borders;
+
         // Add actual dividers as positioned children anchored to their placeholders
         // (the reason we have to do it this way is explained in the large comment above)
         for (divider, position_id) in divider_positions {
             let divider_element = if FeatureFlag::MinimalistUI.is_enabled() {
-                create_minimalist_divider(self.axis, divider, theme)
+                create_minimalist_divider(self.axis, divider, theme, paint_divider)
             } else {
-                create_divider(self.axis, divider, theme)
+                create_divider(self.axis, divider, theme, paint_divider)
             };
 
             stack.add_positioned_child(
@@ -1426,12 +1433,14 @@ fn create_divider(
     direction: SplitDirection,
     item: &Divider,
     theme: &WarpTheme,
+    paint_divider: bool,
 ) -> Box<dyn Element> {
-    let divider = ConstrainedBox::new(
+    let rect = if paint_divider {
+        Rect::new().with_background(theme.split_pane_border_color())
+    } else {
         Rect::new()
-            .with_background(theme.split_pane_border_color())
-            .finish(),
-    );
+    };
+    let divider = ConstrainedBox::new(rect.finish());
 
     let cursor_shape = match direction {
         SplitDirection::Horizontal => Cursor::ResizeLeftRight,
@@ -1462,12 +1471,14 @@ fn create_minimalist_divider(
     direction: SplitDirection,
     item: &Divider,
     theme: &WarpTheme,
+    paint_divider: bool,
 ) -> Box<dyn Element> {
-    let divider = ConstrainedBox::new(
+    let rect = if paint_divider {
+        Rect::new().with_background(theme.split_pane_border_color())
+    } else {
         Rect::new()
-            .with_background(theme.split_pane_border_color())
-            .finish(),
-    );
+    };
+    let divider = ConstrainedBox::new(rect.finish());
 
     let cursor_shape = match direction {
         SplitDirection::Horizontal => Cursor::ResizeLeftRight,

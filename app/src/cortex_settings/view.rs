@@ -137,7 +137,7 @@ impl CortexSettingsView {
             sidebar_states,
             working_panes_state: WorkingPanesPageState::default(),
             tabs_state: TabsPageState::new(ctx),
-            top_bar_state: TopBarPageState::default(),
+            top_bar_state: TopBarPageState::new(ctx),
             toolbar_state: ToolbarPageState::default(),
             editor_state: EditorPageState::default(),
             file_explorer_state: FileExplorerPageState::new(ctx),
@@ -179,6 +179,17 @@ impl CortexSettingsView {
         ctx.notify();
     }
 
+    fn toggle_rounded_pane_borders(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.rounded_pane_borders.toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
     fn toggle_start_with_blank_pane_on_launch(&mut self, ctx: &mut ViewContext<Self>) {
         use crate::settings::CortexSettings;
         use settings::ToggleableSetting;
@@ -213,6 +224,19 @@ impl CortexSettingsView {
         CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
             let _ = settings
                 .tabs_panel_matches_terminal_bg
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_tabs_panel_hide_search_button(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .tabs_panel_hide_search_button
                 .toggle_and_save_value(ctx);
         });
         ctx.notify();
@@ -403,17 +427,90 @@ impl CortexSettingsView {
         ctx.notify();
     }
 
-    fn set_top_bar_search_bar_style(
-        &mut self,
-        value: crate::settings::SearchBarStyle,
-        ctx: &mut ViewContext<Self>,
-    ) {
+    fn set_top_bar_search_bar_opacity(&mut self, value: u8, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::Setting;
+        use warpui::SingletonEntity;
+
+        let value = value.clamp(10, 100);
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.top_bar_search_bar_opacity.set_value(value, ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_top_bar_search_bar_compact(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .top_bar_search_bar_compact
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_top_bar_hide_tabs_panel_collapse_button(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .top_bar_hide_tabs_panel_collapse_button
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_top_bar_hide_agent_management_button(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .top_bar_hide_agent_management_button
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_top_bar_hide_notifications_button(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .top_bar_hide_notifications_button
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn set_top_bar_font_name(&mut self, value: String, ctx: &mut ViewContext<Self>) {
         use crate::settings::CortexSettings;
         use settings::Setting;
         use warpui::SingletonEntity;
 
         CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
-            let _ = settings.top_bar_search_bar_style.set_value(value, ctx);
+            let _ = settings.top_bar_font_name.set_value(value, ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_top_bar_generic_profile_icon(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .top_bar_generic_profile_icon
+                .toggle_and_save_value(ctx);
         });
         ctx.notify();
     }
@@ -693,6 +790,7 @@ impl warpui::TypedActionView for CortexSettingsView {
         match action {
             CortexSettingsAction::SelectSection(section) => self.select_section(*section, ctx),
             CortexSettingsAction::ToggleHidePaneSeparators => self.toggle_hide_pane_separators(ctx),
+            CortexSettingsAction::ToggleRoundedPaneBorders => self.toggle_rounded_pane_borders(ctx),
             CortexSettingsAction::ToggleStartWithBlankPaneOnLaunch => {
                 self.toggle_start_with_blank_pane_on_launch(ctx)
             }
@@ -701,6 +799,9 @@ impl warpui::TypedActionView for CortexSettingsView {
             }
             CortexSettingsAction::ToggleTabsPanelMatchesTerminalBg => {
                 self.toggle_tabs_panel_matches_terminal_bg(ctx)
+            }
+            CortexSettingsAction::ToggleTabsPanelHideSearchButton => {
+                self.toggle_tabs_panel_hide_search_button(ctx)
             }
             CortexSettingsAction::ToggleTabsHideIconBackdrop => {
                 self.toggle_tabs_hide_icon_backdrop(ctx)
@@ -738,8 +839,26 @@ impl warpui::TypedActionView for CortexSettingsView {
             CortexSettingsAction::ToggleTopBarHideDivider => {
                 self.toggle_top_bar_hide_divider(ctx)
             }
-            CortexSettingsAction::SetTopBarSearchBarStyle(value) => {
-                self.set_top_bar_search_bar_style(*value, ctx)
+            CortexSettingsAction::SetTopBarSearchBarOpacity(value) => {
+                self.set_top_bar_search_bar_opacity(*value, ctx)
+            }
+            CortexSettingsAction::ToggleTopBarSearchBarCompact => {
+                self.toggle_top_bar_search_bar_compact(ctx)
+            }
+            CortexSettingsAction::ToggleTopBarHideTabsPanelCollapseButton => {
+                self.toggle_top_bar_hide_tabs_panel_collapse_button(ctx)
+            }
+            CortexSettingsAction::ToggleTopBarHideAgentManagementButton => {
+                self.toggle_top_bar_hide_agent_management_button(ctx)
+            }
+            CortexSettingsAction::ToggleTopBarHideNotificationsButton => {
+                self.toggle_top_bar_hide_notifications_button(ctx)
+            }
+            CortexSettingsAction::SetTopBarFontName(value) => {
+                self.set_top_bar_font_name(value.clone(), ctx)
+            }
+            CortexSettingsAction::ToggleTopBarGenericProfileIcon => {
+                self.toggle_top_bar_generic_profile_icon(ctx)
             }
             CortexSettingsAction::ToggleToolbarShowFileExplorer => {
                 self.toggle_toolbar_show_file_explorer(ctx)

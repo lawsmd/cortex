@@ -46,7 +46,6 @@ use crate::tab::{
 use crate::terminal::session_settings::SessionSettings;
 use crate::terminal::TerminalView;
 use crate::themes::theme::Fill as ThemeFill;
-use crate::ui_components::buttons::combo_inner_button;
 use crate::ui_components::icons::Icon as UiIcon;
 use crate::workspace::action::WorkspaceAction;
 use crate::workspace::cross_window_tab_drag::CrossWindowTabDrag;
@@ -75,10 +74,10 @@ use warp_core::ui::Icon as WarpIcon;
 use warpui::elements::DispatchEventResult;
 use warpui::elements::{
     resizable_state_handle, Border, ChildAnchor, Clipped, ClippedScrollStateHandle,
-    ClippedScrollable, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, DragAxis,
-    DragBarSide, Draggable, DropShadow, DropTarget, Element, Empty, EventHandler, Expanded,
-    Fill as ElementFill, Flex, Hoverable, MainAxisAlignment, MainAxisSize, MouseStateHandle,
-    OffsetPositioning, Padding, ParentAnchor, ParentElement, ParentOffsetBounds,
+    ClippedScrollable, ConstrainedBox, Container, CornerRadius, CrossAxisAlignment, Dismiss,
+    DragAxis, DragBarSide, Draggable, DropShadow, DropTarget, Element, Empty, EventHandler,
+    Expanded, Fill as ElementFill, Flex, Hoverable, MainAxisAlignment, MainAxisSize,
+    MouseStateHandle, OffsetPositioning, Padding, ParentAnchor, ParentElement, ParentOffsetBounds,
     PositionedElementAnchor, PositionedElementOffsetBounds, Radius, Resizable,
     ResizableStateHandle, SavePosition, ScrollTarget, ScrollToPositionMode, ScrollbarWidth,
     Shrinkable, Stack, Text,
@@ -652,11 +651,13 @@ pub(super) struct VerticalTabsPanelState {
     detail_scroll_state: ClippedScrollStateHandle,
     detail_sidecar_mouse_state: MouseStateHandle,
     detail_overlay_state: Arc<Mutex<VerticalTabsDetailOverlayState>>,
-    /// Cortex: hover/click state for the bottom "+" button (saved-projects picker).
+    /// Cortex: hover state for the bottom "+" button (saved-projects picker).
     bottom_new_tab_hover_state: MouseStateHandle,
-    bottom_new_tab_button_state: MouseStateHandle,
     pub(super) search_query: String,
     settings_button_mouse_state: MouseStateHandle,
+    /// Cortex: hover state for the magnifying-glass button in the bottom action
+    /// row that toggles the inline search input above the tab list.
+    search_button_mouse_state: MouseStateHandle,
     panes_segment_mouse_state: MouseStateHandle,
     tabs_segment_mouse_state: MouseStateHandle,
     focused_session_option_mouse_state: MouseStateHandle,
@@ -679,6 +680,10 @@ pub(super) struct VerticalTabsPanelState {
     /// Cortex: drag state for the "Tab spacing" slider in the settings popup.
     tab_spacing_slider_state: SliderStateHandle,
     pub(super) show_settings_popup: bool,
+    /// Cortex: whether the inline search input is currently rendered at the top
+    /// of the panel. Toggled by the bottom-row search button or cleared on Esc
+    /// inside the input.
+    pub(super) show_search_bar: bool,
 }
 
 impl Default for VerticalTabsPanelState {
@@ -695,9 +700,9 @@ impl Default for VerticalTabsPanelState {
             detail_sidecar_mouse_state: Default::default(),
             detail_overlay_state: Arc::new(Mutex::new(VerticalTabsDetailOverlayState::default())),
             bottom_new_tab_hover_state: Default::default(),
-            bottom_new_tab_button_state: Default::default(),
             search_query: String::new(),
             settings_button_mouse_state: Default::default(),
+            search_button_mouse_state: Default::default(),
             panes_segment_mouse_state: Default::default(),
             tabs_segment_mouse_state: Default::default(),
             focused_session_option_mouse_state: Default::default(),
@@ -717,6 +722,7 @@ impl Default for VerticalTabsPanelState {
             cortex_hide_tab_metadata_mouse_state: Default::default(),
             tab_spacing_slider_state: Default::default(),
             show_settings_popup: false,
+            show_search_bar: false,
         }
     }
 }
@@ -1197,7 +1203,6 @@ impl VerticalTabsPanelState {
 }
 
 const CONTROL_BAR_VERTICAL_PADDING: f32 = 4.;
-const CONTROL_BAR_SPACING: f32 = 4.;
 const SEARCH_ICON_SIZE: f32 = 12.;
 const CONTROL_BAR_BUTTON_RADIUS: Radius = Radius::Pixels(4.);
 pub(super) const VERTICAL_TABS_BOTTOM_ADD_TAB_POSITION_ID: &str =
@@ -1206,6 +1211,14 @@ pub(super) const VERTICAL_TABS_SETTINGS_BUTTON_POSITION_ID: &str = "vertical_tab
 
 const BOTTOM_ADD_BUTTON_SIZE: f32 = 28.;
 const BOTTOM_ADD_BUTTON_VERTICAL_PADDING: f32 = 8.;
+/// Cortex: rendered icon size for the three bottom-row buttons (search,
+/// settings, plus). Sits centered inside a `BOTTOM_ADD_BUTTON_SIZE` hit box —
+/// the surrounding gap is what produces the visible padding around the glyph.
+const BOTTOM_ICON_SIZE: f32 = 16.;
+/// Cortex: horizontal gap between the three centered buttons in the bottom
+/// action row (search, settings, plus). Wider than `CONTROL_BAR_SPACING` so the
+/// cluster reads as three discrete affordances rather than a connected group.
+const BOTTOM_ROW_SPACING: f32 = 12.;
 
 pub(super) fn vtab_action_buttons_position_id(tab_index: usize) -> String {
     format!("vtab_action_buttons_{tab_index}")
@@ -1325,11 +1338,20 @@ fn add_vertical_tab_insertion_target_overlay(
     );
 }
 
-fn render_control_bar(
+/// Cortex: the search input strip that slides in at the top of the vertical
+/// tabs panel when the user clicks the magnifying-glass button in the bottom
+/// action row. When `show_search_bar` is false this returns an empty element
+/// — zero pixels, no padding — so the scrollable tab list grows to fill the
+/// freed vertical space.
+fn render_search_strip(
     state: &VerticalTabsPanelState,
     search_editor: &ViewHandle<EditorView>,
     app: &AppContext,
 ) -> Box<dyn Element> {
+    if !state.show_search_bar {
+        return Empty::new().finish();
+    }
+
     let appearance = Appearance::as_ref(app);
     let theme = appearance.theme();
     let sub_text = theme.sub_text_color(theme.background());
@@ -1357,23 +1379,26 @@ fn render_control_bar(
         .with_child(Shrinkable::new(1., text_input).finish())
         .finish();
 
-    let settings_button = render_settings_button(state, appearance);
+    let container = Container::new(search_bar)
+        .with_padding(
+            Padding::uniform(CONTROL_BAR_VERTICAL_PADDING)
+                .with_left(GROUP_HORIZONTAL_PADDING)
+                .with_right(GROUP_HORIZONTAL_PADDING),
+        )
+        .finish();
 
-    Container::new(
-        Flex::row()
-            .with_main_axis_size(MainAxisSize::Max)
-            .with_cross_axis_alignment(CrossAxisAlignment::Center)
-            .with_spacing(CONTROL_BAR_SPACING)
-            .with_child(Shrinkable::new(1., search_bar).finish())
-            .with_child(settings_button)
-            .finish(),
-    )
-    .with_padding(
-        Padding::uniform(CONTROL_BAR_VERTICAL_PADDING)
-            .with_left(GROUP_HORIZONTAL_PADDING)
-            .with_right(GROUP_HORIZONTAL_PADDING),
-    )
-    .finish()
+    // Cortex: click anywhere outside the search input closes the bar.
+    // `prevent_interaction_with_other_elements` makes this modal-style — the
+    // first click outside dismisses (and is consumed), matching the settings
+    // popup. Without this, clicks landing on tabs/buttons elsewhere in the
+    // workspace wouldn't reliably reach the dismiss layer because each sibling
+    // Hoverable consumes its own click first.
+    Dismiss::new(container)
+        .prevent_interaction_with_other_elements()
+        .on_dismiss(|ctx, _| {
+            ctx.dispatch_typed_action(WorkspaceAction::ToggleVerticalTabsSearchBar);
+        })
+        .finish()
 }
 
 fn render_detail_kind_badge_icon(
@@ -1446,8 +1471,8 @@ fn render_settings_button(
                     .to_warpui_icon(if is_popup_open { main_text } else { sub_text })
                     .finish(),
             )
-            .with_width(16.)
-            .with_height(16.)
+            .with_width(BOTTOM_ICON_SIZE)
+            .with_height(BOTTOM_ICON_SIZE)
             .finish();
 
             let background = if is_popup_open {
@@ -1458,11 +1483,21 @@ fn render_settings_button(
                 ThemeFill::Solid(ColorU::transparent_black())
             };
 
-            let button_container = Container::new(icon)
-                .with_padding(Padding::uniform(2.))
-                .with_background(background)
-                .with_corner_radius(CornerRadius::with_all(CONTROL_BAR_BUTTON_RADIUS))
-                .finish();
+            // Cortex: the icon sits inside a fixed BOTTOM_ADD_BUTTON_SIZE box —
+            // `Align::new` centers it; the ConstrainedBox forces the Container
+            // to report a stable 28×28 to its parent regardless of hover state.
+            // (Without this, the bare Container reports 20×20 when not hovered
+            // and the Stack wrapper reports 28×28 when hovered — the size
+            // mismatch shifts the row's centering, causing a visible jump.)
+            let button_container = Container::new(
+                ConstrainedBox::new(Align::new(icon).finish())
+                    .with_width(BOTTOM_ADD_BUTTON_SIZE)
+                    .with_height(BOTTOM_ADD_BUTTON_SIZE)
+                    .finish(),
+            )
+            .with_background(background)
+            .with_corner_radius(CornerRadius::with_all(CONTROL_BAR_BUTTON_RADIUS))
+            .finish();
 
             if hover_state.is_hovered() && !is_popup_open {
                 let tooltip = ui_builder
@@ -1470,13 +1505,16 @@ fn render_settings_button(
                     .build()
                     .finish();
                 let mut stack = Stack::new().with_child(button_container);
+                // Cortex: tooltip opens upward — the gear lives at the bottom
+                // of the panel now, so opening downward would clip below the
+                // window or overlap the OS dock.
                 stack.add_positioned_overlay_child(
                     tooltip,
                     OffsetPositioning::offset_from_parent(
-                        vec2f(0., 4.),
+                        vec2f(0., -4.),
                         ParentOffsetBounds::WindowByPosition,
-                        ParentAnchor::BottomMiddle,
-                        ChildAnchor::TopMiddle,
+                        ParentAnchor::TopMiddle,
+                        ChildAnchor::BottomMiddle,
                     ),
                 );
                 stack.finish()
@@ -1494,65 +1532,60 @@ fn render_settings_button(
     SavePosition::new(button, VERTICAL_TABS_SETTINGS_BUTTON_POSITION_ID).finish()
 }
 
-/// Cortex: SideQuest-style "+" button pinned to the bottom of the vertical
-/// tab panel. Opens a saved-projects picker (separate from the top
-/// "Tab configs" menu). The dynamic spacing between the bottom-most tab and
-/// this button is emergent — the scrollable groups take their natural height,
-/// then the panel column's `MainAxisSize::Max` absorbs the rest above this row.
-fn render_bottom_new_tab_button(
+/// Cortex: magnifying-glass button rendered to the left of the gear + plus in
+/// the bottom action row. Clicking dispatches
+/// [`WorkspaceAction::ToggleVerticalTabsSearchBar`] which flips the inline
+/// search strip at the top of the panel on/off and focuses the editor when
+/// turning on.
+fn render_search_toggle_button(
     state: &VerticalTabsPanelState,
     appearance: &Appearance,
 ) -> Box<dyn Element> {
     let theme = appearance.theme();
     let sub_text = theme.sub_text_color(theme.background());
     let main_text = theme.main_text_color(theme.background());
+    let is_active = state.show_search_bar;
     let ui_builder = appearance.ui_builder().clone();
 
-    let button_inner = Hoverable::new(
-        state.bottom_new_tab_hover_state.clone(),
+    Hoverable::new(
+        state.search_button_mouse_state.clone(),
         move |hover_state| {
-            let plus_button = combo_inner_button(
-                appearance,
-                UiIcon::Plus,
-                false,
-                state.bottom_new_tab_button_state.clone(),
+            let icon = ConstrainedBox::new(
+                WarpIcon::Search
+                    .to_warpui_icon(if is_active { main_text } else { sub_text })
+                    .finish(),
             )
-            .with_style(
-                UiComponentStyles::default()
-                    .set_border_radius(CornerRadius::with_all(CONTROL_BAR_BUTTON_RADIUS))
-                    .set_font_color(if hover_state.is_hovered() { main_text } else { sub_text }
-                        .into()),
-            )
-            .with_active_styles(
-                UiComponentStyles::default()
-                    .set_background(internal_colors::fg_overlay_3(theme).into()),
-            )
-            .build()
-            .on_click(|ctx, _, position| {
-                ctx.dispatch_typed_action(WorkspaceAction::ToggleProjectsPickerMenu { position });
-            })
+            .with_width(BOTTOM_ICON_SIZE)
+            .with_height(BOTTOM_ICON_SIZE)
             .finish();
 
-            let button = SavePosition::new(plus_button, VERTICAL_TABS_BOTTOM_ADD_TAB_POSITION_ID)
-                .finish();
-            let mut container = Container::new(
-                ConstrainedBox::new(button)
+            let background = if is_active {
+                internal_colors::fg_overlay_3(theme)
+            } else if hover_state.is_hovered() {
+                internal_colors::fg_overlay_2(theme)
+            } else {
+                ThemeFill::Solid(ColorU::transparent_black())
+            };
+
+            // Cortex: see comment in `render_settings_button` — fixed-size
+            // 28×28 box with centered icon so hover state doesn't change the
+            // button's reported size.
+            let button_container = Container::new(
+                ConstrainedBox::new(Align::new(icon).finish())
                     .with_width(BOTTOM_ADD_BUTTON_SIZE)
                     .with_height(BOTTOM_ADD_BUTTON_SIZE)
                     .finish(),
             )
-            .with_corner_radius(CornerRadius::with_all(CONTROL_BAR_BUTTON_RADIUS));
-            if hover_state.is_hovered() {
-                container = container.with_background(internal_colors::neutral_1(theme));
-            }
-            let container = container.finish();
+            .with_background(background)
+            .with_corner_radius(CornerRadius::with_all(CONTROL_BAR_BUTTON_RADIUS))
+            .finish();
 
-            if hover_state.is_hovered() {
+            if hover_state.is_hovered() && !is_active {
                 let tooltip = ui_builder
-                    .tool_tip("Open saved project".to_string())
+                    .tool_tip("Search tabs".to_string())
                     .build()
                     .finish();
-                let mut stack = Stack::new().with_child(container);
+                let mut stack = Stack::new().with_child(button_container);
                 stack.add_positioned_overlay_child(
                     tooltip,
                     OffsetPositioning::offset_from_parent(
@@ -1564,22 +1597,120 @@ fn render_bottom_new_tab_button(
                 );
                 stack.finish()
             } else {
-                container
+                button_container
             }
         },
     )
+    .on_click(|ctx, _, _| {
+        ctx.dispatch_typed_action(WorkspaceAction::ToggleVerticalTabsSearchBar);
+    })
+    .with_cursor(Cursor::PointingHand)
+    .finish()
+}
+
+/// Cortex: bottom action row holding (in order, left → right) the search
+/// toggle, the settings/gear flyout, and the SideQuest-style "+" saved-projects
+/// picker. All three buttons are horizontally centered and equally sized.
+/// The dynamic spacing between the bottom-most tab and this row is emergent —
+/// the scrollable groups take their natural height, then the panel column's
+/// `MainAxisSize::Max` absorbs the rest above this row.
+fn render_bottom_action_row(
+    state: &VerticalTabsPanelState,
+    appearance: &Appearance,
+    app: &AppContext,
+) -> Box<dyn Element> {
+    let theme = appearance.theme();
+    let sub_text = theme.sub_text_color(theme.background());
+    let main_text = theme.main_text_color(theme.background());
+    let ui_builder = appearance.ui_builder().clone();
+
+    // Cortex: the "+" button now mirrors the gear/search buttons — a fixed
+    // 28×28 Container with the icon centered inside. This replaces the older
+    // `combo_inner_button` + outer-Container layering, which (a) painted at
+    // 24×24 (mismatched with the 20→28 jump of the others) and (b) layered
+    // two different hover backgrounds on top of each other.
+    let plus_button = Hoverable::new(
+        state.bottom_new_tab_hover_state.clone(),
+        move |hover_state| {
+            let icon = ConstrainedBox::new(
+                WarpIcon::Plus
+                    .to_warpui_icon(if hover_state.is_hovered() { main_text } else { sub_text })
+                    .finish(),
+            )
+            .with_width(BOTTOM_ICON_SIZE)
+            .with_height(BOTTOM_ICON_SIZE)
+            .finish();
+
+            let background = if hover_state.is_hovered() {
+                internal_colors::fg_overlay_2(theme)
+            } else {
+                ThemeFill::Solid(ColorU::transparent_black())
+            };
+
+            let button_container = Container::new(
+                ConstrainedBox::new(Align::new(icon).finish())
+                    .with_width(BOTTOM_ADD_BUTTON_SIZE)
+                    .with_height(BOTTOM_ADD_BUTTON_SIZE)
+                    .finish(),
+            )
+            .with_background(background)
+            .with_corner_radius(CornerRadius::with_all(CONTROL_BAR_BUTTON_RADIUS))
+            .finish();
+
+            // `SavePosition` saves the painted rect so the projects-picker
+            // menu can anchor itself to this button when invoked.
+            let positioned =
+                SavePosition::new(button_container, VERTICAL_TABS_BOTTOM_ADD_TAB_POSITION_ID)
+                    .finish();
+
+            if hover_state.is_hovered() {
+                let tooltip = ui_builder
+                    .tool_tip("Open saved project".to_string())
+                    .build()
+                    .finish();
+                let mut stack = Stack::new().with_child(positioned);
+                stack.add_positioned_overlay_child(
+                    tooltip,
+                    OffsetPositioning::offset_from_parent(
+                        vec2f(0., -4.),
+                        ParentOffsetBounds::WindowByPosition,
+                        ParentAnchor::TopMiddle,
+                        ChildAnchor::BottomMiddle,
+                    ),
+                );
+                stack.finish()
+            } else {
+                positioned
+            }
+        },
+    )
+    .on_click(|ctx, _, position| {
+        ctx.dispatch_typed_action(WorkspaceAction::ToggleProjectsPickerMenu { position });
+    })
+    .with_cursor(Cursor::PointingHand)
     .finish();
 
-    Container::new(
-        Flex::row()
-            .with_main_axis_size(MainAxisSize::Max)
-            .with_cross_axis_alignment(CrossAxisAlignment::Center)
-            .with_main_axis_alignment(MainAxisAlignment::Center)
-            .with_child(button_inner)
-            .finish(),
-    )
-    .with_padding(Padding::uniform(BOTTOM_ADD_BUTTON_VERTICAL_PADDING))
-    .finish()
+    let settings_button = render_settings_button(state, appearance);
+
+    let hide_search_button = *crate::settings::CortexSettings::as_ref(app)
+        .tabs_panel_hide_search_button
+        .value();
+
+    let mut row = Flex::row()
+        .with_main_axis_size(MainAxisSize::Max)
+        .with_cross_axis_alignment(CrossAxisAlignment::Center)
+        .with_main_axis_alignment(MainAxisAlignment::Center)
+        .with_spacing(BOTTOM_ROW_SPACING);
+
+    if !hide_search_button {
+        row = row.with_child(render_search_toggle_button(state, appearance));
+    }
+
+    row = row.with_child(settings_button).with_child(plus_button);
+
+    Container::new(row.finish())
+        .with_padding(Padding::uniform(BOTTOM_ADD_BUTTON_VERTICAL_PADDING))
+        .finish()
 }
 
 fn render_vertical_tabs_panel(
@@ -1619,13 +1750,13 @@ fn render_vertical_tabs_panel_with_options(
     let panel_content = Flex::column()
         .with_main_axis_size(MainAxisSize::Max)
         .with_cross_axis_alignment(CrossAxisAlignment::Stretch)
-        .with_child(render_control_bar(
+        .with_child(render_search_strip(
             state,
             &workspace.vertical_tabs_search_input,
             app,
         ))
         .with_child(Shrinkable::new(1., scrollable_groups).finish())
-        .with_child(render_bottom_new_tab_button(state, appearance))
+        .with_child(render_bottom_action_row(state, appearance, app))
         .finish();
 
     // The settings popup is rendered at the workspace level (with Dismiss for click-outside-

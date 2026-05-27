@@ -103,41 +103,6 @@ settings::macros::implement_setting_for_enum!(
     description: "Horizontal alignment of the metadata subtitle line on Cortex vertical tabs.",
 );
 
-/// Visual style of the title-bar search bar.
-///
-/// `CortexDefault` replaces the filled background with a thin border in the
-/// search-text color (brighter on hover). `WarpDefault` keeps the upstream
-/// semi-transparent pill background.
-#[derive(
-    Default,
-    Debug,
-    serde::Serialize,
-    serde::Deserialize,
-    PartialEq,
-    Eq,
-    Copy,
-    Clone,
-    Hash,
-    schemars::JsonSchema,
-    settings_value::SettingsValue,
-)]
-#[schemars(rename_all = "snake_case")]
-pub enum SearchBarStyle {
-    #[default]
-    CortexDefault,
-    WarpDefault,
-}
-
-settings::macros::implement_setting_for_enum!(
-    SearchBarStyle,
-    CortexSettings,
-    SupportedPlatforms::ALL,
-    SyncToCloud::Globally(RespectUserSyncSetting::Yes),
-    private: false,
-    toml_path: "cortex.top_bar.search_bar_style",
-    description: "Visual style of the title-bar search bar. cortex_default replaces the filled background with a thin border; warp_default keeps the upstream pill background.",
-);
-
 define_settings_group!(CortexSettings, settings: [
     hide_pane_separators: HidePaneSeparators {
         type: bool,
@@ -147,6 +112,15 @@ define_settings_group!(CortexSettings, settings: [
         private: false,
         toml_path: "cortex.appearance.hide_pane_separators",
         description: "Whether the thin separator lines between panels and around input boxes are hidden.",
+    },
+    rounded_pane_borders: RoundedPaneBorders {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.panes.rounded_pane_borders",
+        description: "When two or more panes are open, draw a thin rounded border around each pane instead of straight separator lines between them. The active pane's border uses the tab's project color.",
     },
     start_with_blank_pane_on_launch: StartWithBlankPaneOnLaunch {
         type: bool,
@@ -201,6 +175,15 @@ define_settings_group!(CortexSettings, settings: [
         private: false,
         toml_path: "cortex.tabs.panel.row_spacing",
         description: "Vertical spacing in pixels between tab rows in the vertical tab panel. Adjusted via the slider in the vertical-tabs settings popup. Range 8–24 px; widened from 0–16 to prevent tab-edge animations from clipping into neighbors.",
+    },
+    tabs_panel_hide_search_button: TabsPanelHideSearchButton {
+        type: bool,
+        default: false,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.tabs.panel.hide_search_button",
+        description: "Whether the search button in the vertical tabs panel's bottom action row is hidden. With the button hidden there is no way to filter tabs by name; intended for users with small tab counts who never need the search.",
     },
     tabs_inverse_fill_on_selection: TabsInverseFillOnSelection {
         type: bool,
@@ -331,7 +314,69 @@ define_settings_group!(CortexSettings, settings: [
         toml_path: "cortex.top_bar.hide_divider",
         description: "Whether the thin horizontal divider line at the bottom of the top bar is hidden. Cortex default: on (hidden).",
     },
-    top_bar_search_bar_style: SearchBarStyle,
+    top_bar_search_bar_opacity: TopBarSearchBarOpacity {
+        type: u8,
+        default: 100,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.top_bar.search_bar.opacity",
+        description: "Opacity of the title-bar search bar (background, icon, and placeholder text). 100 = fully opaque, 10 = nearly transparent. Clamped to 10..=100 at the consumption site.",
+    },
+    top_bar_search_bar_compact: TopBarSearchBarCompact {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.top_bar.search_bar.compact",
+        description: "Whether the search bar placeholder is shortened from \"Search sessions, agents, files...\" to just \"Search...\". Cortex default: on.",
+    },
+    top_bar_hide_tabs_panel_collapse_button: TopBarHideTabsPanelCollapseButton {
+        type: bool,
+        default: false,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.top_bar.hide_tabs_panel_collapse_button",
+        description: "Whether the tabs/tools panel collapse button is hidden from the top-bar button cluster.",
+    },
+    top_bar_hide_agent_management_button: TopBarHideAgentManagementButton {
+        type: bool,
+        default: false,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.top_bar.hide_agent_management_button",
+        description: "Whether the agent management panel button is hidden from the top-bar button cluster.",
+    },
+    top_bar_hide_notifications_button: TopBarHideNotificationsButton {
+        type: bool,
+        default: false,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.top_bar.hide_notifications_button",
+        description: "Whether the notifications mailbox button is hidden from the top-bar right cluster.",
+    },
+    top_bar_font_name: TopBarFontName {
+        type: String,
+        default: String::new(),
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.top_bar.font_name",
+        description: "Font family for text inside the top bar (search-bar placeholder, diff stats, avatar initials). Empty string falls back to the UI font.",
+    },
+    top_bar_generic_profile_icon: TopBarGenericProfileIcon {
+        type: bool,
+        default: false,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.top_bar.generic_profile_icon",
+        description: "When on, the profile button in the top-right shows a generic person icon instead of the signed-in user's avatar / photo.",
+    },
     toolbar_show_file_explorer: ToolbarShowFileExplorer {
         type: bool,
         default: true,

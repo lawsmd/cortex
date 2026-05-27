@@ -17,8 +17,8 @@ use header::PaneHeader;
 
 use warpui::{
     elements::{
-        Border, Container, DropTarget, DropTargetData, Flex, MainAxisSize, ParentElement,
-        SavePosition, Shrinkable,
+        Border, Container, CornerRadius, DropTarget, DropTargetData, Flex, MainAxisSize,
+        ParentElement, Radius, SavePosition, Shrinkable,
     },
     keymap::EditableBinding,
     presenter::ChildView,
@@ -158,8 +158,10 @@ impl<P: BackingView> PaneView<P> {
         match event {
             PaneGroupFocusEvent::FocusChanged { .. }
             | PaneGroupFocusEvent::InSplitPaneChanged
-            | PaneGroupFocusEvent::FocusedPaneMaximizedChanged => {
-                // Re-render to update dimming and header visibility.
+            | PaneGroupFocusEvent::FocusedPaneMaximizedChanged
+            | PaneGroupFocusEvent::CortexPaneBorderColorChanged => {
+                // Re-render to update dimming, header visibility, or the
+                // rounded pane-border color.
                 ctx.notify();
             }
             PaneGroupFocusEvent::ActiveSessionChanged { .. } => {}
@@ -397,6 +399,25 @@ impl<P: BackingView> View for PaneView<P> {
         if pane_configuration.show_accent_border {
             let border = Border::all(2.).with_border_fill(appearance.theme().accent());
             container = container.with_border(border);
+        } else if *crate::settings::CortexSettings::as_ref(app).rounded_pane_borders
+            && split_pane_state.is_in_split_pane()
+        {
+            // Cortex rounded pane borders: replace the inter-pane divider
+            // lines with a thin rounded border around every pane. Focused
+            // pane gets the tab's project color (falls back to theme accent);
+            // unfocused panes use the same gray as the legacy dividers.
+            let theme = appearance.theme();
+            let fill = if split_pane_state.is_focused() {
+                self.focus_handle
+                    .as_ref()
+                    .and_then(|fh| fh.cortex_pane_border_color(app))
+                    .unwrap_or_else(|| theme.accent())
+            } else {
+                theme.split_pane_border_color()
+            };
+            container = container
+                .with_border(Border::all(1.).with_border_fill(fill))
+                .with_corner_radius(CornerRadius::with_all(Radius::Pixels(4.)));
         }
 
         // Dim inactive panes.

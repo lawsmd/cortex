@@ -421,7 +421,7 @@ use warp_core::context_flag::ContextFlag;
 use warp_core::execution_mode::AppExecutionMode;
 use warp_core::semantic_selection::SemanticSelection;
 use warp_util::path::{user_friendly_path, LineAndColumnArg};
-use warpui::fonts::Weight;
+use warpui::fonts::{FamilyId, Weight};
 use warpui::modals::{AlertDialogWithCallbacks, AppModalCallback};
 
 use warp_core::user_preferences::GetUserPreferences as _;
@@ -571,6 +571,9 @@ const TAB_BAR_HOVER_HEIGHT: f32 = 12.;
 const TAB_BAR_PADDING_LEFT: f32 = 4.;
 const TAB_BAR_PADDING_RIGHT: f32 = 8.;
 const TITLE_BAR_SEARCH_BAR_MAX_WIDTH: f32 = 320.;
+// CORTEX-BEGIN: top-bar-search-bar-compact-width
+const TITLE_BAR_SEARCH_BAR_COMPACT_WIDTH: f32 = 160.;
+// CORTEX-END: top-bar-search-bar-compact-width
 const TITLE_BAR_SEARCH_BAR_SLOT_PADDING: f32 = 8.;
 
 // The total height taken up by the tab bar, including its bottom border.
@@ -1203,6 +1206,26 @@ fn primary_terminal_cwd(node: &PaneNodeSnapshot) -> Option<&str> {
     }
 }
 
+// CORTEX-BEGIN: top-bar-font-family
+/// Resolves the Cortex Settings > Top Bar > Top Bar Font override into a
+/// `FamilyId`. An empty or unrecognized font name falls back to
+/// `appearance.ui_font_family()`. Used by every text-rendering call inside the
+/// top-bar render tree (search-bar placeholder, diff stats, avatar initials).
+fn cortex_top_bar_font_family(appearance: &Appearance, ctx: &AppContext) -> FamilyId {
+    use ::settings::Setting as _;
+    let name = &**crate::settings::CortexSettings::as_ref(ctx)
+        .top_bar_font_name
+        .value();
+    if name.is_empty() {
+        appearance.ui_font_family()
+    } else {
+        ctx.font_cache()
+            .family_id_for_name(name)
+            .unwrap_or_else(|| appearance.ui_font_family())
+    }
+}
+// CORTEX-END: top-bar-font-family
+
 impl Workspace {
     pub fn is_tab_drag_preview(&self) -> bool {
         self.is_tab_drag_preview
@@ -1437,6 +1460,10 @@ impl Workspace {
             }
             EditorEvent::Escape => {
                 me.vertical_tabs_panel.search_query.clear();
+                me.vertical_tabs_panel.show_search_bar = false;
+                editor_view.update(ctx, |editor, ctx| {
+                    editor.reinitialize_buffer(None, ctx);
+                });
                 me.focus_active_tab(ctx);
             }
             _ => {}
@@ -3789,6 +3816,9 @@ impl Workspace {
                     for tab in &mut self.tabs {
                         Self::sync_codebase_tab_color(tab, ctx);
                     }
+                    for tab_index in 0..self.tabs.len() {
+                        self.sync_cortex_pane_border_color_for_tab(tab_index, ctx);
+                    }
                 }
                 ctx.notify();
             }
@@ -3846,6 +3876,7 @@ impl Workspace {
                 self.tabs[start_index + tab_index].selected_color = tab_template
                     .color
                     .map_or(SelectedTabColor::Unset, SelectedTabColor::Color);
+                self.sync_cortex_pane_border_color_for_tab(start_index + tab_index, ctx);
             });
 
         if !window.tabs.is_empty() {
@@ -3931,6 +3962,11 @@ impl Workspace {
                                 ctx,
                             );
                         }
+
+                        // Cortex: each restored tab gets its tab color pushed
+                        // into the pane group so the rounded pane-border
+                        // feature can use it from frame 1.
+                        self.sync_cortex_pane_border_color_for_tab(tab_index, ctx);
                     });
 
                 if self.tab_count() == 0 {
@@ -4020,6 +4056,7 @@ impl Workspace {
                 if let (Some(color), Some(tab)) = (tab_color, self.tabs.last_mut()) {
                     tab.selected_color = SelectedTabColor::Color(color);
                 }
+                self.sync_cortex_pane_border_color_for_tab(self.active_tab_index, ctx);
                 if self.left_panel_visibility_across_tabs_enabled(ctx) {
                     self.left_panel_open = left_panel_open;
                 }
@@ -4049,6 +4086,7 @@ impl Workspace {
                 if let (Some(color), Some(tab)) = (tab_color, self.tabs.last_mut()) {
                     tab.selected_color = SelectedTabColor::Color(color);
                 }
+                self.sync_cortex_pane_border_color_for_tab(self.active_tab_index, ctx);
                 if self.left_panel_visibility_across_tabs_enabled(ctx) {
                     self.left_panel_open = left_panel_open;
                 }
@@ -5178,6 +5216,47 @@ impl Workspace {
         self.tabs.get(index).and_then(|tab| tab.color())
     }
 
+    /// Cortex: resolve the tab's project color into a `Fill` for the rounded
+    /// pane-border feature. Precedence (matches `compute_tab_group_color_mode`
+    /// in `vertical_tabs.rs`):
+    ///   1. `cortex_accent` (saved-project hex)
+    ///   2. `tab.color()` (manual selection / directory default), resolved
+    ///      against the theme's terminal ANSI palette.
+    ///   3. `None` (let the render code fall back to `theme.accent()`).
+    fn cortex_resolve_pane_border_color(
+        &self,
+        tab_index: usize,
+        ctx: &AppContext,
+    ) -> Option<warp_core::ui::theme::Fill> {
+        let tab = self.tabs.get(tab_index)?;
+        if let Some(coloru) = tab.cortex_accent {
+            return Some(warp_core::ui::theme::Fill::Solid(coloru));
+        }
+        let ansi = tab.color()?;
+        let appearance = Appearance::as_ref(ctx);
+        let theme = appearance.theme();
+        Some(ansi.to_ansi_color(&theme.terminal_colors().normal).into())
+    }
+
+    /// Cortex: resolve the tab's project color and push it into the shared
+    /// `PaneGroupFocusState` so every pane in the tab can color its rounded
+    /// border accordingly. Cheap; safe to call any time the color may have
+    /// changed.
+    pub(crate) fn sync_cortex_pane_border_color_for_tab(
+        &self,
+        tab_index: usize,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        let color = self.cortex_resolve_pane_border_color(tab_index, ctx);
+        let Some(tab) = self.tabs.get(tab_index) else {
+            return;
+        };
+        let pane_group = tab.pane_group.clone();
+        pane_group.update(ctx, |pg, ctx| {
+            pg.set_cortex_pane_border_color(color, ctx);
+        });
+    }
+
     /// Finds the pane containing a terminal viewing the given ambient agent conversation,
     /// returning None if the ambient conversation is not open in any tab.
     fn find_pane_with_ambient_agent_conversation(
@@ -5532,6 +5611,7 @@ impl Workspace {
             },
             ctx
         );
+        self.sync_cortex_pane_border_color_for_tab(index, ctx);
         ctx.notify();
     }
 
@@ -6959,6 +7039,9 @@ impl Workspace {
             if let Some(tab) = self.tabs.get_mut(self.active_tab_index) {
                 tab.cortex_accent = Some(coloru);
             }
+            // Cortex: refresh the rounded pane-border color now that the tab
+            // has its saved-project accent applied.
+            self.sync_cortex_pane_border_color_for_tab(self.active_tab_index, ctx);
         }
     }
 
@@ -7070,6 +7153,7 @@ impl Workspace {
                 tab.selected_color = SelectedTabColor::Color(color);
             }
         }
+        self.sync_cortex_pane_border_color_for_tab(self.active_tab_index, ctx);
     }
 
     /// Opens a tab config, showing the param-fill modal when the config has parameters,
@@ -12070,6 +12154,11 @@ impl Workspace {
                 pg.set_left_panel_open(true, ctx);
             });
         }
+
+        // Cortex: push the new tab's resolved project color into its pane
+        // group so the rounded pane-border feature can color the focused-pane
+        // border. Safe to call even when the tab has no color set.
+        self.sync_cortex_pane_border_color_for_tab(self.active_tab_index, ctx);
     }
 
     pub fn add_tab_from_existing_pane(
@@ -15050,12 +15139,13 @@ impl Workspace {
                 self.update_active_session(ctx);
 
                 if FeatureFlag::DirectoryTabColors.is_enabled() {
-                    if let Some(tab) = self
+                    let tab_index = self
                         .tabs
-                        .iter_mut()
-                        .find(|t| t.pane_group.id() == pane_group.id())
-                    {
-                        Self::sync_codebase_tab_color(tab, ctx);
+                        .iter()
+                        .position(|t| t.pane_group.id() == pane_group.id());
+                    if let Some(tab_index) = tab_index {
+                        Self::sync_codebase_tab_color(&mut self.tabs[tab_index], ctx);
+                        self.sync_cortex_pane_border_color_for_tab(tab_index, ctx);
                     }
                 }
             }
@@ -15588,12 +15678,13 @@ impl Workspace {
                 // re-create models that were just dropped.
 
                 if FeatureFlag::DirectoryTabColors.is_enabled() {
-                    if let Some(tab) = self
+                    let tab_index = self
                         .tabs
-                        .iter_mut()
-                        .find(|t| t.pane_group.id() == pane_group.id())
-                    {
-                        Self::sync_codebase_tab_color(tab, ctx);
+                        .iter()
+                        .position(|t| t.pane_group.id() == pane_group.id());
+                    if let Some(tab_index) = tab_index {
+                        Self::sync_codebase_tab_color(&mut self.tabs[tab_index], ctx);
+                        self.sync_cortex_pane_border_color_for_tab(tab_index, ctx);
                     }
                 }
             }
@@ -15690,6 +15781,10 @@ impl Workspace {
                                         self.tabs[self.active_tab_index].selected_color = selected;
                                         self.tabs[self.active_tab_index].default_directory_color =
                                             default;
+                                        self.sync_cortex_pane_border_color_for_tab(
+                                            self.active_tab_index,
+                                            ctx,
+                                        );
                                     }
                                 }
                             }
@@ -19076,13 +19171,17 @@ impl Workspace {
 
         let has_stats = line_changes.is_some();
 
+        // CORTEX-BEGIN: top-bar-font-diff-stats
+        let top_bar_font = cortex_top_bar_font_family(appearance, ctx);
+        // CORTEX-END: top-bar-font-diff-stats
+
         let mut row = Flex::row().with_cross_axis_alignment(CrossAxisAlignment::Center);
         row.add_child(icon);
 
         if let Some(lc) = line_changes {
             let stat = |value: u32, prefix: &str, color: ColorU| -> Box<dyn Element> {
                 Container::new(
-                    Text::new_inline(format!("{prefix}{value}"), appearance.ui_font_family(), 12.)
+                    Text::new_inline(format!("{prefix}{value}"), top_bar_font, 12.)
                         .with_color(color)
                         .with_style(Properties::default().weight(Weight::Semibold))
                         .finish(),
@@ -19106,7 +19205,7 @@ impl Workspace {
             font_color: Some(font_color.into()),
             font_size: Some(12.),
             font_weight: Some(Weight::Medium),
-            font_family_id: Some(appearance.ui_font_family()),
+            font_family_id: Some(top_bar_font),
             height: Some(24.),
             border_radius: Some(CornerRadius::with_all(Radius::Pixels(4.))),
             border_width: Some(0.),
@@ -19225,71 +19324,86 @@ impl Workspace {
     fn render_title_bar_search_bar(
         &self,
         appearance: &Appearance,
-        // CORTEX-BEGIN: top-bar-search-bar-style
         ctx: &AppContext,
-        // CORTEX-END: top-bar-search-bar-style
     ) -> Box<dyn Element> {
         let theme = appearance.theme();
-        let text_color = theme.sub_text_color(theme.background());
-        // CORTEX-BEGIN: top-bar-search-bar-style
-        let cortex_search_style = {
-            use ::settings::Setting as _;
-            *crate::settings::CortexSettings::as_ref(ctx)
-                .top_bar_search_bar_style
-                .value()
-                == crate::settings::SearchBarStyle::CortexDefault
+        let base_text_color: ColorU = theme.sub_text_color(theme.background()).into();
+
+        // CORTEX-BEGIN: top-bar-search-bar-opacity-compact-font
+        use ::settings::Setting as _;
+        let cortex = crate::settings::CortexSettings::as_ref(ctx);
+        let opacity = (*cortex.top_bar_search_bar_opacity.value()).clamp(10, 100);
+        let compact = *cortex.top_bar_search_bar_compact.value();
+        let placeholder: &'static str = if compact {
+            "Search..."
+        } else {
+            "Search sessions, agents, files..."
         };
-        let hover_border_color = theme.font_color(theme.background());
-        // CORTEX-END: top-bar-search-bar-style
+        let font_family = cortex_top_bar_font_family(appearance, ctx);
+        // On hover the search bar pops to full opacity and gains a bright
+        // outline — a one-off echo of the removed "Cortex Default" search-bar
+        // style, repurposed as a hover affordance for the slider-faded bar.
+        let hover_border_color: ColorU = theme.font_color(theme.background()).into();
+        // CORTEX-END: top-bar-search-bar-opacity-compact-font
 
         Hoverable::new(
             self.mouse_states.title_bar_search_bar.clone(),
             move |mouse_state| {
-                let row = Flex::row()
-                    .with_cross_axis_alignment(CrossAxisAlignment::Center)
-                    .with_spacing(10.)
-                    .with_child(
-                        ConstrainedBox::new(
-                            icons::Icon::Search.to_warpui_icon(text_color).finish(),
-                        )
-                        .with_width(16.)
-                        .with_height(16.)
+                let is_hovered = mouse_state.is_hovered();
+                let effective_opacity = if is_hovered { 100 } else { opacity };
+                let effective_opacity_f = effective_opacity as f32 / 100.0;
+                let text_color = coloru_with_opacity(base_text_color, effective_opacity);
+
+                let icon = ConstrainedBox::new(
+                    icons::Icon::Search
+                        .to_warpui_icon(text_color.into())
+                        .with_opacity(effective_opacity_f)
                         .finish(),
-                    )
-                    .with_child(
-                        Shrinkable::new(
-                            1.,
-                            Text::new_inline(
-                                "Search sessions, agents, files...",
-                                appearance.ui_font_family(),
-                                14.,
-                            )
-                            .with_color(text_color.into())
-                            .with_clip(ClipConfig::ellipsis())
-                            .finish(),
-                        )
-                        .finish(),
-                    )
+                )
+                .with_width(16.)
+                .with_height(16.)
+                .finish();
+
+                let text = Text::new_inline(placeholder, font_family, 14.)
+                    .with_color(text_color)
+                    .with_clip(ClipConfig::ellipsis())
                     .finish();
 
-                // CORTEX-BEGIN: top-bar-search-bar-style
-                let mut container = Container::new(row);
-                if cortex_search_style {
-                    let border_fill = if mouse_state.is_hovered() {
-                        hover_border_color
-                    } else {
-                        text_color
-                    };
-                    container = container
-                        .with_border(Border::all(1.).with_border_fill(border_fill));
+                // CORTEX-BEGIN: top-bar-search-bar-compact-center
+                let row = if compact {
+                    // Compact mode: size to content + center within the
+                    // fixed-width search bar so the icon + short "Search..."
+                    // sit in the middle rather than hugging the left edge.
+                    Flex::row()
+                        .with_cross_axis_alignment(CrossAxisAlignment::Center)
+                        .with_main_axis_alignment(MainAxisAlignment::Center)
+                        .with_main_axis_size(MainAxisSize::Max)
+                        .with_spacing(10.)
+                        .with_child(icon)
+                        .with_child(text)
+                        .finish()
                 } else {
-                    container = container.with_background(if mouse_state.is_hovered() {
-                        internal_colors::fg_overlay_2(theme)
-                    } else {
-                        internal_colors::fg_overlay_1(theme)
-                    });
+                    Flex::row()
+                        .with_cross_axis_alignment(CrossAxisAlignment::Center)
+                        .with_spacing(10.)
+                        .with_child(icon)
+                        .with_child(Shrinkable::new(1., text).finish())
+                        .finish()
+                };
+                // CORTEX-END: top-bar-search-bar-compact-center
+
+                let bg_color_u: ColorU = if is_hovered {
+                    internal_colors::fg_overlay_2(theme).into()
+                } else {
+                    internal_colors::fg_overlay_1(theme).into()
+                };
+                let mut container = Container::new(row).with_background(
+                    coloru_with_opacity(bg_color_u, effective_opacity),
+                );
+                if is_hovered {
+                    container = container
+                        .with_border(Border::all(1.).with_border_fill(hover_border_color));
                 }
-                // CORTEX-END: top-bar-search-bar-style
 
                 ConstrainedBox::new(
                     container
@@ -19300,7 +19414,11 @@ impl Workspace {
                         .with_padding_bottom(4.)
                         .finish(),
                 )
-                .with_width(TITLE_BAR_SEARCH_BAR_MAX_WIDTH)
+                .with_width(if compact {
+                    TITLE_BAR_SEARCH_BAR_COMPACT_WIDTH
+                } else {
+                    TITLE_BAR_SEARCH_BAR_MAX_WIDTH
+                })
                 .finish()
             },
         )
@@ -19653,6 +19771,30 @@ impl Workspace {
         if !item.is_available(ctx) {
             return None;
         }
+        // CORTEX-BEGIN: top-bar-hide-buttons
+        {
+            use ::settings::Setting as _;
+            let cortex = crate::settings::CortexSettings::as_ref(ctx);
+            match item {
+                HeaderToolbarItemKind::TabsPanel
+                    if *cortex.top_bar_hide_tabs_panel_collapse_button.value() =>
+                {
+                    return None;
+                }
+                HeaderToolbarItemKind::AgentManagement
+                    if *cortex.top_bar_hide_agent_management_button.value() =>
+                {
+                    return None;
+                }
+                HeaderToolbarItemKind::NotificationsMailbox
+                    if *cortex.top_bar_hide_notifications_button.value() =>
+                {
+                    return None;
+                }
+                _ => {}
+            }
+        }
+        // CORTEX-END: top-bar-hide-buttons
         let vertical_tabs_active =
             FeatureFlag::VerticalTabs.is_enabled() && *TabSettings::as_ref(ctx).use_vertical_tabs;
         let inner = match item {
@@ -20131,7 +20273,18 @@ impl Workspace {
             .username_for_display()
             .unwrap_or(DEFAULT_USER_DISPLAY_NAME.to_owned());
 
-        let avatar_content = if self.auth_state.is_anonymous_or_logged_out() {
+        // CORTEX-BEGIN: top-bar-generic-profile-icon
+        use ::settings::Setting as _;
+        let cortex_generic_profile = *crate::settings::CortexSettings::as_ref(ctx)
+            .top_bar_generic_profile_icon
+            .value();
+        // CORTEX-END: top-bar-generic-profile-icon
+
+        let avatar_content = if cortex_generic_profile {
+            // CORTEX-BEGIN: top-bar-generic-profile-icon
+            AvatarContent::Icon(icons::Icon::User)
+            // CORTEX-END: top-bar-generic-profile-icon
+        } else if self.auth_state.is_anonymous_or_logged_out() {
             AvatarContent::Icon(icons::Icon::Gear)
         } else {
             self.auth_state
@@ -20149,7 +20302,7 @@ impl Workspace {
                 width: Some(20.),
                 height: Some(20.),
                 border_radius: Some(CornerRadius::with_all(Radius::Percentage(50.))),
-                font_family_id: Some(appearance.ui_font_family()),
+                font_family_id: Some(cortex_top_bar_font_family(appearance, ctx)),
                 font_weight: Some(Weight::Bold),
                 background: Some(appearance.theme().accent().into()),
                 font_size: Some(12.),
@@ -23143,6 +23296,27 @@ impl TypedActionView for Workspace {
                     ctx.notify();
                 }
             }
+            ToggleVerticalTabsSearchBar => {
+                if FeatureFlag::VerticalTabs.is_enabled()
+                    && *TabSettings::as_ref(ctx).use_vertical_tabs
+                    && self.vertical_tabs_panel_open
+                {
+                    let now_open = !self.vertical_tabs_panel.show_search_bar;
+                    self.vertical_tabs_panel.show_search_bar = now_open;
+                    // Always reset the editor + filter so reopening starts clean.
+                    self.vertical_tabs_panel.search_query.clear();
+                    let editor_handle = self.vertical_tabs_search_input.clone();
+                    editor_handle.update(ctx, |editor, ctx| {
+                        editor.reinitialize_buffer(None, ctx);
+                    });
+                    if now_open {
+                        ctx.focus(&editor_handle);
+                    } else {
+                        self.focus_active_tab(ctx);
+                    }
+                    ctx.notify();
+                }
+            }
             SetVerticalTabsDisplayGranularity(granularity) => {
                 let granularity = *granularity;
                 TabSettings::handle(ctx).update(ctx, |settings, ctx| {
@@ -24859,6 +25033,9 @@ impl View for Workspace {
             && self.vertical_tabs_panel_open
             && self.vertical_tabs_panel.show_settings_popup
         {
+            // Cortex: the settings gear now lives in the panel's bottom action
+            // row (alongside the search and plus buttons), so the popup must
+            // open upward — pin the popup's bottom-left to the button's top-left.
             stack.add_positioned_overlay_child(
                 Dismiss::new(render_settings_popup(&self.vertical_tabs_panel, app))
                     .prevent_interaction_with_other_elements()
@@ -24868,10 +25045,10 @@ impl View for Workspace {
                     .finish(),
                 OffsetPositioning::offset_from_save_position_element(
                     VERTICAL_TABS_SETTINGS_BUTTON_POSITION_ID,
-                    vec2f(0., 4.),
+                    vec2f(0., -4.),
                     PositionedElementOffsetBounds::WindowByPosition,
-                    PositionedElementAnchor::BottomLeft,
-                    ChildAnchor::TopLeft,
+                    PositionedElementAnchor::TopLeft,
+                    ChildAnchor::BottomLeft,
                 ),
             );
         }
@@ -26133,6 +26310,7 @@ impl Workspace {
         tab_data.draggable_state = draggable_state;
         self.tabs.insert(index, tab_data);
         self.activate_tab_internal(index, ctx);
+        self.sync_cortex_pane_border_color_for_tab(index, ctx);
         ctx.notify();
     }
 

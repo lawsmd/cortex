@@ -24,14 +24,16 @@ const CONTROL_RIGHT_PADDING: f32 = 5.0;
 #[derive(Default)]
 pub struct WorkingPanesPageState {
     hide_pane_separators_switch: SwitchStateHandle,
+    rounded_pane_borders_switch: SwitchStateHandle,
     start_with_blank_pane_switch: SwitchStateHandle,
     recap_matches_terminal_style_switch: SwitchStateHandle,
 }
 
 pub fn working_panes_page_search_terms() -> &'static [&'static str] {
     &[
-        "working", "panes", "pane", "hide", "separator", "lines", "border", "recap", "restored",
-        "session", "launch", "blank", "match", "style", "gray",
+        "working", "panes", "pane", "hide", "separator", "lines", "border", "borders", "rounded",
+        "tui", "sidebar", "input", "recap", "restored", "session", "launch", "blank", "match",
+        "style", "gray",
     ]
 }
 
@@ -43,6 +45,7 @@ pub fn render_working_panes_page(
     Flex::column()
         .with_cross_axis_alignment(CrossAxisAlignment::Stretch)
         .with_child(render_hide_pane_separators_row(state, appearance, app))
+        .with_child(render_rounded_pane_borders_row(state, appearance, app))
         .with_child(render_start_with_blank_pane_row(state, appearance, app))
         .with_child(render_recap_matches_terminal_style_row(
             state, appearance, app,
@@ -59,7 +62,7 @@ fn render_hide_pane_separators_row(
     let current_value = *CortexSettings::as_ref(app).hide_pane_separators;
 
     let label = ui_builder
-        .span("Hide Pane Separator Lines".to_string())
+        .span("Hide Sidebar & Input Borders".to_string())
         .build()
         .finish();
 
@@ -75,6 +78,49 @@ fn render_hide_pane_separators_row(
     // Mirrors the Warp `build_toggle_element` shape (settings_page.rs:778):
     // label hugs the left edge of the centered max-width column, control
     // hugs the right.
+    let header = Shrinkable::new(
+        1.0,
+        Container::new(Align::new(label).left().finish()).finish(),
+    )
+    .finish();
+
+    let control = Container::new(switch)
+        .with_padding_right(CONTROL_RIGHT_PADDING)
+        .finish();
+
+    let row = Flex::row()
+        .with_cross_axis_alignment(CrossAxisAlignment::Center)
+        .with_child(header)
+        .with_child(control)
+        .finish();
+
+    Container::new(row)
+        .with_padding(Padding::uniform(ROW_VERTICAL_PADDING))
+        .finish()
+}
+
+fn render_rounded_pane_borders_row(
+    state: &WorkingPanesPageState,
+    appearance: &Appearance,
+    app: &AppContext,
+) -> Box<dyn Element> {
+    let ui_builder = appearance.ui_builder();
+    let current_value = *CortexSettings::as_ref(app).rounded_pane_borders;
+
+    let label = ui_builder
+        .span("Use Rounded Pane Borders".to_string())
+        .build()
+        .finish();
+
+    let switch = ui_builder
+        .switch(state.rounded_pane_borders_switch.clone())
+        .check(current_value)
+        .build()
+        .on_click(move |ctx, _, _| {
+            ctx.dispatch_typed_action(CortexSettingsAction::ToggleRoundedPaneBorders);
+        })
+        .finish();
+
     let header = Shrinkable::new(
         1.0,
         Container::new(Align::new(label).left().finish()).finish(),

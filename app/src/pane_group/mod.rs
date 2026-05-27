@@ -4339,6 +4339,7 @@ impl PaneGroup {
             }
             PaneGroupFocusEvent::InSplitPaneChanged => ctx.notify(),
             PaneGroupFocusEvent::FocusedPaneMaximizedChanged => ctx.notify(),
+            PaneGroupFocusEvent::CortexPaneBorderColorChanged => ctx.notify(),
         }
     }
 
@@ -4600,6 +4601,19 @@ impl PaneGroup {
                 config.set_dim_even_if_focused(dim_even_if_focused, ctx);
             });
         }
+    }
+
+    /// Cortex: push the containing tab's resolved project color into the
+    /// shared focus_state so every pane in this group can render its rounded
+    /// border in that color when focused.
+    pub fn set_cortex_pane_border_color(
+        &mut self,
+        color: Option<warp_core::ui::theme::Fill>,
+        ctx: &mut ViewContext<Self>,
+    ) {
+        self.focus_state.update(ctx, |focus_state, ctx| {
+            focus_state.set_cortex_pane_border_color(color, ctx);
+        });
     }
 
     pub fn set_left_panel_open(&mut self, is_open: bool, ctx: &mut ViewContext<Self>) {

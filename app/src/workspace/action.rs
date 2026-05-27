@@ -282,6 +282,12 @@ pub enum WorkspaceAction {
     /// Toggles the vertical tabs panel. This happens as an explicit action from the user.
     ToggleVerticalTabsPanel,
     ToggleVerticalTabsSettingsPopup,
+    /// Cortex: toggle the inline search input at the top of the vertical tabs
+    /// panel. Default off; clicking the magnifying-glass button in the panel's
+    /// bottom action row flips this on (and focuses the editor). Pressing Esc
+    /// inside the input or clicking the search button again flips it back off
+    /// and clears the in-flight query.
+    ToggleVerticalTabsSearchBar,
     SetVerticalTabsDisplayGranularity(VerticalTabsDisplayGranularity),
     SetVerticalTabsTabItemMode(VerticalTabsTabItemMode),
     SetVerticalTabsViewMode(VerticalTabsViewMode),
@@ -899,6 +905,7 @@ impl WorkspaceAction {
             | ToggleRightPanel
             | OpenCodeReviewPanel(..)
             | ToggleVerticalTabsSettingsPopup
+            | ToggleVerticalTabsSearchBar
             | SetVerticalTabsDisplayGranularity(_)
             | SetVerticalTabsTabItemMode(_)
             | SetVerticalTabsViewMode(_)

@@ -1,5 +1,6 @@
 use super::pane::{PaneId, TerminalPaneId};
 use super::{PaneState, SplitPaneState};
+use warp_core::ui::theme::Fill;
 use warpui::{AppContext, Entity, ModelContext, ModelHandle};
 
 /// Centralized focus state for a pane group.
@@ -11,6 +12,11 @@ pub struct PaneGroupFocusState {
     active_session_id: Option<TerminalPaneId>,
     in_split_pane: bool,
     is_focused_pane_maximized: bool,
+    /// Cortex: fill used by the rounded pane-border feature when this pane
+    /// group's focused pane should be highlighted. Resolved from the
+    /// containing tab's project color and pushed in by the workspace.
+    /// `None` falls back to `theme.accent()` at render time.
+    cortex_pane_border_color: Option<Fill>,
 }
 
 #[derive(Debug, Clone)]
@@ -25,6 +31,7 @@ pub enum PaneGroupFocusEvent {
     },
     InSplitPaneChanged,
     FocusedPaneMaximizedChanged,
+    CortexPaneBorderColorChanged,
 }
 
 impl Entity for PaneGroupFocusState {
@@ -42,6 +49,24 @@ impl PaneGroupFocusState {
             active_session_id,
             in_split_pane,
             is_focused_pane_maximized: false,
+            cortex_pane_border_color: None,
+        }
+    }
+
+    /// Cortex: the active pane group's resolved tab project color, used by
+    /// the rounded pane-border feature. `None` => fall back to `theme.accent()`.
+    pub fn cortex_pane_border_color(&self) -> Option<Fill> {
+        self.cortex_pane_border_color
+    }
+
+    pub(super) fn set_cortex_pane_border_color(
+        &mut self,
+        color: Option<Fill>,
+        ctx: &mut ModelContext<Self>,
+    ) {
+        if self.cortex_pane_border_color != color {
+            self.cortex_pane_border_color = color;
+            ctx.emit(PaneGroupFocusEvent::CortexPaneBorderColorChanged);
         }
     }
 
@@ -211,6 +236,12 @@ impl PaneFocusHandle {
         self.pane_id
     }
 
+    /// Cortex: tab project color for this pane group's focused-pane border.
+    /// `None` => fall back to the theme accent.
+    pub fn cortex_pane_border_color(&self, app: &AppContext) -> Option<Fill> {
+        self.focus_state.as_ref(app).cortex_pane_border_color()
+    }
+
     /// Whether or not a focus-change event affects the pane associated with this handle.
     ///
     /// The implementation prioritizes correctness over efficiency:
@@ -232,6 +263,7 @@ impl PaneFocusHandle {
             },
             PaneGroupFocusEvent::InSplitPaneChanged => true,
             PaneGroupFocusEvent::FocusedPaneMaximizedChanged => true,
+            PaneGroupFocusEvent::CortexPaneBorderColorChanged => true,
         }
     }
 }

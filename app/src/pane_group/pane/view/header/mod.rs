@@ -203,7 +203,8 @@ impl<P: BackingView> PaneHeader<P> {
             |_me, _, event, ctx| match event {
                 PaneGroupFocusEvent::InSplitPaneChanged
                 | PaneGroupFocusEvent::FocusedPaneMaximizedChanged
-                | PaneGroupFocusEvent::FocusChanged { .. } => ctx.notify(),
+                | PaneGroupFocusEvent::FocusChanged { .. }
+                | PaneGroupFocusEvent::CortexPaneBorderColorChanged => ctx.notify(),
                 PaneGroupFocusEvent::ActiveSessionChanged { .. } => {}
             },
         );
@@ -796,7 +797,11 @@ impl<P: BackingView> View for PaneHeader<P> {
         // which requires a button click to trigger.
         self.add_overlays_to_stack(&mut stack, has_overflow_items, app);
 
-        if show_active_pane_indicator {
+        // Cortex: when rounded pane borders are on, the focused pane's
+        // colored border replaces this upper-left triangle indicator.
+        let rounded_pane_borders =
+            *crate::settings::CortexSettings::as_ref(app).rounded_pane_borders;
+        if show_active_pane_indicator && !rounded_pane_borders {
             add_active_pane_indicator_to_stack(&mut stack, appearance);
         }
 

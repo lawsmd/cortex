@@ -25,12 +25,15 @@ use warpui::{
 
 use crate::appearance::Appearance;
 use crate::cortex_settings::action::CortexSettingsAction;
+use crate::cortex_settings::font_options::{
+    font_family_dropdown_items, font_family_label_for_value,
+};
 use crate::cortex_settings::tabs_preview;
 use crate::cortex_settings::view::CortexSettingsView;
 use crate::settings::{
     CortexSettings, TabStyle, TabsMetadataAlignment, TabsTitleAlignment,
 };
-use crate::view_components::{Dropdown, DropdownItem};
+use crate::view_components::Dropdown;
 
 const ROW_VERTICAL_PADDING: f32 = 6.0;
 const CONTROL_RIGHT_PADDING: f32 = 5.0;
@@ -58,6 +61,7 @@ pub struct TabsPageState {
     // Vertical Tab Bar/Panel
     panel_bg_switch: SwitchStateHandle,
     stack_left_column_switch: SwitchStateHandle,
+    hide_search_button_switch: SwitchStateHandle,
     // Tab Title (font)
     pub(crate) title_font_name_dropdown: ViewHandle<Dropdown<CortexSettingsAction>>,
     title_font_size_slider: SliderStateHandle,
@@ -72,7 +76,7 @@ impl TabsPageState {
             let mut dropdown = Dropdown::new(ctx);
             dropdown.set_top_bar_max_width(TAB_TITLE_FONT_NAME_DROPDOWN_WIDTH);
             dropdown.set_menu_width(TAB_TITLE_FONT_NAME_DROPDOWN_WIDTH, ctx);
-            let items = font_family_dropdown_items();
+            let items = font_family_dropdown_items(CortexSettingsAction::SetTabTitleFontName);
             dropdown.add_items(items, ctx);
             let initial_name = (*CortexSettings::as_ref(ctx).tabs_title_font_name.value()).clone();
             dropdown.set_selected_by_name(font_family_label_for_value(&initial_name), ctx);
@@ -98,6 +102,7 @@ impl TabsPageState {
             hide_icon_backdrop_switch: SwitchStateHandle::default(),
             panel_bg_switch: SwitchStateHandle::default(),
             stack_left_column_switch: SwitchStateHandle::default(),
+            hide_search_button_switch: SwitchStateHandle::default(),
             title_font_name_dropdown,
             title_font_size_slider: SliderStateHandle::default(),
             title_font_weight_radio: RadioButtonStateHandle::default(),
@@ -109,33 +114,6 @@ impl TabsPageState {
             title_italic_switch: SwitchStateHandle::default(),
         }
     }
-}
-
-const TAB_TITLE_FONT_FAMILY_OPTIONS: &[(&str, &str)] = &[
-    ("(use UI font)", ""),
-    ("Fira Code", "Fira Code"),
-    ("Hack", "Hack"),
-    ("Roboto", "Roboto"),
-];
-
-fn font_family_dropdown_items() -> Vec<DropdownItem<CortexSettingsAction>> {
-    TAB_TITLE_FONT_FAMILY_OPTIONS
-        .iter()
-        .map(|(label, value)| {
-            DropdownItem::new(
-                *label,
-                CortexSettingsAction::SetTabTitleFontName((*value).to_string()),
-            )
-        })
-        .collect()
-}
-
-fn font_family_label_for_value(value: &str) -> &'static str {
-    TAB_TITLE_FONT_FAMILY_OPTIONS
-        .iter()
-        .find(|(_, v)| *v == value)
-        .map(|(label, _)| *label)
-        .unwrap_or(TAB_TITLE_FONT_FAMILY_OPTIONS[0].0)
 }
 
 pub fn tabs_page_search_terms() -> &'static [&'static str] {
@@ -166,6 +144,9 @@ pub fn tabs_page_search_terms() -> &'static [&'static str] {
         "bold",
         "medium",
         "italic",
+        "search",
+        "hide",
+        "button",
     ]
 }
 
@@ -181,6 +162,7 @@ pub fn render_tabs_page(
     let hide_icon_backdrop = *settings.tabs_hide_icon_backdrop.value();
     let panel_bg = *settings.tabs_panel_matches_terminal_bg.value();
     let stack_left_column = *settings.stack_left_column.value();
+    let hide_search_button = *settings.tabs_panel_hide_search_button.value();
 
     Flex::column()
         .with_cross_axis_alignment(CrossAxisAlignment::Stretch)
@@ -276,6 +258,13 @@ pub fn render_tabs_page(
             state.stack_left_column_switch.clone(),
             stack_left_column,
             CortexSettingsAction::ToggleStackLeftColumn,
+            appearance,
+        ))
+        .with_child(render_toggle_row(
+            "Hide Tabs Search Button",
+            state.hide_search_button_switch.clone(),
+            hide_search_button,
+            CortexSettingsAction::ToggleTabsPanelHideSearchButton,
             appearance,
         ))
         .finish()

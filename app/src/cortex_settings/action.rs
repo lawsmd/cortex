@@ -2,7 +2,7 @@
 
 use warpui::fonts::Weight;
 
-use crate::settings::{SearchBarStyle, TabStyle, TabsMetadataAlignment, TabsTitleAlignment};
+use crate::settings::{TabStyle, TabsMetadataAlignment, TabsTitleAlignment};
 
 /// Top-level categories shown down the left side of the Cortex Settings pane.
 /// Add new sections here as the toggle set grows.
@@ -58,12 +58,18 @@ pub enum CortexSettingsAction {
     SelectSection(CortexSettingsSection),
     /// Flip the `hide_pane_separators` toggle on the Panes page.
     ToggleHidePaneSeparators,
+    /// Flip the `rounded_pane_borders` toggle on the Panes page.
+    ToggleRoundedPaneBorders,
     /// Flip the "Hide Previous Session Recap on Launch" toggle on the Panes page.
     ToggleStartWithBlankPaneOnLaunch,
     /// Flip the "Match Recap Style to Active Terminal" toggle on the Panes page.
     ToggleRecapMatchesTerminalStyle,
     /// Flip the "Bar/Panel Background Matches Terminal Background" toggle.
     ToggleTabsPanelMatchesTerminalBg,
+    /// Flip the "Hide Tabs Search Button" toggle (Vertical Tab Bar/Panel section).
+    /// When on, the magnifying-glass button in the panel's bottom action row is
+    /// removed entirely — tab-name filtering becomes unavailable.
+    ToggleTabsPanelHideSearchButton,
     /// Flip the "Hide Icon Backdrop" toggle (Tab Icons section).
     ToggleTabsHideIconBackdrop,
     /// Set the tab style preset (e.g. Cortex Modern).
@@ -109,8 +115,20 @@ pub enum CortexSettingsAction {
     ToggleTopBarMatchesTerminalBg,
     /// Flip the "Hide Top Bar Divider Line" toggle on the Top Bar page.
     ToggleTopBarHideDivider,
-    /// Set the title-bar search bar visual style (Cortex Default / Warp Default).
-    SetTopBarSearchBarStyle(SearchBarStyle),
+    /// Set the title-bar search bar opacity (10..=100).
+    SetTopBarSearchBarOpacity(u8),
+    /// Flip the "Compact Search Bar" placeholder toggle.
+    ToggleTopBarSearchBarCompact,
+    /// Flip the "Hide Tabs Panel Collapse Button" toggle.
+    ToggleTopBarHideTabsPanelCollapseButton,
+    /// Flip the "Hide Agent Management Panel Button" toggle.
+    ToggleTopBarHideAgentManagementButton,
+    /// Flip the "Hide Notifications Button" toggle.
+    ToggleTopBarHideNotificationsButton,
+    /// Set the top-bar font family. Empty string = inherit UI font.
+    SetTopBarFontName(String),
+    /// Flip the "Replace Profile Button with Generic Icon" toggle.
+    ToggleTopBarGenericProfileIcon,
     /// Toggle visibility of the File Explorer icon in the toolbar.
     ToggleToolbarShowFileExplorer,
     /// Toggle visibility of the Global Search icon in the toolbar.
