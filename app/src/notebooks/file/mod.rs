@@ -27,12 +27,17 @@ use warpui::{
 
 #[cfg(feature = "local_fs")]
 use crate::notebooks::post_process_notebook;
+use pathfinder_color::ColorU;
+use settings::Setting as _;
+
 use crate::{
     appearance::Appearance,
     cmd_or_ctrl_shift,
     editor::InteractionState,
     menu::{MenuItem, MenuItemFields},
     notebooks::editor::{model::NotebooksEditorModel, rich_text_styles},
+    settings::CortexSettings,
+    util::color::lighten_toward_white,
     pane_group::{
         focus_state::PaneFocusHandle,
         pane::view,
@@ -86,6 +91,8 @@ pub struct FileNotebookView {
     location: Option<FileLocation>,
     /// Read-only rich text editor used to show the notebook contents.
     editor: ViewHandle<RichTextEditorView>,
+    /// Retained handle so we can push header-color overrides into the render model.
+    editor_model: ModelHandle<NotebooksEditorModel>,
     retry_button_mouse_state: MouseStateHandle,
     /// Tracks the state for loading the backing Markdown file.
     file_state: FileState,
@@ -248,6 +255,7 @@ impl FileNotebookView {
             model.set_default_mermaid_display_mode(MarkdownDisplayMode::Rendered, ctx);
             model
         });
+        let editor_model_retained = editor_model.clone();
         let editor = ctx.add_typed_action_view(|ctx| {
             let mut view = RichTextEditorView::new(
                 view_position_id.clone(),
@@ -280,9 +288,19 @@ impl FileNotebookView {
             view.handle_action(&FileNotebookAction::ToggleMarkdownDisplayMode(*mode), ctx);
         });
 
+        // CORTEX-BEGIN: header-text-colors
+        ctx.subscribe_to_model(&Appearance::handle(ctx), |view, _, _, ctx| {
+            view.push_header_colors_to_editor(ctx);
+        });
+        ctx.subscribe_to_model(&CortexSettings::handle(ctx), |view, _, _, ctx| {
+            view.push_header_colors_to_editor(ctx);
+        });
+        // CORTEX-END: header-text-colors
+
         Self {
             location: None,
             editor,
+            editor_model: editor_model_retained,
             file_state: FileState::NoFile,
             retry_button_mouse_state: Default::default(),
             #[cfg(feature = "local_fs")]
@@ -680,10 +698,22 @@ impl FileNotebookView {
         &self,
         appearance: &Appearance,
         font_settings: &FontSettings,
+        app: &AppContext,
     ) -> Box<dyn Element> {
+        // CORTEX-BEGIN: editor-title-font
+        let font_name = &**CortexSettings::as_ref(app).editor_title_font_name.value();
+        let title_family = if font_name.is_empty() {
+            appearance.ui_font_family()
+        } else {
+            app.font_cache()
+                .family_id_for_name(font_name)
+                .unwrap_or_else(|| appearance.ui_font_family())
+        };
+        // CORTEX-END: editor-title-font
+
         let title = Text::new_inline(
             self.title(),
-            appearance.ui_font_family(),
+            title_family,
             styles::title_font_size(font_settings),
         )
         .with_color(styles::title_text_fill(appearance).into())
@@ -696,6 +726,7 @@ impl FileNotebookView {
                 .span(location.breadcrumbs.clone())
                 .with_style(UiComponentStyles {
                     font_color: Some(styles::title_text_fill(appearance).into_solid()),
+                    font_family_id: Some(title_family),
                     ..Default::default()
                 })
                 .build()
@@ -798,6 +829,34 @@ impl FileNotebookView {
         };
         styles::wrap_body(body)
     }
+
+    // CORTEX-BEGIN: header-text-colors
+    fn push_header_colors_to_editor(&self, ctx: &mut ViewContext<Self>) {
+        let enabled = *CortexSettings::as_ref(ctx).editor_header_project_color;
+        let colors = if enabled {
+            self.focus_handle
+                .as_ref()
+                .and_then(|fh| fh.cortex_pane_border_color(ctx))
+                .map(|fill| {
+                    let base: ColorU = fill.into_solid();
+                    std::array::from_fn(|i| lighten_toward_white(base, i as f32 * 0.05))
+                })
+        } else {
+            None
+        };
+
+        let model = &self.editor_model;
+        let current = model.as_ref(ctx).render_state().as_ref(ctx).styles().clone();
+        if current.header_text_colors == colors {
+            return;
+        }
+        let mut updated = current;
+        updated.header_text_colors = colors;
+        model.update(ctx, |m, ctx| {
+            m.update_rich_text_styles(updated, ctx);
+        });
+    }
+    // CORTEX-END: header-text-colors
 }
 
 impl Entity for FileNotebookView {
@@ -821,7 +880,7 @@ impl View for FileNotebookView {
         let font_settings = FontSettings::as_ref(app);
 
         let column = Flex::column().with_children([
-            self.render_title(appearance, font_settings),
+            self.render_title(appearance, font_settings, app),
             Shrinkable::new(1., self.render_body(appearance)).finish(),
         ]);
 
@@ -1061,9 +1120,10 @@ impl BackingView for FileNotebookView {
         }
     }
 
-    fn set_focus_handle(&mut self, focus_handle: PaneFocusHandle, _ctx: &mut ViewContext<Self>) {
+    fn set_focus_handle(&mut self, focus_handle: PaneFocusHandle, ctx: &mut ViewContext<Self>) {
         self.focus_handle = Some(focus_handle.clone());
         self.context_menu.set_focus_handle(focus_handle);
+        self.push_header_colors_to_editor(ctx);
     }
 }
 

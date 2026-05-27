@@ -272,6 +272,7 @@ pub fn rich_text_styles(appearance: &Appearance, font_settings: &FontSettings) -
         cursor_width: 1.,
         highlight_urls: true,
         table_style: markdown_table_style(appearance, appearance.ui_font_family(), font_size),
+        header_text_colors: None,
     }
 }
 

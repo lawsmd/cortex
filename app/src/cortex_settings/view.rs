@@ -143,7 +143,7 @@ impl CortexSettingsView {
             tabs_state: TabsPageState::new(ctx),
             top_bar_state: TopBarPageState::new(ctx),
             toolbar_state: ToolbarPageState::default(),
-            editor_state: EditorPageState::default(),
+            editor_state: EditorPageState::new(ctx),
             file_explorer_state: FileExplorerPageState::new(ctx),
             ai_state: AiPageState::default(),
             diagnostics_state: DiagnosticsPageState::default(),
@@ -465,6 +465,30 @@ impl CortexSettingsView {
 
         CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
             let _ = settings.editor_wrap_long_lines.toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_editor_header_project_color(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .editor_header_project_color
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn set_editor_title_font_name(&mut self, value: String, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::Setting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.editor_title_font_name.set_value(value, ctx);
         });
         ctx.notify();
     }
@@ -932,6 +956,12 @@ impl warpui::TypedActionView for CortexSettingsView {
             }
             CortexSettingsAction::ToggleEditorWrapLongLines => {
                 self.toggle_editor_wrap_long_lines(ctx)
+            }
+            CortexSettingsAction::ToggleEditorHeaderProjectColor => {
+                self.toggle_editor_header_project_color(ctx)
+            }
+            CortexSettingsAction::SetEditorTitleFontName(value) => {
+                self.set_editor_title_font_name(value.clone(), ctx)
             }
             CortexSettingsAction::ToggleTopBarMatchesTerminalBg => {
                 self.toggle_top_bar_matches_terminal_bg(ctx)

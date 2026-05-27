@@ -1305,6 +1305,7 @@ impl NotebooksEditorModel {
             let current = self.render_state.as_ref(ctx).styles();
             current.inline_code_style != new_styles.inline_code_style
                 || current.base_text.text_color != new_styles.base_text.text_color
+                || current.header_text_colors != new_styles.header_text_colors
         };
 
         let style_update = self.render_state.update(ctx, |render_state, _| {

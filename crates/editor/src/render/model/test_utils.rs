@@ -218,6 +218,7 @@ pub const TEST_STYLES: RichTextStyles = RichTextStyles {
         column_dividers: true,
         row_dividers: true,
     },
+    header_text_colors: None,
 };
 
 /// Minimal text layout for unit tests that require populated text frames.

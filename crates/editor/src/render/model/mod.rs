@@ -506,6 +506,9 @@ pub struct RichTextStyles {
     pub highlight_urls: bool,
     /// Styling for tables.
     pub table_style: TableStyle,
+    // CORTEX-BEGIN: header-text-colors
+    pub header_text_colors: Option<[ColorU; 6]>,
+    // CORTEX-END: header-text-colors
 }
 
 #[derive(Clone, PartialEq, Debug)]
@@ -3401,6 +3404,12 @@ impl RichTextStyles {
                 let mut base_text_style = self.base_text;
                 base_text_style.font_size *= header_size.font_size_multiplication_ratio();
                 base_text_style.font_weight = Weight::from_custom_weight(header_size.font_weight());
+                // CORTEX-BEGIN: header-text-colors
+                if let Some(colors) = &self.header_text_colors {
+                    let idx: usize = (*header_size).into();
+                    base_text_style.text_color = colors[idx.saturating_sub(1)];
+                }
+                // CORTEX-END: header-text-colors
                 base_text_style
             }
         }

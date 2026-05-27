@@ -34,6 +34,7 @@ use warpui::event::DispatchedEvent;
 use warpui::{AppContext, SingletonEntity};
 
 use crate::animation::AnimationClock;
+use crate::util::color::lighten_toward_white;
 
 const BREATH_DEPTH: f32 = 0.70;
 /// Minimum opacity at the trough of the cycle. The row renderer drops the
@@ -75,15 +76,6 @@ impl RowGlowBreathElement {
             origin: None,
         }
     }
-}
-
-fn lighten_toward_white(c: ColorU, amount: f32) -> ColorU {
-    let amount = amount.clamp(0.0, 1.0);
-    let blend = |channel: u8| -> u8 {
-        let v = channel as f32;
-        (v + (255.0 - v) * amount).round().clamp(0.0, 255.0) as u8
-    };
-    ColorU::new(blend(c.r), blend(c.g), blend(c.b), c.a)
 }
 
 impl Element for RowGlowBreathElement {

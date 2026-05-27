@@ -126,6 +126,10 @@ pub enum CortexSettingsAction {
     /// [`crate::settings::CortexSettings::editor_wrap_long_lines`]; read at
     /// editor model construction (reopen the file to apply a change).
     ToggleEditorWrapLongLines,
+    /// Flip the "Header Project Color" toggle on the Editor page.
+    ToggleEditorHeaderProjectColor,
+    /// Set the font family for the rendered-Markdown title / breadcrumbs.
+    SetEditorTitleFontName(String),
     /// Flip the "Top Bar Matches Terminal Background Color" toggle on the
     /// Top Bar page.
     ToggleTopBarMatchesTerminalBg,
