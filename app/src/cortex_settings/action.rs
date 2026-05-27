@@ -15,6 +15,10 @@ pub enum CortexSettingsSection {
     Editor,
     FileExplorer,
     Ai,
+    /// Cortex-only: live health of the external-status hook bridge plus a
+    /// "Test bridge" button. See `app/src/cortex_settings/diagnostics_page.rs`
+    /// and `app/src/terminal/cli_agent_sessions/bridge_health.rs`.
+    Diagnostics,
 }
 
 impl CortexSettingsSection {
@@ -27,6 +31,7 @@ impl CortexSettingsSection {
             Self::Editor => "Editor",
             Self::FileExplorer => "File Explorer",
             Self::Ai => "AI",
+            Self::Diagnostics => "Diagnostics",
         }
     }
 
@@ -39,6 +44,7 @@ impl CortexSettingsSection {
             Self::Editor,
             Self::FileExplorer,
             Self::Ai,
+            Self::Diagnostics,
         ]
     }
 }
@@ -145,4 +151,9 @@ pub enum CortexSettingsAction {
     ToggleFileExplorerNerdIcons,
     /// Toggle per-file-type icon coloring in the file explorer.
     ToggleFileExplorerColoredIcons,
+    /// Cortex-only: trigger a manual sweep of the bridge-health watchdog
+    /// from the Diagnostics page's "Test bridge" button. Refreshes the
+    /// state shown in the UI without waiting for the next 5 s sweep tick.
+    /// See `app/src/terminal/cli_agent_sessions/bridge_health.rs`.
+    TriggerBridgeHealthSweep,
 }

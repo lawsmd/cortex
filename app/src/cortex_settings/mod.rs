@@ -21,6 +21,7 @@
 pub mod action;
 pub mod ai_page;
 pub mod brand;
+pub mod diagnostics_page;
 pub mod editor_page;
 pub mod file_explorer_page;
 pub mod font_options;

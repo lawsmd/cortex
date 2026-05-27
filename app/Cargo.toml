@@ -53,6 +53,18 @@ name = "generate_settings_schema"
 path = "src/bin/generate_settings_schema.rs"
 test = false
 
+# Cortex-only thin client. Talks bincode over the hook-bridge IPC socket
+# whose path is in `CORTEX_HOOK_IPC_SOCKET`. Invoked from inside
+# `cortex-hook.{sh,ps1}` as a parallel transport alongside the existing
+# OSC 777 emit. Kept as a separate binary (rather than a subcommand of
+# `warp-oss`) so it doesn't pay the full app's startup cost on every
+# claude lifecycle hook. See docs/ai/external-status-injection.md
+# § Layer A2.
+[[bin]]
+name = "cortex-hook-emit"
+path = "src/bin/cortex_hook_emit.rs"
+test = false
+
 [dependencies]
 addr = "0.15.6"
 ai.workspace = true

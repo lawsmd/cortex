@@ -29,6 +29,9 @@ use crate::cortex_settings::brand::{
     BRAND_HEADER_ICON_TO_TITLE_FONT_RATIO, BRAND_HEADER_TITLE_TO_FONT_RATIO,
     BRAND_MENU_ICON_LABEL_GAP_RATIO,
 };
+use crate::cortex_settings::diagnostics_page::{
+    diagnostics_page_search_terms, render_diagnostics_page, DiagnosticsPageState,
+};
 use crate::cortex_settings::editor_page::{
     editor_page_search_terms, render_editor_page, EditorPageState,
 };
@@ -99,6 +102,7 @@ pub struct CortexSettingsView {
     editor_state: EditorPageState,
     file_explorer_state: FileExplorerPageState,
     ai_state: AiPageState,
+    diagnostics_state: DiagnosticsPageState,
     search_editor: ViewHandle<EditorView>,
 }
 
@@ -142,6 +146,7 @@ impl CortexSettingsView {
             editor_state: EditorPageState::default(),
             file_explorer_state: FileExplorerPageState::new(ctx),
             ai_state: AiPageState::default(),
+            diagnostics_state: DiagnosticsPageState::default(),
             search_editor,
         }
     }
@@ -617,6 +622,22 @@ impl CortexSettingsView {
         ctx.notify();
     }
 
+    #[cfg(not(target_family = "wasm"))]
+    fn trigger_bridge_health_sweep(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::terminal::cli_agent_sessions::bridge_health::BridgeHealthMonitor;
+        use warpui::SingletonEntity;
+
+        BridgeHealthMonitor::handle(ctx).update(ctx, |monitor, ctx| {
+            monitor.sweep_now(ctx);
+        });
+        ctx.notify();
+    }
+
+    #[cfg(target_family = "wasm")]
+    fn trigger_bridge_health_sweep(&mut self, _ctx: &mut ViewContext<Self>) {
+        // Watchdog isn't compiled on wasm — button is a no-op.
+    }
+
     fn handle_search_editor_event(
         &mut self,
         _editor: ViewHandle<EditorView>,
@@ -745,6 +766,9 @@ impl CortexSettingsView {
                 render_file_explorer_page(&self.file_explorer_state, appearance, app)
             }
             CortexSettingsSection::Ai => render_ai_page(&self.ai_state, appearance, app),
+            CortexSettingsSection::Diagnostics => {
+                render_diagnostics_page(&self.diagnostics_state, appearance, app)
+            }
         }
     }
 }
@@ -884,6 +908,9 @@ impl warpui::TypedActionView for CortexSettingsView {
             CortexSettingsAction::ToggleFileExplorerColoredIcons => {
                 self.toggle_file_explorer_colored_icons(ctx)
             }
+            CortexSettingsAction::TriggerBridgeHealthSweep => {
+                self.trigger_bridge_health_sweep(ctx)
+            }
         }
     }
 }
@@ -971,13 +998,14 @@ impl BackingView for CortexSettingsView {
 #[allow(dead_code)]
 pub fn cortex_settings_search_terms() -> String {
     format!(
-        "cortex settings {} {} {} {} {} {} {}",
+        "cortex settings {} {} {} {} {} {} {} {}",
         working_panes_page_search_terms().join(" "),
         tabs_page_search_terms().join(" "),
         top_bar_page_search_terms().join(" "),
         toolbar_page_search_terms().join(" "),
         editor_page_search_terms().join(" "),
         file_explorer_page_search_terms().join(" "),
-        ai_page_search_terms().join(" ")
+        ai_page_search_terms().join(" "),
+        diagnostics_page_search_terms().join(" ")
     )
 }

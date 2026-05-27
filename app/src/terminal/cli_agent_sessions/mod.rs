@@ -8,8 +8,19 @@ pub(crate) mod plugin_manager;
 // See docs/ai/external-status-injection.md.
 #[cfg(not(target_family = "wasm"))]
 pub mod cortex_claude_hooks;
+// CORTEX-BEGIN: bridge-health-module
+// Cortex-only: receive-side watchdog for the external-status hook bridge.
+// Detects "PromptSubmit armed but no Stop ever arrived" — the strongest
+// signal that Tier 1 (OSC 777 / IPC) has gone dark. See `bridge_health.rs`
+// and `docs/ai/external-status-injection.md`.
+#[cfg(not(target_family = "wasm"))]
+pub mod bridge_health;
+// CORTEX-END: bridge-health-module
 
 use std::collections::{HashMap, HashSet};
+// CORTEX-BEGIN: bridge-health-instant-import
+use std::time::Instant;
+// CORTEX-END: bridge-health-instant-import
 
 use warpui::{Entity, EntityId, ModelContext, ModelHandle, SingletonEntity};
 
@@ -339,6 +350,15 @@ pub struct CLIAgentSessionsModel {
     /// (called from the workspace's `PaneFocused` handler) and by a fresh
     /// `PromptSubmit` (the user re-engaged so the prior turn is acknowledged).
     attention_pending: HashSet<EntityId>,
+    // CORTEX-BEGIN: bridge-health-prompt-submit-at
+    /// Tracks `Instant::now()` at the moment of each `PromptSubmit`, cleared
+    /// on the corresponding `Stop`. The [`bridge_health::BridgeHealthMonitor`]
+    /// watchdog sweeps this map looking for armed entries older than the
+    /// "missed Stop" threshold — the strongest receive-side signal that
+    /// Tier 1 (the OSC 777 / IPC bridge from `cortex-hook.sh` / `cortex-hook.ps1`)
+    /// has gone dark. See `docs/ai/external-status-injection.md`.
+    prompt_submit_at: HashMap<EntityId, Instant>,
+    // CORTEX-END: bridge-health-prompt-submit-at
 }
 
 impl Entity for CLIAgentSessionsModel {
@@ -353,6 +373,9 @@ impl CLIAgentSessionsModel {
             sessions: HashMap::new(),
             plugin_auto_failures: HashSet::new(),
             attention_pending: HashSet::new(),
+            // CORTEX-BEGIN: bridge-health-prompt-submit-at-init
+            prompt_submit_at: HashMap::new(),
+            // CORTEX-END: bridge-health-prompt-submit-at-init
         }
     }
 
@@ -368,6 +391,19 @@ impl CLIAgentSessionsModel {
     pub fn is_attention_pending(&self, terminal_view_id: EntityId) -> bool {
         self.attention_pending.contains(&terminal_view_id)
     }
+
+    // CORTEX-BEGIN: bridge-health-armed-accessor
+    /// Snapshot of `(view_id, prompt_submit_at)` pairs for every session that
+    /// has an unacknowledged `PromptSubmit` (no `Stop` received yet). Consumed
+    /// by [`bridge_health::BridgeHealthMonitor`] to detect missed Stops — an
+    /// armed entry older than the threshold means Tier 1 emit failed for that
+    /// turn.
+    pub fn armed_prompt_submits(&self) -> impl Iterator<Item = (EntityId, Instant)> + '_ {
+        self.prompt_submit_at
+            .iter()
+            .map(|(id, at)| (*id, *at))
+    }
+    // CORTEX-END: bridge-health-armed-accessor
 
     /// Clears the attention-pending flag for this session, if set. Called
     /// from the workspace's `PaneFocused` handler — reaching the pane is the
@@ -593,12 +629,39 @@ impl CLIAgentSessionsModel {
         match event_type {
             CLIAgentEventType::Stop => {
                 self.attention_pending.insert(terminal_view_id);
+                // CORTEX-BEGIN: bridge-health-disarm-on-stop
+                // Symmetric to the arm-on-PromptSubmit below. A Stop event
+                // is the receive-side proof that Tier 1 delivered.
+                self.prompt_submit_at.remove(&terminal_view_id);
+                // CORTEX-END: bridge-health-disarm-on-stop
             }
             CLIAgentEventType::PromptSubmit => {
                 self.attention_pending.remove(&terminal_view_id);
+                // CORTEX-BEGIN: bridge-health-arm-on-prompt-submit
+                self.prompt_submit_at
+                    .insert(terminal_view_id, Instant::now());
+                // CORTEX-END: bridge-health-arm-on-prompt-submit
             }
             _ => {}
         }
+
+        // CORTEX-BEGIN: bridge-health-record-event
+        // Notify the receive-side watchdog. Direct cross-singleton call
+        // (rather than event subscription) so the counter only bumps once
+        // per `update_from_event` invocation, even when multiple
+        // CLIAgentSessionsModelEvent variants are emitted below. Skipped on
+        // wasm — the watchdog module isn't compiled there.
+        #[cfg(not(target_family = "wasm"))]
+        {
+            let is_stop = matches!(event_type, CLIAgentEventType::Stop);
+            bridge_health::BridgeHealthMonitor::handle(ctx).update(
+                ctx,
+                |monitor, ctx| {
+                    monitor.record_event(is_stop, ctx);
+                },
+            );
+        }
+        // CORTEX-END: bridge-health-record-event
 
         if matches!(
             event_type,

@@ -159,6 +159,22 @@ pub(super) fn get_shell_environment_variables(options: &PtyOptions) -> Vec<u16> 
         );
     }
 
+    // CORTEX-BEGIN: hook-bridge-ipc-env
+    // Hook-bridge IPC socket path for `cortex-hook-emit` invoked from
+    // `cortex-hook.ps1`. Same WSL caveat as above — intentionally not
+    // forwarded into WSL distros. Shadow MVP, see
+    // docs/ai/external-status-injection.md § Layer A2.
+    if let Some(socket_path) = crate::hook_bridge::hook_bridge_ipc_socket_path() {
+        env.insert(
+            map_key(crate::hook_bridge::CORTEX_HOOK_IPC_SOCKET_ENV.into()),
+            EnvEntry {
+                preferred_key: crate::hook_bridge::CORTEX_HOOK_IPC_SOCKET_ENV.into(),
+                value: socket_path.into(),
+            },
+        );
+    }
+    // CORTEX-END: hook-bridge-ipc-env
+
     match &options.shell_starter {
         ShellStarter::MSYS2(_) => {
             // Prevent all commands run before bootstrap from entering history.

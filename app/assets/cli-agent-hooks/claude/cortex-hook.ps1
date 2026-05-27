@@ -255,6 +255,41 @@ try {
     exit 0
 }
 
+# ---- Shadow IPC emit -----------------------------------------------------
+# Cortex Phase 2 (Layer A2, docs/ai/external-status-injection.md): fire the
+# envelope through the Cortex hook-bridge IPC server in addition to the
+# AttachConsole/CONOUT$ path below. OSC remains authoritative; IPC delivery
+# is logged separately (`ipc=ok|fail|skip`) so the Diagnostics page can show
+# transport health for both channels independently and a future Phase 3 can
+# flip authority once pane-routing is wired up.
+$ipcStatus = 'skip'
+$emitBinary = Get-Command 'cortex-hook-emit.exe' -ErrorAction SilentlyContinue
+if ($env:CORTEX_HOOK_IPC_SOCKET -and $emitBinary) {
+    try {
+        # Pipe the JSON envelope to the thin client. Swallow stdout/stderr —
+        # the binary always exits 0 and logs its own ipc=ok|fail line to
+        # ~/.claude/cortex-hook.log so we can grep delivery independently.
+        $emitInfo = New-Object System.Diagnostics.ProcessStartInfo
+        $emitInfo.FileName = $emitBinary.Source
+        $emitInfo.RedirectStandardInput = $true
+        $emitInfo.RedirectStandardOutput = $true
+        $emitInfo.RedirectStandardError = $true
+        $emitInfo.UseShellExecute = $false
+        $emitInfo.CreateNoWindow = $true
+        $emitProc = [System.Diagnostics.Process]::Start($emitInfo)
+        $emitProc.StandardInput.Write($json)
+        $emitProc.StandardInput.Close()
+        if ($emitProc.WaitForExit(2000)) {
+            $ipcStatus = 'ok'
+        } else {
+            try { $emitProc.Kill() } catch {}
+            $ipcStatus = 'fail'
+        }
+    } catch {
+        $ipcStatus = 'fail'
+    }
+}
+
 # ---- OSC 777 byte sequence -----------------------------------------------
 # \x1b]777;notify;warp://cli-agent;<JSON>\x07
 $prefix = [byte[]]@(0x1B, 0x5D) + [System.Text.Encoding]::ASCII.GetBytes('777;notify;warp://cli-agent;')
@@ -393,7 +428,7 @@ namespace Cortex.Hook {
 }
 
 if ($emitted) {
-    Write-CortexHookLog ("emit ok event={0} bytes={1} pane_shell={2}" -f $cortexEvent, $bytes.Length, $shellPid)
+    Write-CortexHookLog ("emit ok event={0} bytes={1} pane_shell={2} ipc={3}" -f $cortexEvent, $bytes.Length, $shellPid, $ipcStatus)
 }
 
 exit 0

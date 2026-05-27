@@ -52,6 +52,8 @@ mod login_item;
 mod menu;
 mod modal;
 mod network;
+#[cfg(not(target_family = "wasm"))]
+mod hook_bridge;
 mod notebooks;
 mod notification;
 #[cfg(not(target_family = "wasm"))]
@@ -1465,6 +1467,14 @@ pub(crate) fn initialize_app(
     #[cfg(not(target_family = "wasm"))]
     ctx.add_singleton_model(orchestrate::OrchestrateBridge::new);
 
+    // Same shape for the hook-bridge IPC server: must boot before any
+    // PTY spawns so the env-var injector below sees a populated
+    // `CORTEX_HOOK_IPC_SOCKET`. Shadow-MVP: handler logs + counts only;
+    // OSC 777 remains authoritative. See
+    // docs/ai/external-status-injection.md § Layer A2.
+    #[cfg(not(target_family = "wasm"))]
+    ctx.add_singleton_model(hook_bridge::HookBridgeServer::new);
+
     log::info!(
         "Starting warp with channel state {} and version {:?}",
         ChannelState::debug_str(),
@@ -1799,6 +1809,15 @@ pub(crate) fn initialize_app(
     });
     ctx.add_singleton_model(move |_| RestoredAgentConversations::new(multi_agent_conversations));
     ctx.add_singleton_model(|_| CLIAgentSessionsModel::new());
+    // CORTEX-BEGIN: bridge-health-monitor-singleton
+    // Cortex-only: receive-side watchdog for the external-status hook bridge.
+    // Registered immediately after CLIAgentSessionsModel so the bridge-health
+    // record_event call in update_from_event always finds an initialized
+    // singleton. See app/src/terminal/cli_agent_sessions/bridge_health.rs and
+    // docs/ai/external-status-injection.md.
+    #[cfg(not(target_family = "wasm"))]
+    ctx.add_singleton_model(crate::terminal::cli_agent_sessions::bridge_health::BridgeHealthMonitor::new);
+    // CORTEX-END: bridge-health-monitor-singleton
     // Cortex: install the claude hook bridge once per app launch. Idempotent
     // — no-ops when already installed. Runs at startup (not on first claude
     // detection) because the gating triggers on `ClaudeCodePluginManager::install`

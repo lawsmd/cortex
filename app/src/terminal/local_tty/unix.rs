@@ -373,6 +373,20 @@ fn build_host_shell_command(
         builder.env(CORTEX_IPC_SOCKET_ENV, socket_path);
     }
 
+    // CORTEX-BEGIN: hook-bridge-ipc-env
+    // Expose the Cortex hook-bridge IPC socket so `cortex-hook-emit`
+    // (invoked from inside `cortex-hook.sh`) can reach the running
+    // HookBridgeServer. Shadow MVP — OSC 777 still drives state; this
+    // path provides observability + de-risks the Phase 3 transport flip.
+    // See docs/ai/external-status-injection.md § Layer A2.
+    if let Some(socket_path) = crate::hook_bridge::hook_bridge_ipc_socket_path() {
+        builder.env(
+            crate::hook_bridge::CORTEX_HOOK_IPC_SOCKET_ENV,
+            socket_path,
+        );
+    }
+    // CORTEX-END: hook-bridge-ipc-env
+
     // Apply any caller-provided environment overrides last, so they win.
     for (key, value) in env_vars {
         builder.env(key, value);
@@ -836,6 +850,18 @@ fn build_docker_sandbox_command(
     if let Some(socket_path) = orchestrate_ipc_socket_path() {
         builder.env(CORTEX_IPC_SOCKET_ENV, socket_path);
     }
+
+    // CORTEX-BEGIN: hook-bridge-ipc-env-sandbox
+    // Same host/sandbox-symmetric exposure for the hook-bridge IPC socket.
+    // Reachable from inside the sandbox only if `sbx` bind-mounts the
+    // socket path; harmless to expose either way.
+    if let Some(socket_path) = crate::hook_bridge::hook_bridge_ipc_socket_path() {
+        builder.env(
+            crate::hook_bridge::CORTEX_HOOK_IPC_SOCKET_ENV,
+            socket_path,
+        );
+    }
+    // CORTEX-END: hook-bridge-ipc-env-sandbox
 
     // Apply any caller-provided environment overrides last, so they win.
     for (key, value) in env_vars {
