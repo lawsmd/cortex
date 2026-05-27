@@ -114,6 +114,14 @@ pub enum CortexSettingsAction {
     /// `--dangerously-skip-permissions` (off). Read by the orchestrate IPC
     /// bridge at request time.
     ToggleOrchestratedSubagentsStartInPlanMode,
+    /// Toggle the AI Assistant button in the block action toolbar.
+    ToggleShowBlockAiButton,
+    /// Toggle the Save as Workflow button in the block action toolbar.
+    ToggleShowBlockSaveWorkflowButton,
+    /// Toggle the Filter button in the block action toolbar.
+    ToggleShowBlockFilterButton,
+    /// Toggle the overflow menu button in the block action toolbar.
+    ToggleShowBlockOverflowButton,
     /// Flip the "Wrap Lines in 'Raw' View" toggle on the Editor page. Persisted to
     /// [`crate::settings::CortexSettings::editor_wrap_long_lines`]; read at
     /// editor model construction (reopen the file to apply a change).

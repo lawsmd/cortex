@@ -23407,6 +23407,10 @@ impl TerminalView {
                       filtered_blocks,
                       mouse_states,
                       app| {
+                    // CORTEX-BEGIN: block-filter-button-toggle
+                    let show_filter_btn =
+                        *crate::settings::CortexSettings::as_ref(app).show_block_filter_button;
+                    // CORTEX-END: block-filter-button-toggle
                     range
                         .iter()
                         .enumerate()
@@ -23416,9 +23420,10 @@ impl TerminalView {
                                 filtered_blocks.is_some_and(|filtered_blocks| {
                                     filtered_blocks.contains(block_index)
                                 });
-                            if has_active_filter
+                            if show_filter_btn
+                                && (has_active_filter
                                 || hovered_index == Some(*block_index)
-                                || active_filter_editor_block_index == Some(*block_index)
+                                || active_filter_editor_block_index == Some(*block_index))
                             {
                                 Some(Self::render_filter_element(
                                     *block_index,

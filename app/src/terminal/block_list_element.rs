@@ -1070,6 +1070,14 @@ impl BlockListElement {
             .sub_text_color(self.warp_theme.surface_2())
             .into_solid();
 
+        // CORTEX-BEGIN: block-button-toggles
+        let cortex = crate::settings::CortexSettings::as_ref(app);
+        let show_overflow = *cortex.show_block_overflow_button;
+        let show_ai = *cortex.show_block_ai_button;
+        let show_workflow = *cortex.show_block_save_workflow_button;
+        // CORTEX-END: block-button-toggles
+
+        if show_overflow {
         let icon = Container::new(
             ConstrainedBox::new(Icon::new(OVERFLOW_BUTTON_ICON_PATH, icon_color).finish())
                 .with_height(26.)
@@ -1097,6 +1105,7 @@ impl BlockListElement {
             )
             .finish(),
         );
+        }
 
         let snackbar_toggle_icon;
         let rounded_corners;
@@ -1136,7 +1145,7 @@ impl BlockListElement {
             .finish(),
         );
 
-        if AISettings::as_ref(app).is_any_ai_enabled(app) {
+        if show_ai && AISettings::as_ref(app).is_any_ai_enabled(app) {
             let icon = Container::new(
                 ConstrainedBox::new(if FeatureFlag::AgentView.is_enabled() {
                     UIIcon::Icon::Paperclip
@@ -1201,7 +1210,7 @@ impl BlockListElement {
             self.ask_ai_assistant_button = Some(element);
         }
 
-        if WarpDriveSettings::is_warp_drive_enabled(app) {
+        if show_workflow && WarpDriveSettings::is_warp_drive_enabled(app) {
             let icon = Container::new(
                 ConstrainedBox::new(
                     ui_components::icons::Icon::Save
@@ -4073,7 +4082,31 @@ impl Element for BlockListElement {
 
                     ctx.scene.start_layer(ClipBounds::ActiveLayer);
                     let block_is_bookmarked = self.bookmark_elements.contains_key(block_index);
-                    let offset = 136.; // 4 icons of 26px width + 4px padding between icons x3 + 4px left padding + 4 px right padding + 4px for selected block border + 8px scrollbar
+
+                    // CORTEX-BEGIN: dynamic-block-toolbar-layout
+                    let ai_slot_used = self.ask_ai_assistant_button.is_some();
+                    let bookmark_slot_used =
+                        self.save_as_workflow_button.is_some() || block_is_bookmarked;
+                    let filter_slot_used = self.filter_elements.contains_key(block_index);
+                    let overflow_slot_used = self.overflow_menu_button.is_some();
+
+                    let slot_count = [
+                        ai_slot_used,
+                        bookmark_slot_used,
+                        filter_slot_used,
+                        overflow_slot_used,
+                    ]
+                    .iter()
+                    .filter(|&&v| v)
+                    .count() as f32;
+
+                    let menu_rect_width = if slot_count > 0. {
+                        30. * slot_count + 4.
+                    } else {
+                        0.
+                    };
+                    let offset = menu_rect_width + 12.;
+                    // CORTEX-END: dynamic-block-toolbar-layout
 
                     let block_menu_items_start_origin = header_grid_origin
                         + vec2f(
@@ -4083,17 +4116,28 @@ impl Element for BlockListElement {
                         );
 
                     let block_menu_rect_origin = block_menu_items_start_origin - vec2f(4., 4.);
-                    let block_menu_rect_size = vec2f(
-                        124., // 4 icons of 26px width + 4px padding between icons x3 + 4px left padding + 4px right padding
-                        34.,  // 26px height icons + 4px top padding + 4px bottom padding
-                    );
+                    let block_menu_rect_size = vec2f(menu_rect_width, 34.);
 
-                    // We add in increments of 30 as each icon is 26px wide + 4px gap between icons
-                    let ask_ai_assistant_button_origin = block_menu_items_start_origin;
-                    let bookmark_button_origin = block_menu_items_start_origin + vec2f(30., 0.);
+                    // CORTEX-BEGIN: dynamic-button-origins
+                    let mut slot = 0.0_f32;
+                    let ask_ai_assistant_button_origin =
+                        block_menu_items_start_origin + vec2f(slot, 0.);
+                    if ai_slot_used {
+                        slot += 30.;
+                    }
+                    let bookmark_button_origin =
+                        block_menu_items_start_origin + vec2f(slot, 0.);
+                    if bookmark_slot_used {
+                        slot += 30.;
+                    }
+                    let filter_button_origin =
+                        block_menu_items_start_origin + vec2f(slot, 0.);
+                    if filter_slot_used {
+                        slot += 30.;
+                    }
                     let overflow_menu_button_origin =
-                        block_menu_items_start_origin + vec2f(90., 0.);
-                    let filter_button_origin = block_menu_items_start_origin + vec2f(60., 0.);
+                        block_menu_items_start_origin + vec2f(slot, 0.);
+                    // CORTEX-END: dynamic-button-origins
 
                     if let Some(snackbar_toggle_button_origin) =
                         self.compute_snackbar_toggle_button_draw_location(&block_grid_params)
@@ -4113,8 +4157,8 @@ impl Element for BlockListElement {
                         .as_ref()
                         .is_some_and(|filtered_blocks| filtered_blocks.contains(block_index))
                         || self.active_filter_editor_block_index == Some(*block_index);
-                    let show_toolbelt_background =
-                        is_block_hovered || block_has_active_filter_icon || block_is_bookmarked;
+                    let show_toolbelt_background = slot_count > 0.
+                        && (is_block_hovered || block_has_active_filter_icon || block_is_bookmarked);
                     if show_toolbelt_background {
                         let prompt_max_x = match self.label_elements.get_mut(block_index) {
                             // If using the default prompt, use the "label" element's

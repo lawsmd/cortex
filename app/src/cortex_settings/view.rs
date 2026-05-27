@@ -408,6 +408,56 @@ impl CortexSettingsView {
         ctx.notify();
     }
 
+    fn toggle_show_block_ai_button(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.show_block_ai_button.toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_show_block_save_workflow_button(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .show_block_save_workflow_button
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_show_block_filter_button(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .show_block_filter_button
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_show_block_overflow_button(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .show_block_overflow_button
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
     fn toggle_editor_wrap_long_lines(&mut self, ctx: &mut ViewContext<Self>) {
         use crate::settings::CortexSettings;
         use settings::ToggleableSetting;
@@ -867,6 +917,18 @@ impl warpui::TypedActionView for CortexSettingsView {
             }
             CortexSettingsAction::ToggleOrchestratedSubagentsStartInPlanMode => {
                 self.toggle_orchestrated_subagents_start_in_plan_mode(ctx)
+            }
+            CortexSettingsAction::ToggleShowBlockAiButton => {
+                self.toggle_show_block_ai_button(ctx)
+            }
+            CortexSettingsAction::ToggleShowBlockSaveWorkflowButton => {
+                self.toggle_show_block_save_workflow_button(ctx)
+            }
+            CortexSettingsAction::ToggleShowBlockFilterButton => {
+                self.toggle_show_block_filter_button(ctx)
+            }
+            CortexSettingsAction::ToggleShowBlockOverflowButton => {
+                self.toggle_show_block_overflow_button(ctx)
             }
             CortexSettingsAction::ToggleEditorWrapLongLines => {
                 self.toggle_editor_wrap_long_lines(ctx)
