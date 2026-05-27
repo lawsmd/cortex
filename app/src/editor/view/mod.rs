@@ -1469,6 +1469,8 @@ pub struct EditorOptions {
     /// Optional closure that allows parent views to add flags to the EditorView's keymap context.
     /// This is called during `keymap_context()` and can insert additional flags into the context.
     pub keymap_context_modifier: Option<KeymapContextModifierFn>,
+    // CORTEX: when true, draw a static (non-blinking) cursor even when the editor is unfocused.
+    pub show_cursor_when_unfocused: bool,
 }
 
 impl Default for EditorOptions {
@@ -1501,6 +1503,7 @@ impl Default for EditorOptions {
             drag_drop_path_transformer: None,
             is_password: false,
             keymap_context_modifier: None,
+            show_cursor_when_unfocused: false,
         }
     }
 }
@@ -1536,6 +1539,7 @@ impl From<SingleLineEditorOptions> for EditorOptions {
             drag_drop_path_transformer: None,
             is_password: options.is_password,
             keymap_context_modifier: None,
+            show_cursor_when_unfocused: false,
         }
     }
 }
@@ -1912,6 +1916,9 @@ pub struct EditorView {
 
     /// Optional closure that allows parent views to add flags to this editor's keymap context.
     keymap_context_modifier: Option<KeymapContextModifierFn>,
+
+    // CORTEX: draw static cursor when unfocused (terminal input TUI prompt)
+    show_cursor_when_unfocused: bool,
 }
 
 pub(super) struct ScrollState {
@@ -3194,6 +3201,7 @@ impl EditorView {
             process_attached_images_future_handle: None,
             is_password: options.is_password,
             keymap_context_modifier: options.keymap_context_modifier,
+            show_cursor_when_unfocused: options.show_cursor_when_unfocused,
         }
     }
 
@@ -7478,7 +7486,16 @@ impl EditorView {
             return true;
         }
 
-        self.cursors_visible && self.focused_in_active_window(ctx) && self.can_edit(ctx)
+        if !self.can_edit(ctx) {
+            return false;
+        }
+
+        if self.focused_in_active_window(ctx) {
+            self.cursors_visible
+        } else {
+            // CORTEX: static cursor in unfocused terminal input panes
+            self.show_cursor_when_unfocused
+        }
     }
 
     fn handle_model_event(

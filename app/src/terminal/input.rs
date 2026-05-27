@@ -312,7 +312,7 @@ use warpui::{
     elements::{
         resizable_state_handle, Align, AnchorPair, ChildAnchor, Clipped, ConstrainedBox, Container,
         CornerRadius, CrossAxisAlignment, DispatchEventResult, DropTargetData, Element,
-        EventHandler, Flex, MainAxisAlignment, MainAxisSize, MouseStateHandle, OffsetPositioning,
+        EventHandler, Expanded, Flex, MainAxisAlignment, MainAxisSize, MouseStateHandle, OffsetPositioning,
         OffsetType, ParentAnchor, ParentElement, PositionedElementOffsetBounds, PositioningAxis,
         Radius, ResizableStateHandle, SavePosition, SelectionHandle, Text, Wrap, XAxisAnchor,
         YAxisAnchor,
@@ -2850,6 +2850,8 @@ impl Input {
                             context.set.insert(flags::CLI_AGENT_RICH_INPUT_OPEN);
                         }
                     })),
+                    // CORTEX: static cursor bar visible in unfocused terminal panes
+                    show_cursor_when_unfocused: true,
                     ..Default::default()
                 };
                 EditorView::new(options, ctx)
@@ -14583,7 +14585,7 @@ impl Input {
             bottom_padding = terminal_spacing.editor_bottom_padding - 4.;
         }
 
-        let input_box = Container::new(
+        let editor_element = Container::new(
             ConstrainedBox::new(Clipped::new(ChildView::new(&self.editor).finish()).finish())
                 .with_max_height(editor_height_rounded_down.as_f32())
                 .finish(),
@@ -14591,6 +14593,28 @@ impl Input {
         .with_padding_right(*TERMINAL_VIEW_PADDING_LEFT)
         .with_padding_bottom(bottom_padding)
         .finish();
+
+        // CORTEX-BEGIN: tui-prompt-prefix
+        let prompt_color: ColorU =
+            blended_colors::text_sub(appearance.theme(), appearance.theme().background());
+        let prompt_prefix = Container::new(
+            Text::new(
+                ">",
+                appearance.monospace_font_family(),
+                appearance.monospace_font_size(),
+            )
+            .with_color(prompt_color)
+            .finish(),
+        )
+        .with_padding_right(appearance.monospace_font_size() * 0.5)
+        .finish();
+
+        let input_box = Flex::row()
+            .with_cross_axis_alignment(CrossAxisAlignment::Start)
+            .with_child(prompt_prefix)
+            .with_child(Expanded::new(1., editor_element).finish())
+            .finish();
+        // CORTEX-END: tui-prompt-prefix
 
         let input_editor_save_position_id = self.editor_save_position_id();
         SavePosition::new(
