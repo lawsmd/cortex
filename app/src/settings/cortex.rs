@@ -140,6 +140,15 @@ define_settings_group!(CortexSettings, settings: [
         toml_path: "cortex.panes.recap_matches_terminal_style",
         description: "Render restored session blocks with the same background and text colors as live terminal content, instead of the dim gray foreground overlay upstream Warp uses to mark them as inactive scrollback. Cortex default: on (no visual distinction).",
     },
+    panes_title_font_name: PanesTitleFontName {
+        type: String,
+        default: "Fira Code".to_string(),
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.panes.title.font_name",
+        description: "Font family for pane header titles. Empty string falls back to the UI font. Default is Fira Code for the TUI look.",
+    },
     hide_tab_icon: HideTabIcon {
         type: bool,
         default: false,

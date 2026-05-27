@@ -14,7 +14,8 @@ use warpui::elements::{
 };
 use warpui::text_layout::ClipConfig;
 use warpui::ui_components::components::UiComponent;
-use warpui::Element;
+use settings::Setting;
+use warpui::{Element, SingletonEntity};
 
 /// Horizontal padding applied inside each edge column of the three-column header.
 pub const HEADER_EDGE_PADDING: f32 = 4.;
@@ -112,12 +113,24 @@ pub fn render_pane_header_title_text(
     title: impl Into<std::borrow::Cow<'static, str>>,
     appearance: &Appearance,
     clip_config: ClipConfig,
+    app: &warpui::AppContext,
 ) -> Box<dyn Element> {
     let font_size = appearance.ui_font_size();
     let font_color = appearance
         .theme()
         .sub_text_color(appearance.theme().background());
-    Text::new_inline(title, appearance.ui_font_family(), font_size)
+
+    let cortex = crate::settings::CortexSettings::as_ref(app);
+    let name = &**cortex.panes_title_font_name.value();
+    let family = if name.is_empty() {
+        appearance.ui_font_family()
+    } else {
+        app.font_cache()
+            .family_id_for_name(name)
+            .unwrap_or_else(|| appearance.ui_font_family())
+    };
+
+    Text::new_inline(title, family, font_size)
         .with_color(font_color.into())
         .with_clip(clip_config)
         .finish()

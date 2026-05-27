@@ -826,7 +826,7 @@ impl AIDocumentView {
         let button_count = should_show_close_button as u32 + header_ctx.has_overflow_items as u32;
         render_three_column_header(
             left_row,
-            render_pane_header_title_text(title, appearance, ClipConfig::start()),
+            render_pane_header_title_text(title, appearance, ClipConfig::start(), app),
             right_row.finish(),
             CenteredHeaderEdgeWidth {
                 min: button_count as f32 * ICON_DIMENSIONS,

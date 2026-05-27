@@ -70,6 +70,8 @@ pub enum CortexSettingsAction {
     ToggleStartWithBlankPaneOnLaunch,
     /// Flip the "Match Recap Style to Active Terminal" toggle on the Panes page.
     ToggleRecapMatchesTerminalStyle,
+    /// Set the font family for pane header titles. Empty string = inherit UI font.
+    SetPaneTitleFontName(String),
     /// Flip the "Bar/Panel Background Matches Terminal Background" toggle.
     ToggleTabsPanelMatchesTerminalBg,
     /// Flip the "Hide Tabs Search Button" toggle (Vertical Tab Bar/Panel section).

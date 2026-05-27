@@ -359,7 +359,7 @@ impl TerminalView {
         if let Some(indicator) = pane_indicator {
             center_row.add_child(Container::new(indicator).with_margin_right(4.).finish());
         }
-        let title_text = render_pane_header_title_text(title, appearance, clip_config);
+        let title_text = render_pane_header_title_text(title, appearance, clip_config, app);
         if is_pane_dragging {
             // During drag, all children must be non-flex to avoid panics
             // from infinite constraints on flex children.

@@ -139,7 +139,7 @@ impl CortexSettingsView {
             focus_handle: None,
             current_section: CortexSettingsSection::default(),
             sidebar_states,
-            working_panes_state: WorkingPanesPageState::default(),
+            working_panes_state: WorkingPanesPageState::new(ctx),
             tabs_state: TabsPageState::new(ctx),
             top_bar_state: TopBarPageState::new(ctx),
             toolbar_state: ToolbarPageState::default(),
@@ -217,6 +217,17 @@ impl CortexSettingsView {
             let _ = settings
                 .recap_matches_terminal_style
                 .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn set_pane_title_font_name(&mut self, value: String, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::Setting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.panes_title_font_name.set_value(value, ctx);
         });
         ctx.notify();
     }
@@ -820,6 +831,9 @@ impl warpui::TypedActionView for CortexSettingsView {
             }
             CortexSettingsAction::ToggleRecapMatchesTerminalStyle => {
                 self.toggle_recap_matches_terminal_style(ctx)
+            }
+            CortexSettingsAction::SetPaneTitleFontName(value) => {
+                self.set_pane_title_font_name(value.clone(), ctx)
             }
             CortexSettingsAction::ToggleTabsPanelMatchesTerminalBg => {
                 self.toggle_tabs_panel_matches_terminal_bg(ctx)

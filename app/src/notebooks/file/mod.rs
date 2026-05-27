@@ -1027,6 +1027,7 @@ impl BackingView for FileNotebookView {
                 title,
                 appearance,
                 warpui::text_layout::ClipConfig::start(),
+                app,
             );
 
             view::HeaderContent::Custom {

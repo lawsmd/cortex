@@ -1924,7 +1924,7 @@ impl CodeView {
         let title_element: Box<dyn Element> = match tab_handle {
             Some(handle) => Hoverable::new(handle, |hover_state| {
                 let title_text =
-                    render_pane_header_title_text(title.clone(), appearance, ClipConfig::start());
+                    render_pane_header_title_text(title.clone(), appearance, ClipConfig::start(), app);
 
                 let mut title_row = Flex::row()
                     .with_cross_axis_alignment(CrossAxisAlignment::Center)
@@ -1969,7 +1969,7 @@ impl CodeView {
             .finish(),
             None => {
                 let title_text =
-                    render_pane_header_title_text(title, appearance, ClipConfig::start());
+                    render_pane_header_title_text(title, appearance, ClipConfig::start(), app);
                 if has_unsaved {
                     let dot_color = appearance
                         .theme()
