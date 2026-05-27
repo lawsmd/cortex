@@ -11,11 +11,12 @@
 
 use pathfinder_color::ColorU;
 use pathfinder_geometry::vector::Vector2F;
-use settings::Setting;
 
 use crate::animation::elements::row_glow_breath::RowGlowBreathElement;
 use crate::animation::elements::traveling_comet::TravelingCometElement;
+use crate::animation::elements::tui_traveling_dot::TuiTravelingDotElement;
 use crate::appearance::Appearance;
+use crate::settings::TabStyle;
 use crate::tab::TabAnimationKind;
 use crate::themes::theme::Fill as ThemeFill;
 use crate::ui_components::icon_with_status::{render_icon_with_status, IconWithStatusVariant};
@@ -42,9 +43,9 @@ pub(super) const CORTEX_SUMMARY_LINE_FONT_SIZE: f32 = 12.;
 /// elsewhere in the panel) and white so it reads on both dark and light themes
 /// without being claimable by either.
 pub(crate) const VERTICAL_TAB_UNSELECTED_BORDER_GRAY: ColorU = ColorU {
-    r: 140,
-    g: 140,
-    b: 140,
+    r: 112,
+    g: 112,
+    b: 112,
     a: 255,
 };
 
@@ -59,16 +60,6 @@ pub(super) const VERTICAL_TABS_SUMMARY_STATUS_ICON_SIZE: f32 = 10.;
 /// farther right than other rows — a deliberate trade for the optical
 /// weight on this single tab.
 pub(super) const VERTICAL_TABS_BRAIN_ICON_SIZE: f32 = 30.;
-
-/// Whether the current tab style implies inverse fill on selected tabs.
-pub(crate) fn cortex_inverse_fill_active(
-    cortex: &crate::settings::CortexSettings,
-) -> bool {
-    matches!(
-        *cortex.tab_style.value(),
-        crate::settings::TabStyle::CortexModern
-    )
-}
 
 /// Resolve a pane's color into a single `ColorU` for the comet outline. Saved
 /// projects use their accent color; unsaved projects fall back to the same
@@ -95,9 +86,10 @@ pub(crate) fn breath_frame_tint(pane_color: Option<&ThemeFill>) -> ColorU {
 /// the appropriate animation element renders alongside it. Returns `content`
 /// unchanged when there's no animation to layer.
 ///
-/// `Running` overlays the comet on top of the content; `AttentionNeeded`
-/// puts the breath wash underneath. The two states are mutually exclusive
-/// at the aggregator level — see `aggregated_tab_animation` in `tab.rs`.
+/// `Running` overlays the comet (CortexModern) or traveling-dot
+/// (CortexTui) on top of the content; `AttentionNeeded` puts the breath
+/// wash underneath. The two states are mutually exclusive at the aggregator
+/// level — see `aggregated_tab_animation` in `tab.rs`.
 ///
 /// The animation element is added as a *positioned* child anchored to the
 /// row's top-left and bounded to the parent's size. This is required: the
@@ -110,6 +102,8 @@ pub(crate) fn wrap_with_agent_animation_layers(
     content: Box<dyn Element>,
     tab_animation: Option<TabAnimationKind>,
     pane_color: Option<&ThemeFill>,
+    tab_style: TabStyle,
+    is_selected: bool,
 ) -> Box<dyn Element> {
     let Some(kind) = tab_animation else {
         return content;
@@ -122,11 +116,21 @@ pub(crate) fn wrap_with_agent_animation_layers(
     );
     let stack = match kind {
         TabAnimationKind::Running => {
-            let outline = comet_outline_color(pane_color);
-            Stack::new().with_child(content).with_positioned_child(
-                TravelingCometElement::new(outline).finish(),
-                fill_parent,
-            )
+            let accent = comet_outline_color(pane_color);
+            let anim_element: Box<dyn Element> = match tab_style {
+                TabStyle::CortexModern => TravelingCometElement::new(accent).finish(),
+                TabStyle::CortexTui => {
+                    let border_color = if is_selected {
+                        accent
+                    } else {
+                        VERTICAL_TAB_UNSELECTED_BORDER_GRAY
+                    };
+                    TuiTravelingDotElement::new(border_color, accent).finish()
+                }
+            };
+            Stack::new()
+                .with_child(content)
+                .with_positioned_child(anim_element, fill_parent)
         }
         TabAnimationKind::AttentionNeeded => {
             let tint = breath_frame_tint(pane_color);

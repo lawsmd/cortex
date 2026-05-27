@@ -181,26 +181,48 @@ fn render_preview_tab(
         TabsMetadataAlignment::Centered
     );
 
-    let inverse_fill_active = is_selected
-        && matches!(*cortex.tab_style.value(), TabStyle::CortexModern);
+    let tab_style = *cortex.tab_style.value();
 
     let white_fill = ThemeFill::white();
-    let (title_color, metadata_color, bg_fill, border) = if inverse_fill_active {
-        (
+    let (title_color, metadata_color, bg_fill, border) = match tab_style {
+        TabStyle::CortexModern if is_selected => (
             theme.background(),
             theme.background().with_opacity(METADATA_OPACITY),
             Some(white_fill.clone()),
             Border::default(),
-        )
-    } else {
-        let text_fill = ThemeFill::Solid(ColorU::white());
-        (
-            text_fill.clone(),
-            text_fill.with_opacity(METADATA_OPACITY),
-            None,
-            Border::all(PREVIEW_BORDER_WIDTH)
-                .with_border_fill(ThemeFill::Solid(VERTICAL_TAB_UNSELECTED_BORDER_GRAY)),
-        )
+        ),
+        TabStyle::CortexTui if is_selected => {
+            let text_fill = ThemeFill::Solid(ColorU::white());
+            let tui_border = if matches!(animation, Some(TabAnimationKind::Running)) {
+                Border::default()
+            } else {
+                Border::all(PREVIEW_BORDER_WIDTH)
+                    .with_border_fill(ThemeFill::Solid(ColorU::white()))
+            };
+            (
+                text_fill.clone(),
+                text_fill.with_opacity(METADATA_OPACITY),
+                None,
+                tui_border,
+            )
+        }
+        _ => {
+            let text_fill = ThemeFill::Solid(ColorU::white());
+            let unselected_border = if matches!(animation, Some(TabAnimationKind::Running))
+                && matches!(tab_style, TabStyle::CortexTui)
+            {
+                Border::default()
+            } else {
+                Border::all(PREVIEW_BORDER_WIDTH)
+                    .with_border_fill(ThemeFill::Solid(VERTICAL_TAB_UNSELECTED_BORDER_GRAY))
+            };
+            (
+                text_fill.clone(),
+                text_fill.with_opacity(METADATA_OPACITY),
+                None,
+                unselected_border,
+            )
+        }
     };
 
     let title_element = Text::new_inline(TITLE_TEXT.to_string(), title_family, title_size)
@@ -258,5 +280,5 @@ fn render_preview_tab(
         .finish();
 
     let pane_color = Some(white_fill);
-    wrap_with_agent_animation_layers(content, animation, pane_color.as_ref())
+    wrap_with_agent_animation_layers(content, animation, pane_color.as_ref(), tab_style, is_selected)
 }

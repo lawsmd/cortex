@@ -2,13 +2,13 @@
   <img src="app/assets/cortex/cortex-banner.svg" alt="Cortex" width="720" />
 </p>
 
-Cortex is a personal fork of [Warp](https://github.com/warpdotdev/warp) — a customization and convenience layer for people who like Warp's terminal and IDE features but want fewer of its AI / Oz Agent bits.
+Cortex is a personal fork of [Warp](https://github.com/warpdotdev/warp) — Warp's IDE-grade terminal features wrapped in a look that belongs in the terminal, not a browser. The default **Cortex TUI** style trades Warp's filled-background tab selection for border-based chrome and minimalist traveling-dot animations, with [Fira Code](https://github.com/tonsky/FiraCode) as the bundled default tab-title font.
 
 ## Tab appearance and agent-state animations
 
 ![Cortex tab states reflecting agent activity](./assets/readme/tab-states.gif)
 
-Cortex tabs visually reflect the state of the CLI agent running inside each session. Only Claude Code is supported for now.
+Cortex tabs visually reflect the state of the CLI agent running inside each session. The **Cortex TUI** style uses accent-colored borders on selected tabs and a traveling-dot animation (two dots orbiting the border through gaps) to indicate a running agent. An alternative **Cortex Modern** style with filled-background selection and comet animations is also available. Only Claude Code is supported for agent status detection.
 
 ## Custom Theme Library
 
@@ -49,6 +49,7 @@ That's the whole flow. See [`WARP.md`](WARP.md) for Warp's engineering guide, or
 ## Credits
 
 - **[Warp](https://github.com/warpdotdev/warp)** — the terminal Cortex sits on top of. None of this exists without their work, and especially their decision to open-source the client. Cortex inherits Warp's license split (MIT for `warpui_core` and `warpui`, AGPL-3.0 for the rest).
+- **[Fira Code](https://github.com/tonsky/FiraCode)** — bundled as the default tab-title font for the Cortex TUI style (SIL OFL 1.1).
 - **Color themes** — bundled from four open-source community libraries:
   - [Gogh](https://github.com/Gogh-Co/Gogh) — ~361 schemes (MIT)
   - [iTerm2-Color-Schemes](https://github.com/mbadolato/iTerm2-Color-Schemes) — ~381 schemes (MIT; individual schemes retain their original copyright)

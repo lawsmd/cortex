@@ -347,6 +347,46 @@ fn load_password_font_family(ctx: &mut AppContext) -> anyhow::Result<FamilyId> {
     })
 }
 
+fn load_fira_code_font_family(ctx: &mut AppContext) -> anyhow::Result<FamilyId> {
+    warpui::fonts::Cache::handle(ctx).update(ctx, |font_cache, _| {
+        font_cache.load_family_from_bytes(
+            "Fira Code",
+            vec![
+                ASSETS
+                    .get("bundled/fonts/fira-code/FiraCode-Regular.ttf")?
+                    .to_vec(),
+                ASSETS
+                    .get("bundled/fonts/fira-code/FiraCode-Bold.ttf")?
+                    .to_vec(),
+                ASSETS
+                    .get("bundled/fonts/fira-code/FiraCode-SemiBold.ttf")?
+                    .to_vec(),
+            ],
+        )
+    })
+}
+
+// CORTEX-BEGIN: firacode-nerd-font
+fn load_firacode_nerd_font_family(ctx: &mut AppContext) -> anyhow::Result<FamilyId> {
+    warpui::fonts::Cache::handle(ctx).update(ctx, |font_cache, _| {
+        font_cache.load_family_from_bytes(
+            "FiraCode Nerd Font Mono",
+            vec![
+                ASSETS
+                    .get("bundled/fonts/firacode-nerd/FiraCodeNerdFontMono-Regular.ttf")?
+                    .to_vec(),
+                ASSETS
+                    .get("bundled/fonts/firacode-nerd/FiraCodeNerdFontMono-Bold.ttf")?
+                    .to_vec(),
+                ASSETS
+                    .get("bundled/fonts/firacode-nerd/FiraCodeNerdFontMono-Light.ttf")?
+                    .to_vec(),
+            ],
+        )
+    })
+}
+// CORTEX-END: firacode-nerd-font
+
 #[cfg(target_family = "wasm")]
 /// On wasm we don't support loading fonts, so we just use the default.
 fn get_or_load_font_family(_font_name: &str, _ctx: &mut AppContext) -> Option<FamilyId> {
@@ -406,6 +446,16 @@ fn build_appearance(ctx: &mut AppContext) -> Appearance {
 
     let password_font_family =
         load_password_font_family(ctx).expect("unable to load password font family");
+
+    if let Err(e) = load_fira_code_font_family(ctx) {
+        log::warn!("Failed to load bundled Fira Code font: {e}");
+    }
+
+    // CORTEX-BEGIN: firacode-nerd-font
+    if let Err(e) = load_firacode_nerd_font_family(ctx) {
+        log::warn!("Failed to load bundled FiraCode Nerd Font Mono: {e}");
+    }
+    // CORTEX-END: firacode-nerd-font
 
     let monospace_font_size = *FontSettings::as_ref(ctx).monospace_font_size.value();
 

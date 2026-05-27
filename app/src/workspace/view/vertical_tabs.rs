@@ -48,7 +48,6 @@ use crate::terminal::TerminalView;
 use crate::themes::theme::Fill as ThemeFill;
 use crate::ui_components::buttons::combo_inner_button;
 use crate::ui_components::icons::Icon as UiIcon;
-use crate::util::color::Opacity;
 use crate::workspace::action::WorkspaceAction;
 use crate::workspace::cross_window_tab_drag::CrossWindowTabDrag;
 use crate::workspace::tab_settings::{
@@ -112,8 +111,6 @@ const DETAIL_SIDECAR_CORNER_RADIUS: f32 = 4.;
 /// Fixed height of the metadata row (line 3 in expanded mode). Matches the passive badge height
 /// so the row doesn't resize when badges are toggled.
 const METADATA_ROW_HEIGHT: f32 = BADGE_ICON_SIZE + 2.;
-const TAB_COLOR_HOVER_OPACITY: Opacity = 50;
-
 // Circular icon constants
 const ICON_WITH_STATUS_GAP: f32 = 8.;
 pub(super) const VERTICAL_TABS_DETAIL_SIDECAR_POSITION_ID: &str = "vertical_tabs:detail_sidecar";
@@ -264,27 +261,26 @@ fn pane_row_background(
     is_selected: bool,
     is_hovered: bool,
     is_being_dragged: bool,
-    cortex_inverse_fill: bool,
+    tab_style: crate::settings::TabStyle,
     theme: &WarpTheme,
 ) -> Option<ThemeFill> {
-    // Cortex unselected: no background fill regardless of toggles. Hover still
-    // shows a subtle fg_overlay_1 for affordance, matching Warp's behavior.
     if !is_selected {
         if is_being_dragged || is_hovered {
             return Some(internal_colors::fg_overlay_1(theme));
         }
         return None;
     }
-    // Selected with Cortex inverse-fill ON: tab fills with its accent color
-    // (or white when no per-tab tint), at full opacity.
-    if cortex_inverse_fill {
-        return Some(pane_color.unwrap_or_else(ThemeFill::white));
-    }
-    // Selected with inverse-fill OFF: existing Warp selected look.
-    if let Some(color) = pane_color {
-        Some(color.with_opacity(TAB_COLOR_HOVER_OPACITY))
-    } else {
-        Some(internal_colors::fg_overlay_2(theme))
+    match tab_style {
+        crate::settings::TabStyle::CortexModern => {
+            Some(pane_color.unwrap_or_else(ThemeFill::white))
+        }
+        crate::settings::TabStyle::CortexTui => {
+            if is_hovered {
+                Some(internal_colors::fg_overlay_1(theme))
+            } else {
+                None
+            }
+        }
     }
 }
 
@@ -328,9 +324,10 @@ fn cortex_row_appearance(
     app: &AppContext,
 ) -> CortexRowAppearance {
     let cortex = crate::settings::CortexSettings::as_ref(app);
+    let tab_style = *cortex.tab_style.value();
     let accent_fill: ThemeFill = pane_color.cloned().unwrap_or_else(ThemeFill::white);
-    let inverse_fill_active =
-        is_selected && cortex_extensions::cortex_inverse_fill_active(&cortex);
+    let inverse_fill_active = is_selected
+        && matches!(tab_style, crate::settings::TabStyle::CortexModern);
     let title_color: ThemeFill = if inverse_fill_active {
         theme.background()
     } else {
@@ -373,9 +370,9 @@ fn render_pane_row_element(
         )
     });
     let row_position_id = vtab_pane_row_position_id(props.pane_group_id, props.pane_id);
-    let cortex_inverse_fill = cortex_extensions::cortex_inverse_fill_active(
-        &crate::settings::CortexSettings::as_ref(app),
-    );
+    let cortex = crate::settings::CortexSettings::as_ref(app);
+    let tab_style = *cortex.tab_style.value();
+    let cortex_tui = matches!(tab_style, crate::settings::TabStyle::CortexTui);
     let PaneProps {
         pane_id,
         pane_group_id,
@@ -411,36 +408,37 @@ fn render_pane_row_element(
             is_selected,
             state.is_hovered(),
             is_being_dragged,
-            cortex_inverse_fill,
+            tab_style,
             theme,
         ) {
             container = container.with_background(background);
         }
 
-        // Cortex border policy:
-        //   - Selected + inverse-fill ON  → no border (the accent fill carries
-        //     the selection chrome).
-        //   - Selected + inverse-fill OFF → Warp's existing 15% fg-overlay
-        //     border on top of the overlay fill.
-        //   - Unselected + AttentionNeeded → no border. The pulsing breath
-        //     frame layered on by `wrap_with_agent_animation_layers` is the
-        //     row's visible boundary for the duration of the pulse; keeping
-        //     the gray ring would clash concentrically with the project-color
-        //     frame. The breath element's opacity is floored above 0 so the
-        //     row is never visually borderless.
-        //   - Unselected (otherwise)      → 1px gray, theme-independent. The
-        //     gray border is the unconditional Cortex outline at rest.
-        let border_fill: ElementFill = if !is_selected
-            && matches!(tab_animation, Some(TabAnimationKind::AttentionNeeded))
-        {
-            ElementFill::None
-        } else if !is_selected {
-            ThemeFill::Solid(VERTICAL_TAB_UNSELECTED_BORDER_GRAY).into()
-        } else if cortex_inverse_fill {
-            ElementFill::None
-        } else {
-            internal_colors::fg_overlay_3(theme).into()
-        };
+        // Border policy per style:
+        //   CortexModern selected → no border (accent fill is the chrome).
+        //   CortexTui selected + Running → no border (animation draws
+        //       border-with-gaps).
+        //   CortexTui selected + idle/attention → accent-colored 1px border.
+        //   Unselected + AttentionNeeded → no border (breath frame is boundary).
+        //   Unselected + Running (CortexTui) → no border (animation draws it).
+        //   Unselected idle → 1px gray.
+        let tui_running = cortex_tui
+            && matches!(tab_animation, Some(TabAnimationKind::Running));
+        let border_fill: ElementFill =
+            if matches!(tab_animation, Some(TabAnimationKind::AttentionNeeded)) {
+                ElementFill::None
+            } else if tui_running {
+                ElementFill::None
+            } else if is_selected && cortex_tui {
+                pane_color
+                    .clone()
+                    .unwrap_or_else(ThemeFill::white)
+                    .into()
+            } else if is_selected {
+                ElementFill::None
+            } else {
+                ThemeFill::Solid(VERTICAL_TAB_UNSELECTED_BORDER_GRAY).into()
+            };
 
         container
             .with_border(Border::all(1.).with_border_fill(border_fill))
@@ -2075,10 +2073,14 @@ fn render_tab_group_internal(
                     tab_animation,
                     app,
                 );
+                let cortex = crate::settings::CortexSettings::as_ref(app);
+                let tab_style = *cortex.tab_style.value();
                 let summary_row = wrap_with_agent_animation_layers(
                     summary_row,
                     tab_animation,
                     pane_color.as_ref(),
+                    tab_style,
+                    is_active,
                 );
                 rows.add_child(summary_row);
                 return rows.finish();
@@ -2135,8 +2137,15 @@ fn render_tab_group_internal(
                         render_pane_row(pane_props, tab_animation, app)
                     }
                 };
-                let row =
-                    wrap_with_agent_animation_layers(row, tab_animation, pane_color.as_ref());
+                let cortex = crate::settings::CortexSettings::as_ref(app);
+                let tab_style = *cortex.tab_style.value();
+                let row = wrap_with_agent_animation_layers(
+                    row,
+                    tab_animation,
+                    pane_color.as_ref(),
+                    tab_style,
+                    is_active,
+                );
                 rows.add_child(row);
             }
             rows.finish()
@@ -2629,8 +2638,15 @@ pub(crate) fn cortex_tab_title_style(
 ) -> (FamilyId, f32, Properties) {
     let cortex = crate::settings::CortexSettings::as_ref(app);
     let name = &**cortex.tabs_title_font_name.value();
+    let tab_style = *cortex.tab_style.value();
     let family = if name.is_empty() {
-        appearance.ui_font_family()
+        if matches!(tab_style, crate::settings::TabStyle::CortexTui) {
+            app.font_cache()
+                .family_id_for_name("Fira Code")
+                .unwrap_or_else(|| appearance.ui_font_family())
+        } else {
+            appearance.ui_font_family()
+        }
     } else {
         app.font_cache()
             .family_id_for_name(name)

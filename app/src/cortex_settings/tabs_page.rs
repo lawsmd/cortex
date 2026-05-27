@@ -81,7 +81,10 @@ impl TabsPageState {
 
         Self {
             tab_style_radio: RadioButtonStateHandle::default(),
-            tab_style_mouse_states: vec![MouseStateHandle::default()],
+            tab_style_mouse_states: vec![
+                MouseStateHandle::default(),
+                MouseStateHandle::default(),
+            ],
             title_alignment_radio: RadioButtonStateHandle::default(),
             title_alignment_mouse_states: vec![
                 MouseStateHandle::default(),
@@ -110,6 +113,7 @@ impl TabsPageState {
 
 const TAB_TITLE_FONT_FAMILY_OPTIONS: &[(&str, &str)] = &[
     ("(use UI font)", ""),
+    ("Fira Code", "Fira Code"),
     ("Hack", "Hack"),
     ("Roboto", "Roboto"),
 ];
@@ -143,6 +147,7 @@ pub fn tabs_page_search_terms() -> &'static [&'static str] {
         "background",
         "style",
         "modern",
+        "tui",
         "preview",
         "animation",
         "text",
@@ -184,13 +189,14 @@ pub fn render_tabs_page(
         .with_child(render_alignment_row(
             "Style",
             "Cortex Modern",
-            "",
+            "Cortex TUI",
             state.tab_style_radio.clone(),
             state.tab_style_mouse_states.clone(),
             tab_style_idx,
             |index| {
                 let value = match index {
-                    _ => TabStyle::CortexModern,
+                    0 => TabStyle::CortexModern,
+                    _ => TabStyle::CortexTui,
                 };
                 CortexSettingsAction::SetTabStyle(value)
             },
@@ -502,6 +508,7 @@ where
 fn tab_style_idx(value: TabStyle) -> usize {
     match value {
         TabStyle::CortexModern => 0,
+        TabStyle::CortexTui => 1,
     }
 }
 

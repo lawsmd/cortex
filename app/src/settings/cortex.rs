@@ -6,7 +6,9 @@ use warpui::fonts::Weight;
 /// Visual style preset for vertical tabs.
 ///
 /// `CortexModern` implies inverse fill on selected tabs (accent-colored
-/// background, terminal-background text). More styles will be added later.
+/// background, terminal-background text). `CortexTui` uses an accent-colored
+/// border on selected tabs with no fill, and a minimalist traveling-dot
+/// animation instead of the comet.
 #[derive(
     Default,
     Debug,
@@ -22,8 +24,9 @@ use warpui::fonts::Weight;
 )]
 #[schemars(rename_all = "snake_case")]
 pub enum TabStyle {
-    #[default]
     CortexModern,
+    #[default]
+    CortexTui,
 }
 
 settings::macros::implement_setting_for_enum!(
@@ -33,7 +36,7 @@ settings::macros::implement_setting_for_enum!(
     SyncToCloud::Globally(RespectUserSyncSetting::Yes),
     private: false,
     toml_path: "cortex.tabs.style",
-    description: "Visual style preset for vertical tabs. cortex_modern uses inverse fill on selected tabs.",
+    description: "Visual style preset for vertical tabs. cortex_modern uses inverse fill on selected tabs; cortex_tui uses accent-colored borders and traveling-dot animation.",
 );
 
 /// Horizontal alignment of the title line on vertical tabs (both selected and
@@ -364,5 +367,50 @@ define_settings_group!(CortexSettings, settings: [
         private: false,
         toml_path: "cortex.toolbar.show_agent_conversations",
         description: "Show the Agent Conversations icon in the toolbar.",
+    },
+    file_explorer_font_name: FileExplorerFontName {
+        type: String,
+        default: String::from("FiraCode Nerd Font Mono"),
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.file_explorer.font_name",
+        description: "Font family for file/folder labels in the file explorer. Empty string falls back to the UI font.",
+    },
+    file_explorer_tree_lines: FileExplorerTreeLines {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.file_explorer.tree_lines",
+        description: "Draw box-drawing characters connecting sibling entries in the file tree.",
+    },
+    file_explorer_nerd_icons: FileExplorerNerdIcons {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.file_explorer.nerd_icons",
+        description: "Replace SVG file-type icons with colored Nerd Font glyphs.",
+    },
+    file_explorer_colored_icons: FileExplorerColoredIcons {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.file_explorer.colored_icons",
+        description: "Color Nerd Font icons per file type (Rust=orange, Python=blue, etc.). When off, all icons use the theme text color.",
+    },
+    file_explorer_font_size: FileExplorerFontSize {
+        type: f32,
+        default: 13.0,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.file_explorer.font_size",
+        description: "Font size for file and folder labels in the file explorer. Clamped to 10..=18.",
     }
 ]);
