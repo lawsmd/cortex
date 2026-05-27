@@ -70,11 +70,14 @@ use warp_core::ui::theme::{color::internal_colors, Fill};
 use warp_core::HostId;
 
 mod editing;
+// CORTEX-BEGIN: yazi-file-explorer
+mod nerd_icons;
+// CORTEX-END: yazi-file-explorer
 mod render;
 
 const REMOTE_TEXT: &str = "The Project Explorer requires access to your local workspace, which isn’t supported in remote sessions.";
 const DISABLED_TEXT: &str = "The Project Explorer requires access to your local workspace. Open a new session or navigate to an active session to view.";
-const WSL_TEXT: &str = "The Project Explorer doesn't currently work in WSL.";
+const WSL_TEXT: &str = "The Project Explorer doesn’t currently work in WSL.";
 
 /// Stable identifier for an item in the file tree.
 /// Includes both the root directory and the index within that root's flattened list.
@@ -198,6 +201,9 @@ enum FileTreeItem {
         depth: usize,
         mouse_state_handle: MouseStateHandle,
         draggable_state: DraggableState,
+        // CORTEX-BEGIN: yazi-file-explorer
+        is_last_at_depth: Vec<bool>,
+        // CORTEX-END: yazi-file-explorer
     },
     /// A directory header with its metadata, depth, and expanded state
     DirectoryHeader {
@@ -205,6 +211,9 @@ enum FileTreeItem {
         depth: usize,
         mouse_state_handle: MouseStateHandle,
         draggable_state: DraggableState,
+        // CORTEX-BEGIN: yazi-file-explorer
+        is_last_at_depth: Vec<bool>,
+        // CORTEX-END: yazi-file-explorer
     },
 }
 
@@ -1682,6 +1691,7 @@ impl FileTreeView {
                 &root_path,
                 &entry_state,
                 0,
+                Vec::new(),
                 selected_item_path.as_ref(),
                 path_to_remove,
                 &mut items,
@@ -1715,6 +1725,9 @@ impl FileTreeView {
         current_path: &StandardizedPath,
         entry_map: &FileTreeEntry,
         depth: usize,
+        // CORTEX-BEGIN: yazi-file-explorer
+        is_last_at_depth: Vec<bool>,
+        // CORTEX-END: yazi-file-explorer
         path_of_selected_item: Option<&StandardizedPath>,
         path_of_removed_item: Option<&StandardizedPath>,
         items: &mut Vec<FileTreeItem>,
@@ -1751,6 +1764,7 @@ impl FileTreeView {
                     depth,
                     mouse_state_handle,
                     draggable_state,
+                    is_last_at_depth: is_last_at_depth.clone(),
                 });
             }
             Some(FileTreeEntryState::Directory(dir)) => {
@@ -1773,19 +1787,27 @@ impl FileTreeView {
                     depth,
                     mouse_state_handle,
                     draggable_state,
+                    is_last_at_depth: is_last_at_depth.clone(),
                 });
 
                 // Add children if expanded
                 if is_expanded {
-                    for child in entry_map
+                    // CORTEX-BEGIN: yazi-file-explorer
+                    let children: Vec<_> = entry_map
                         .child_paths(&dir.path)
                         .sorted_by(|a, b| sort_entries_for_file_tree(a, b, entry_map))
-                    {
+                        .collect();
+                    let last_idx = children.len().saturating_sub(1);
+                    for (i, child) in children.into_iter().enumerate() {
+                        let mut child_ancestry = is_last_at_depth.clone();
+                        child_ancestry.push(i == last_idx);
+                        // CORTEX-END: yazi-file-explorer
                         let (child_selected_index, child_removed) = self.flatten_entry_for_root(
                             root_path,
                             child,
                             entry_map,
                             depth + 1,
+                            child_ancestry,
                             path_of_selected_item,
                             path_of_removed_item,
                             items,
@@ -1819,64 +1841,166 @@ impl FileTreeView {
             .with_main_axis_size(MainAxisSize::Max)
             .with_cross_axis_alignment(CrossAxisAlignment::Center);
 
-        // Add an indentation spacer based on the depth of the item in the file tree.
-        if render_state.depth > 0 {
+        let text_color = item_highlight_state.text_and_icon_color(appearance);
+
+        // CORTEX-BEGIN: yazi-file-explorer
+        let tui = render_state.tui.clone();
+        let label_font = tui
+            .explorer_font_family
+            .unwrap_or_else(|| appearance.ui_font_family());
+        let label_size = tui.explorer_font_size;
+
+        if tui.tree_lines {
+            // --- Tree-drawing mode ---
+            let tree_color = {
+                let theme = appearance.theme();
+                crate::ui_components::blended_colors::text_sub(theme, theme.background())
+            };
+            let col_width = FOLDER_INDENT_PER_LEVEL;
+
+            // Ancestor guide columns (depth 0 .. depth-2); the item's own
+            // depth is handled by the connector below.
+            for d in 0..render_state.depth.saturating_sub(1) {
+                let guide = if render_state.is_last_at_depth.get(d).copied().unwrap_or(false) {
+                    "  "
+                } else {
+                    "\u{2502} "
+                };
+                header_row.add_child(
+                    ConstrainedBox::new(
+                        Text::new_inline(guide.to_string(), label_font, label_size)
+                            .with_color(tree_color)
+                            .finish(),
+                    )
+                    .with_width(col_width)
+                    .finish(),
+                );
+            }
+
+            // Own connector (only for non-root items)
+            if render_state.depth > 0 {
+                let connector = if render_state
+                    .is_last_at_depth
+                    .last()
+                    .copied()
+                    .unwrap_or(false)
+                {
+                    "\u{2514}\u{2500}"
+                } else {
+                    "\u{251C}\u{2500}"
+                };
+                header_row.add_child(
+                    Container::new(
+                        ConstrainedBox::new(
+                            Text::new_inline(connector.to_string(), label_font, label_size)
+                                .with_color(tree_color)
+                                .finish(),
+                        )
+                        .with_width(FOLDER_INDENT)
+                        .finish(),
+                    )
+                    .with_margin_right(2.)
+                    .finish(),
+                );
+            }
+        } else {
+            // CORTEX-END: yazi-file-explorer
+            // --- Classic chevron mode ---
+            // Add an indentation spacer based on the depth of the item in the file tree.
+            if render_state.depth > 0 {
+                header_row.add_child(
+                    Container::new(
+                        ConstrainedBox::new(Empty::new().finish())
+                            .with_width(render_state.depth as f32 * FOLDER_INDENT_PER_LEVEL)
+                            .finish(),
+                    )
+                    .finish(),
+                );
+            }
+
+            // Add expand/collapse button if the item is expandable.
+            let expand_icon = render_state.is_expanded.map(|expanded| {
+                if expanded {
+                    Icon::ChevronDown
+                } else {
+                    Icon::ChevronRight
+                }
+            });
+
+            let expand_icon = match expand_icon {
+                Some(icon) => {
+                    let chevron_icon_color = item_highlight_state.text_and_icon_color(appearance);
+                    icon.to_warpui_icon(chevron_icon_color.into()).finish()
+                }
+                None => Empty::new().finish(),
+            };
+
             header_row.add_child(
                 Container::new(
-                    ConstrainedBox::new(Empty::new().finish())
-                        .with_width(render_state.depth as f32 * FOLDER_INDENT_PER_LEVEL)
+                    ConstrainedBox::new(expand_icon)
+                        .with_width(FOLDER_INDENT)
+                        .with_height(FOLDER_INDENT)
                         .finish(),
                 )
+                .with_margin_right(2.)
                 .finish(),
             );
         }
 
-        // Add expand/collapse button if the item is expandable.
-        let expand_icon = render_state.is_expanded.map(|expanded| {
-            if expanded {
-                Icon::ChevronDown
+        // CORTEX-BEGIN: yazi-file-explorer
+        if tui.nerd_icons {
+            let is_dir = render_state.is_expanded.is_some();
+            let is_expanded = render_state.is_expanded.unwrap_or(false);
+            let default_icon_color = text_color;
+            let nerd = nerd_icons::nerd_icon_for_path(
+                &render_state.display_name,
+                is_dir,
+                is_expanded,
+                default_icon_color,
+            );
+            let icon_color_final = if tui.colored_icons {
+                nerd.color
             } else {
-                Icon::ChevronRight
-            }
-        });
-
-        let expand_icon = match expand_icon {
-            Some(icon) => {
-                let chevron_icon_color = item_highlight_state.text_and_icon_color(appearance);
-                icon.to_warpui_icon(chevron_icon_color.into()).finish()
-            }
-            None => Empty::new().finish(),
-        };
-
-        header_row.add_child(
-            Container::new(
-                ConstrainedBox::new(expand_icon)
+                default_icon_color
+            };
+            header_row.add_child(
+                Container::new(
+                    ConstrainedBox::new(
+                        Text::new_inline(
+                            String::from(nerd.glyph),
+                            tui.nerd_font_family.unwrap_or(label_font),
+                            label_size,
+                        )
+                        .with_color(icon_color_final)
+                        .finish(),
+                    )
                     .with_width(FOLDER_INDENT)
                     .with_height(FOLDER_INDENT)
                     .finish(),
-            )
-            .with_margin_right(2.)
-            .finish(),
-        );
+                )
+                .with_margin_right(6.)
+                .finish(),
+            );
+        } else {
+            // CORTEX-END: yazi-file-explorer
+            // Add the classic SVG icon for the item.
+            let icon_color = item_highlight_state.text_and_icon_color(appearance);
+            let icon = match render_state.icon {
+                ImageOrIcon::Icon(icon) => icon.to_warpui_icon(icon_color.into()).finish(),
+                ImageOrIcon::Image(image) => image,
+            };
+            header_row.add_child(
+                Container::new(
+                    ConstrainedBox::new(icon)
+                        .with_width(FOLDER_INDENT)
+                        .with_height(FOLDER_INDENT)
+                        .finish(),
+                )
+                .with_margin_right(6.)
+                .finish(),
+            );
+        }
 
-        // Add the icon for the item.
-        let icon_color = item_highlight_state.text_and_icon_color(appearance);
-        let icon = match render_state.icon {
-            ImageOrIcon::Icon(icon) => icon.to_warpui_icon(icon_color.into()).finish(),
-            ImageOrIcon::Image(image) => image,
-        };
-        header_row.add_child(
-            Container::new(
-                ConstrainedBox::new(icon)
-                    .with_width(FOLDER_INDENT)
-                    .with_height(FOLDER_INDENT)
-                    .finish(),
-            )
-            .with_margin_right(6.)
-            .finish(),
-        );
-
-        let text_color = item_highlight_state.text_and_icon_color(appearance);
         let text_style = if render_state.is_ignored {
             Properties::default()
                 .style(Style::Italic)
@@ -1904,8 +2028,8 @@ impl FileTreeView {
                         1.,
                         Text::new_inline(
                             render_state.display_name,
-                            appearance.ui_font_family(),
-                            ITEM_FONT_SIZE,
+                            label_font,
+                            label_size,
                         )
                         .with_color(text_color)
                         .with_style(text_style)
@@ -1981,7 +2105,14 @@ impl FileTreeView {
     }
 
     /// Renders a clickable tree item with mouse state handle
-    fn render_item(&self, id: &FileTreeIdentifier, appearance: &Appearance) -> Box<dyn Element> {
+    fn render_item(
+        &self,
+        id: &FileTreeIdentifier,
+        appearance: &Appearance,
+        // CORTEX-BEGIN: yazi-file-explorer
+        app: &AppContext,
+        // CORTEX-END: yazi-file-explorer
+    ) -> Box<dyn Element> {
         let Some(root_dir) = self.root_directories.get(&id.root) else {
             return Empty::new().finish();
         };
@@ -1991,7 +2122,30 @@ impl FileTreeView {
 
         let is_selected = self.selected_item.as_ref() == Some(id);
         let is_expanded = self.is_item_expanded(&id.root, item);
-        let render_state = item.to_render_state(is_expanded, appearance);
+        let mut render_state = item.to_render_state(is_expanded, appearance);
+
+        // CORTEX-BEGIN: yazi-file-explorer
+        {
+            use crate::settings::CortexSettings;
+            use settings::Setting;
+            let cortex = CortexSettings::as_ref(app);
+            let font_name = cortex.file_explorer_font_name.value();
+            render_state.tui = render::TuiStyleSettings {
+                tree_lines: *cortex.file_explorer_tree_lines,
+                nerd_icons: *cortex.file_explorer_nerd_icons,
+                colored_icons: *cortex.file_explorer_colored_icons,
+                explorer_font_size: (*cortex.file_explorer_font_size).clamp(10.0, 18.0),
+                explorer_font_family: if font_name.is_empty() {
+                    None
+                } else {
+                    app.font_cache().family_id_for_name(font_name)
+                },
+                nerd_font_family: app
+                    .font_cache()
+                    .family_id_for_name("FiraCode Nerd Font Mono"),
+            };
+        }
+        // CORTEX-END: yazi-file-explorer
 
         let item_display_name = render_state.display_name.clone();
         let item_position_id = format!("file_tree_item:{item_display_name}");
@@ -2662,7 +2816,7 @@ impl FileTreeView {
                 range
                     .filter_map(|global_index| {
                         let item_id = view.identifier_from_global_index(global_index)?;
-                        Some(view.render_item(&item_id, appearance))
+                        Some(view.render_item(&item_id, appearance, app))
                     })
                     .collect::<Vec<_>>()
                     .into_iter()

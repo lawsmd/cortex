@@ -13,6 +13,7 @@ pub enum CortexSettingsSection {
     TopBar,
     Toolbar,
     Editor,
+    FileExplorer,
     Ai,
 }
 
@@ -24,6 +25,7 @@ impl CortexSettingsSection {
             Self::TopBar => "Top Bar",
             Self::Toolbar => "Toolbar",
             Self::Editor => "Editor",
+            Self::FileExplorer => "File Explorer",
             Self::Ai => "AI",
         }
     }
@@ -35,6 +37,7 @@ impl CortexSettingsSection {
             Self::TopBar,
             Self::Toolbar,
             Self::Editor,
+            Self::FileExplorer,
             Self::Ai,
         ]
     }
@@ -116,4 +119,12 @@ pub enum CortexSettingsAction {
     ToggleToolbarShowWarpDrive,
     /// Toggle visibility of the Agent Conversations icon in the toolbar.
     ToggleToolbarShowAgentConversations,
+    /// Set the font family for the file explorer. Empty string = inherit UI font.
+    SetFileExplorerFontName(String),
+    /// Toggle box-drawing tree lines in the file explorer.
+    ToggleFileExplorerTreeLines,
+    /// Toggle Nerd Font icons in the file explorer.
+    ToggleFileExplorerNerdIcons,
+    /// Toggle per-file-type icon coloring in the file explorer.
+    ToggleFileExplorerColoredIcons,
 }

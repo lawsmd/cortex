@@ -22,6 +22,7 @@ pub mod action;
 pub mod ai_page;
 pub mod brand;
 pub mod editor_page;
+pub mod file_explorer_page;
 pub mod pane_manager;
 pub mod tabs_page;
 pub mod tabs_preview;

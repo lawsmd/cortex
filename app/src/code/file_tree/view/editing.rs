@@ -109,6 +109,7 @@ impl FileTreeView {
                 depth: depth + 1,
                 mouse_state_handle: MouseStateHandle::default(),
                 draggable_state: warpui::elements::DraggableState::default(),
+                is_last_at_depth: Vec::new(),
             },
         );
 

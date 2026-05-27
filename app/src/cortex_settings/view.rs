@@ -32,6 +32,9 @@ use crate::cortex_settings::brand::{
 use crate::cortex_settings::editor_page::{
     editor_page_search_terms, render_editor_page, EditorPageState,
 };
+use crate::cortex_settings::file_explorer_page::{
+    file_explorer_page_search_terms, render_file_explorer_page, FileExplorerPageState,
+};
 use crate::cortex_settings::tabs_page::{render_tabs_page, tabs_page_search_terms, TabsPageState};
 use crate::cortex_settings::toolbar_page::{
     render_toolbar_page, toolbar_page_search_terms, ToolbarPageState,
@@ -94,6 +97,7 @@ pub struct CortexSettingsView {
     top_bar_state: TopBarPageState,
     toolbar_state: ToolbarPageState,
     editor_state: EditorPageState,
+    file_explorer_state: FileExplorerPageState,
     ai_state: AiPageState,
     search_editor: ViewHandle<EditorView>,
 }
@@ -136,6 +140,7 @@ impl CortexSettingsView {
             top_bar_state: TopBarPageState::default(),
             toolbar_state: ToolbarPageState::default(),
             editor_state: EditorPageState::default(),
+            file_explorer_state: FileExplorerPageState::new(ctx),
             ai_state: AiPageState::default(),
             search_editor,
         }
@@ -465,6 +470,56 @@ impl CortexSettingsView {
         ctx.notify();
     }
 
+    fn set_file_explorer_font_name(&mut self, value: String, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::Setting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings.file_explorer_font_name.set_value(value, ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_file_explorer_tree_lines(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .file_explorer_tree_lines
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_file_explorer_nerd_icons(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .file_explorer_nerd_icons
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
+    fn toggle_file_explorer_colored_icons(&mut self, ctx: &mut ViewContext<Self>) {
+        use crate::settings::CortexSettings;
+        use settings::ToggleableSetting;
+        use warpui::SingletonEntity;
+
+        CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
+            let _ = settings
+                .file_explorer_colored_icons
+                .toggle_and_save_value(ctx);
+        });
+        ctx.notify();
+    }
+
     fn handle_search_editor_event(
         &mut self,
         _editor: ViewHandle<EditorView>,
@@ -589,6 +644,9 @@ impl CortexSettingsView {
             CortexSettingsSection::Editor => {
                 render_editor_page(&self.editor_state, appearance, app)
             }
+            CortexSettingsSection::FileExplorer => {
+                render_file_explorer_page(&self.file_explorer_state, appearance, app)
+            }
             CortexSettingsSection::Ai => render_ai_page(&self.ai_state, appearance, app),
         }
     }
@@ -695,6 +753,18 @@ impl warpui::TypedActionView for CortexSettingsView {
             CortexSettingsAction::ToggleToolbarShowAgentConversations => {
                 self.toggle_toolbar_show_agent_conversations(ctx)
             }
+            CortexSettingsAction::SetFileExplorerFontName(value) => {
+                self.set_file_explorer_font_name(value.clone(), ctx)
+            }
+            CortexSettingsAction::ToggleFileExplorerTreeLines => {
+                self.toggle_file_explorer_tree_lines(ctx)
+            }
+            CortexSettingsAction::ToggleFileExplorerNerdIcons => {
+                self.toggle_file_explorer_nerd_icons(ctx)
+            }
+            CortexSettingsAction::ToggleFileExplorerColoredIcons => {
+                self.toggle_file_explorer_colored_icons(ctx)
+            }
         }
     }
 }
@@ -782,12 +852,13 @@ impl BackingView for CortexSettingsView {
 #[allow(dead_code)]
 pub fn cortex_settings_search_terms() -> String {
     format!(
-        "cortex settings {} {} {} {} {} {}",
+        "cortex settings {} {} {} {} {} {} {}",
         working_panes_page_search_terms().join(" "),
         tabs_page_search_terms().join(" "),
         top_bar_page_search_terms().join(" "),
         toolbar_page_search_terms().join(" "),
         editor_page_search_terms().join(" "),
+        file_explorer_page_search_terms().join(" "),
         ai_page_search_terms().join(" ")
     )
 }
