@@ -312,9 +312,9 @@ use warpui::{
     elements::{
         resizable_state_handle, Align, AnchorPair, ChildAnchor, Clipped, ConstrainedBox, Container,
         CornerRadius, CrossAxisAlignment, DispatchEventResult, DropTargetData, Element,
-        EventHandler, Expanded, Flex, MainAxisAlignment, MainAxisSize, MouseStateHandle, OffsetPositioning,
+        EventHandler, Flex, MainAxisAlignment, MainAxisSize, MouseStateHandle, OffsetPositioning,
         OffsetType, ParentAnchor, ParentElement, PositionedElementOffsetBounds, PositioningAxis,
-        Radius, ResizableStateHandle, SavePosition, SelectionHandle, Text, Wrap, XAxisAnchor,
+        Radius, ResizableStateHandle, SavePosition, SelectionHandle, Shrinkable, Text, Wrap, XAxisAnchor,
         YAxisAnchor,
     },
     end_trace,
@@ -14612,7 +14612,7 @@ impl Input {
         let input_box = Flex::row()
             .with_cross_axis_alignment(CrossAxisAlignment::Start)
             .with_child(prompt_prefix)
-            .with_child(Expanded::new(1., editor_element).finish())
+            .with_child(Shrinkable::new(1., editor_element).finish())
             .finish();
         // CORTEX-END: tui-prompt-prefix
 
