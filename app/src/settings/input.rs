@@ -36,7 +36,7 @@ define_settings_group!(InputSettings,
     settings: [
         show_hint_text: ShowHintText {
             type: bool,
-            default: true,
+            default: false, // CORTEX: hide "Run commands" placeholder by default
             supported_platforms: SupportedPlatforms::ALL,
             sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
             private: false,
@@ -166,7 +166,7 @@ define_settings_group!(InputSettings,
         // Only applicable when FeatureFlag::AgentView is enabled.
         show_terminal_input_message_bar: ShowTerminalInputMessageBar {
             type: bool,
-            default: true,
+            default: false, // CORTEX: hide agent-conversation hint by default
             supported_platforms: SupportedPlatforms::ALL,
             sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
             private: false,

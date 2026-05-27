@@ -53,6 +53,11 @@ app/src/persistence/schema.rs.orig
 # Don't include Claude Code worktrees
 .claude/worktrees/
 
+# On Windows, .claude/skills is a directory junction (not a native symlink),
+# so its contents appear as untracked files. The actual skills are tracked
+# under .agents/skills/; these are just junction shadows.
+.claude/skills/
+
 # Don't include ctags output
 tags
 

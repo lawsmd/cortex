@@ -40,7 +40,7 @@ const BREATH_DEPTH: f32 = 0.70;
 /// gray 1px border while AttentionNeeded is active, so this floor is what
 /// keeps the project-color ring visibly drawn at every frame — without it
 /// the row would briefly read as borderless every cycle.
-const BREATH_FLOOR: f32 = 0.30;
+const BREATH_FLOOR: f32 = 0.10;
 const BREATH_PERIOD: Duration = Duration::from_millis(1200);
 const REPAINT_INTERVAL: Duration = Duration::from_millis(32);
 /// Frame thickness in logical pixels.

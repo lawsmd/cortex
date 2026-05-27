@@ -19,7 +19,7 @@ use warpui::color::ColorU;
 /// How much lighter (toward white) the *last* sub-project's color sits
 /// relative to the parent's. Same value for N=2 and N=100, so the
 /// flyout's visual range stays consistent.
-pub const SUB_PROJECT_LIGHTEN_END: f32 = 0.40;
+pub const SUB_PROJECT_LIGHTEN_END: f32 = 0.20;
 
 /// Returns the gradient hex shade for sub-project `index` of `total`, mixed
 /// from the parent's hex toward white in linear-RGB space. Returns `None`
@@ -101,7 +101,7 @@ mod tests {
 
     #[test]
     fn black_endpoint_lightens_partway() {
-        // Pure black mixed 40% toward white in linear RGB lands around 0x6B
+        // Pure black mixed 20% toward white in linear RGB lands well above 0x00
         // in sRGB (roughly — the linear-RGB midpoint of 0 and 1 is not 0.5).
         // We only assert it's brighter than 0 and dimmer than full white.
         let endpoint = sub_project_color("#000000", 0, 1).unwrap();
