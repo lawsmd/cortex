@@ -11,10 +11,12 @@
 use warp_core::ui::theme::Fill;
 use warpui::{
     elements::{
-        Align, Border, ChildView, Clipped, ConstrainedBox, Container, CrossAxisAlignment, Element,
-        Flex, MainAxisAlignment, MainAxisSize, MouseStateHandle, ParentElement, Shrinkable, Text,
+        Align, Border, ChildView, Clipped, ClippedScrollStateHandle, ClippedScrollable,
+        ConstrainedBox, Container, CrossAxisAlignment, Element, Flex, MainAxisAlignment,
+        MainAxisSize, MouseStateHandle, ParentElement, ScrollbarWidth, Shrinkable, Text,
     },
     text_layout::ClipConfig,
+    units::Pixels,
     ui_components::{
         button::ButtonVariant,
         components::{Coords, UiComponent, UiComponentStyles},
@@ -76,6 +78,7 @@ const SIDEBAR_HEADER_PADDING: f32 = 15.0;
 const SIDEBAR_BORDER_WIDTH: f32 = 1.0;
 const PAGE_PADDING: f32 = 28.0;
 const MAX_PAGE_WIDTH: f32 = 800.0;
+const SCROLLBAR_WIDTH: ScrollbarWidth = ScrollbarWidth::Auto;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum CortexSettingsViewEvent {
@@ -104,6 +107,7 @@ pub struct CortexSettingsView {
     ai_state: AiPageState,
     diagnostics_state: DiagnosticsPageState,
     search_editor: ViewHandle<EditorView>,
+    clipped_scroll_state: ClippedScrollStateHandle,
 }
 
 impl CortexSettingsView {
@@ -148,6 +152,7 @@ impl CortexSettingsView {
             ai_state: AiPageState::default(),
             diagnostics_state: DiagnosticsPageState::default(),
             search_editor,
+            clipped_scroll_state: ClippedScrollStateHandle::default(),
         }
     }
 
@@ -162,6 +167,7 @@ impl CortexSettingsView {
     fn select_section(&mut self, section: CortexSettingsSection, ctx: &mut ViewContext<Self>) {
         if self.current_section != section {
             self.current_section = section;
+            self.clipped_scroll_state.scroll_to(Pixels::zero());
             ctx.notify();
         }
     }
@@ -869,6 +875,7 @@ impl View for CortexSettingsView {
 
     fn render(&self, app: &AppContext) -> Box<dyn Element> {
         let appearance = Appearance::as_ref(app);
+        let theme = appearance.theme();
 
         let centered_content = Container::new(
             Align::new(
@@ -882,12 +889,22 @@ impl View for CortexSettingsView {
         .with_uniform_padding(PAGE_PADDING)
         .finish();
 
+        let scrollable_content = ClippedScrollable::vertical(
+            self.clipped_scroll_state.clone(),
+            centered_content,
+            SCROLLBAR_WIDTH,
+            theme.nonactive_ui_detail().into(),
+            theme.active_ui_detail().into(),
+            warpui::elements::Fill::None,
+        )
+        .finish();
+
         Flex::row()
             .with_cross_axis_alignment(CrossAxisAlignment::Stretch)
             .with_main_axis_alignment(MainAxisAlignment::Start)
             .with_main_axis_size(MainAxisSize::Max)
             .with_child(self.render_sidebar(appearance, app))
-            .with_child(Shrinkable::new(1., centered_content).finish())
+            .with_child(Shrinkable::new(1., scrollable_content).finish())
             .finish()
     }
 }
