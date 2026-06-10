@@ -174,6 +174,8 @@ pub enum TerminalAction {
     ReinputCommands,
     ReinputCommandsWithSudo,
     ClearBuffer,
+    // CORTEX: per-pane smart clear button — /clear to a running CLI agent, else clear blocks.
+    CortexClearPane,
     Focus,
     FocusInputAndClearSelection,
     ShowFindBar,
@@ -537,6 +539,8 @@ impl fmt::Debug for TerminalAction {
             ReinputCommands => f.write_str("ReinputCommands"),
             ReinputCommandsWithSudo => f.write_str("ReinputCommandsWithSudo"),
             ClearBuffer => f.write_str("ClearBuffer"),
+            // CORTEX: smart clear button.
+            CortexClearPane => f.write_str("CortexClearPane"),
             SelectBookmarkUp => f.write_str("SelectBookmarkUp"),
             SelectBookmarkDown => f.write_str("SelectBookmarkDown"),
             Focus => f.write_str("Focus"),

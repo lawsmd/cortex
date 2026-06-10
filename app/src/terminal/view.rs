@@ -6,6 +6,8 @@ pub mod block_onboarding;
 pub(crate) mod blocklist_filter;
 mod bookmarks;
 mod context_menu;
+// Cortex-only: per-pane smart clear button (header + floating overlay).
+mod cortex_clear;
 pub mod init;
 pub mod inline_banner;
 pub mod load_ai_conversation;
@@ -2368,6 +2370,11 @@ struct TerminalViewMouseStates {
     jump_to_bottom_of_block_button: MouseStateHandle,
 
     parent_conversation_header_link: MouseStateHandle,
+    // CORTEX-BEGIN: pane-clear-button-mouse-states
+    // Smart-clear button (header and floating-overlay placements).
+    cortex_clear_header_button: MouseStateHandle,
+    cortex_clear_overlay_button: MouseStateHandle,
+    // CORTEX-END: pane-clear-button-mouse-states
     /// Persistent horizontal scroll state for the orchestration breadcrumb
     /// row. Lives here (rather than as a `MouseStateHandle`) so the user's
     /// scroll position survives across renders — in narrow split-off panes
@@ -25525,6 +25532,8 @@ impl TypedActionView for TerminalView {
             | ReinputCommands
             | ReinputCommandsWithSudo
             | ClearBuffer
+            // CORTEX: smart clear has no accessibility content, like ClearBuffer.
+            | CortexClearPane
             | Focus
             | ShowFindBar
             | PageUp
@@ -25848,6 +25857,8 @@ impl TypedActionView for TerminalView {
             ReinputCommands => self.reinput_commands(false, ctx),
             ReinputCommandsWithSudo => self.reinput_commands(true, ctx),
             ClearBuffer => self.clear_buffer(ctx),
+            // CORTEX: smart clear — /clear to a running CLI agent, else clear blocks.
+            CortexClearPane => self.cortex_smart_clear(ctx),
             Focus => self.redetermine_global_focus(ctx),
             FocusInputAndClearSelection => self.focus_input_and_clear_selections(ctx),
             ShowFindBar => self.show_find_bar(ctx),
@@ -27097,6 +27108,14 @@ impl View for TerminalView {
             ),
             None => {}
         }
+
+        // CORTEX-BEGIN: pane-clear-overlay
+        // Floating smart-clear button for panes whose header is hidden
+        // (default single-pane layout); the header hosts the button otherwise.
+        if self.cortex_should_show_clear_overlay(app) {
+            stack.add_child(self.render_cortex_clear_overlay(app));
+        }
+        // CORTEX-END: pane-clear-overlay
 
         if self.find_model.as_ref(app).is_find_bar_open() {
             stack.add_child(ChildView::new(&self.find_bar).finish());

@@ -455,6 +455,10 @@ impl TerminalView {
             .focus_handle
             .as_ref()
             .is_some_and(|h| h.is_in_split_pane(app));
+        // CORTEX-BEGIN: pane-clear-button
+        right_row.add_child(self.render_cortex_clear_header_button(icon_color, button_size, app));
+        icon_button_count += 1;
+        // CORTEX-END: pane-clear-button
         right_row.add_child(
             render_pane_header_buttons::<TerminalAction, TerminalAction>(
                 header_ctx,
