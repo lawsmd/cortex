@@ -258,6 +258,36 @@ if errorlevel 1 (
     exit /b 1
 )
 
+REM --- Install the `cortex` console shims and register them on PATH.
+REM     Cortex.exe is GUI-subsystem, so interactive shells neither wait for
+REM     it nor see its exit code, and (pre-fix) its CLI output was lost.
+REM     The shims give scripted callers (notably the cortex-orchestrate
+REM     skill's `cortex orchestrate ...` invocation) a console-friendly
+REM     entry point:
+REM       bin\cortex.cmd - cmd / PowerShell (batch context waits for GUI
+REM                        EXEs and propagates %%ERRORLEVEL%%)
+REM       bin\cortex     - Git Bash / MSYS2 (bash ignores PATHEXT, needs
+REM                        an extensionless sh script)
+REM     They live in bin\ rather than next to Cortex.exe because PATHEXT
+REM     resolves .EXE before .CMD - a shim beside the EXE would lose the
+REM     `cortex` lookup to the GUI binary itself. install-cortex-path.ps1
+REM     appends bin\ to the user PATH idempotently; failures are soft
+REM     (shims still work via their absolute path).
+if not exist "%INSTALL_DIR%\bin" mkdir "%INSTALL_DIR%\bin"
+copy /Y "scripts\cortex-shims\cortex.cmd" "%INSTALL_DIR%\bin\cortex.cmd" >nul
+copy /Y "scripts\cortex-shims\cortex"     "%INSTALL_DIR%\bin\cortex"     >nul
+if errorlevel 1 (
+    echo.
+    echo Shim copy failed. `cortex` CLI invocations will need the full
+    echo EXE path until the next successful install.
+) else (
+    powershell -NoProfile -ExecutionPolicy Bypass -File "scripts\install-cortex-path.ps1"
+    if errorlevel 1 (
+        echo PATH registration failed. Invoke the shim by absolute path:
+        echo   "%INSTALL_DIR%\bin\cortex.cmd" orchestrate ...
+    )
+)
+
 REM --- Verify the installed Cortex.exe is GUI-subsystem (no console).
 REM     The conditional at app\src\bin\oss.rs:15-20 should produce a
 REM     windows-subsystem EXE for any release build, but if it silently
@@ -376,6 +406,7 @@ REM --- Footer (matches dev's clean-exit sentinel format) ---
 echo.
 echo === Done ===
 echo Prod EXE:    %INSTALL_PATH%
+echo CLI shim:    %INSTALL_DIR%\bin\cortex^(.cmd^)  ^(on user PATH for new shells^)
 echo Build stamp: %INSTALL_DIR%\Cortex.build-info  ^(commit %BUILD_COMMIT:~0,7%^)
 echo Log:         %LOG_PATH%
 echo Per-crate timings: target\cargo-timings\cargo-timing-*.html  ^(open the latest^)

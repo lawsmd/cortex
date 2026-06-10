@@ -1,0 +1,12 @@
+#!/bin/sh
+# Console shim for the GUI-subsystem prod Cortex.exe (Git Bash / MSYS2).
+#
+# Installed by scripts\install-cortex-prod.cmd to %LOCALAPPDATA%\Cortex\bin\
+# alongside cortex.cmd. Bash does not consult PATHEXT, so the .cmd shim is
+# invisible to it for a bare `cortex` lookup — this extensionless sh script
+# is what bash finds on PATH. exec-ing the EXE means bash waits for it and
+# the exit code propagates, while stdio passes through (pipes included;
+# `attach_to_parent_console` in crates/warp_util preserves redirection).
+#
+# Must keep LF line endings (pinned in .gitattributes) or sh chokes on CR.
+exec "$(dirname "$0")/../Cortex.exe" "$@"

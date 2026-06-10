@@ -11,3 +11,8 @@ crates/input_classifier/models/**/*tokenizer.json -filter -diff -merge text ling
 # Cortex-side; not upstream Warp.
 *.bat text eol=crlf
 *.cmd text eol=crlf
+
+# The extensionless sh shim for Git Bash must stay LF even on Windows
+# checkouts (autocrlf=true would otherwise CRLF it and break the shebang).
+# Cortex-side; not upstream Warp.
+scripts/cortex-shims/cortex text eol=lf

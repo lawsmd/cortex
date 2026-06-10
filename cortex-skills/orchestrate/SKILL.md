@@ -32,13 +32,15 @@ Do NOT use for single-shot work. Splitting has setup cost; reserve it for genuin
 
    Each `## Section N` heading must appear on its own line. Each section must be self-contained — the sub-agent reads only its own section.
 
-4. Invoke the orchestrate CLI via the Bash tool:
+4. Create a second temp file for the pane ids (`mktemp -t cortex-orchestrate-ids.XXXXXX`), then invoke the orchestrate CLI via the Bash tool:
 
    ```
-   cortex orchestrate --plan-file <path-from-step-2> --panes <N>
+   cortex orchestrate --plan-file <path-from-step-2> --panes <N> --out <ids-file>
    ```
 
-   The CLI prints one pane id per line on success, or returns a non-zero exit with an error.
+   `cortex` is a console shim installed at `%LOCALAPPDATA%\Cortex\bin` (on the user PATH; installed by `scripts\install-cortex-prod.cmd`). If the shell can't resolve `cortex` — e.g. this Cortex instance launched before the shim existed, so its panes inherited a stale PATH — fall back to the absolute shim path `"$LOCALAPPDATA/Cortex/bin/cortex"` (Bash) / `"%LOCALAPPDATA%\Cortex\bin\cortex.cmd"` (cmd/PowerShell), and only as a last resort the raw EXE `"$LOCALAPPDATA/Cortex/Cortex.exe"`. Prefer the shim: the EXE is GUI-subsystem, so interactive shells won't wait for it or surface its exit code.
+
+   Contract: on success the CLI prints one pane id per line on stdout *and* writes the same ids to the `--out` file; on failure (no `CORTEX_IPC_SOCKET` in the environment, dead socket, no workspace, bad arguments) it exits non-zero with an error on stderr. If stdout comes back empty despite exit 0, read the `--out` file — do not fall back to scanning the process table.
 
 5. Tell the user: "Spawned N panes. Each sub-agent will present its plan — approve each one when it appears."
 

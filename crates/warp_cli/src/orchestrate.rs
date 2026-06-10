@@ -31,4 +31,12 @@ pub struct OrchestrateArgs {
     /// use; v1 inherits the focused pane's cwd via `add_terminal_pane`.
     #[arg(long = "working-dir")]
     pub working_dir: Option<PathBuf>,
+
+    /// Also write the spawned pane ids (one per line) to this file on
+    /// success. Belt-and-suspenders for scripted callers: stdout from a
+    /// GUI-subsystem binary can be lost in degraded console situations,
+    /// but the file survives. If relative, resolved against the current
+    /// working directory.
+    #[arg(long = "out")]
+    pub out: Option<PathBuf>,
 }

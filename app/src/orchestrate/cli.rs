@@ -65,6 +65,16 @@ pub fn run_cli(args: &OrchestrateArgs) -> Result<()> {
         return Err(anyhow!("OrchestrateService returned error: {error}"));
     }
 
+    // Write the ids file before printing: stdout from a GUI-subsystem
+    // binary is best-effort (see `attach_to_parent_console`), the file is
+    // the reliable channel for scripted callers.
+    if let Some(out) = &args.out {
+        let mut contents = response.pane_ids.join("\n");
+        contents.push('\n');
+        std::fs::write(out, contents)
+            .with_context(|| format!("failed to write pane ids to {}", out.display()))?;
+    }
+
     for id in &response.pane_ids {
         println!("{id}");
     }
