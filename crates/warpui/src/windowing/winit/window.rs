@@ -1450,6 +1450,14 @@ fn create_window(
                 log::error!("Failed to mark window as cloaked: {e:#?}");
             };
 
+            // CORTEX-BEGIN: cloak-watchdog
+            // Failsafe: if the first frame never renders (e.g. a render-path
+            // deadlock), the window above stays cloaked = invisible, unclosable,
+            // and silent. This force-uncloaks + logs after a grace period so the
+            // failure is visible instead of a mystery. No-op on healthy startup.
+            super::windows::spawn_cloak_watchdog(window, std::time::Duration::from_secs(8));
+            // CORTEX-END: cloak-watchdog
+
             if let Some(adjustment) = maybe_adjust_window_vertically(window) {
                 let direction = if adjustment > 0 { "down" } else { "up" };
                 log::info!(

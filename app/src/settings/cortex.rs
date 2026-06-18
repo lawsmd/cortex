@@ -149,6 +149,42 @@ define_settings_group!(CortexSettings, settings: [
         toml_path: "cortex.panes.title.font_name",
         description: "Font family for pane header titles. Empty string falls back to the UI font. Default is Fira Code for the TUI look.",
     },
+    reviewed_checklist_enabled: ReviewedChecklistEnabled {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.code_review.reviewed_checklist_enabled",
+        description: "Show a per-file 'mark as reviewed' check button in the code review panel. Reviewing a file tints its header green and collapses it; the mark auto-clears if the file's diff changes. Marks are stored locally and never committed.",
+    },
+    sink_reviewed_to_bottom: SinkReviewedToBottom {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.code_review.sink_reviewed_to_bottom",
+        description: "When a code review file is marked reviewed, sink it below a 'Reviewed (N)' divider at the bottom of the list so unreviewed files stay on top as the active worklist. When off, reviewed files stay in place (still green and collapsed).",
+    },
+    highlight_removed_files: HighlightRemovedFiles {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.code_review.highlight_removed_files",
+        description: "Treat deleted files as their own category in the code review panel: tint the header red, show a 'Removed' badge with just the deletion count, and collapse the file by default (instead of dumping the whole file as red removed lines). When off, deleted files render like upstream.",
+    },
+    sink_removed_to_bottom: SinkRemovedToBottom {
+        type: bool,
+        default: true,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.code_review.sink_removed_to_bottom",
+        description: "Sink deleted files below a red 'Removed (N)' divider at the very bottom of the code review list — beneath the Reviewed zone — so they stay out of the active worklist. When off, deleted files stay in place (still red and collapsed).",
+    },
     hide_tab_icon: HideTabIcon {
         type: bool,
         default: false,
@@ -287,14 +323,14 @@ define_settings_group!(CortexSettings, settings: [
         toml_path: "cortex.ai.allow_local_claude_codex_child_harnesses",
         description: "Whether /orchestrate's Local execution mode may spawn child agents using the Claude Code or Codex CLI harnesses instead of being limited to Oz. Upstream Warp keeps this gated behind FeatureFlag::LocalClaudeCodexChildHarnesses; Cortex hydrates that flag from this setting at startup and on each toggle, so checks at the existing call sites (local_child_harnesses.rs, orchestration_controls.rs) react without a restart. Default on — the whole point of the Cortex fork on this branch is to route /orchestrate children through your local Claude Code login.",
     },
-    orchestrated_subagents_start_in_plan_mode: OrchestratedSubagentsStartInPlanMode {
-        type: bool,
-        default: true,
+    orchestrated_subagents_permission_mode: OrchestratedSubagentsPermissionMode {
+        type: String,
+        default: "auto".to_string(),
         supported_platforms: SupportedPlatforms::ALL,
         sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
         private: false,
-        toml_path: "cortex.ai.orchestrated_subagents_start_in_plan_mode",
-        description: "Whether Cortex's `/orchestrate` skill spawns each child Claude Code sub-agent in Plan Mode (`--permission-mode plan`). When off, sub-agents launch with `--dangerously-skip-permissions`. Default on so the user reviews each sub-agent's plan before execution.",
+        toml_path: "cortex.ai.orchestrated_subagents_permission_mode",
+        description: "Permission mode Cortex's `/orchestrate` skill spawns each child Claude Code sub-agent in. `plan` → `--permission-mode plan` (review and approve every step); `auto` → `--permission-mode auto` (sub-agent presents its plan, you approve once, then it runs hands-off with a background safety classifier — needs Opus 4.6+); `skip` → `--dangerously-skip-permissions` (no plan gate, no prompts). Default `auto`. Unknown values are treated as `auto`.",
     },
     show_block_ai_button: ShowBlockAiButton {
         type: bool,
@@ -520,5 +556,46 @@ define_settings_group!(CortexSettings, settings: [
         private: false,
         toml_path: "cortex.file_explorer.font_size",
         description: "Font size for file and folder labels in the file explorer. Clamped to 10..=18.",
+    },
+    mobile_server_enabled: MobileServerEnabled {
+        type: bool,
+        default: false,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.mobile.enabled",
+        description: "Enable the Cortex mobile companion server: a local WebSocket endpoint a paired Android app connects to in order to mirror and control your open terminal panes. Off by default; intended to be reached over a Tailscale tailnet. Listen port is cortex.mobile.port. Takes effect on next launch.",
+    },
+    mobile_server_port: MobileServerPort {
+        type: u16,
+        default: 9278,
+        supported_platforms: SupportedPlatforms::ALL,
+        sync_to_cloud: SyncToCloud::Globally(RespectUserSyncSetting::Yes),
+        private: false,
+        toml_path: "cortex.mobile.port",
+        description: "TCP port the Cortex mobile companion server listens on (WebSocket). Default 9278, adjacent to the built-in HTTP server's 9277. Takes effect on next launch.",
+    },
+    mobile_server_token: MobileServerToken {
+        type: String,
+        default: String::new(),
+        supported_platforms: SupportedPlatforms::ALL,
+        // Never sync to cloud: this is an auth secret and is per-device. Lives
+        // only in the local settings.toml (M4a); hardening to OS secure storage
+        // + QR pairing is M4b.
+        sync_to_cloud: SyncToCloud::Never,
+        private: false,
+        toml_path: "cortex.mobile.token",
+        description: "Shared secret the Cortex mobile companion requires on every non-loopback (remote) connection. Empty disables remote access entirely (loopback still works without a token). Set a long random value and pass it to the phone as ?token=… in the bridge URL. Never synced to the cloud. Takes effect on next launch.",
+    },
+    mobile_server_bind_address: MobileServerBindAddress {
+        type: String,
+        default: String::new(),
+        supported_platforms: SupportedPlatforms::ALL,
+        // Never sync to cloud: the bind address is per-device (each machine's
+        // Tailscale 100.x address differs).
+        sync_to_cloud: SyncToCloud::Never,
+        private: false,
+        toml_path: "cortex.mobile.bind_address",
+        description: "Extra IP the Cortex mobile companion binds, in addition to loopback, so a phone can reach it. Leave empty to auto-detect this machine's Tailscale interface (an address in 100.64.0.0/10) on each launch — recommended, since it re-binds correctly even if the tailnet IP changes. Set an explicit IP to override auto-detection. Only honored when cortex.mobile.token is also set, so the bridge is never exposed without auth. If empty and no Tailscale interface is found, the bridge is loopback only (no remote access). Takes effect on next launch.",
     }
 ]);

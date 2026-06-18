@@ -139,6 +139,13 @@ fn build_local_claude_child_command_plan_mode_drops_session_id() {
 }
 
 #[test]
+fn build_local_claude_child_command_auto_mode_drops_session_id() {
+    let command = build_local_claude_child_command("hello world", ClaudePermissionMode::Auto);
+
+    assert_eq!(command, "claude --permission-mode auto 'hello world'");
+}
+
+#[test]
 fn build_local_opencode_child_command_quotes_the_prompt() {
     assert_eq!(
         build_local_opencode_child_command("hello world"),

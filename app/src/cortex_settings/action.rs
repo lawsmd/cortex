@@ -108,12 +108,11 @@ pub enum CortexSettingsAction {
     /// so the orchestration controls (`local_child_harnesses.rs`,
     /// `orchestration_controls.rs`) react without a restart.
     ToggleAllowLocalClaudeCodexChildHarnesses,
-    /// Flip the "Orchestrated sub-agents start in Plan Mode" toggle on the AI
-    /// page. Controls whether Cortex's `/orchestrate` skill spawns each child
-    /// Claude Code sub-agent with `--permission-mode plan` (on) or
-    /// `--dangerously-skip-permissions` (off). Read by the orchestrate IPC
-    /// bridge at request time.
-    ToggleOrchestratedSubagentsStartInPlanMode,
+    /// Set the permission mode the AI page's orchestrate selector spawns child
+    /// Claude Code sub-agents in: `plan` (`--permission-mode plan`), `auto`
+    /// (`--permission-mode auto`), or `skip` (`--dangerously-skip-permissions`).
+    /// Read by the orchestrate IPC bridge at request time.
+    SetOrchestratedSubagentsPermissionMode(String),
     /// Toggle the AI Assistant button in the block action toolbar.
     ToggleShowBlockAiButton,
     /// Toggle the Save as Workflow button in the block action toolbar.

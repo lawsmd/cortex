@@ -57,6 +57,8 @@ mod hook_bridge;
 mod notebooks;
 mod notification;
 #[cfg(not(target_family = "wasm"))]
+mod mobile_bridge;
+#[cfg(not(target_family = "wasm"))]
 mod orchestrate;
 mod palette;
 mod persistence;
@@ -1474,6 +1476,14 @@ pub(crate) fn initialize_app(
     // docs/ai/external-status-injection.md § Layer A2.
     #[cfg(not(target_family = "wasm"))]
     ctx.add_singleton_model(hook_bridge::HookBridgeServer::new);
+
+    // Boot the Cortex mobile companion bridge (M0: a WebSocket echo server
+    // gated on `cortex.mobile.enabled`). Like the orchestrate/hook bridges it
+    // comes up early so a connecting phone can see panes as soon as the
+    // workspace exists. Later milestones add pane enumeration, output
+    // streaming, and input injection on this transport.
+    #[cfg(not(target_family = "wasm"))]
+    ctx.add_singleton_model(mobile_bridge::MobileBridge::new);
 
     log::info!(
         "Starting warp with channel state {} and version {:?}",

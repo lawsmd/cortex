@@ -54,6 +54,7 @@ pub(super) fn validate_local_harness_shell(shell_type: Option<ShellType>) -> Res
 pub(crate) enum ClaudePermissionMode {
     DangerouslySkip,
     Plan,
+    Auto,
 }
 
 pub(crate) fn build_local_claude_child_command(
@@ -77,6 +78,13 @@ pub(crate) fn build_local_claude_child_command(
             // against the Claude CLI, and orchestrated sub-agents are user-visible
             // panes that don't need session resumption.
             format!("claude --permission-mode plan {quoted_prompt}")
+        }
+        ClaudePermissionMode::Auto => {
+            // `--permission-mode auto`: the sub-agent presents its plan, the user
+            // approves once in chat, then it runs hands-off while a background
+            // classifier gates risky escalations. Drop --session-id for the same
+            // reason as Plan (unverified pairing; user-visible panes don't resume).
+            format!("claude --permission-mode auto {quoted_prompt}")
         }
     }
 }

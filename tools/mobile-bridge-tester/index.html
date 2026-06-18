@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cortex Mobile Bridge — Tester</title>
+
+<!--
+  Desktop test harness for the Cortex mobile companion bridge (M3).
+
+  Open this file in any browser on the machine running Cortex (dev lane), with
+  `[cortex.mobile] enabled = true` in settings. It exercises the same wire
+  protocol the Android app will speak:
+
+    1. Connects to ws://<host>:<port>/ws
+    2. Sends {"type":"list_panes"} and renders the window -> tab -> pane tree,
+       badging each terminal with its CLI-agent name + status.
+    3. Click a pane -> sends {"type":"subscribe","pane_id":<token>}, renders the
+       Snapshot ANSI redraw, then writes live Output deltas into xterm.js.
+       Switching panes unsubscribes the previous one.
+    4. (M3) Type into the focused terminal, or use the soft-key bar, to send
+       {"type":"input","pane_id":<token>,"bytes_b64":<keys>} back to the pane's
+       PTY — keystrokes, control codes, arrows, Ctrl-C, and /clear, /exit. There
+       is no local echo: characters appear when the PTY echoes them back as
+       Output, exactly like a real remote terminal.
+
+  This is the de-risker for the snapshot serializer + live stream + input path.
+  The client logic here is intentionally close to what the Android WebView will
+  bundle, so it doubles as a reference implementation. xterm.js is loaded from a
+  CDN for zero setup; the Android build will bundle it as an asset instead.
+
+  Note: v1 does not resize the desktop PTY (plan defers that to M5), so if this
+  browser window is narrower than the source pane, long lines wrap differently.
+  Text stays sharp — maximize the window for the closest match.
+
+  /clear and /exit send the command text, then the Enter ~60ms later: Claude's
+  slash-command input layer can eat a too-rapid carriage return and leave the
+  command sitting unsubmitted (the desktop smart-clear button uses the same
+  DelayedEnter, 50ms). Normal typing is naturally paced, so it needs no delay.
+-->
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css" />
+<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@xterm/addon-fit@0.10.0/lib/addon-fit.js"></script>
+
+<style>
+  :root {
+    --bg: #0d0f12;
+    --panel: #14171c;
+    --panel-2: #1b1f26;
+    --border: #2a2f38;
+    --text: #c8ccd4;
+    --dim: #7c828d;
+    --accent: #6fb3ff;
+    --ok: #57c08a;
+    --warn: #e0b341;
+    --busy: #6fb3ff;
+    --bad: #e06c75;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font: 13px/1.5 ui-monospace, "FiraCode Nerd Font Mono", "Cascadia Code", Consolas, monospace;
+    display: flex;
+    flex-direction: column;
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+  }
+  header .title { font-weight: 600; color: var(--text); margin-right: 8px; }
+  header input {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 5px 8px;
+    border-radius: 5px;
+    font: inherit;
+    width: 170px;
+  }
+  header button {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 5px 12px;
+    border-radius: 5px;
+    font: inherit;
+    cursor: pointer;
+  }
+  header button:hover { border-color: var(--accent); }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--bad); display: inline-block; }
+  .dot.on { background: var(--ok); }
+  .status-text { color: var(--dim); margin-left: 4px; }
+
+  main { flex: 1; display: flex; min-height: 0; }
+
+  #sidebar {
+    width: 320px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 8px;
+  }
+  .window-group { margin-bottom: 14px; }
+  .window-label { color: var(--dim); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; margin: 4px 2px; }
+  .tab-row { color: var(--text); padding: 4px 6px; font-weight: 600; }
+  .tab-row .active-badge { color: var(--accent); font-weight: 400; font-size: 11px; }
+  .pane-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 8px 5px 18px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .pane-row:hover { background: var(--panel-2); }
+  .pane-row.selected { background: var(--panel-2); border-color: var(--accent); }
+  .pane-row .kind { color: var(--text); }
+  .pane-row .non-terminal { color: var(--dim); cursor: default; }
+  .badge {
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    color: var(--dim);
+  }
+  .badge.agent { color: var(--accent); border-color: var(--accent); }
+  .badge.in_progress { color: var(--busy); border-color: var(--busy); }
+  .badge.success { color: var(--ok); border-color: var(--ok); }
+  .badge.blocked { color: var(--bad); border-color: var(--bad); font-weight: 600; }
+
+  #right { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+  #term-header {
+    padding: 6px 12px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    color: var(--dim);
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  #term-header .live { color: var(--ok); }
+  #terminal { flex: 1; min-height: 0; padding: 6px 8px; background: #000; }
+  #empty-hint {
+    margin: auto;
+    color: var(--dim);
+    text-align: center;
+  }
+
+  #softkeys {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 12px;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+  }
+  #softkeys button {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 6px 11px;
+    border-radius: 6px;
+    font: inherit;
+    cursor: pointer;
+    min-width: 40px;
+  }
+  #softkeys button:hover:not(:disabled) { border-color: var(--accent); }
+  #softkeys button:disabled { opacity: .4; cursor: default; }
+  #softkeys .sep { width: 1px; background: var(--border); margin: 2px 4px; }
+  #softkeys .cmd { color: var(--accent); border-color: var(--accent); }
+</style>
+</head>
+<body>
+  <header>
+    <span class="title">⌁ Cortex Mobile Bridge</span>
+    <input id="host" value="127.0.0.1" title="host" />
+    <input id="port" value="9278" title="port" style="width:70px" />
+    <button id="connect-btn">Connect</button>
+    <button id="refresh-btn" title="Re-request the pane list">Refresh panes</button>
+    <span class="dot" id="conn-dot"></span>
+    <span class="status-text" id="conn-status">disconnected</span>
+  </header>
+
+  <main>
+    <div id="sidebar">
+      <div id="empty-hint">Connect to load the pane tree.</div>
+    </div>
+    <div id="right">
+      <div id="term-header">
+        <span id="sub-label">No pane subscribed</span>
+        <span id="live-label" class="live"></span>
+      </div>
+      <div id="terminal"></div>
+      <div id="softkeys">
+        <button data-keys="1b" title="Escape">Esc</button>
+        <button data-keys="09" title="Tab">Tab</button>
+        <button data-keys="03" class="cmd" title="Ctrl-C (interrupt)">Ctrl-C</button>
+        <span class="sep"></span>
+        <button data-keys="1b5b41" title="Up arrow">↑</button>
+        <button data-keys="1b5b42" title="Down arrow">↓</button>
+        <button data-keys="1b5b44" title="Left arrow">←</button>
+        <button data-keys="1b5b43" title="Right arrow">→</button>
+        <button data-keys="0d" class="cmd" title="Enter / carriage return">⏎ Enter</button>
+        <span class="sep"></span>
+        <button data-cmd="/clear" class="cmd" title="Send /clear, then Enter">/clear</button>
+        <button data-cmd="/exit" class="cmd" title="Send /exit, then Enter">/exit</button>
+      </div>
+    </div>
+  </main>
+
+<script>
+(() => {
+  "use strict";
+
+  const $ = (id) => document.getElementById(id);
+  const decode = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+  // bytes -> base64 (the inverse of decode); inputs are tiny keystroke chunks.
+  const b64encode = (bytes) => {
+    let s = "";
+    for (const b of bytes) s += String.fromCharCode(b);
+    return btoa(s);
+  };
+  const utf8 = (str) => new TextEncoder().encode(str);
+  // "1b5b41" -> Uint8Array([0x1b,0x5b,0x41]); for soft-key escape sequences.
+  const hexBytes = (hex) => {
+    const out = new Uint8Array(hex.length / 2);
+    for (let i = 0; i < out.length; i++) out[i] = parseInt(hex.substr(i * 2, 2), 16);
+    return out;
+  };
+  const sameId = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+  // ── xterm.js setup ─────────────────────────────────────────────────────
+  const term = new Terminal({
+    fontFamily: '"FiraCode Nerd Font Mono", "Cascadia Code", Consolas, monospace',
+    fontSize: 13,
+    cursorBlink: true,
+    scrollback: 5000,
+    theme: { background: "#000000" },
+  });
+  const fit = new FitAddon.FitAddon();
+  term.loadAddon(fit);
+  term.open($("terminal"));
+  fit.fit();
+  window.addEventListener("resize", () => { try { fit.fit(); } catch (_) {} });
+
+  // ── Connection state ───────────────────────────────────────────────────
+  let ws = null;
+  let currentPaneId = null;   // the opaque token of the subscribed pane
+  let refreshTimer = null;
+
+  function setConn(on, text) {
+    $("conn-dot").classList.toggle("on", on);
+    $("conn-status").textContent = text;
+    $("connect-btn").textContent = on ? "Disconnect" : "Connect";
+  }
+
+  function connect() {
+    disconnect();
+    const url = `ws://${$("host").value}:${$("port").value}/ws`;
+    setConn(false, `connecting to ${url} …`);
+    ws = new WebSocket(url);
+
+    ws.onopen = () => {
+      setConn(true, "connected");
+      listPanes();
+      // M1/M2 are request/response (no server push until M4) — poll the tree.
+      refreshTimer = setInterval(listPanes, 3000);
+    };
+    ws.onclose = () => { setConn(false, "disconnected"); stopPolling(); setInputEnabled(false); };
+    ws.onerror = () => { setConn(false, "error (see console)"); };
+    ws.onmessage = (ev) => {
+      let msg;
+      try { msg = JSON.parse(ev.data); } catch { console.warn("bad frame", ev.data); return; }
+      handle(msg);
+    };
+  }
+
+  function disconnect() {
+    stopPolling();
+    setInputEnabled(false);
+    if (ws) { try { ws.close(); } catch (_) {} ws = null; }
+  }
+  function stopPolling() { if (refreshTimer) { clearInterval(refreshTimer); refreshTimer = null; } }
+
+  function send(obj) {
+    if (ws && ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify(obj));
+  }
+  function listPanes() { send({ type: "list_panes" }); }
+
+  // ── Input (M3) ───────────────────────────────────────────────────────────
+  // Forward raw bytes to the subscribed pane's PTY. No-op until a pane is
+  // subscribed, so stray keystrokes can't go nowhere.
+  function sendInput(bytes) {
+    if (!currentPaneId || !bytes || !bytes.length) return;
+    send({ type: "input", pane_id: currentPaneId, bytes_b64: b64encode(bytes) });
+  }
+  // Submit a slash command the way the desktop smart-clear button does: the
+  // text now, the Enter ~60ms later, so Claude's input layer doesn't eat it.
+  function submitCommand(cmd) {
+    sendInput(utf8(cmd));
+    setTimeout(() => sendInput(utf8("\r")), 60);
+  }
+  function setInputEnabled(on) {
+    document.querySelectorAll("#softkeys button").forEach((b) => { b.disabled = !on; });
+  }
+
+  function subscribe(paneId) {
+    if (currentPaneId && !sameId(currentPaneId, paneId)) {
+      send({ type: "unsubscribe", pane_id: currentPaneId });
+    }
+    currentPaneId = paneId;
+    term.reset();
+    $("live-label").textContent = "● waiting for snapshot…";
+    send({ type: "subscribe", pane_id: paneId });
+    setInputEnabled(true);
+    term.focus();
+    renderSelection();
+  }
+
+  // ── Incoming frame handling ──────────────────────────────────────────────
+  function handle(msg) {
+    switch (msg.type) {
+      case "pane_list":
+        renderTree(msg.windows || []);
+        break;
+      case "snapshot":
+        if (sameId(msg.pane_id, currentPaneId)) {
+          term.reset();
+          term.write(decode(msg.ansi_b64));
+          $("live-label").textContent = "● live";
+        }
+        break;
+      case "output":
+        if (sameId(msg.pane_id, currentPaneId)) {
+          term.write(decode(msg.bytes_b64));
+        }
+        break;
+      case "error":
+        console.warn("bridge error:", msg.message);
+        $("live-label").textContent = "⚠ " + msg.message;
+        break;
+      default:
+        console.warn("unknown frame type:", msg.type, msg);
+    }
+  }
+
+  // ── Sidebar rendering ──────────────────────────────────────────────────
+  let lastWindows = [];
+
+  function renderTree(windows) {
+    lastWindows = windows;
+    const sidebar = $("sidebar");
+    sidebar.innerHTML = "";
+    if (!windows.length) {
+      sidebar.innerHTML = '<div id="empty-hint">No windows reported.</div>';
+      return;
+    }
+    windows.forEach((win, wi) => {
+      const group = document.createElement("div");
+      group.className = "window-group";
+      const label = document.createElement("div");
+      label.className = "window-label";
+      label.textContent = `Window ${wi + 1}`;
+      group.appendChild(label);
+
+      (win.tabs || []).forEach((tab) => {
+        const tabRow = document.createElement("div");
+        tabRow.className = "tab-row";
+        tabRow.innerHTML = `${escapeHtml(tab.title || "(untitled)")} ` +
+          (tab.active ? '<span class="active-badge">active</span>' : "");
+        group.appendChild(tabRow);
+
+        (tab.panes || []).forEach((pane) => {
+          group.appendChild(renderPaneRow(pane));
+        });
+      });
+      sidebar.appendChild(group);
+    });
+    renderSelection();
+  }
+
+  function renderPaneRow(pane) {
+    const row = document.createElement("div");
+    const isTerminal = pane.kind === "Terminal";
+    row.className = "pane-row" + (isTerminal ? "" : "");
+    row.dataset.paneId = JSON.stringify(pane.pane_id);
+
+    const kind = document.createElement("span");
+    kind.className = "kind" + (isTerminal ? "" : " non-terminal");
+    kind.textContent = pane.kind;
+    row.appendChild(kind);
+
+    if (pane.agent) {
+      const a = document.createElement("span");
+      a.className = "badge agent";
+      a.textContent = pane.agent;
+      row.appendChild(a);
+    }
+    if (pane.status) {
+      const s = document.createElement("span");
+      s.className = "badge " + pane.status;
+      s.textContent = pane.status.replace("_", " ");
+      row.appendChild(s);
+    }
+
+    if (isTerminal) {
+      row.addEventListener("click", () => subscribe(pane.pane_id));
+    } else {
+      row.title = "Only terminal panes can be mirrored";
+    }
+    return row;
+  }
+
+  function renderSelection() {
+    document.querySelectorAll(".pane-row").forEach((row) => {
+      let id;
+      try { id = JSON.parse(row.dataset.paneId); } catch { return; }
+      row.classList.toggle("selected", currentPaneId && sameId(id, currentPaneId));
+    });
+    $("sub-label").textContent = currentPaneId
+      ? "Mirroring pane " + JSON.stringify(currentPaneId)
+      : "No pane subscribed";
+  }
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  }
+
+  // ── Wire up controls ─────────────────────────────────────────────────────
+  $("connect-btn").addEventListener("click", () => {
+    if (ws && ws.readyState === WebSocket.OPEN) { disconnect(); setConn(false, "disconnected"); }
+    else connect();
+  });
+  $("refresh-btn").addEventListener("click", listPanes);
+
+  // Keystrokes typed into the focused terminal -> raw input frames. xterm.js
+  // gives us the already-encoded terminal input string (arrows, Enter, pasted
+  // text); we just UTF-8 it. No local echo — the PTY's echo comes back as Output.
+  term.onData((data) => sendInput(utf8(data)));
+
+  // Soft-key bar: data-keys is a hex byte sequence; data-cmd is a slash command
+  // submitted with a delayed Enter. Re-focus the terminal after each so physical
+  // typing keeps working without an extra click.
+  document.querySelectorAll("#softkeys button").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      if (btn.dataset.cmd) submitCommand(btn.dataset.cmd);
+      else if (btn.dataset.keys) sendInput(hexBytes(btn.dataset.keys));
+      term.focus();
+    });
+  });
+
+  setInputEnabled(false); // nothing subscribed yet
+})();
+</script>
+</body>
+</html>

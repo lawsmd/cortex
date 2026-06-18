@@ -86,6 +86,20 @@ pub fn warp_home_projects_file_path() -> Option<PathBuf> {
     warp_home_config_dir().map(|warp_config_dir| warp_config_dir.join("projects.json"))
 }
 
+// CORTEX-BEGIN: reviewed-checklist
+/// Cortex-only: path to the local, never-committed store of code-review
+/// "reviewed" marks. Each entry records the fingerprint of a file's diff at the
+/// moment it was checked off, so a mark only survives a restart if the diff is
+/// byte-identical. Lives in the channel- *and* profile-aware home config dir
+/// (e.g. `~/.warp-oss/code_review_reviews.json` for prod and
+/// `~/.warp-oss-dev/code_review_reviews.json` for dev) — crucially *outside*
+/// any repository working tree, so the marks are invisible to git and to
+/// collaborators on the reviewed branch.
+pub fn warp_home_code_review_reviews_file_path() -> Option<PathBuf> {
+    warp_home_config_dir().map(|warp_config_dir| warp_config_dir.join("code_review_reviews.json"))
+}
+// CORTEX-END: reviewed-checklist
+
 /// Returns the macOS config directory name for the current channel and data profile.
 ///
 /// Stable uses `.warp`, while other channels include a channel suffix

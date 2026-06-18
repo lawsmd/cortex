@@ -2179,6 +2179,99 @@ impl GlobalBufferModel {
         Ok(())
     }
 
+    // CORTEX-BEGIN: reload-from-disk
+    /// Force-reload every open **local** buffer from disk, discarding any
+    /// in-memory edits. Cortex addition: the manual escape hatch behind the
+    /// "reload from disk" buttons in the editor and code-review headers.
+    ///
+    /// External editors (Claude Code, Zed) can modify files while the
+    /// filesystem watcher misses the event (notably on Windows), leaving the
+    /// `FileModel` buffer cache stale. This re-reads each local buffer
+    /// unconditionally, bypassing the version-guard that the watcher-driven
+    /// reload path applies. Bounded by the number of open buffers, not repo
+    /// size. Remote / server-local buffers have their own reload paths
+    /// (`reopen_remote_buffer` / `force_reload_server_local`) and are skipped.
+    ///
+    /// Always defined (so UI call sites need no feature gate); the body is a
+    /// no-op without `local_fs`.
+    pub fn force_reload_all_local(&mut self, ctx: &mut ModelContext<Self>) {
+        #[cfg(feature = "local_fs")]
+        {
+            let file_ids: Vec<FileId> = self
+                .buffers
+                .iter()
+                .filter(|(_, state)| matches!(state.source, BufferSource::Local { .. }))
+                .map(|(id, _)| *id)
+                .collect();
+            for file_id in file_ids {
+                self.force_reload_local(file_id, ctx);
+            }
+        }
+        #[cfg(not(feature = "local_fs"))]
+        let _ = ctx;
+    }
+
+    /// Force-reload a single local buffer from disk, discarding in-memory
+    /// edits. Mirrors `force_reload_server_local` minus the server-side
+    /// sync-clock bookkeeping and cross-connection broadcast (those are
+    /// remote-only concepts). Emits `BufferUpdatedFromFileEvent` so editor and
+    /// code-review views re-render against the fresh content.
+    #[cfg(feature = "local_fs")]
+    fn force_reload_local(&mut self, file_id: FileId, ctx: &mut ModelContext<Self>) {
+        // Only Local-source buffers; ServerLocal/Remote reload elsewhere.
+        if !matches!(
+            self.buffers.get(&file_id).map(|s| &s.source),
+            Some(BufferSource::Local { .. })
+        ) {
+            return;
+        }
+        let Some(file_path) =
+            self.location_to_id
+                .get_by_right(&file_id)
+                .and_then(|loc| match loc {
+                    LocalOrRemotePath::Local(p) => Some(p.clone()),
+                    LocalOrRemotePath::Remote(_) => None,
+                })
+        else {
+            return;
+        };
+
+        ctx.spawn(
+            async move { FileModel::read_content_for_file(&file_path).await },
+            move |me, content, ctx| match content {
+                Ok(content) => {
+                    let Some(state) = me.buffers.get_mut(&file_id) else {
+                        return;
+                    };
+                    let Some(buffer) = state.buffer.upgrade(ctx) else {
+                        return;
+                    };
+
+                    let new_version = ContentVersion::new();
+                    buffer.update(ctx, |buffer, ctx| {
+                        buffer.replace_all(&content, ctx);
+                        buffer.set_version(new_version);
+                    });
+
+                    state.set_base_content_version(new_version);
+                    FileModel::handle(ctx).update(ctx, |file_model, _ctx| {
+                        file_model.set_version(file_id, new_version);
+                    });
+
+                    ctx.emit(GlobalBufferModelEvent::BufferUpdatedFromFileEvent {
+                        file_id,
+                        success: true,
+                        content_version: new_version,
+                    });
+                }
+                Err(e) => {
+                    log::warn!("[reload-from-disk] force_reload_local failed: {e}");
+                }
+            },
+        );
+    }
+    // CORTEX-END: reload-from-disk
+
     /// Re-open an existing remote buffer by sending `OpenBuffer` with
     /// `force_reload = true` to the server.
     ///

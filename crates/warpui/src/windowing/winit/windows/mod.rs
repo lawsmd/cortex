@@ -11,3 +11,6 @@ pub use registry::*;
 pub use system_caption_buttons::*;
 pub use window_attribute::*;
 pub use window_ext::WindowExt;
+// CORTEX-BEGIN: cloak-watchdog
+pub use window_ext::spawn_cloak_watchdog;
+// CORTEX-END: cloak-watchdog

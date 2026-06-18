@@ -456,7 +456,17 @@ impl TerminalView {
             .as_ref()
             .is_some_and(|h| h.is_in_split_pane(app));
         // CORTEX-BEGIN: pane-clear-button
-        right_row.add_child(self.render_cortex_clear_header_button(icon_color, button_size, app));
+        // Header placement of the smart-clear button (split panes, shared
+        // sessions, fullscreen agent view). render_header_actions does NOT hold
+        // the terminal model lock, so resolving the agent here locks safely —
+        // unlike the overlay path inside TerminalView::render. See cortex_clear.rs.
+        let active_agent = self.cortex_active_cli_agent(app);
+        right_row.add_child(self.render_cortex_clear_header_button(
+            active_agent,
+            icon_color,
+            button_size,
+            app,
+        ));
         icon_button_count += 1;
         // CORTEX-END: pane-clear-button
         right_row.add_child(

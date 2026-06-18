@@ -129,6 +129,9 @@ handlebars.workspace = true
 hex.workspace = true
 http.workspace = true
 http_client.workspace = true
+# Cortex: enumerate local interfaces so the mobile bridge can auto-detect this
+# machine's Tailscale (100.64.0.0/10) address and bind it without a hardcoded IP.
+if-addrs = "0.13"
 image.workspace = true
 include_dir = "0.7"
 infer = "0.19.0"
@@ -288,7 +291,7 @@ wgpu.workspace = true
 [target.'cfg(not(target_family = "wasm"))'.dependencies]
 app-installation-detection.workspace = true
 async-io.workspace = true
-axum.workspace = true
+axum = { workspace = true, features = ["ws"] }
 comfy-table = "7.1.4"
 inquire = "0.9.1"
 diesel = { workspace = true, features = ["sqlite", "chrono"] }

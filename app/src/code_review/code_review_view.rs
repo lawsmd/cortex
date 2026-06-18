@@ -152,7 +152,13 @@ use warpui::{
 };
 
 use crate::code::footer::{CodeFooterView, CodeFooterViewEvent};
+// CORTEX-BEGIN: reviewed-checklist
+use crate::code_review::reviewed_marks::{self, ReviewedMarksStore};
+// CORTEX-END: reviewed-checklist
 use crate::settings::AISettings;
+// CORTEX-BEGIN: reviewed-checklist
+use crate::settings::CortexSettings;
+// CORTEX-END: reviewed-checklist
 use crate::settings_view::SettingsSection;
 use crate::ui_components::{
     blended_colors::{neutral_2, neutral_3},
@@ -375,6 +381,10 @@ pub enum CodeReviewAction {
         line_and_column: Option<LineAndColumnArg>,
     },
     ToggleFileExpanded(String),
+    // CORTEX-BEGIN: reviewed-checklist
+    /// Toggle the "reviewed" mark on the file with this repo-relative path.
+    ToggleFileReviewed(String),
+    // CORTEX-END: reviewed-checklist
     OpenHeaderMenu,
     SetDiffMode(DiffMode),
     ToggleFileSidebar,
@@ -385,6 +395,17 @@ pub enum CodeReviewAction {
         paths: Vec<String>,
     },
     RefreshGitState,
+    // CORTEX-BEGIN: reload-from-disk
+    /// Force-reload every open local buffer from disk, then recompute the git
+    /// diff. Manual escape hatch for when an external editor changed files and
+    /// the cached buffer contents went stale.
+    ForceReloadFromDisk,
+    // CORTEX-END: reload-from-disk
+    // CORTEX-BEGIN: collapse-all
+    /// Collapse every currently-expanded file in the diff list in one click,
+    /// instead of clicking each file header individually.
+    CollapseAllFiles,
+    // CORTEX-END: collapse-all
     UndoRevert,
     Close,
     EmitPaneEvent(PaneEvent),
@@ -419,6 +440,15 @@ pub struct FileState {
     discard_button: ViewHandle<ActionButton>,
     add_context_button: ViewHandle<ActionButton>,
     copy_path_button: ViewHandle<ActionButton>,
+    // CORTEX-BEGIN: reviewed-checklist
+    /// Fingerprint of `file_diff`'s current content, refreshed whenever
+    /// `file_diff` is reassigned. Compared against the persisted mark to decide
+    /// whether this file still counts as reviewed (a cheap `u64` compare at
+    /// render time instead of rehashing the diff every frame).
+    diff_fingerprint: u64,
+    /// The header "mark as reviewed" check button.
+    reviewed_button: ViewHandle<ActionButton>,
+    // CORTEX-END: reviewed-checklist
 }
 
 pub(crate) struct LoadedState {
@@ -590,17 +620,152 @@ struct RepositoryState {
 
     /// Whether a repo-relative file path has been explicitly expanded (true) or collapsed (false).
     file_expanded: HashMap<String, bool>,
+
+    // CORTEX-BEGIN: reviewed-checklist
+    /// Repo-relative file path → fingerprint of the file's diff at the moment it
+    /// was marked reviewed. A file reads as reviewed only while its *current*
+    /// diff fingerprint still equals the stored one (see `is_reviewed`), so any
+    /// change to the diff silently un-reviews it. Loaded from / saved to the
+    /// local never-committed store (`ReviewedMarksStore`).
+    reviewed_files: HashMap<String, u64>,
+    // CORTEX-END: reviewed-checklist
 }
+
+// CORTEX-BEGIN: reviewed-checklist
+/// Which display zone a file belongs to, top → bottom. Reviewed files sink below
+/// the active worklist; removed (deleted) files sink below *everything* into
+/// their own red zone. The single source of truth for both the sort order and
+/// the two zone dividers, so they can never disagree about where a file lives.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum FileZone {
+    Active,
+    Reviewed,
+    Removed,
+}
+// CORTEX-END: reviewed-checklist
 
 impl RepositoryState {
     fn new(repo_path: LocalOrRemotePath) -> Self {
+        // CORTEX-BEGIN: reviewed-checklist
+        let reviewed_files = ReviewedMarksStore::load_for_repo(&repo_path.display_path());
+        // CORTEX-END: reviewed-checklist
         Self {
             repo_path,
             state: CodeReviewViewState::None,
             available_branches: Vec::new(),
             file_expanded: HashMap::new(),
+            // CORTEX-BEGIN: reviewed-checklist
+            reviewed_files,
+            // CORTEX-END: reviewed-checklist
         }
     }
+
+    // CORTEX-BEGIN: reviewed-checklist
+    /// Stable on-disk identity for this repository (its absolute path).
+    fn reviewed_marks_key(&self) -> String {
+        self.repo_path.display_path()
+    }
+
+    /// True when `path` is marked reviewed *and* the stored fingerprint still
+    /// matches the file's current diff fingerprint. A mismatch means the diff
+    /// changed since it was checked off, so it is no longer considered reviewed.
+    fn is_reviewed(&self, path: &str, current_fingerprint: u64) -> bool {
+        self.reviewed_files.get(path) == Some(&current_fingerprint)
+    }
+
+    /// Persist the current reviewed marks for this repo to the local store.
+    fn save_reviewed_marks(&self) {
+        ReviewedMarksStore::save_for_repo(&self.reviewed_marks_key(), &self.reviewed_files);
+    }
+
+    /// Drop reviewed marks whose stored fingerprint no longer matches the file's
+    /// current diff fingerprint (the diff changed since it was checked off).
+    /// Marks for files no longer present in the diff are intentionally left
+    /// alone (a transient empty diff shouldn't wipe them). Must be called while
+    /// `state` is `Loaded`. Returns true if any mark was removed.
+    fn reconcile_reviewed_marks(&mut self) -> bool {
+        let CodeReviewViewState::Loaded(state) = &self.state else {
+            return false;
+        };
+        let stale: Vec<String> = self
+            .reviewed_files
+            .iter()
+            .filter(|(path, &fingerprint)| {
+                state
+                    .file_states
+                    .get(path.as_str())
+                    .is_some_and(|file| file.diff_fingerprint != fingerprint)
+            })
+            .map(|(path, _)| path.clone())
+            .collect();
+        for path in &stale {
+            self.reviewed_files.remove(path);
+        }
+        !stale.is_empty()
+    }
+
+    /// The display zone a single file belongs to. Removed-wins: a deleted file is
+    /// always `Removed` (when removed-sink is on), regardless of any reviewed
+    /// mark — checked before the reviewed test. `sink_reviewed`/`sink_removed`
+    /// reflect the corresponding CortexSettings; when a zone's sink is off, files
+    /// that would land there collapse back to `Active` so they keep their place.
+    fn zone_of(&self, file: &FileState, sink_reviewed: bool, sink_removed: bool) -> FileZone {
+        if matches!(file.file_diff.status, GitFileStatus::Deleted) {
+            return if sink_removed {
+                FileZone::Removed
+            } else {
+                FileZone::Active
+            };
+        }
+        if sink_reviewed
+            && self.reviewed_files.get(&file.file_diff.file_path) == Some(&file.diff_fingerprint)
+        {
+            return FileZone::Reviewed;
+        }
+        FileZone::Active
+    }
+
+    /// Reorder the loaded file list into the three zones (active → reviewed →
+    /// removed), preserving the original relative order within each zone. No-op
+    /// unless loaded. Returns true if the order actually changed (so the caller
+    /// can invalidate cached list heights only when needed).
+    fn sort_file_zones(&mut self, sink_reviewed: bool, sink_removed: bool) -> bool {
+        let reviewed_files = &self.reviewed_files;
+        let CodeReviewViewState::Loaded(state) = &mut self.state else {
+            return false;
+        };
+
+        let previous_order: Vec<String> = state.file_states.keys().cloned().collect();
+
+        let mut active: IndexMap<String, FileState> = IndexMap::new();
+        let mut reviewed: IndexMap<String, FileState> = IndexMap::new();
+        let mut removed: IndexMap<String, FileState> = IndexMap::new();
+        for (path, file) in std::mem::take(&mut state.file_states) {
+            // Inlined `zone_of` to avoid borrowing `self` while `state` is held.
+            let zone = if matches!(file.file_diff.status, GitFileStatus::Deleted) {
+                if sink_removed {
+                    FileZone::Removed
+                } else {
+                    FileZone::Active
+                }
+            } else if sink_reviewed && reviewed_files.get(&path) == Some(&file.diff_fingerprint) {
+                FileZone::Reviewed
+            } else {
+                FileZone::Active
+            };
+            match zone {
+                FileZone::Active => active.insert(path, file),
+                FileZone::Reviewed => reviewed.insert(path, file),
+                FileZone::Removed => removed.insert(path, file),
+            };
+        }
+        active.extend(reviewed);
+        active.extend(removed);
+        let changed = active.keys().ne(previous_order.iter());
+        state.file_states = active;
+        changed
+    }
+    // CORTEX-END: reviewed-checklist
 
     /// If the current state is Loaded, replace it with None and return the LoadedState.
     /// Otherwise leave the state unchanged and return None.
@@ -2430,6 +2595,38 @@ impl CodeReviewView {
                         .unwrap_or(true);
                     if should_apply {
                         current.file_diff = diff.file_diff.clone();
+                        // CORTEX-BEGIN: reviewed-checklist
+                        // The diff content changed, so refresh the fingerprint and
+                        // drop any now-stale "reviewed" mark — a changed file is no
+                        // longer reviewed (and we refresh its check button to match).
+                        current.diff_fingerprint =
+                            reviewed_marks::diff_fingerprint(&current.file_diff);
+                        let new_fingerprint = current.diff_fingerprint;
+                        let reviewed_button = current.reviewed_button.clone();
+                        let pruned = if let Some(repo) = self.active_repo.as_mut() {
+                            if repo
+                                .reviewed_files
+                                .get(&file_path)
+                                .is_some_and(|&fp| fp != new_fingerprint)
+                            {
+                                repo.reviewed_files.remove(&file_path);
+                                repo.save_reviewed_marks();
+                                true
+                            } else {
+                                false
+                            }
+                        } else {
+                            false
+                        };
+                        if pruned {
+                            let (icon, tooltip) =
+                                reviewed_marks::reviewed_button_appearance(false);
+                            reviewed_button.update(ctx, |button, ctx| {
+                                button.set_icon(Some(icon), ctx);
+                                button.set_tooltip(Some(tooltip), ctx);
+                            });
+                        }
+                        // CORTEX-END: reviewed-checklist
                     }
                     self.viewported_list_state
                         .invalidate_height_for_index(index);
@@ -2454,6 +2651,13 @@ impl CodeReviewView {
         if let Some(repo) = self.active_repo.as_mut() {
             repo.state = CodeReviewViewState::Loaded(diff_data);
         }
+
+        // CORTEX-BEGIN: reviewed-checklist
+        // A single-file update can flip a file's reviewed state (auto-reset) or
+        // add a new unreviewed file; re-sink reviewed files so the worklist
+        // order stays correct. Only re-measures heights if the order changed.
+        self.apply_reviewed_sort(ctx);
+        // CORTEX-END: reviewed-checklist
 
         self.update_editor_comment_markers(ctx);
         GlobalBufferModel::handle(ctx).update(ctx, |model, ctx| {
@@ -2546,7 +2750,22 @@ impl CodeReviewView {
                 total_deletions: diff_data.total_deletions,
                 files_changed: diff_data.files_changed,
             });
+            // CORTEX-BEGIN: reviewed-checklist
+            // Freshly built file states carry up-to-date fingerprints; drop any
+            // persisted marks that no longer match (their diff changed while the
+            // panel was closed) and persist the cleanup. Buttons are brand new
+            // here, so no imperative icon refresh is needed.
+            if repo.reconcile_reviewed_marks() {
+                repo.save_reviewed_marks();
+            }
+            // CORTEX-END: reviewed-checklist
         }
+
+        // CORTEX-BEGIN: reviewed-checklist
+        // Order reviewed files to the bottom. The list state is freshly created
+        // here (heights not yet measured), so no extra invalidation is needed.
+        self.apply_reviewed_sort(ctx);
+        // CORTEX-END: reviewed-checklist
 
         if self.all_editors_loaded() {
             let diff_mode = self.diff_state_model.as_ref(ctx).diff_mode(ctx);
@@ -2599,7 +2818,30 @@ impl CodeReviewView {
                     self.create_code_review_model(file, ctx)
                 }
             };
-            let is_expanded = self.should_auto_expand_file(&file.file_diff);
+            // CORTEX-BEGIN: reviewed-checklist
+            let diff_fingerprint = reviewed_marks::diff_fingerprint(&file.file_diff);
+            let is_removed = matches!(file.file_diff.status, GitFileStatus::Deleted)
+                && *CortexSettings::as_ref(ctx).highlight_removed_files;
+            let is_reviewed = *CortexSettings::as_ref(ctx).reviewed_checklist_enabled
+                && !is_removed
+                && self
+                    .active_repo
+                    .as_ref()
+                    .map(|repo| repo.is_reviewed(&file.file_diff.file_path, diff_fingerprint))
+                    .unwrap_or(false);
+            // A reviewed file ("done") or removed file ("gone") defaults to
+            // collapsed — for a deletion this avoids dumping the whole file as a
+            // wall of red removed lines — unless the user has explicitly expanded
+            // it again via the chevron.
+            let is_expanded = if is_reviewed || is_removed {
+                self.active_repo
+                    .as_ref()
+                    .and_then(|repo| repo.file_expanded.get(&file.file_diff.file_path).copied())
+                    .unwrap_or(false)
+            } else {
+                self.should_auto_expand_file(&file.file_diff)
+            };
+            // CORTEX-END: reviewed-checklist
 
             let file_path = file.file_diff.file_path.clone();
             let file_line = file_line_for_open(&file.file_diff);
@@ -2682,6 +2924,23 @@ impl CodeReviewView {
                     })
             });
 
+            // CORTEX-BEGIN: reviewed-checklist
+            let reviewed_path = file_path.clone();
+            let (reviewed_icon, reviewed_tooltip) =
+                reviewed_marks::reviewed_button_appearance(is_reviewed);
+            let reviewed_button = ctx.add_typed_action_view(move |_ctx| {
+                ActionButton::new("", NakedTheme)
+                    .with_icon(reviewed_icon)
+                    .with_size(ButtonSize::InlineActionHeader)
+                    .with_tooltip(reviewed_tooltip)
+                    .on_click(move |ctx| {
+                        ctx.dispatch_typed_action(CodeReviewAction::ToggleFileReviewed(
+                            reviewed_path.clone(),
+                        ))
+                    })
+            });
+            // CORTEX-END: reviewed-checklist
+
             file_states.push(FileState {
                 file_diff: file.file_diff.clone(),
                 editor_state,
@@ -2693,6 +2952,10 @@ impl CodeReviewView {
                 copy_path_button,
                 sidebar_mouse_state: MouseStateHandle::default(),
                 header_mouse_state: MouseStateHandle::default(),
+                // CORTEX-BEGIN: reviewed-checklist
+                diff_fingerprint,
+                reviewed_button,
+                // CORTEX-END: reviewed-checklist
             })
         }
 
@@ -2721,6 +2984,144 @@ impl CodeReviewView {
 
         self.render_file_diff(file_state, index, scroll_offset, appearance, app)
     }
+
+    // CORTEX-BEGIN: reviewed-checklist
+    /// Number of files currently in the loaded list (0 if not loaded).
+    fn loaded_file_count(&self) -> usize {
+        match self.state() {
+            CodeReviewViewState::Loaded(state) => state.file_states.len(),
+            _ => 0,
+        }
+    }
+
+    /// Force every list item to be re-measured. Needed after a reorder, where
+    /// the index→file mapping changes and per-index height caches go stale.
+    fn invalidate_all_list_heights(&self) {
+        for index in 0..self.loaded_file_count() {
+            self.viewported_list_state
+                .invalidate_height_for_index(index);
+        }
+    }
+
+    /// `(sink_reviewed, sink_removed)`: whether each zone's "sink to bottom"
+    /// behavior is currently active — its feature toggle *and* its sink toggle
+    /// both on. The single place the four CortexSettings collapse into the two
+    /// flags that drive both `sort_file_zones` and the zone dividers.
+    fn zone_flags(app: &AppContext) -> (bool, bool) {
+        let settings = CortexSettings::as_ref(app);
+        let sink_reviewed =
+            *settings.reviewed_checklist_enabled && *settings.sink_reviewed_to_bottom;
+        let sink_removed = *settings.highlight_removed_files && *settings.sink_removed_to_bottom;
+        (sink_reviewed, sink_removed)
+    }
+
+    /// Sink reviewed files (and removed files, lower still) into their zones at
+    /// the bottom when those zones are active, re-measuring list heights only if
+    /// the order actually changed.
+    fn apply_reviewed_sort(&mut self, ctx: &mut ViewContext<Self>) {
+        // Read settings directly off `ctx` here (rather than via `zone_flags`,
+        // which takes `&AppContext`) to match the existing `as_ref(ctx)` calls.
+        let (sink_reviewed, sink_removed) = {
+            let settings = CortexSettings::as_ref(ctx);
+            (
+                *settings.reviewed_checklist_enabled && *settings.sink_reviewed_to_bottom,
+                *settings.highlight_removed_files && *settings.sink_removed_to_bottom,
+            )
+        };
+        if !sink_reviewed && !sink_removed {
+            return;
+        }
+        let changed = self
+            .active_repo
+            .as_mut()
+            .map(|repo| repo.sort_file_zones(sink_reviewed, sink_removed))
+            .unwrap_or(false);
+        if changed {
+            self.invalidate_all_list_heights();
+        }
+    }
+
+    /// If a zone divider should be drawn *above* the file at `file_index` (it is
+    /// the first file of a `Reviewed` or `Removed` zone in display order),
+    /// returns that zone and the total count of files in it. Otherwise `None`.
+    fn zone_divider(
+        &self,
+        file: &FileState,
+        file_index: usize,
+        app: &AppContext,
+    ) -> Option<(FileZone, usize)> {
+        let (sink_reviewed, sink_removed) = Self::zone_flags(app);
+        let repo = self.active_repo.as_ref()?;
+        let CodeReviewViewState::Loaded(state) = &repo.state else {
+            return None;
+        };
+        let zone = repo.zone_of(file, sink_reviewed, sink_removed);
+        if zone == FileZone::Active {
+            return None;
+        }
+        // The divider sits above the first file of its zone only.
+        let prev_same_zone = file_index
+            .checked_sub(1)
+            .and_then(|i| state.file_states.get_index(i))
+            .map(|(_, prev)| repo.zone_of(prev, sink_reviewed, sink_removed) == zone)
+            .unwrap_or(false);
+        if prev_same_zone {
+            return None;
+        }
+        let count = state
+            .file_states
+            .values()
+            .filter(|fs| repo.zone_of(fs, sink_reviewed, sink_removed) == zone)
+            .count();
+        Some((zone, count))
+    }
+
+    /// A subtle zone separator drawn above the first file of a zone: a neutral
+    /// "Reviewed (N)" label or a red "Removed (N)" label, followed by a thin rule.
+    fn render_zone_divider(
+        &self,
+        zone: FileZone,
+        count: usize,
+        appearance: &Appearance,
+    ) -> Box<dyn Element> {
+        let theme = appearance.theme();
+        let (label_text, label_fill): (String, warp_core::ui::theme::Fill) = match zone {
+            FileZone::Removed => (
+                format!("Removed ({count})"),
+                warp_core::ui::theme::Fill::Solid(theme.ui_error_color()),
+            ),
+            _ => (
+                format!("Reviewed ({count})"),
+                theme.main_text_color(theme.background()),
+            ),
+        };
+        let label = Text::new(
+            label_text,
+            appearance.ui_font_family(),
+            appearance.ui_font_size(),
+        )
+        .with_color(label_fill.into())
+        .finish();
+        let line = Shrinkable::new(
+            1.,
+            ConstrainedBox::new(Rect::new().with_background(theme.outline()).finish())
+                .with_height(1.)
+                .finish(),
+        )
+        .finish();
+        Container::new(
+            Flex::row()
+                .with_cross_axis_alignment(CrossAxisAlignment::Center)
+                .with_child(Container::new(label).with_margin_right(8.).finish())
+                .with_child(line)
+                .finish(),
+        )
+        .with_margin_top(EDITOR_GAP)
+        .with_margin_bottom(8.)
+        .with_horizontal_padding(16.)
+        .finish()
+    }
+    // CORTEX-END: reviewed-checklist
 
     fn should_auto_expand_file(&self, file: &FileDiff) -> bool {
         self.active_repo
@@ -4866,7 +5267,13 @@ impl CodeReviewView {
                 }
             };
 
-        let mut content = Flex::column().with_child(file_header);
+        let mut content = Flex::column();
+        // CORTEX-BEGIN: reviewed-checklist
+        if let Some((zone, count)) = self.zone_divider(file, file_index, app) {
+            content.add_child(self.render_zone_divider(zone, count, appearance));
+        }
+        // CORTEX-END: reviewed-checklist
+        content.add_child(file_header);
 
         let mut stack = Stack::new().with_constrain_absolute_children();
         // Only show file content if expanded.
@@ -4927,6 +5334,22 @@ impl CodeReviewView {
         let theme = appearance.theme();
 
         let file_name = file.file_diff.file_path.clone();
+
+        // CORTEX-BEGIN: reviewed-checklist
+        // A deleted file is "removed" (red, no review button, collapsed); a
+        // non-deleted file can be "reviewed" (green). The two are mutually
+        // exclusive — removed wins — so their washes never blend.
+        let is_removed = matches!(file.file_diff.status, GitFileStatus::Deleted)
+            && *CortexSettings::as_ref(app).highlight_removed_files;
+        let checklist_enabled = *CortexSettings::as_ref(app).reviewed_checklist_enabled;
+        let is_reviewed = checklist_enabled
+            && !is_removed
+            && self
+                .active_repo
+                .as_ref()
+                .map(|repo| repo.is_reviewed(&file.file_diff.file_path, file.diff_fingerprint))
+                .unwrap_or(false);
+        // CORTEX-END: reviewed-checklist
 
         let mut left_section = Flex::row()
             .with_cross_axis_alignment(CrossAxisAlignment::Center)
@@ -5031,11 +5454,30 @@ impl CodeReviewView {
             .on_left_mouse_down(|_, _, _| DispatchEventResult::StopPropagation)
             .finish(),
         );
-        left_section.add_child(self.render_file_stats(&file.file_diff, appearance));
+        // CORTEX: pass `is_removed` so the stats badge becomes a "Removed" badge.
+        left_section.add_child(self.render_file_stats(&file.file_diff, appearance, is_removed));
 
         let mut right_row = Flex::row()
             .with_main_axis_alignment(MainAxisAlignment::End)
             .with_cross_axis_alignment(CrossAxisAlignment::Center);
+
+        // CORTEX-BEGIN: reviewed-checklist
+        // "Mark as reviewed" check button — leftmost of the header's action group.
+        // Suppressed for removed files: deletions are categorized automatically,
+        // not checked off (and a green wash would fight the red one).
+        if checklist_enabled && !is_removed {
+            right_row.add_child(
+                EventHandler::new(
+                    Container::new(ChildView::new(&file.reviewed_button).finish())
+                        .with_margin_left(4.)
+                        .finish(),
+                )
+                .on_left_mouse_up(|_, _, _| DispatchEventResult::StopPropagation)
+                .on_left_mouse_down(|_, _, _| DispatchEventResult::StopPropagation)
+                .finish(),
+            );
+        }
+        // CORTEX-END: reviewed-checklist
 
         // Add file diff as context button (before remove button)
         if FeatureFlag::DiffSetAsContext.is_enabled() {
@@ -5087,11 +5529,20 @@ impl CodeReviewView {
         };
 
         let inner_header = Hoverable::new(file.header_mouse_state.clone(), |mouse_state| {
-            let header_bg = if mouse_state.is_hovered() {
+            // CORTEX-BEGIN: reviewed-checklist
+            // A removed file gets a low-opacity red wash ("gone"); a reviewed file
+            // a green one ("done"). Both keep the filename legible; they're mutually
+            // exclusive (removed wins), so the washes never combine.
+            let header_bg = if is_removed {
+                reviewed_marks::removed_header_bg(appearance.theme(), mouse_state.is_hovered())
+            } else if is_reviewed {
+                reviewed_marks::reviewed_header_bg(appearance.theme(), mouse_state.is_hovered())
+            } else if mouse_state.is_hovered() {
                 neutral_3(appearance.theme())
             } else {
                 neutral_2(appearance.theme())
             };
+            // CORTEX-END: reviewed-checklist
             Container::new(
                 Clipped::new(
                     Shrinkable::new(
@@ -5137,12 +5588,47 @@ impl CodeReviewView {
             .finish()
     }
 
-    /// Renders file-specific statistics
-    fn render_file_stats(&self, file: &FileDiff, appearance: &Appearance) -> Box<dyn Element> {
+    /// Renders file-specific statistics.
+    ///
+    /// CORTEX: when `removed` is true (a deleted file, with the
+    /// `highlight_removed_files` setting on) the usual `+0 • -N` is replaced by a
+    /// red trash icon + the deletion count, so the badge reads unambiguously as
+    /// "this file is being removed" rather than a change that happens to add 0
+    /// lines.
+    fn render_file_stats(
+        &self,
+        file: &FileDiff,
+        appearance: &Appearance,
+        removed: bool,
+    ) -> Box<dyn Element> {
         let mut row = Flex::row().with_cross_axis_alignment(CrossAxisAlignment::Center);
 
         let no_line_changes_present = file.additions() == 0 && file.deletions() == 0;
-        if file.is_binary || no_line_changes_present {
+        // CORTEX-BEGIN: reviewed-checklist
+        if removed {
+            let trash = ConstrainedBox::new(
+                Icon::Trash
+                    .to_warpui_icon(warp_core::ui::theme::Fill::Solid(remove_color(appearance)))
+                    .finish(),
+            )
+            .with_width(14.)
+            .with_height(14.)
+            .finish();
+            row.add_children([
+                Container::new(trash).with_margin_right(4.).finish(),
+                Container::new(
+                    Text::new(
+                        format!("-{}", file.deletions()),
+                        appearance.ui_font_family(),
+                        appearance.ui_font_size(),
+                    )
+                    .with_color(remove_color(appearance))
+                    .finish(),
+                )
+                .finish(),
+            ]);
+        } else if file.is_binary || no_line_changes_present {
+        // CORTEX-END: reviewed-checklist
             row.add_child(
                 Container::new(
                     Text::new("0", appearance.ui_font_family(), appearance.ui_font_size())
@@ -7136,6 +7622,71 @@ impl TypedActionView for CodeReviewView {
 
                 ctx.notify();
             }
+            // CORTEX-BEGIN: reviewed-checklist
+            CodeReviewAction::ToggleFileReviewed(path) => {
+                let Some((now_reviewed, reviewed_button, chevron_button)) = ({
+                    let Some(repo) = self.active_repo.as_mut() else {
+                        return;
+                    };
+                    let CodeReviewViewState::Loaded(state) = &mut repo.state else {
+                        return;
+                    };
+                    let Some(index) = state.file_states.get_index_of(path) else {
+                        return;
+                    };
+
+                    // Read the bits we need up front so `state` and the other
+                    // `repo` fields are only ever borrowed disjointly below.
+                    let fingerprint = state.file_states[index].diff_fingerprint;
+                    let reviewed_button = state.file_states[index].reviewed_button.clone();
+                    let chevron_button = state.file_states[index].chevron_button.clone();
+
+                    let was_reviewed = repo.reviewed_files.get(path) == Some(&fingerprint);
+                    let now_reviewed = if was_reviewed {
+                        repo.reviewed_files.remove(path);
+                        false
+                    } else {
+                        repo.reviewed_files.insert(path.clone(), fingerprint);
+                        // Marking reviewed collapses the file so it stops taking
+                        // up the worklist; record the collapse so a later rebuild
+                        // keeps it folded.
+                        state.file_states[index].is_expanded = false;
+                        repo.file_expanded.insert(path.clone(), false);
+                        true
+                    };
+
+                    Some((now_reviewed, reviewed_button, chevron_button))
+                }) else {
+                    return;
+                };
+
+                // Persist the updated marks to the local (never-committed) store.
+                if let Some(repo) = self.active_repo.as_ref() {
+                    repo.save_reviewed_marks();
+                }
+
+                let (icon, tooltip) = reviewed_marks::reviewed_button_appearance(now_reviewed);
+                reviewed_button.update(ctx, |button, ctx| {
+                    button.set_icon(Some(icon), ctx);
+                    button.set_tooltip(Some(tooltip), ctx);
+                });
+
+                // We collapse on review, so keep the chevron in sync.
+                if now_reviewed {
+                    chevron_button.update(ctx, |button, ctx| {
+                        button.set_icon(Some(Icon::ChevronRight), ctx);
+                    });
+                }
+
+                // Sink reviewed files to the bottom (if enabled). The toggled
+                // file's height changed either way (it collapsed/expanded), so
+                // re-measure all items to be safe — toggles are infrequent.
+                self.apply_reviewed_sort(ctx);
+                self.invalidate_all_list_heights();
+
+                ctx.notify();
+            }
+            // CORTEX-END: reviewed-checklist
             CodeReviewAction::SetDiffMode(mode) => {
                 self.apply_diff_mode(mode.clone(), ctx);
             }
@@ -7221,6 +7772,69 @@ impl TypedActionView for CodeReviewView {
                     model.refresh_metadata_and_pr_info(ctx);
                 });
             }
+            // CORTEX-BEGIN: reload-from-disk
+            CodeReviewAction::ForceReloadFromDisk => {
+                // Clear the stale FileModel/GlobalBufferModel buffer cache that
+                // backs the diff editors...
+                GlobalBufferModel::handle(ctx).update(ctx, |model, ctx| {
+                    model.force_reload_all_local(ctx);
+                });
+                // ...then force a fresh git diff against the new disk contents.
+                self.diff_state_model.update(ctx, |model, ctx| {
+                    model.load_diffs_for_current_repo(true, ctx);
+                    model.refresh_metadata_and_pr_info(ctx);
+                });
+            }
+            // CORTEX-END: reload-from-disk
+            // CORTEX-BEGIN: collapse-all
+            CodeReviewAction::CollapseAllFiles => {
+                // Bulk version of ToggleFileExpanded: collapse every expanded
+                // file in one pass. Collect the chevron handles + indices while
+                // holding the `as_mut` borrow, then update them after releasing
+                // it (same borrow discipline as the single-file toggle).
+                let collapsed: Vec<(usize, ViewHandle<ActionButton>)> = {
+                    let Some(repo) = self.active_repo.as_mut() else {
+                        return;
+                    };
+                    if let CodeReviewViewState::Loaded(state) = &mut repo.state {
+                        let mut collapsed = Vec::new();
+                        for (index, (_, file)) in state.file_states.iter_mut().enumerate() {
+                            if file.is_expanded {
+                                file.is_expanded = false;
+                                repo.file_expanded
+                                    .insert(file.file_diff.file_path.clone(), false);
+                                collapsed.push((index, file.chevron_button.clone()));
+                            }
+                        }
+                        collapsed
+                    } else {
+                        return;
+                    }
+                };
+
+                if collapsed.is_empty() {
+                    return;
+                }
+
+                for (index, chevron_button) in &collapsed {
+                    chevron_button.update(ctx, |button, ctx| {
+                        button.set_icon(Some(Icon::ChevronRight), ctx);
+                    });
+                    self.viewported_list_state
+                        .invalidate_height_for_index(*index);
+                }
+
+                if self.find_model.as_ref(ctx).is_find_bar_open()
+                    && FeatureFlag::CodeReviewFind.is_enabled()
+                {
+                    self.find_model.update(ctx, |model, model_ctx| {
+                        model.run_search(self.editor_handles(), model_ctx);
+                    });
+                }
+
+                ctx.notify();
+            }
+            // CORTEX-END: collapse-all
             CodeReviewAction::UndoRevert => {
                 self.maybe_undo_revert(ctx);
             }

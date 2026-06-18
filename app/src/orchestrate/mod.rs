@@ -4,9 +4,9 @@
 //! stashes the socket path in a process-global cell that the terminal
 //! env-var injector (Phase 4) reads as `CORTEX_IPC_SOCKET`, and dispatches
 //! each request onto the main UI thread to split the active tab's pane
-//! group into N panes — each seeded with `claude --permission-mode plan`
-//! (or `--dangerously-skip-permissions`, gated by the AI settings toggle
-//! introduced in Phase 2).
+//! group into N panes — each seeded with `claude --permission-mode auto`
+//! (or `--permission-mode plan` / `--dangerously-skip-permissions`, selected
+//! by the `cortex.ai.orchestrated_subagents_permission_mode` AI setting).
 //!
 //! Lifted from the `single_instance_manager.rs` (UriService) bridge
 //! template, with the cross-platform unix-socket transport and a
@@ -122,7 +122,9 @@ impl SingletonEntity for OrchestrateBridge {}
 /// section it owns.
 fn prompt_for_section(plan_file: &std::path::Path, section_index: usize) -> String {
     format!(
-        "Read {} and execute Section {}. Present the plan for my approval before doing any work.",
+        "Read {} and execute Section {}. First present your plan and WAIT for my approval — do \
+         not edit any files or run any commands until I reply. Once I approve, proceed without \
+         pausing for further confirmation.",
         plan_file.display(),
         section_index + 1
     )
@@ -143,10 +145,18 @@ fn handle_orchestrate_request(
         };
     }
 
-    let mode = if *CortexSettings::as_ref(ctx).orchestrated_subagents_start_in_plan_mode {
-        ClaudePermissionMode::Plan
-    } else {
-        ClaudePermissionMode::DangerouslySkip
+    let mode = {
+        use settings::Setting;
+        match CortexSettings::as_ref(ctx)
+            .orchestrated_subagents_permission_mode
+            .value()
+            .as_str()
+        {
+            "plan" => ClaudePermissionMode::Plan,
+            "skip" => ClaudePermissionMode::DangerouslySkip,
+            // "auto" — and any unrecognized value — fall through to the default.
+            _ => ClaudePermissionMode::Auto,
+        }
     };
 
     // Prefer the focused window; fall back to any registered workspace so

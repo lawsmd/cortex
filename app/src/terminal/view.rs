@@ -26801,6 +26801,18 @@ impl View for TerminalView {
 
         let appearance = Appearance::as_ref(app);
         let semantic_selection = SemanticSelection::as_ref(app);
+        // CORTEX-BEGIN: pane-clear-overlay-visibility
+        // Decide smart-clear overlay visibility BEFORE taking the model lock.
+        // `cortex_should_show_clear_overlay` calls `BackingView::should_render_header`,
+        // which itself locks `self.model`. `self.model` is a non-reentrant
+        // `FairMutex`, so evaluating this while the render guard below is held
+        // re-locks on the same thread and deadlocks the UI thread before first
+        // paint (the window then stays cloaked → invisible/unclosable). Computing
+        // it here, before the guard exists, lets that internal lock acquire and
+        // release cleanly. (Root cause of the 2026-06-17 white-screen incident,
+        // surfaced by the cloak watchdog; same class as the 2026-06-15 one.)
+        let show_cortex_clear_overlay = self.cortex_should_show_clear_overlay(app);
+        // CORTEX-END: pane-clear-overlay-visibility
         let model = self.model.lock();
         let input_mode = if FeatureFlag::AgentView.is_enabled()
             && self.agent_view_controller.as_ref(app).is_fullscreen()
@@ -27110,10 +27122,23 @@ impl View for TerminalView {
         }
 
         // CORTEX-BEGIN: pane-clear-overlay
-        // Floating smart-clear button for panes whose header is hidden
-        // (default single-pane layout); the header hosts the button otherwise.
-        if self.cortex_should_show_clear_overlay(app) {
-            stack.add_child(self.render_cortex_clear_overlay(app));
+        // Floating smart-clear button for panes whose header is hidden (the
+        // default single-pane layout); the pane header hosts the button
+        // otherwise. Visibility (`show_cortex_clear_overlay`) was computed above
+        // BEFORE the model lock, because the check re-locks `self.model` (see
+        // that block). Everything below reads the agent state from the `model`
+        // guard this render() already holds, or from `app` — do NOT call
+        // self.model.lock() from here. `self.model` is a non-reentrant
+        // FairMutex; a second lock during render deadlocks the UI thread before
+        // first paint, leaving the window cloaked (invisible) and unclosable.
+        // See cortex_clear.rs and the 2026-06-15 / 2026-06-17 incidents.
+        if show_cortex_clear_overlay {
+            let long_running = model
+                .block_list()
+                .active_block()
+                .is_active_and_long_running();
+            let active_agent = self.cortex_cli_agent(app, long_running);
+            stack.add_child(self.render_cortex_clear_overlay(active_agent, app));
         }
         // CORTEX-END: pane-clear-overlay
 

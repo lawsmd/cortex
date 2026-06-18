@@ -25,6 +25,7 @@ pub mod diagnostics_page;
 pub mod editor_page;
 pub mod file_explorer_page;
 pub mod font_options;
+pub mod orchestrate_mode_options;
 pub mod pane_manager;
 pub mod tabs_page;
 pub mod tabs_preview;

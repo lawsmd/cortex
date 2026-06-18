@@ -37,6 +37,10 @@ impl CodeReviewHeader {
             .with_main_axis_alignment(MainAxisAlignment::End)
             .with_cross_axis_alignment(CrossAxisAlignment::Center);
 
+        // CORTEX-BEGIN: reload-from-disk
+        right_section.add_child(self.render_reload_from_disk_button(appearance));
+        // CORTEX-END: reload-from-disk
+
         if let Some(git_button) = Self::render_git_operations_button(code_review_header_fields) {
             right_section.add_child(git_button);
         }

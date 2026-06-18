@@ -149,7 +149,7 @@ impl CortexSettingsView {
             toolbar_state: ToolbarPageState::default(),
             editor_state: EditorPageState::new(ctx),
             file_explorer_state: FileExplorerPageState::new(ctx),
-            ai_state: AiPageState::default(),
+            ai_state: AiPageState::new(ctx),
             diagnostics_state: DiagnosticsPageState::default(),
             search_editor,
             clipped_scroll_state: ClippedScrollStateHandle::default(),
@@ -401,15 +401,19 @@ impl CortexSettingsView {
         ctx.notify();
     }
 
-    fn toggle_orchestrated_subagents_start_in_plan_mode(&mut self, ctx: &mut ViewContext<Self>) {
+    fn set_orchestrated_subagents_permission_mode(
+        &mut self,
+        value: String,
+        ctx: &mut ViewContext<Self>,
+    ) {
         use crate::settings::CortexSettings;
-        use settings::ToggleableSetting;
+        use settings::Setting;
         use warpui::SingletonEntity;
 
         CortexSettings::handle(ctx).update(ctx, |settings, ctx| {
             let _ = settings
-                .orchestrated_subagents_start_in_plan_mode
-                .toggle_and_save_value(ctx);
+                .orchestrated_subagents_permission_mode
+                .set_value(value, ctx);
         });
         ctx.notify();
     }
@@ -956,8 +960,8 @@ impl warpui::TypedActionView for CortexSettingsView {
             CortexSettingsAction::ToggleAllowLocalClaudeCodexChildHarnesses => {
                 self.toggle_allow_local_claude_codex_child_harnesses(ctx)
             }
-            CortexSettingsAction::ToggleOrchestratedSubagentsStartInPlanMode => {
-                self.toggle_orchestrated_subagents_start_in_plan_mode(ctx)
+            CortexSettingsAction::SetOrchestratedSubagentsPermissionMode(value) => {
+                self.set_orchestrated_subagents_permission_mode(value.clone(), ctx)
             }
             CortexSettingsAction::ToggleShowBlockAiButton => {
                 self.toggle_show_block_ai_button(ctx)

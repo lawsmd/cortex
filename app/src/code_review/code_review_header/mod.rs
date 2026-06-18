@@ -47,6 +47,12 @@ struct StateHandles {
     branch_name_tooltip: MouseStateHandle,
     discard_all_button: MouseStateHandle,
     add_diff_set_context_button: MouseStateHandle,
+    // CORTEX-BEGIN: reload-from-disk
+    reload_from_disk_button: MouseStateHandle,
+    // CORTEX-END: reload-from-disk
+    // CORTEX-BEGIN: collapse-all
+    collapse_all_button: MouseStateHandle,
+    // CORTEX-END: collapse-all
 }
 
 pub struct CodeReviewHeader {
@@ -126,6 +132,10 @@ impl CodeReviewHeader {
 
         let has_no_changes = state.to_diff_stats().has_no_changes();
 
+        // CORTEX-BEGIN: collapse-all
+        right_section_wide.add_child(self.render_collapse_all_button(state, appearance));
+        // CORTEX-END: collapse-all
+
         if FeatureFlag::DiscardPerFileAndAllChanges.is_enabled() {
             right_section_wide.add_child(self.create_discard_button(
                 state,
@@ -134,6 +144,10 @@ impl CodeReviewHeader {
                 app,
             ));
         }
+
+        // CORTEX-BEGIN: reload-from-disk
+        right_section_wide.add_child(self.render_reload_from_disk_button(appearance));
+        // CORTEX-END: reload-from-disk
 
         if FeatureFlag::DiffSetAsContext.is_enabled() && !has_no_changes {
             if FeatureFlag::FileAndDiffSetComments.is_enabled() {
@@ -205,6 +219,10 @@ impl CodeReviewHeader {
             .with_main_axis_size(MainAxisSize::Min)
             .with_cross_axis_alignment(CrossAxisAlignment::Center);
 
+        // CORTEX-BEGIN: collapse-all
+        right_subsection_compact.add_child(self.render_collapse_all_button(state, appearance));
+        // CORTEX-END: collapse-all
+
         if FeatureFlag::DiscardPerFileAndAllChanges.is_enabled() {
             right_subsection_compact.add_child(self.create_discard_button(
                 state,
@@ -213,6 +231,10 @@ impl CodeReviewHeader {
                 app,
             ));
         }
+
+        // CORTEX-BEGIN: reload-from-disk
+        right_subsection_compact.add_child(self.render_reload_from_disk_button(appearance));
+        // CORTEX-END: reload-from-disk
 
         let has_no_changes = state.to_diff_stats().has_no_changes();
 
@@ -372,6 +394,68 @@ impl CodeReviewHeader {
         }
     }
 
+    // CORTEX-BEGIN: collapse-all
+    /// Renders the "Collapse all" button, styled to match the adjacent
+    /// "Discard all" button (same Secondary text+icon size). Dispatches
+    /// [`CodeReviewAction::CollapseAllFiles`], which collapses every expanded
+    /// file in the diff list at once. Greyed out (no-op) when there are no
+    /// changes, mirroring the discard button's disabled state.
+    fn render_collapse_all_button(
+        &self,
+        state: &LoadedState,
+        appearance: &Appearance,
+    ) -> Box<dyn Element> {
+        let theme = appearance.theme();
+        let is_disabled = state.to_diff_stats().has_no_changes();
+        let sub_text_color = theme.sub_text_color(theme.background());
+
+        let mut button_builder = appearance
+            .ui_builder()
+            .button(
+                ButtonVariant::Secondary,
+                self.state_handles.collapse_all_button.clone(),
+            )
+            .with_style(UiComponentStyles::default().set_padding(HEADER_BUTTON_PADDING))
+            .with_style(UiComponentStyles {
+                font_color: Some(sub_text_color.into()),
+                ..Default::default()
+            })
+            .with_text_and_icon_label(
+                TextAndIcon::new(
+                    TextAndIconAlignment::IconFirst,
+                    "Collapse all".to_string(),
+                    Icon::ChevronUp.to_warpui_icon(warp_core::ui::theme::Fill::Solid(
+                        sub_text_color.into_solid(),
+                    )),
+                    MainAxisSize::Min,
+                    MainAxisAlignment::SpaceBetween,
+                    vec2f(16., 16.),
+                )
+                .with_inner_padding(4.),
+            );
+
+        if is_disabled {
+            let disabled_styles = UiComponentStyles {
+                font_color: Some(theme.disabled_text_color(theme.background()).into_solid()),
+                ..Default::default()
+            };
+            button_builder = button_builder.with_style(disabled_styles).with_cursor(None);
+        }
+
+        let mut button_hoverable = button_builder.build();
+
+        if !is_disabled {
+            button_hoverable = button_hoverable.on_click(|ctx, _, _| {
+                ctx.dispatch_typed_action(CodeReviewAction::CollapseAllFiles);
+            });
+        }
+
+        Container::new(button_hoverable.finish())
+            .with_margin_left(4.)
+            .finish()
+    }
+    // CORTEX-END: collapse-all
+
     fn wrap_disabled_button_with_tooltip(
         button_element: Box<dyn Element>,
         tooltip_text: String,
@@ -412,6 +496,53 @@ impl CodeReviewHeader {
         .with_margin_right(6.)
         .finish()
     }
+
+    // CORTEX-BEGIN: reload-from-disk
+    /// Renders the "reload from disk" button for the code-review header.
+    /// Dispatches [`CodeReviewAction::ForceReloadFromDisk`], which clears the
+    /// stale buffer cache and recomputes the git diff against fresh disk
+    /// contents. Always shown, regardless of feature flags or change state.
+    pub(super) fn render_reload_from_disk_button(&self, appearance: &Appearance) -> Box<dyn Element> {
+        let theme = appearance.theme();
+        let ui_builder = appearance.ui_builder().clone();
+
+        let button = ui_builder
+            .button(
+                ButtonVariant::Secondary,
+                self.state_handles.reload_from_disk_button.clone(),
+            )
+            .with_text_and_icon_label(TextAndIcon::new(
+                TextAndIconAlignment::IconFirst,
+                "",
+                Icon::Refresh.to_warpui_icon(warp_core::ui::theme::Fill::Solid(
+                    theme.main_text_color(theme.background()).into(),
+                )),
+                MainAxisSize::Min,
+                MainAxisAlignment::SpaceBetween,
+                vec2f(16., 16.),
+            ))
+            .with_style(UiComponentStyles::default().set_padding(Coords {
+                top: 6.,
+                bottom: 6.,
+                left: 6.,
+                right: 6.,
+            }))
+            .with_tooltip(move || {
+                ui_builder
+                    .tool_tip("Reload from disk".to_owned())
+                    .build()
+                    .finish()
+            })
+            .with_tooltip_position(warpui::ui_components::button::ButtonTooltipPosition::AboveLeft)
+            .build()
+            .on_click(|ctx, _, _| {
+                ctx.dispatch_typed_action(CodeReviewAction::ForceReloadFromDisk);
+            })
+            .finish();
+
+        Container::new(button).with_margin_left(4.).finish()
+    }
+    // CORTEX-END: reload-from-disk
 
     fn render_add_diff_set_context_button(&self, appearance: &Appearance) -> Box<dyn Element> {
         let theme = appearance.theme();

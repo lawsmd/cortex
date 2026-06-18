@@ -181,6 +181,12 @@ pub enum CodeViewAction {
     },
     ClearEditorTabGroupDragPositions,
     ClearWorkspaceTabGroupDragPositions,
+    // CORTEX-BEGIN: reload-from-disk
+    /// Force-reload all open local buffers from disk, discarding cached
+    /// content. Manual escape hatch for when an external editor changed a file
+    /// and the filesystem watcher missed it.
+    ReloadFromDisk,
+    // CORTEX-END: reload-from-disk
 }
 
 #[derive(Debug, Clone)]
@@ -245,6 +251,10 @@ pub struct CodeView {
     window_id: WindowId,
     drag_position: Option<TabBarDragPosition>,
     markdown_mode_segmented_control: Option<ViewHandle<MarkdownToggleView>>,
+    // CORTEX-BEGIN: reload-from-disk
+    /// Persistent mouse state for the header "reload from disk" button.
+    reload_button_mouse_state: MouseStateHandle,
+    // CORTEX-END: reload-from-disk
 }
 
 impl CodeView {
@@ -261,6 +271,9 @@ impl CodeView {
             window_id,
             drag_position: None,
             markdown_mode_segmented_control: None,
+            // CORTEX-BEGIN: reload-from-disk
+            reload_button_mouse_state: MouseStateHandle::default(),
+            // CORTEX-END: reload-from-disk
         }
     }
 
@@ -1418,6 +1431,39 @@ impl CodeView {
         .finish()
     }
 
+    // CORTEX-BEGIN: reload-from-disk
+    /// Renders the header "reload from disk" button. Dispatches
+    /// [`CodeViewAction::ReloadFromDisk`], which force-reloads every open local
+    /// buffer from disk — the manual escape hatch for stale cached content when
+    /// an external editor modified a file and the watcher missed it.
+    fn render_reload_from_disk_button(&self, appearance: &Appearance) -> Box<dyn Element> {
+        icon_button(
+            appearance,
+            crate::ui_components::icons::Icon::Refresh,
+            false,
+            self.reload_button_mouse_state.clone(),
+        )
+        .with_tooltip({
+            let ui_builder = appearance.ui_builder().clone();
+            move || {
+                ui_builder
+                    .tool_tip("Reload from disk".to_owned())
+                    .build()
+                    .finish()
+            }
+        })
+        .build()
+        .on_click(move |ctx, _app, _pos| {
+            ctx.dispatch_typed_action(
+                PaneHeaderAction::<CodeViewAction, CodeViewAction>::CustomAction(
+                    CodeViewAction::ReloadFromDisk,
+                ),
+            );
+        })
+        .finish()
+    }
+    // CORTEX-END: reload-from-disk
+
     fn calculate_tab_bar_dragged_position(
         drag_position: &RectF,
         index: usize,
@@ -1850,6 +1896,15 @@ impl CodeView {
             None,
         );
 
+        // CORTEX-BEGIN: reload-from-disk
+        let mut buttons_row = Flex::row()
+            .with_cross_axis_alignment(CrossAxisAlignment::Center)
+            .with_main_axis_size(MainAxisSize::Min);
+        buttons_row.add_child(self.render_reload_from_disk_button(appearance));
+        buttons_row.add_child(buttons);
+        let buttons = buttons_row.finish();
+        // CORTEX-END: reload-from-disk
+
         header_row.add_child(
             Container::new(Align::new(buttons).finish())
                 .with_padding_right(4.)
@@ -1890,6 +1945,10 @@ impl CodeView {
             right_row.add_child(ChildView::new(segmented).finish());
         }
 
+        // CORTEX-BEGIN: reload-from-disk
+        right_row.add_child(self.render_reload_from_disk_button(appearance));
+        // CORTEX-END: reload-from-disk
+
         let show_close_button = self
             .focus_handle
             .as_ref()
@@ -1905,7 +1964,8 @@ impl CodeView {
             ),
         );
 
-        let button_count = show_close_button as u32 + header_ctx.has_overflow_items as u32;
+        // CORTEX: +1 for the reload-from-disk button (always shown).
+        let button_count = show_close_button as u32 + header_ctx.has_overflow_items as u32 + 1;
         let buttons_width = button_count as f32 * ICON_DIMENSIONS;
         let edge_width = if self.markdown_mode_segmented_control.is_some() {
             220.0
@@ -2295,6 +2355,14 @@ impl TypedActionView for CodeView {
             CodeViewAction::ClearWorkspaceTabGroupDragPositions => {
                 ctx.emit(CodeViewEvent::Pane(PaneEvent::ClearHoveredTabIndex));
             }
+
+            // CORTEX-BEGIN: reload-from-disk
+            CodeViewAction::ReloadFromDisk => {
+                GlobalBufferModel::handle(ctx).update(ctx, |model, ctx| {
+                    model.force_reload_all_local(ctx);
+                });
+            }
+            // CORTEX-END: reload-from-disk
         }
     }
 }

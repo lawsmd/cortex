@@ -73,6 +73,20 @@ impl ChannelEventListener {
             }
         }
     }
+
+    // CORTEX-BEGIN: mobile-bridge-pty-subscribe
+    /// Cortex: mint a fresh, active receiver on the PTY-reads broadcast.
+    ///
+    /// Used by the mobile companion bridge (`app/src/mobile_bridge/`) to mirror
+    /// a pane's live output to a phone. The new receiver only observes chunks
+    /// broadcast *after* this call, so it pairs cleanly with a screen snapshot
+    /// taken under the same model lock — no gap, no overlap. Creating it also
+    /// bumps `receiver_count()`, which is the gate `send_pty_read_event` checks
+    /// before broadcasting, so output flows only while a pane is being mirrored.
+    pub fn cortex_new_pty_reads_receiver(&self) -> async_broadcast::Receiver<Arc<Vec<u8>>> {
+        self.pty_reads_tx.new_receiver()
+    }
+    // CORTEX-END: mobile-bridge-pty-subscribe
 }
 
 #[cfg(test)]
