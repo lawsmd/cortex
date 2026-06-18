@@ -5,6 +5,18 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
 <title>Cortex Mobile</title>
 
+<!-- Standalone / full-screen app metadata: lets "Add to Home Screen" launch this
+     chrome-less (no browser bars), and matches the system status/nav bars to the app
+     background. Paired with the manifest + icon the bridge serves (see mod.rs). The
+     safe-area insets + viewport-fit=cover above pay off once running standalone. -->
+<meta name="theme-color" content="#0d0f12" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Cortex" />
+<link rel="manifest" href="./manifest.webmanifest" />
+<link rel="apple-touch-icon" href="./icon.png" />
+
 <!--
   Cortex mobile companion — web client (M4 / mobile-first).
 
@@ -27,11 +39,14 @@
   xterm to match so absolute cursor moves and alt-screen TUIs (Claude prompts)
   land correctly, then let the user zoom/fit/pan the desktop-sized grid (v1
   doesn't resize the PTY). There is no local echo — characters appear when the
-  PTY echoes them back, like any remote terminal. xterm.js is loaded from a CDN.
+  PTY echoes them back, like any remote terminal. xterm.js (5.5.0) is VENDORED
+  locally — served by the bridge at ./xterm.js + ./xterm.css (see mod.rs) and
+  bundled as sibling assets in the APK — so the client is fully self-contained
+  and works offline (no CDN), which the native shell / `file://` load requires.
 -->
 
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/css/xterm.css" />
-<script src="https://cdn.jsdelivr.net/npm/@xterm/xterm@5.5.0/lib/xterm.js"></script>
+<link rel="stylesheet" href="./xterm.css" />
+<script src="./xterm.js"></script>
 
 <style>
   :root {
@@ -98,6 +113,11 @@
   .hdr-chip { flex: 0 0 auto; transform: scale(.72); cursor: default; }
   .icon-btn {
     flex: 0 0 auto;
+    /* Flex-center the glyph so an oversized icon (e.g. #fit-btn) sits dead-center
+       in the 34px box instead of riding low on the text baseline. */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background: var(--panel-2);
     border: 1px solid var(--border);
     color: var(--text);
@@ -111,8 +131,9 @@
   }
   .icon-btn:active { background: var(--border); }
   /* The fit-to-view glyph reads too small at the shared 14px; bump just its
-     font so the icon fills the button without changing the 34px footprint. */
-  #fit-btn { font-size: 21px; line-height: 1; }
+     font so the icon fills the button without changing the 34px footprint.
+     translateY nudge corrects the ⤢ glyph's font-internal low bias. */
+  #fit-btn { font-size: 24px; line-height: 1; transform: translateY(-1px); }
   .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bad); flex: 0 0 auto; }
   .dot.on { background: var(--ok); }
   /* Connection state as a compact pill (dot + short label), tinted by state.
@@ -444,7 +465,23 @@
   .pane-sq.done .donepip { display: block; }
 
   /* ── Terminal ────────────────────────────────────────────────────────── */
-  #main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; }
+  #main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; position: relative; }
+  /* Blinking block pinned at the terminal's home cell, shown only while a pane is
+     subscribed AND its buffer is empty — an unmistakable "live & empty, ready"
+     signal so a blank pane reads as a real terminal, not a dead/stuck black screen.
+     Hidden the instant any content arrives (the solid block cursor takes over). */
+  #empty-cursor {
+    position: absolute;
+    top: 8px; left: 8px;        /* term-wrap's 4px padding + a hair, ≈ the home cell */
+    width: 8px; height: 16px;   /* resized to ~1 cell from fontSize in applyFont() */
+    background: var(--text);
+    border-radius: 1px;
+    pointer-events: none;
+    display: none;
+    z-index: 3;
+  }
+  #empty-cursor.show { display: block; animation: blink 1.06s step-end infinite; }
+  @keyframes blink { 0%, 50% { opacity: .85; } 50.01%, 100% { opacity: 0; } }
   #term-wrap {
     flex: 1 1 auto;
     min-height: 0;
@@ -634,6 +671,7 @@
 
     <main id="main">
       <div id="term-wrap"><div id="terminal"></div></div>
+      <div id="empty-cursor"></div>
     </main>
 
     <div id="scrim"></div>
@@ -688,7 +726,7 @@
       <button data-keys="7f" title="Backspace (delete a character)">⌫</button>
     </div>
     <div class="key-group">
-      <button data-keys="1b5b5a" title="Shift+Tab — cycle a running model's mode">⇧Tab</button>
+      <button data-keys="1b5b5a" class="cmd" title="Shift+Tab — cycle a running model's mode">⇧Tab</button>
       <button data-keys="03" class="cmd" title="Ctrl-C (interrupt)">^C</button>
       <button id="cmd-clear" class="cmd" title="Clear — /clear when a CLI agent is running, else clear">clear</button>
       <button id="cmd-exit" class="cmd" title="Exit — /exit when a CLI agent is running, else exit">exit</button>
@@ -734,6 +772,11 @@
     fontFamily: '"FiraCode Nerd Font Mono", "Cascadia Code", Consolas, monospace',
     fontSize: fontSize,
     cursorBlink: true,
+    // The mobile client never focuses xterm (input rides the compose bar / soft-keys),
+    // so the cursor is always "inactive" — render it as a solid block (not the default
+    // near-invisible outline) so a populated pane shows a clearly visible cursor at the
+    // real position. A truly-empty pane gets the blinking #empty-cursor overlay instead.
+    cursorInactiveStyle: "block",
     scrollback: 8000,
     theme: { background: "#000000" },
   });
@@ -743,7 +786,30 @@
   function applyFont() {
     fontSize = Math.max(5, Math.min(28, fontSize));
     term.options.fontSize = fontSize;
+    // Keep the blank-pane cursor block ≈ one cell so it tracks pinch-zoom.
+    const ec = $("empty-cursor");
+    if (ec) {
+      ec.style.width = Math.max(5, Math.round(fontSize * 0.6)) + "px";
+      ec.style.height = Math.max(10, Math.round(fontSize * 1.2)) + "px";
+    }
     if (typeof sel !== "undefined" && sel) placeHandles();
+  }
+
+  // ── Blank-pane indicator ─────────────────────────────────────────────────
+  // True when no row in the buffer holds a non-whitespace glyph (a fresh/empty pane).
+  // Cheap in practice: only called while blankShown is true (a small buffer) or right
+  // after a subscribe/snapshot, and it early-returns on the first populated row.
+  function isTerminalBlank() {
+    const buf = term.buffer.active;
+    for (let y = 0; y < buf.length; y++) {
+      const line = buf.getLine(y);
+      if (line && line.translateToString(true).trim() !== "") return false;
+    }
+    return true;
+  }
+  function updateBlankIndicator() {
+    blankShown = !!currentPaneId && isTerminalBlank();
+    $("empty-cursor").classList.toggle("show", blankShown);
   }
   function fitWidth() {
     // Pick the largest font whose grid width still fits the viewport, so the
@@ -764,6 +830,10 @@
   // subscription — not on re-subscribes to the same pane (e.g. the clear re-sync
   // below), which would otherwise snap the user's pinch-zoom back to the default.
   let autoSizeNextSnapshot = false;
+  // Whether the blinking #empty-cursor is currently shown (pane subscribed + buffer
+  // empty). Tracked so the output handler only re-scans the buffer while it's blank;
+  // once content appears the scan stops until the next subscribe/clear resets it.
+  let blankShown = false;
 
   // 3-state connection model. `connState` ∈ off | connecting | connected |
   // reconnect. `everConnected` distinguishes "never up" (red, Not Connected)
@@ -774,6 +844,25 @@
   let retryTimer = null;
   let retryCount = 0;
   const MAX_AUTO_RETRIES = 5;
+
+  // ── Screen wake-lock ───────────────────────────────────────────────────────
+  // Keep the screen on while actively mirroring. Feature-detected + try/catch: the
+  // Screen Wake Lock API needs a secure context, so over plain http://100.x
+  // (Tailscale) it silently no-ops; it works in the eventual https / native-WebView
+  // shell. The lock auto-releases when the page is backgrounded, so we re-acquire on
+  // visibilitychange as long as a pane is still subscribed.
+  let wakeLock = null;
+  async function acquireWakeLock() {
+    if (!("wakeLock" in navigator) || !currentPaneId || document.visibilityState !== "visible") return;
+    if (wakeLock) return;
+    try {
+      wakeLock = await navigator.wakeLock.request("screen");
+      wakeLock.addEventListener("release", () => { wakeLock = null; });
+    } catch (_) { wakeLock = null; }
+  }
+  function releaseWakeLock() {
+    if (wakeLock) { try { wakeLock.release(); } catch (_) {} wakeLock = null; }
+  }
 
   // ── Connection profiles (which instance to mirror) ──────────────────────────
   // An arbitrary list of instances (each machine × prod/dev). Source of truth is
@@ -865,6 +954,7 @@
     term.reset();
     clearSelectionUI();
     setInputEnabled(false);
+    updateBlankIndicator();    // currentPaneId is null now → hide the blank cursor
     $("sidebar").innerHTML = '<div id="empty-hint">Connecting…</div>';
     renderSelection();         // header → "No pane"
     showLoading(p.label || id, reveal);
@@ -900,6 +990,7 @@
     $("lo-sub").textContent = "";
     $("lo-actions").hidden = true;
     $("loading-overlay").hidden = false;
+    armBackGuard();
     if (loadingTimer) clearTimeout(loadingTimer);
     loadingTimer = setTimeout(() => loadingError("Timed out reaching the desktop."), 12000);
   }
@@ -992,6 +1083,9 @@
   function disconnect() {
     stopPolling();
     setInputEnabled(false);
+    blankShown = false;
+    $("empty-cursor").classList.remove("show");
+    releaseWakeLock();
     if (ws) {
       // Detach handlers so this programmatic close doesn't bounce through
       // onDropped and clobber the state we're about to set.
@@ -1022,6 +1116,8 @@
     setInputEnabled(true);
     closeDrawer();             // mobile: reveal the terminal
     renderSelection();
+    updateBlankIndicator();    // blink the home cursor until the snapshot/output lands
+    acquireWakeLock();         // keep the screen awake while actively mirroring
   }
 
   // ── Input ────────────────────────────────────────────────────────────────
@@ -1063,10 +1159,14 @@
           autoSizeNextSnapshot = false;
           term.reset();
           term.write(decode(msg.ansi_b64));
+          updateBlankIndicator();   // empty snapshot → keep blinking; content → hide
         }
         break;
       case "output":
-        if (sameId(msg.pane_id, currentPaneId)) term.write(decode(msg.bytes_b64));
+        if (sameId(msg.pane_id, currentPaneId)) {
+          term.write(decode(msg.bytes_b64));
+          if (blankShown) updateBlankIndicator();   // re-scan only while still blank
+        }
         break;
       case "error":
         console.warn("bridge error:", msg.message);
@@ -1299,9 +1399,38 @@
   }
 
   // ── Drawer ───────────────────────────────────────────────────────────────
-  function openDrawer() { $("drawer").classList.add("open"); $("scrim").classList.add("open"); }
+  function openDrawer() { $("drawer").classList.add("open"); $("scrim").classList.add("open"); armBackGuard(); }
   function closeDrawer() { $("drawer").classList.remove("open"); $("scrim").classList.remove("open"); }
   function toggleDrawer() { $("drawer").classList.contains("open") ? closeDrawer() : openDrawer(); }
+
+  // ── Hardware "back" (Android) ──────────────────────────────────────────────
+  // In a standalone PWA / native WebView the system Back button fires popstate.
+  // We push ONE guard history entry whenever an overlay opens, so Back closes the
+  // topmost overlay (settings → loading → drawer) instead of exiting the app; with
+  // nothing open, Back falls through to default navigation. (Minor wart: closing an
+  // overlay via a UI tap leaves the guard entry on the stack, so the next Back press
+  // is a harmless no-op that just consumes it — it never loops or traps.)
+  function anyOverlayOpen() {
+    return !$("settings-panel").hidden
+      || !$("loading-overlay").hidden
+      || $("drawer").classList.contains("open");
+  }
+  function closeTopOverlay() {
+    if (!$("settings-panel").hidden) { closeSettings(false); return true; }
+    if (!$("loading-overlay").hidden) { hideLoading(); return true; }
+    if ($("drawer").classList.contains("open")) { closeDrawer(); return true; }
+    return false;
+  }
+  function armBackGuard() {
+    if (!(history.state && history.state.cortexOverlay)) {
+      try { history.pushState({ cortexOverlay: true }, ""); } catch (_) {}
+    }
+  }
+  window.addEventListener("popstate", () => {
+    if (closeTopOverlay() && anyOverlayOpen()) {
+      try { history.pushState({ cortexOverlay: true }, ""); } catch (_) {}
+    }
+  });
 
   // ── Wire up controls ─────────────────────────────────────────────────────
   // Seed profiles from how the page was served: any profile lacking a host gets
@@ -1373,6 +1502,7 @@
     list.innerHTML = "";
     for (const p of profileStore.list) list.appendChild(buildProfileBlock(p));
     $("settings-panel").hidden = false;
+    armBackGuard();
   }
   function closeSettings(save) {
     if (save) {
@@ -1411,8 +1541,11 @@
   $("lo-retry").addEventListener("click", () => connectProfile(profileStore.active, loadingReveal));
   $("lo-cancel").addEventListener("click", hideLoading);
 
-  // Auto-reconnect when the app comes back to the foreground / network returns.
-  document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") maybeReconnect(); });
+  // Auto-reconnect when the app comes back to the foreground / network returns,
+  // and re-take the wake-lock (auto-released while backgrounded) if still mirroring.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") { maybeReconnect(); acquireWakeLock(); }
+  });
   window.addEventListener("focus", maybeReconnect);
   window.addEventListener("online", maybeReconnect);
 

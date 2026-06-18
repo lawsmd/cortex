@@ -707,12 +707,46 @@ async fn forward_pty_output(
 /// file outside the crate.
 const CLIENT_HTML: &str = include_str!("client.html");
 
+/// xterm.js (5.5.0) vendored locally and served at `/xterm.js` + `/xterm.css`
+/// (referenced by the client with relative paths). Killing the CDN dependency
+/// makes the client work offline and lets the APK bundle these as sibling
+/// assets — a prerequisite for the native `file://` WebView shell.
+const XTERM_JS: &str = include_str!("vendor/xterm.js");
+const XTERM_CSS: &str = include_str!("vendor/xterm.css");
+
+/// PWA icon served at `/icon.png` — the same Cortex icon the macOS bundle uses.
+const ICON_PNG: &[u8] =
+    include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/channels/oss/icon/no-padding/512x512.png"));
+
+/// Web-app manifest served at `/manifest.webmanifest`. Makes the served client
+/// installable ("Add to Home Screen") as a chrome-less standalone app; the
+/// native APK supplies its own manifest, so this is for the install-as-PWA path.
+const MANIFEST_JSON: &str = r##"{
+  "name": "Cortex Mobile",
+  "short_name": "Cortex",
+  "description": "Mirror and control your Cortex terminal panes.",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d0f12",
+  "theme_color": "#0d0f12",
+  "start_url": "./",
+  "scope": "./",
+  "icons": [
+    { "src": "./icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}"##;
+
 /// Builds the route table for one listener. `/` serves the web client; `/ws`
-/// is the protocol endpoint. Auth (if any) is carried in `state`.
+/// is the protocol endpoint; the static routes serve the vendored xterm assets,
+/// the PWA manifest, and the icon. Auth (if any) is carried in `state`.
 fn build_router(state: BridgeState) -> Router {
     Router::new()
         .route("/", get(index))
         .route("/ws", get(ws_handler))
+        .route("/xterm.js", get(xterm_js))
+        .route("/xterm.css", get(xterm_css))
+        .route("/manifest.webmanifest", get(manifest))
+        .route("/icon.png", get(icon_png))
         .with_state(state)
 }
 
@@ -754,6 +788,30 @@ async fn serve_on(addr: SocketAddr, router: Router, label: &'static str) {
 
 async fn index() -> Html<String> {
     Html(client_html())
+}
+
+/// Static asset handlers. Each pins an explicit content-type so browsers parse
+/// the vendored JS/CSS, the manifest, and the icon correctly.
+async fn xterm_js() -> impl IntoResponse {
+    (
+        [(axum::http::header::CONTENT_TYPE, "text/javascript; charset=utf-8")],
+        XTERM_JS,
+    )
+}
+async fn xterm_css() -> impl IntoResponse {
+    (
+        [(axum::http::header::CONTENT_TYPE, "text/css; charset=utf-8")],
+        XTERM_CSS,
+    )
+}
+async fn manifest() -> impl IntoResponse {
+    (
+        [(axum::http::header::CONTENT_TYPE, "application/manifest+json")],
+        MANIFEST_JSON,
+    )
+}
+async fn icon_png() -> impl IntoResponse {
+    ([(axum::http::header::CONTENT_TYPE, "image/png")], ICON_PNG)
 }
 
 /// Release: the embedded client. Debug: read `client.html` from the source tree
