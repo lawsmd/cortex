@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Cortex Mobile</string>
+    <string name="pair_intro">Pair with your desktop Cortex bridge. Scan the pairing QR, or enter the connection details manually.</string>
+    <string name="pair_scan_btn">Scan pairing QR</string>
+    <string name="pair_scan_prompt">Point at the Cortex pairing QR</string>
+    <string name="pair_scan_unrecognized">That QR wasn\'t a Cortex pairing code.</string>
+    <string name="pair_or_manual">— or enter manually —</string>
+    <string name="pair_label_hint">Label (e.g. Desktop Dev)</string>
+    <string name="pair_host_hint">Host (Tailscale name or 100.x address)</string>
+    <string name="pair_port_hint">Port (e.g. 9280)</string>
+    <string name="pair_token_hint">Token</string>
+    <string name="pair_save_btn">Save &amp; connect</string>
+    <string name="pair_default_label">Desktop</string>
+    <string name="pair_need_host_port">Host and port are required.</string>
+</resources>

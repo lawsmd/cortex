@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The app only ever talks to the desktop Cortex bridge over the Tailscale tailnet,
+  which is already end-to-end encrypted by WireGuard. The bridge serves plain
+  ws:// (no TLS), so cleartext is permitted. No other hosts are contacted.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

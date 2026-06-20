@@ -1,0 +1,12 @@
+{
+  "name": "Cortex Mobile",
+  "short_name": "Cortex",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0d0f12",
+  "theme_color": "#0d0f12",
+  "start_url": "./",
+  "icons": [
+    { "src": "./icon.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

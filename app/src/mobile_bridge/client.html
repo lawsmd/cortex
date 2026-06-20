@@ -904,6 +904,7 @@
       p.host = p.host || "";
       p.port = String(p.port || "");
       p.token = p.token || "";
+      p.secure = !!p.secure;     // ws vs wss; native shell loads over https appassets but talks plain ws
     }
     if (!store.list.find((p) => p.id === store.active)) store.active = store.list[0].id;
     return store;
@@ -1013,7 +1014,12 @@
     const host = $("host").value.trim();
     const port = $("port").value.trim();
     const token = $("token").value.trim();
-    const scheme = (window.location.protocol === "https:") ? "wss" : "ws";
+    // Scheme follows the target's own `secure` flag, not the page protocol: the native
+    // APK shell serves this page over the appassets https origin but the desktop bridge
+    // speaks plain ws over the (WireGuard-encrypted) tailnet. Default ws; flip to wss
+    // only for a profile explicitly marked secure (a future TLS bridge).
+    const secure = !!(activeProfile() && activeProfile().secure);
+    const scheme = secure ? "wss" : "ws";
     let url = `${scheme}://${host}:${port}/ws`;
     if (token) url += `?token=${encodeURIComponent(token)}`;
     setConnState("connecting", `connecting to ${scheme}://${host}:${port}/ws …`);
@@ -1441,6 +1447,10 @@
     try {
       const loc = window.location;
       if (loc.protocol !== "http:" && loc.protocol !== "https:") return;
+      // Under the native APK shell the page is served from the appassets virtual host,
+      // which is meaningless as a desktop address — never seed profiles from it. The
+      // real desktop arrives via seedFromPairingQuery() (the ?host=&port= the shell adds).
+      if (loc.hostname === "appassets.androidplatform.net") return;
       const host = loc.hostname || "";
       const port = loc.port || (loc.protocol === "https:" ? "443" : "80");
       const tok = new URLSearchParams(loc.search).get("token") || "";
@@ -1454,6 +1464,34 @@
       saveProfiles();
     } catch (_) {}
   })();
+
+  // Native shell / explicit pairing: a ?host=&port=&token= (and optional &label=&secure=)
+  // names the desktop to mirror. The APK shell adds these because window.location under
+  // appassets is the asset host, not the desktop. Returns true if it seeded+activated a
+  // profile (reusing one with the same host:port, else creating it).
+  function seedFromPairingQuery() {
+    try {
+      const q = new URLSearchParams(window.location.search);
+      const host = (q.get("host") || "").trim();
+      const port = (q.get("port") || "").trim();
+      if (!host || !port) return false;
+      const token = (q.get("token") || "").trim();
+      const label = (q.get("label") || "Paired desktop").trim();
+      const secure = q.get("secure") === "1";
+      let p = profileStore.list.find((x) => x.host === host && String(x.port) === String(port));
+      if (!p) {
+        p = { id: genId(), label, host, port: String(port), token, secure };
+        profileStore.list.push(p);
+      } else {
+        if (token) p.token = token;
+        p.secure = secure;
+        if (label) p.label = label;
+      }
+      profileStore.active = p.id;
+      saveProfiles();
+      return true;
+    } catch (_) { return false; }
+  }
 
   $("menu-btn").addEventListener("click", toggleDrawer);
   $("scrim").addEventListener("click", closeDrawer);
@@ -1868,9 +1906,16 @@
   loadActiveIntoBuffer();
   setConnState("off");
 
-  // Served (not file://) → connect to the active desktop so the phone URL/QR is
-  // zero-tap. file:// (the bundled APK shell) shows the drawer to pick/connect.
-  if (window.location.protocol === "http:" || window.location.protocol === "https:") {
+  // Connect strategy by how we were loaded:
+  //  • native APK shell (appassets https + ?host=&port=) → seed that profile, connect.
+  //  • plain served page (phone browser at http://<host>:<port>/?token=) → connect active.
+  //  • unpaired appassets (no query) or file:// → show the drawer to pick/connect (the
+  //    native shell normally routes to its own pairing screen before this point).
+  const seededFromQuery = seedFromPairingQuery();
+  const isAppAssets = window.location.hostname === "appassets.androidplatform.net";
+  const servedOverHttp =
+    !isAppAssets && (window.location.protocol === "http:" || window.location.protocol === "https:");
+  if (seededFromQuery || servedOverHttp) {
     connectProfile(profileStore.active);
   } else {
     openDrawer();
