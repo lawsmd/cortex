@@ -11,11 +11,14 @@ build living at `cortex/mobile/`. It reads (does not duplicate) the web client s
 from `../app/src/mobile_bridge/` at build time, so the APK and the desktop bridge can
 never drift.
 
-> **Status:** **build confirmed** (2026-06-20). A cold command-line `assembleDebug` succeeds in
-> ~1m33s on Windows — it auto-downloads SDK Platform 35 + Build-Tools and produces a 3.7 MB
-> `app-debug.apk` with the web client bundled. No dependency/version nudge was needed. What's
-> left is the on-device pass: `adb install` it onto the Pixel and pair. Use
-> [`build-apk.ps1`](build-apk.ps1) for the one-line build (it pins the right JDK + invocation).
+> **Status:** **on device** (2026-06-24). The APK installs, pairs, and mirrors live panes on
+> the Pixel; iteration is now per-feature build-and-sideload. A cold command-line
+> `assembleDebug` produces a 3.7 MB `app-debug.apk` with the web client bundled (no
+> dependency/version nudge needed). Use [`build-apk.ps1`](build-apk.ps1) for the one-line
+> build (it pins the right JDK + invocation).
+>
+> Recent input fix: the soft keyboard now rises on the **first** tap of the compose box after
+> a cold launch (it previously took two). See [Soft keyboard on first tap](#soft-keyboard-on-first-tap).
 
 ---
 
@@ -94,10 +97,12 @@ The token is stored only in the app's private storage; it is never in the APK or
 > one yourself from a `cortex://pair?…` or `http://<host>:<port>/?token=…` string (any QR
 > generator), or just use manual entry.
 
-**Re-pair / switch desktop:** for now, edit host/port/token live in the web client's own
-settings menu (the ⚙ in the sidebar), or clear the app's storage to return to the pairing
-screen. (A native "re-pair" hook — `window.CortexShell.rescan()` — is wired in the shell
-and can be surfaced as a settings button in a later client tweak.)
+**Re-pair / switch desktop:** open the web client's settings menu (the ⚙ in the sidebar)
+and tap **"Scan QR / Re-pair…"** — it relaunches the native QR scanner via the shell's
+`window.CortexShell.rescan()` hook, and on a successful scan the shell reloads the client
+pre-paired to the new desktop. (That button is shown only inside the native shell — a plain
+browser, which has no native scanner, hides it.) You can still edit host/port/token by hand
+in the same menu, or clear the app's storage to force the first-run pairing screen.
 
 ---
 
@@ -123,6 +128,28 @@ Files:
 - `app/src/main/res/xml/network_security_config.xml` — permit cleartext (ws://) to the
   tailnet (WireGuard already encrypts it).
 - `app/build.gradle.kts` — `syncWebAssets` copy task (single source of truth for the client).
+
+### Soft keyboard on first tap
+
+After a **cold launch**, the Android WebView used to skip the soft keyboard on the *first* tap
+of the compose box — the user had to tap twice. The cause is a WebView IME race: the `<textarea>`
+does receive DOM focus on the first tap (the shell pre-focuses the WebView container in
+`onPageFinished` / `loadClient` / an `ACTION_DOWN` touch listener), but on the very first focus
+the WebView's native input connection isn't live yet at the moment it would raise the IME, so
+`showSoftInput` is effectively dropped. Every later tap works because the connection now exists.
+
+Fix — the web client tells the shell to raise the keyboard the instant the box gains focus:
+
+- `client.html` adds a `focus` listener on `#compose-input` that calls
+  `window.CortexShell.showKeyboard()` (guarded on the bridge existing, so a plain browser / PWA
+  keeps its own IME).
+- `MainActivity.ShellBridge.showKeyboard()` runs on the UI thread and posts
+  `InputMethodManager.showSoftInput(webView, SHOW_IMPLICIT)` immediately **plus one ~60 ms retry**
+  to win the first-focus connection race. `SHOW_IMPLICIT` is a no-op when a hardware keyboard is
+  attached, so it never pops the on-screen keyboard wrongly.
+
+It's idempotent, so taps after the first (already working) are unaffected. Verify on a *true*
+cold start: `adb shell am force-stop com.cortex.mobile.debug`, reopen, tap the compose box once.
 
 ## Versions (bump during first sync if Studio flags them)
 

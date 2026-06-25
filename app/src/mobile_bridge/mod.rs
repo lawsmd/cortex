@@ -12,9 +12,12 @@
 //! no app install — it just opens the URL). Capabilities:
 //!   * `ListPanes` → `PaneList` — walk every window's tabs/panes, decorating
 //!     each terminal with its CLI-agent name + status (M1).
-//!   * `Subscribe` → a one-shot `Snapshot` (an ANSI redraw of the pane's
-//!     current screen) followed by live `Output` frames carrying raw PTY
-//!     bytes; `Unsubscribe` stops the stream (M2).
+//!   * `Subscribe` → an initial `Snapshot` (an ANSI redraw of the pane's current
+//!     screen) followed by throttled `Snapshot` frames — the bridge re-serializes
+//!     the pane's grid once per coalesced output burst (server-side reflow) rather
+//!     than forwarding raw PTY bytes, so the phone, which reflows to its own width,
+//!     never ghosts a desktop-width cursor redraw; `Unsubscribe` stops the stream
+//!     (M2).
 //!   * `Input` → write raw bytes into a pane's PTY via
 //!     [`crate::terminal::view::TerminalView::write_viewer_bytes_to_pty`], the
 //!     same funnel local keystrokes take, so it also clears the pane's
@@ -39,10 +42,12 @@
 //! hand-off the `/orchestrate` IPC bridge uses (`app/src/orchestrate/`). Unlike
 //! M1's request/reply, a `Subscribe` produces an open-ended stream, so replies
 //! flow back through a per-connection outbound queue drained by a writer task,
-//! and live output is forwarded by a background task that taps the pane's
-//! existing `pty_reads` broadcast. The snapshot and that broadcast receiver are
-//! taken under one model lock, so the receiver sees exactly the bytes after the
-//! snapshot — no gap, no overlap.
+//! and a background task streams throttled screen snapshots. That task taps the
+//! pane's existing `pty_reads` broadcast as a *change signal* (its bytes are
+//! discarded) and re-serializes the grid — which is `Send + Sync` behind a
+//! `FairMutex`, so the snapshot runs off the main thread. The initial snapshot
+//! and the broadcast receiver are taken under one model lock, so the receiver's
+//! first wake reflects only changes after that snapshot — no gap, no overlap.
 
 mod protocol;
 mod snapshot;
@@ -51,6 +56,7 @@ use std::collections::HashMap;
 use std::net::{IpAddr, SocketAddr};
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::time::Duration;
 
 use axum::{
     extract::ws::{Message, WebSocket, WebSocketUpgrade},
@@ -62,26 +68,37 @@ use axum::{
 };
 use base64::engine::general_purpose::STANDARD as BASE64;
 use base64::Engine as _;
-use futures::future::AbortHandle;
+use futures::future::{select, AbortHandle, Either};
 use futures::{SinkExt, StreamExt};
+use parking_lot::FairMutex;
 use warp_terminal::model::escape_sequences;
+use warpui::r#async::Timer;
 use warpui::{Entity, ModelContext, SingletonEntity, ViewHandle};
 
 use crate::pane_group::pane::PaneId;
-use crate::pane_group::PaneGroup;
+use crate::pane_group::{Direction, PaneGroup};
 use crate::settings::CortexSettings;
 use crate::terminal::cli_agent_sessions::{CLIAgentSessionStatus, CLIAgentSessionsModel};
-use crate::terminal::TerminalView;
+use crate::terminal::{TerminalModel, TerminalView};
 use crate::workspace::WorkspaceRegistry;
 
-use protocol::{MobileRequest, MobileResponse, PaneEntry, TabEntry, WindowEntry};
+use protocol::{
+    MobileRequest, MobileResponse, PaneEntry, ProjectEntry, TabEntry, WindowEntry,
+};
 
-/// Bound on a connection's outbound queue (snapshot/output/replies awaiting the
-/// socket write). The live forwarder uses a blocking send, so when a phone
-/// falls behind this fills, the forwarder stalls, and the pane's `pty_reads`
-/// broadcast overflows — dropping the oldest output rather than the newest and
-/// bounding memory. xterm.js resyncs from the next chunk it does receive.
+/// Bound on a connection's outbound queue (snapshot/replies awaiting the socket
+/// write). The reflow streamer uses a blocking send, so when a phone falls
+/// behind this fills, the streamer stalls, the pane's `pty_reads` broadcast
+/// overflows, and the next coalesced frame simply re-snapshots the current
+/// screen — so a slow phone drops *intermediate* frames, never desyncs.
 const OUTBOUND_CHANNEL_CAPACITY: usize = 512;
+
+/// Primary-screen capture depth for the *streamed* reflow frames (the initial
+/// subscribe uses the larger [`snapshot::MAX_PRIMARY_SNAPSHOT_ROWS`]). Smaller
+/// than the initial frame because every burst re-sends the whole thing at up to
+/// ~10 fps — enough to fill the phone viewport plus a little scrollback without
+/// shipping 200 rows per tick.
+const MAX_STREAM_SNAPSHOT_ROWS: usize = 120;
 
 /// How often the writer task sends a WebSocket ping when the outbound queue is
 /// idle. Browsers auto-reply with a pong, so this keeps the NAT/WireGuard path
@@ -230,54 +247,65 @@ impl MobileBridge {
         // Remote: bound to one specific address so the port stays off every
         // other network (LAN, café Wi-Fi) — only the tailnet. The address is
         // either an explicit `cortex.mobile.bind_address` override, or (when
-        // that's empty) auto-detected from this machine's Tailscale interface,
-        // so a changed tailnet IP re-binds correctly on the next launch. The
-        // phone reaches us by MagicDNS hostname, which always resolves to it.
-        let bind_address = bind_address.trim();
-        let remote_ip: Option<(IpAddr, &'static str)> = if !bind_address.is_empty() {
-            match bind_address.parse::<IpAddr>() {
-                Ok(ip) => Some((ip, "manual cortex.mobile.bind_address")),
-                Err(err) => {
-                    log::warn!(
-                        "Cortex mobile bridge: invalid cortex.mobile.bind_address \
-                         {bind_address:?}: {err}"
-                    );
-                    None
-                }
-            }
-        } else {
-            match detect_tailscale_ipv4() {
-                Some(ip) => Some((ip, "auto-detected Tailscale interface")),
-                None => {
-                    log::info!(
-                        "Cortex mobile bridge: no Tailscale (100.64.0.0/10) interface found and \
-                         cortex.mobile.bind_address is empty; loopback only (no remote access)."
-                    );
-                    None
-                }
-            }
-        };
-
-        // Bound only when an address AND a token are both available, so the
-        // bridge is never exposed unauthenticated.
-        if let Some((ip, source)) = remote_ip {
-            if token.is_empty() {
+        // that's empty) auto-detected from this machine's Tailscale interface.
+        // The phone reaches us by MagicDNS hostname, which always resolves to it.
+        //
+        // The bind is run by `serve_remote_retrying`, which re-resolves the
+        // address and retries on a backoff until the bind succeeds — so a Cortex
+        // launch that wins the race against Tailscale assigning this machine's
+        // `100.x` IP (the one-shot bind would fail once with WSAEADDRNOTAVAIL /
+        // os error 10049 and strand the phone on loopback-only) still ends up
+        // listening once the address appears, with no restart needed.
+        let bind_address = bind_address.trim().to_string();
+        if token.is_empty() {
+            // Never expose the bridge unauthenticated. Worth a warning only when
+            // the user evidently intended remote access (a pinned address, or a
+            // tailnet interface is already present).
+            let intended = !bind_address.is_empty() || detect_tailscale_ipv4().is_some();
+            if intended {
                 log::warn!(
-                    "Cortex mobile bridge: a remote bind address is available ({ip}, {source}) but \
+                    "Cortex mobile bridge: a remote bind address is available but \
                      cortex.mobile.token is empty; refusing to expose the bridge without auth. \
                      Set cortex.mobile.token to enable remote access."
                 );
-            } else {
-                let state = BridgeState {
-                    requests: requests.clone(),
-                    next_conn_id: next_conn_id.clone(),
-                    require_token: true,
-                    token: token.clone(),
-                };
-                let addr = SocketAddr::new(ip, port);
-                log::info!("Cortex mobile bridge: remote bind {addr} ({source}).");
-                runtime.spawn(serve_on(addr, build_router(state), "remote (token-gated)"));
             }
+        } else {
+            // Parse the manual override once; empty or unparseable falls through
+            // to auto-detect, which is re-evaluated on each bind attempt.
+            let manual: Option<IpAddr> = if bind_address.is_empty() {
+                None
+            } else {
+                match bind_address.parse::<IpAddr>() {
+                    Ok(ip) => Some(ip),
+                    Err(err) => {
+                        log::warn!(
+                            "Cortex mobile bridge: invalid cortex.mobile.bind_address \
+                             {bind_address:?}: {err}; falling back to Tailscale auto-detect."
+                        );
+                        None
+                    }
+                }
+            };
+            let resolve = move || -> Option<(IpAddr, &'static str)> {
+                match manual {
+                    Some(ip) => Some((ip, "manual cortex.mobile.bind_address")),
+                    None => {
+                        detect_tailscale_ipv4().map(|ip| (ip, "auto-detected Tailscale interface"))
+                    }
+                }
+            };
+            let state = BridgeState {
+                requests: requests.clone(),
+                next_conn_id: next_conn_id.clone(),
+                require_token: true,
+                token: token.clone(),
+            };
+            runtime.spawn(serve_remote_retrying(
+                port,
+                resolve,
+                build_router(state),
+                "remote (token-gated)",
+            ));
         }
 
         Ok(runtime)
@@ -306,6 +334,9 @@ impl MobileBridge {
                 text,
                 submit,
             } => paste_text(pane_id, text, submit, out, ctx),
+            MobileRequest::NewTab => new_tab(out, ctx),
+            MobileRequest::OpenProject { name } => open_project(name, out, ctx),
+            MobileRequest::NewPane { tab_id } => new_pane(tab_id, out, ctx),
         }
     }
 
@@ -337,28 +368,37 @@ impl MobileBridge {
         let model = view.as_ref(ctx).model.clone();
 
         // Snapshot the screen and attach a live receiver under the SAME lock, so
-        // the receiver observes exactly the bytes that follow the snapshot.
+        // the receiver's first wake observes only changes *after* this snapshot.
         let (snapshot, receiver) = {
             let model = model.lock();
             (
-                snapshot::screen_snapshot(&model),
+                snapshot::screen_snapshot(&model, snapshot::MAX_PRIMARY_SNAPSHOT_ROWS),
                 model.event_proxy.cortex_new_pty_reads_receiver(),
             )
         };
 
-        // Snapshot first — it must precede any live Output frame.
+        // Initial frame — a deeper snapshot for on-attach history. `streaming:
+        // false` lands it in the client's primary buffer so its scrollback seeds
+        // browsable history before live alt-buffer frames begin.
         let _ = out.try_send(MobileResponse::Snapshot {
             pane_id: pane_id_json.clone(),
             ansi_b64: b64(snapshot.ansi.as_bytes()),
             cols: snapshot.cols,
             rows: snapshot.rows,
+            streaming: false,
         });
 
-        // Forward live output on a background thread; cancel any prior
-        // subscription this connection had for the same pane.
-        let (task, abort) = ctx
-            .background_executor()
-            .spawn_abortable(forward_pty_output(receiver, out, pane_id_json));
+        // Then stream throttled reflow snapshots on a background thread; cancel
+        // any prior subscription this connection had for the same pane.
+        let (task, abort) = ctx.background_executor().spawn_abortable(
+            forward_reflow_snapshots(
+                model,
+                receiver,
+                out,
+                pane_id_json,
+                MAX_STREAM_SNAPSHOT_ROWS,
+            ),
+        );
         task.detach();
         if let Some(previous) = self.subscriptions.insert((conn, pane_id), abort) {
             previous.abort();
@@ -497,7 +537,17 @@ fn list_panes(ctx: &mut ModelContext<MobileBridge>) -> MobileResponse {
         });
     }
 
-    MobileResponse::PaneList { windows }
+    // The saved projects (loaded once above), surfaced to the phone's new-tab
+    // picker as name + accent color.
+    let projects = saved_projects
+        .iter()
+        .map(|p| ProjectEntry {
+            name: p.name.clone(),
+            color: p.color.clone(),
+        })
+        .collect();
+
+    MobileResponse::PaneList { windows, projects }
 }
 
 /// Resolves the CLI-agent name + status for a terminal pane, if a session is
@@ -548,6 +598,110 @@ fn find_terminal_view(
         }
     }
     None
+}
+
+// ── Tab / pane creation (the mobile sidebar "+" affordances) ─────────────────
+
+/// The first registered workspace (window). Single-window is the norm for this
+/// personal tool; a multi-window setup picks the first deterministically.
+fn first_workspace(
+    ctx: &mut ModelContext<MobileBridge>,
+) -> Option<ViewHandle<crate::workspace::Workspace>> {
+    WorkspaceRegistry::as_ref(ctx)
+        .all_workspaces(ctx)
+        .into_iter()
+        .next()
+        .map(|(_window_id, workspace)| workspace)
+}
+
+/// Finds a tab's pane group by the opaque `tab_id` the phone received in a
+/// `PaneList` (the debug form of the group's id — the same string `list_panes`
+/// emits as `TabEntry::tab_id`).
+fn find_pane_group_by_tab_id(
+    tab_id: &str,
+    ctx: &mut ModelContext<MobileBridge>,
+) -> Option<ViewHandle<PaneGroup>> {
+    for (_window_id, workspace) in WorkspaceRegistry::as_ref(ctx).all_workspaces(ctx) {
+        let groups: Vec<ViewHandle<PaneGroup>> = {
+            let ws = workspace.as_ref(ctx);
+            (0..ws.tab_count())
+                .filter_map(|i| ws.get_pane_group_view(i).cloned())
+                .collect()
+        };
+        for group in groups {
+            if format!("{:?}", group.id()) == tab_id {
+                return Some(group);
+            }
+        }
+    }
+    None
+}
+
+/// Open a fresh blank terminal tab in the first window — the new-tab picker's
+/// "New terminal" item. Produces no direct reply beyond pushing a refreshed
+/// `PaneList` so the phone sees the tab without waiting for the next poll.
+fn new_tab(out: async_channel::Sender<MobileResponse>, ctx: &mut ModelContext<MobileBridge>) {
+    let Some(workspace) = first_workspace(ctx) else {
+        let _ = out.try_send(MobileResponse::Error {
+            message: "no open window to add a tab to".to_string(),
+        });
+        return;
+    };
+    workspace.update(ctx, |ws, ctx| ws.add_terminal_tab(false, ctx));
+    let _ = out.try_send(list_panes(ctx));
+}
+
+/// Open a saved project (matched by name) as a new tab in its directory, tinted
+/// with its project color — the same path the desktop's saved-project picker
+/// takes. Reloads `projects.json` to resolve the cwd/color so no filesystem path
+/// rides the wire.
+fn open_project(
+    name: String,
+    out: async_channel::Sender<MobileResponse>,
+    ctx: &mut ModelContext<MobileBridge>,
+) {
+    let Some(project) = crate::saved_projects::load_projects()
+        .into_iter()
+        .find(|p| p.name == name)
+    else {
+        let _ = out.try_send(MobileResponse::Error {
+            message: format!("saved project not found: {name}"),
+        });
+        return;
+    };
+    let Some(workspace) = first_workspace(ctx) else {
+        let _ = out.try_send(MobileResponse::Error {
+            message: "no open window to add a tab to".to_string(),
+        });
+        return;
+    };
+    let crate::saved_projects::Project {
+        name, cwd, color, ..
+    } = project;
+    workspace.update(ctx, |ws, ctx| {
+        ws.open_saved_project_directory(cwd, name, &color, ctx);
+    });
+    let _ = out.try_send(list_panes(ctx));
+}
+
+/// Add a terminal pane (split right) to the tab identified by its opaque
+/// `tab_id` — the per-tab "+" square in the mobile sidebar. Mirrors the desktop
+/// split-right action; the new pane uses the default shell.
+fn new_pane(
+    tab_id: String,
+    out: async_channel::Sender<MobileResponse>,
+    ctx: &mut ModelContext<MobileBridge>,
+) {
+    let Some(group) = find_pane_group_by_tab_id(&tab_id, ctx) else {
+        let _ = out.try_send(MobileResponse::Error {
+            message: "tab not found".to_string(),
+        });
+        return;
+    };
+    group.update(ctx, |group, ctx| {
+        group.add_terminal_pane(Direction::Right, None, ctx);
+    });
+    let _ = out.try_send(list_panes(ctx));
 }
 
 /// Decode base64 input and write it into a pane's PTY on the main thread, as if
@@ -666,37 +820,116 @@ fn b64(bytes: &[u8]) -> String {
     BASE64.encode(bytes)
 }
 
-// ── Background output forwarding ─────────────────────────────────────────────
+// ── Background reflow-snapshot streaming ─────────────────────────────────────
 
-/// Drains a pane's `pty_reads` broadcast and pushes each chunk to a connection
-/// as an [`MobileResponse::Output`] frame. Ends when the pane closes, the
-/// connection's outbound queue closes (phone gone), or the subscription is
-/// aborted. Runs on the background executor; holds no main-thread state.
-async fn forward_pty_output(
+/// Streams a pane's screen to a connection as throttled, reflow-friendly
+/// [`MobileResponse::Snapshot`] frames.
+///
+/// Forwarding *raw* PTY bytes desyncs the mirror: Claude/Ink TUIs redraw their
+/// bottom region with cursor moves computed for the desktop's wide grid, and
+/// when the phone reflows them to its own narrow width those moves land in the
+/// wrong cells and ghost. Instead, this re-serializes the pane's *current* grid
+/// — which xterm repaints cleanly at any width — once per coalesced output
+/// burst, capped at `FRAME_MIN_INTERVAL`. The pane's `pty_reads` broadcast is
+/// used only as a change signal (and to keep `receiver_count()` non-zero so the
+/// pane keeps broadcasting); its bytes are discarded.
+///
+/// Ends when the pane closes, the outbound queue closes (phone gone), or the
+/// subscription is aborted. Runs on the background executor and touches only the
+/// `Send + Sync` model mutex — never main-thread state.
+async fn forward_reflow_snapshots(
+    model: Arc<FairMutex<TerminalModel>>,
     mut receiver: async_broadcast::Receiver<Arc<Vec<u8>>>,
     out: async_channel::Sender<MobileResponse>,
     pane_id: serde_json::Value,
+    max_rows: usize,
 ) {
+    // ~10 fps ceiling: a sustained TUI animation (Claude's spinner, /compact)
+    // yields at most one full-frame repaint per tick, coalescing every burst in
+    // between. Lower it (raise fps) if updates feel choppy; raise it to cut
+    // bandwidth/phone CPU during heavy animation.
+    const FRAME_MIN_INTERVAL: Duration = Duration::from_millis(100);
+
+    // After a burst goes this quiet, emit one `streaming: false` *settle* frame:
+    // a deep snapshot the client lands in its primary buffer so scrollback holds
+    // browsable history (it also drops the client out of the alt buffer). Kept
+    // comfortably longer than Claude's sub-second inter-token gaps so a normal
+    // streaming pause doesn't thrash the alt↔primary switch.
+    const SETTLE_IDLE: Duration = Duration::from_millis(700);
+
+    // True once we've sent at least one live (alt-buffer) frame since the last
+    // settle. While true we only wait up to SETTLE_IDLE for more output before
+    // settling; while false we block indefinitely for the next burst.
+    let mut streaming = false;
+
     loop {
-        match receiver.recv().await {
-            Ok(chunk) => {
-                let frame = MobileResponse::Output {
-                    pane_id: pane_id.clone(),
-                    bytes_b64: b64(chunk.as_slice()),
-                };
-                // Blocking send applies backpressure: a slow phone stalls us,
-                // the broadcast overflows, and old output is dropped (below).
-                if out.send(frame).await.is_err() {
-                    break;
+        // Wait for the next output. Mid-burst, race the wait against the settle
+        // timer so a lull produces one history frame and then goes quiet.
+        if streaming {
+            let recv_fut = receiver.recv();
+            let settle = Timer::after(SETTLE_IDLE);
+            futures::pin_mut!(recv_fut, settle);
+            match select(recv_fut, settle).await {
+                // More output (or a benign overflow) → fall through and repaint.
+                Either::Left((Ok(_), _)) => {}
+                Either::Left((Err(async_broadcast::RecvError::Overflowed(_)), _)) => {}
+                Either::Left((Err(async_broadcast::RecvError::Closed), _)) => break,
+                // Quiet for SETTLE_IDLE → settle: a deep primary-buffer snapshot
+                // that also pops the client out of the alt buffer.
+                Either::Right((_, _)) => {
+                    let frame = {
+                        let model = model.lock();
+                        let snap =
+                            snapshot::screen_snapshot(&model, snapshot::MAX_PRIMARY_SNAPSHOT_ROWS);
+                        MobileResponse::Snapshot {
+                            pane_id: pane_id.clone(),
+                            ansi_b64: b64(snap.ansi.as_bytes()),
+                            cols: snap.cols,
+                            rows: snap.rows,
+                            streaming: false,
+                        }
+                    };
+                    if out.send(frame).await.is_err() {
+                        return; // phone gone
+                    }
+                    streaming = false;
+                    continue;
                 }
             }
-            Err(async_broadcast::RecvError::Overflowed(skipped)) => {
-                log::warn!(
-                    "Cortex mobile bridge: pty mirror lagged, dropped {skipped} chunk(s)"
-                );
+        } else {
+            // Idle-sleep until the pane produces output worth repainting.
+            match receiver.recv().await {
+                Ok(_) => {}
+                // A full re-snapshot supersedes any dropped chunk, so overflow is
+                // benign — just render the current screen.
+                Err(async_broadcast::RecvError::Overflowed(_)) => {}
+                Err(async_broadcast::RecvError::Closed) => break,
             }
-            Err(async_broadcast::RecvError::Closed) => break,
         }
+
+        // Coalesce everything already queued into this single frame.
+        while receiver.try_recv().is_ok() {}
+
+        // Re-serialize the authoritative grid into a live (alt-buffer) frame. The
+        // lock is released at the end of this block — never held across an await.
+        let frame = {
+            let model = model.lock();
+            let snap = snapshot::screen_snapshot(&model, max_rows);
+            MobileResponse::Snapshot {
+                pane_id: pane_id.clone(),
+                ansi_b64: b64(snap.ansi.as_bytes()),
+                cols: snap.cols,
+                rows: snap.rows,
+                streaming: true,
+            }
+        };
+        if out.send(frame).await.is_err() {
+            return; // phone gone
+        }
+        streaming = true;
+
+        // Rate-cap before looping back to wait for the next burst.
+        Timer::after(FRAME_MIN_INTERVAL).await;
     }
 }
 
@@ -771,7 +1004,9 @@ fn detect_tailscale_ipv4() -> Option<IpAddr> {
 }
 
 /// Binds `addr` and serves `router` until the runtime shuts down. `label`
-/// distinguishes loopback vs. remote in the log.
+/// distinguishes loopback vs. remote in the log. Loopback always binds on the
+/// first try, so this one-shot form is used only there; the remote listener
+/// uses [`serve_remote_retrying`].
 async fn serve_on(addr: SocketAddr, router: Router, label: &'static str) {
     match tokio::net::TcpListener::bind(addr).await {
         Ok(listener) => {
@@ -783,6 +1018,73 @@ async fn serve_on(addr: SocketAddr, router: Router, label: &'static str) {
         Err(err) => {
             log::warn!("Cortex mobile bridge failed to bind {addr} [{label}]: {err:#}");
         }
+    }
+}
+
+/// Like [`serve_on`], but for the remote (tailnet) listener: re-resolves the
+/// target address and retries the bind on a capped backoff until it succeeds,
+/// then serves until shutdown. This makes the bridge self-healing against a
+/// boot-time race where Cortex launches before Tailscale has assigned this
+/// machine's `100.x` address — the one-shot bind would fail with
+/// `WSAEADDRNOTAVAIL` (os error 10049) and strand the phone on loopback-only for
+/// the whole session. `resolve` is re-run on every attempt so the auto-detect
+/// path picks up a late-appearing interface (the manual-override path just
+/// returns its fixed address). Failures are logged once per streak (reset on a
+/// successful bind) so a never-up Tailscale doesn't spam the log. If the served
+/// listener ever returns (interface dropped mid-session), the loop re-establishes
+/// it; on app exit the whole runtime is torn down, ending this task.
+async fn serve_remote_retrying(
+    port: u16,
+    resolve: impl Fn() -> Option<(IpAddr, &'static str)> + Send + 'static,
+    router: Router,
+    label: &'static str,
+) {
+    use std::time::Duration;
+    const MAX_BACKOFF: Duration = Duration::from_secs(30);
+    let mut backoff = Duration::from_secs(1);
+    let mut warned = false;
+    loop {
+        match resolve() {
+            Some((ip, source)) => {
+                let addr = SocketAddr::new(ip, port);
+                match tokio::net::TcpListener::bind(addr).await {
+                    Ok(listener) => {
+                        log::info!(
+                            "Cortex mobile bridge listening on http://{addr}/ (ws://{addr}/ws) \
+                             [{label}] ({source})"
+                        );
+                        backoff = Duration::from_secs(1);
+                        warned = false;
+                        if let Err(err) = axum::serve(listener, router.clone()).await {
+                            log::warn!("Cortex mobile bridge server stopped [{label}]: {err:#}");
+                        }
+                        // Served then returned — re-establish on the next loop.
+                        continue;
+                    }
+                    Err(err) => {
+                        if !warned {
+                            log::warn!(
+                                "Cortex mobile bridge: cannot bind {addr} [{label}] yet ({err}); \
+                                 retrying until it's available (often a boot-time race with \
+                                 Tailscale assigning {ip})."
+                            );
+                            warned = true;
+                        }
+                    }
+                }
+            }
+            None => {
+                if !warned {
+                    log::info!(
+                        "Cortex mobile bridge: no remote bind address available yet [{label}]; \
+                         waiting for the Tailscale interface (retrying)."
+                    );
+                    warned = true;
+                }
+            }
+        }
+        tokio::time::sleep(backoff).await;
+        backoff = (backoff * 2).min(MAX_BACKOFF);
     }
 }
 

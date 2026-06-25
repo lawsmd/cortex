@@ -11,7 +11,9 @@
 //! read-only mirror, the bridge now also accepts keystrokes:
 //!   * [`MobileRequest::Subscribe`] → an initial [`MobileResponse::Snapshot`]
 //!     (an ANSI redraw of the pane's current screen) followed by a live stream
-//!     of [`MobileResponse::Output`] frames carrying raw PTY bytes.
+//!     of further [`MobileResponse::Snapshot`] frames, one per coalesced output
+//!     burst (server-side reflow — see [`MobileResponse::Snapshot`]). Raw
+//!     [`MobileResponse::Output`] frames are no longer used by the mirror.
 //!   * [`MobileRequest::Unsubscribe`] stops that stream.
 //!   * [`MobileRequest::Input`] writes raw bytes into a pane's PTY, exactly as
 //!     if the user typed them locally (control codes, arrow keys, `/clear`).
@@ -34,11 +36,11 @@ use serde::{Deserialize, Serialize};
 pub enum MobileRequest {
     /// Ask for the full live tree of windows → tabs → panes.
     ListPanes,
-    /// Start mirroring a pane: the bridge replies with a one-shot
-    /// [`MobileResponse::Snapshot`] of the current screen, then streams live
-    /// [`MobileResponse::Output`] frames until [`MobileRequest::Unsubscribe`]
-    /// or the connection closes. `pane_id` is the opaque token the client
-    /// received in a `PaneList` (the serialized [`PaneId`]).
+    /// Start mirroring a pane: the bridge replies with an initial
+    /// [`MobileResponse::Snapshot`] of the current screen, then streams further
+    /// throttled [`MobileResponse::Snapshot`] frames (server-side reflow) until
+    /// [`MobileRequest::Unsubscribe`] or the connection closes. `pane_id` is the
+    /// opaque token the client received in a `PaneList` (the serialized [`PaneId`]).
     ///
     /// [`PaneId`]: crate::pane_group::pane::PaneId
     Subscribe { pane_id: serde_json::Value },
@@ -70,30 +72,65 @@ pub enum MobileRequest {
         #[serde(default)]
         submit: bool,
     },
+    /// Cortex: open a fresh blank terminal tab (the new-tab picker's "New
+    /// terminal" item). Lands in the first window; the effect shows up in the
+    /// next `PaneList` (the bridge also pushes one immediately).
+    NewTab,
+    /// Cortex: open a saved project as a new tab in its directory, tinted with
+    /// its project color. `name` matches a [`ProjectEntry::name`] the client
+    /// received in a [`MobileResponse::PaneList`].
+    OpenProject { name: String },
+    /// Cortex: add a terminal pane (split right) to the tab identified by
+    /// `tab_id` — the opaque [`TabEntry::tab_id`] the client received in a
+    /// `PaneList`. Backs the per-tab "+" square in the mobile sidebar.
+    NewPane { tab_id: String },
 }
 
 /// A response sent back to the mobile client.
 #[derive(Debug, Clone, Serialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum MobileResponse {
-    /// The current workspace tree, one entry per open window.
-    PaneList { windows: Vec<WindowEntry> },
-    /// The initial screen state for a freshly subscribed pane: a base64-encoded
-    /// ANSI redraw string. Fed to a blank xterm.js, it reproduces the screen
-    /// (clear + paint + cursor). Always precedes the pane's `Output` frames.
-    /// `cols`/`rows` are the desktop pane's grid size at subscribe time; the
-    /// client resizes its terminal to match so the desktop's absolute cursor
-    /// moves and alt-screen TUIs (Claude's prompts) land in the right cells,
-    /// then scales/zooms that grid to fit the phone (v1 doesn't resize the PTY).
+    /// The current workspace tree, one entry per open window. Cortex also
+    /// attaches the user's saved projects so the phone's new-tab picker can list
+    /// them — re-sent every poll, but free: `list_panes` already loads them for
+    /// the per-tab project-name lookup.
+    PaneList {
+        windows: Vec<WindowEntry>,
+        projects: Vec<ProjectEntry>,
+    },
+    /// A screen state for a subscribed pane: a base64-encoded ANSI redraw string
+    /// that, written to xterm.js, reproduces the screen (clear + paint + cursor).
+    /// Sent once on subscribe and then repeatedly — once per coalesced output
+    /// burst — as the live mirror (server-side reflow): each frame is a clean,
+    /// authoritative repaint, so the phone, which reflows the redraw to its *own*
+    /// width, never ghosts a desktop-width cursor move the way a raw-byte stream
+    /// would. `cols`/`rows` are the desktop pane's grid size; the client ignores
+    /// them for sizing (it owns its width) and lets xterm reflow the redraw.
     Snapshot {
         pane_id: serde_json::Value,
         ansi_b64: String,
         cols: usize,
         rows: usize,
+        /// Cortex: how the client should land this frame.
+        /// * `true` — a *live* frame from an active output burst. The client
+        ///   paints it into xterm's **alternate** buffer for a flicker-free,
+        ///   scroll-stable in-place repaint (the alt buffer has no scrollback, so
+        ///   row positions don't churn frame-to-frame and xterm diffs cells
+        ///   instead of re-rendering the whole grid).
+        /// * `false` — the initial on-attach snapshot, or the idle **settle**
+        ///   frame the streamer emits once a burst goes quiet. The client paints
+        ///   it into the **primary** buffer, whose scrollback then holds
+        ///   browsable history. Defaulted so older/synthetic frames read as
+        ///   non-streaming (primary).
+        #[serde(default)]
+        streaming: bool,
     },
     /// A live chunk of raw PTY output for a subscribed pane, base64-encoded.
     /// Written verbatim to xterm.js, which interprets the ANSI exactly as the
-    /// desktop terminal does.
+    /// desktop terminal does. Retained for protocol completeness, but the mirror
+    /// now streams reflowed [`MobileResponse::Snapshot`] frames instead (see
+    /// `Subscribe`), so the bridge no longer emits these.
+    #[allow(dead_code)] // wire-protocol variant kept for back-compat; mirror streams Snapshot now
     Output {
         pane_id: serde_json::Value,
         bytes_b64: String,
@@ -134,6 +171,17 @@ pub struct TabEntry {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub project_name: Option<String>,
     pub panes: Vec<PaneEntry>,
+}
+
+/// Cortex: one of the user's saved projects, surfaced to the mobile new-tab
+/// picker. Tapping a row sends [`MobileRequest::OpenProject`] with `name`.
+#[derive(Debug, Clone, Serialize)]
+pub struct ProjectEntry {
+    /// Project display name; also the key the client echoes back in
+    /// [`MobileRequest::OpenProject`].
+    pub name: String,
+    /// `#rrggbb` accent for the picker row's color swatch.
+    pub color: String,
 }
 
 /// One pane within a tab.

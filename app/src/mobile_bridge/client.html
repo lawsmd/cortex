@@ -47,6 +47,15 @@
 
 <link rel="stylesheet" href="./xterm.css" />
 <script src="./xterm.js"></script>
+<!-- @xterm/addon-unicode11 0.8.0 (UMD), inlined verbatim. Upgrades xterm's
+     character-width table to Unicode 11 so its line-wrap math matches Claude/Ink's
+     string-width — without it xterm's default (Unicode 6) widths disagree on a
+     glyph in Claude's TUI chrome, Ink's relative cursorUp redraw lands offset, and
+     an interleaved ghost gets baked into the mirror. Inlined (not a separate
+     ./addon route) so it needs no bridge route / gradle entry and the debug bridge
+     serves it live from disk. Exposes the global `Unicode11Addon`; loaded +
+     activated below, right after term.open(). -->
+<script>!function(e,t){"object"==typeof exports&&"object"==typeof module?module.exports=t():"function"==typeof define&&define.amd?define([],t):"object"==typeof exports?exports.Unicode11Addon=t():e.Unicode11Addon=t()}(this,(()=>(()=>{"use strict";var e={433:(e,t,i)=>{Object.defineProperty(t,"__esModule",{value:!0}),t.UnicodeV11=void 0;const r=i(938),s=[[768,879],[1155,1161],[1425,1469],[1471,1471],[1473,1474],[1476,1477],[1479,1479],[1536,1541],[1552,1562],[1564,1564],[1611,1631],[1648,1648],[1750,1757],[1759,1764],[1767,1768],[1770,1773],[1807,1807],[1809,1809],[1840,1866],[1958,1968],[2027,2035],[2045,2045],[2070,2073],[2075,2083],[2085,2087],[2089,2093],[2137,2139],[2259,2306],[2362,2362],[2364,2364],[2369,2376],[2381,2381],[2385,2391],[2402,2403],[2433,2433],[2492,2492],[2497,2500],[2509,2509],[2530,2531],[2558,2558],[2561,2562],[2620,2620],[2625,2626],[2631,2632],[2635,2637],[2641,2641],[2672,2673],[2677,2677],[2689,2690],[2748,2748],[2753,2757],[2759,2760],[2765,2765],[2786,2787],[2810,2815],[2817,2817],[2876,2876],[2879,2879],[2881,2884],[2893,2893],[2902,2902],[2914,2915],[2946,2946],[3008,3008],[3021,3021],[3072,3072],[3076,3076],[3134,3136],[3142,3144],[3146,3149],[3157,3158],[3170,3171],[3201,3201],[3260,3260],[3263,3263],[3270,3270],[3276,3277],[3298,3299],[3328,3329],[3387,3388],[3393,3396],[3405,3405],[3426,3427],[3530,3530],[3538,3540],[3542,3542],[3633,3633],[3636,3642],[3655,3662],[3761,3761],[3764,3772],[3784,3789],[3864,3865],[3893,3893],[3895,3895],[3897,3897],[3953,3966],[3968,3972],[3974,3975],[3981,3991],[3993,4028],[4038,4038],[4141,4144],[4146,4151],[4153,4154],[4157,4158],[4184,4185],[4190,4192],[4209,4212],[4226,4226],[4229,4230],[4237,4237],[4253,4253],[4448,4607],[4957,4959],[5906,5908],[5938,5940],[5970,5971],[6002,6003],[6068,6069],[6071,6077],[6086,6086],[6089,6099],[6109,6109],[6155,6158],[6277,6278],[6313,6313],[6432,6434],[6439,6440],[6450,6450],[6457,6459],[6679,6680],[6683,6683],[6742,6742],[6744,6750],[6752,6752],[6754,6754],[6757,6764],[6771,6780],[6783,6783],[6832,6846],[6912,6915],[6964,6964],[6966,6970],[6972,6972],[6978,6978],[7019,7027],[7040,7041],[7074,7077],[7080,7081],[7083,7085],[7142,7142],[7144,7145],[7149,7149],[7151,7153],[7212,7219],[7222,7223],[7376,7378],[7380,7392],[7394,7400],[7405,7405],[7412,7412],[7416,7417],[7616,7673],[7675,7679],[8203,8207],[8234,8238],[8288,8292],[8294,8303],[8400,8432],[11503,11505],[11647,11647],[11744,11775],[12330,12333],[12441,12442],[42607,42610],[42612,42621],[42654,42655],[42736,42737],[43010,43010],[43014,43014],[43019,43019],[43045,43046],[43204,43205],[43232,43249],[43263,43263],[43302,43309],[43335,43345],[43392,43394],[43443,43443],[43446,43449],[43452,43453],[43493,43493],[43561,43566],[43569,43570],[43573,43574],[43587,43587],[43596,43596],[43644,43644],[43696,43696],[43698,43700],[43703,43704],[43710,43711],[43713,43713],[43756,43757],[43766,43766],[44005,44005],[44008,44008],[44013,44013],[64286,64286],[65024,65039],[65056,65071],[65279,65279],[65529,65531]],n=[[66045,66045],[66272,66272],[66422,66426],[68097,68099],[68101,68102],[68108,68111],[68152,68154],[68159,68159],[68325,68326],[68900,68903],[69446,69456],[69633,69633],[69688,69702],[69759,69761],[69811,69814],[69817,69818],[69821,69821],[69837,69837],[69888,69890],[69927,69931],[69933,69940],[70003,70003],[70016,70017],[70070,70078],[70089,70092],[70191,70193],[70196,70196],[70198,70199],[70206,70206],[70367,70367],[70371,70378],[70400,70401],[70459,70460],[70464,70464],[70502,70508],[70512,70516],[70712,70719],[70722,70724],[70726,70726],[70750,70750],[70835,70840],[70842,70842],[70847,70848],[70850,70851],[71090,71093],[71100,71101],[71103,71104],[71132,71133],[71219,71226],[71229,71229],[71231,71232],[71339,71339],[71341,71341],[71344,71349],[71351,71351],[71453,71455],[71458,71461],[71463,71467],[71727,71735],[71737,71738],[72148,72151],[72154,72155],[72160,72160],[72193,72202],[72243,72248],[72251,72254],[72263,72263],[72273,72278],[72281,72283],[72330,72342],[72344,72345],[72752,72758],[72760,72765],[72767,72767],[72850,72871],[72874,72880],[72882,72883],[72885,72886],[73009,73014],[73018,73018],[73020,73021],[73023,73029],[73031,73031],[73104,73105],[73109,73109],[73111,73111],[73459,73460],[78896,78904],[92912,92916],[92976,92982],[94031,94031],[94095,94098],[113821,113822],[113824,113827],[119143,119145],[119155,119170],[119173,119179],[119210,119213],[119362,119364],[121344,121398],[121403,121452],[121461,121461],[121476,121476],[121499,121503],[121505,121519],[122880,122886],[122888,122904],[122907,122913],[122915,122916],[122918,122922],[123184,123190],[123628,123631],[125136,125142],[125252,125258],[917505,917505],[917536,917631],[917760,917999]],o=[[4352,4447],[8986,8987],[9001,9002],[9193,9196],[9200,9200],[9203,9203],[9725,9726],[9748,9749],[9800,9811],[9855,9855],[9875,9875],[9889,9889],[9898,9899],[9917,9918],[9924,9925],[9934,9934],[9940,9940],[9962,9962],[9970,9971],[9973,9973],[9978,9978],[9981,9981],[9989,9989],[9994,9995],[10024,10024],[10060,10060],[10062,10062],[10067,10069],[10071,10071],[10133,10135],[10160,10160],[10175,10175],[11035,11036],[11088,11088],[11093,11093],[11904,11929],[11931,12019],[12032,12245],[12272,12283],[12288,12329],[12334,12350],[12353,12438],[12443,12543],[12549,12591],[12593,12686],[12688,12730],[12736,12771],[12784,12830],[12832,12871],[12880,19903],[19968,42124],[42128,42182],[43360,43388],[44032,55203],[63744,64255],[65040,65049],[65072,65106],[65108,65126],[65128,65131],[65281,65376],[65504,65510]],c=[[94176,94179],[94208,100343],[100352,101106],[110592,110878],[110928,110930],[110948,110951],[110960,111355],[126980,126980],[127183,127183],[127374,127374],[127377,127386],[127488,127490],[127504,127547],[127552,127560],[127568,127569],[127584,127589],[127744,127776],[127789,127797],[127799,127868],[127870,127891],[127904,127946],[127951,127955],[127968,127984],[127988,127988],[127992,128062],[128064,128064],[128066,128252],[128255,128317],[128331,128334],[128336,128359],[128378,128378],[128405,128406],[128420,128420],[128507,128591],[128640,128709],[128716,128716],[128720,128722],[128725,128725],[128747,128748],[128756,128762],[128992,129003],[129293,129393],[129395,129398],[129402,129442],[129445,129450],[129454,129482],[129485,129535],[129648,129651],[129656,129658],[129664,129666],[129680,129685],[131072,196605],[196608,262141]];let l;function d(e,t){let i,r=0,s=t.length-1;if(e<t[0][0]||e>t[s][1])return!1;for(;s>=r;)if(i=r+s>>1,e>t[i][1])r=i+1;else{if(!(e<t[i][0]))return!0;s=i-1}return!1}t.UnicodeV11=class{constructor(){if(this.version="11",!l){l=new Uint8Array(65536),l.fill(1),l[0]=0,l.fill(0,1,32),l.fill(0,127,160);for(let e=0;e<s.length;++e)l.fill(0,s[e][0],s[e][1]+1);for(let e=0;e<o.length;++e)l.fill(2,o[e][0],o[e][1]+1)}}wcwidth(e){return e<32?0:e<127?1:e<65536?l[e]:d(e,n)?0:d(e,c)?2:1}charProperties(e,t){let i=this.wcwidth(e),s=0===i&&0!==t;if(s){const e=r.UnicodeService.extractWidth(t);0===e?s=!1:e>i&&(i=e)}return r.UnicodeService.createPropertyValue(0,i,s)}}},345:(e,t)=>{Object.defineProperty(t,"__esModule",{value:!0}),t.runAndSubscribe=t.forwardEvent=t.EventEmitter=void 0,t.EventEmitter=class{constructor(){this._listeners=[],this._disposed=!1}get event(){return this._event||(this._event=e=>(this._listeners.push(e),{dispose:()=>{if(!this._disposed)for(let t=0;t<this._listeners.length;t++)if(this._listeners[t]===e)return void this._listeners.splice(t,1)}})),this._event}fire(e,t){const i=[];for(let e=0;e<this._listeners.length;e++)i.push(this._listeners[e]);for(let r=0;r<i.length;r++)i[r].call(void 0,e,t)}dispose(){this.clearListeners(),this._disposed=!0}clearListeners(){this._listeners&&(this._listeners.length=0)}},t.forwardEvent=function(e,t){return e((e=>t.fire(e)))},t.runAndSubscribe=function(e,t){return t(void 0),e((e=>t(e)))}},490:(e,t,i)=>{Object.defineProperty(t,"__esModule",{value:!0}),t.UnicodeV6=void 0;const r=i(938),s=[[768,879],[1155,1158],[1160,1161],[1425,1469],[1471,1471],[1473,1474],[1476,1477],[1479,1479],[1536,1539],[1552,1557],[1611,1630],[1648,1648],[1750,1764],[1767,1768],[1770,1773],[1807,1807],[1809,1809],[1840,1866],[1958,1968],[2027,2035],[2305,2306],[2364,2364],[2369,2376],[2381,2381],[2385,2388],[2402,2403],[2433,2433],[2492,2492],[2497,2500],[2509,2509],[2530,2531],[2561,2562],[2620,2620],[2625,2626],[2631,2632],[2635,2637],[2672,2673],[2689,2690],[2748,2748],[2753,2757],[2759,2760],[2765,2765],[2786,2787],[2817,2817],[2876,2876],[2879,2879],[2881,2883],[2893,2893],[2902,2902],[2946,2946],[3008,3008],[3021,3021],[3134,3136],[3142,3144],[3146,3149],[3157,3158],[3260,3260],[3263,3263],[3270,3270],[3276,3277],[3298,3299],[3393,3395],[3405,3405],[3530,3530],[3538,3540],[3542,3542],[3633,3633],[3636,3642],[3655,3662],[3761,3761],[3764,3769],[3771,3772],[3784,3789],[3864,3865],[3893,3893],[3895,3895],[3897,3897],[3953,3966],[3968,3972],[3974,3975],[3984,3991],[3993,4028],[4038,4038],[4141,4144],[4146,4146],[4150,4151],[4153,4153],[4184,4185],[4448,4607],[4959,4959],[5906,5908],[5938,5940],[5970,5971],[6002,6003],[6068,6069],[6071,6077],[6086,6086],[6089,6099],[6109,6109],[6155,6157],[6313,6313],[6432,6434],[6439,6440],[6450,6450],[6457,6459],[6679,6680],[6912,6915],[6964,6964],[6966,6970],[6972,6972],[6978,6978],[7019,7027],[7616,7626],[7678,7679],[8203,8207],[8234,8238],[8288,8291],[8298,8303],[8400,8431],[12330,12335],[12441,12442],[43014,43014],[43019,43019],[43045,43046],[64286,64286],[65024,65039],[65056,65059],[65279,65279],[65529,65531]],n=[[68097,68099],[68101,68102],[68108,68111],[68152,68154],[68159,68159],[119143,119145],[119155,119170],[119173,119179],[119210,119213],[119362,119364],[917505,917505],[917536,917631],[917760,917999]];let o;t.UnicodeV6=class{constructor(){if(this.version="6",!o){o=new Uint8Array(65536),o.fill(1),o[0]=0,o.fill(0,1,32),o.fill(0,127,160),o.fill(2,4352,4448),o[9001]=2,o[9002]=2,o.fill(2,11904,42192),o[12351]=1,o.fill(2,44032,55204),o.fill(2,63744,64256),o.fill(2,65040,65050),o.fill(2,65072,65136),o.fill(2,65280,65377),o.fill(2,65504,65511);for(let e=0;e<s.length;++e)o.fill(0,s[e][0],s[e][1]+1)}}wcwidth(e){return e<32?0:e<127?1:e<65536?o[e]:function(e,t){let i,r=0,s=t.length-1;if(e<t[0][0]||e>t[s][1])return!1;for(;s>=r;)if(i=r+s>>1,e>t[i][1])r=i+1;else{if(!(e<t[i][0]))return!0;s=i-1}return!1}(e,n)?0:e>=131072&&e<=196605||e>=196608&&e<=262141?2:1}charProperties(e,t){let i=this.wcwidth(e),s=0===i&&0!==t;if(s){const e=r.UnicodeService.extractWidth(t);0===e?s=!1:e>i&&(i=e)}return r.UnicodeService.createPropertyValue(0,i,s)}}},938:(e,t,i)=>{Object.defineProperty(t,"__esModule",{value:!0}),t.UnicodeService=void 0;const r=i(345),s=i(490);class n{static extractShouldJoin(e){return 0!=(1&e)}static extractWidth(e){return e>>1&3}static extractCharKind(e){return e>>3}static createPropertyValue(e,t,i=!1){return(16777215&e)<<3|(3&t)<<1|(i?1:0)}constructor(){this._providers=Object.create(null),this._active="",this._onChange=new r.EventEmitter,this.onChange=this._onChange.event;const e=new s.UnicodeV6;this.register(e),this._active=e.version,this._activeProvider=e}dispose(){this._onChange.dispose()}get versions(){return Object.keys(this._providers)}get activeVersion(){return this._active}set activeVersion(e){if(!this._providers[e])throw new Error(`unknown Unicode version "${e}"`);this._active=e,this._activeProvider=this._providers[e],this._onChange.fire(e)}register(e){this._providers[e.version]=e}wcwidth(e){return this._activeProvider.wcwidth(e)}getStringCellWidth(e){let t=0,i=0;const r=e.length;for(let s=0;s<r;++s){let o=e.charCodeAt(s);if(55296<=o&&o<=56319){if(++s>=r)return t+this.wcwidth(o);const i=e.charCodeAt(s);56320<=i&&i<=57343?o=1024*(o-55296)+i-56320+65536:t+=this.wcwidth(i)}const c=this.charProperties(o,i);let l=n.extractWidth(c);n.extractShouldJoin(c)&&(l-=n.extractWidth(i)),t+=l,i=c}return t}charProperties(e,t){return this._activeProvider.charProperties(e,t)}}t.UnicodeService=n}},t={};function i(r){var s=t[r];if(void 0!==s)return s.exports;var n=t[r]={exports:{}};return e[r](n,n.exports,i),n.exports}var r={};return(()=>{var e=r;Object.defineProperty(e,"__esModule",{value:!0}),e.Unicode11Addon=void 0;const t=i(433);e.Unicode11Addon=class{activate(e){e.unicode.register(new t.UnicodeV11)}dispose(){}}})(),r})()));</script>
 
 <style>
   :root {
@@ -66,6 +75,19 @@
     --busy: #6fb3ff;
     --bad: #e06c75;
     --topbar-h: 48px;
+    /* Safe-area insets. In the native Android shell, WebView does NOT auto-fill
+       env(safe-area-inset-*) from the system bars, so the page pulls them from
+       CortexShell.env() into --cortex-sat/--cortex-sab (CSS px). env() still covers a
+       real mobile browser / display notch. max() (never a sum) takes whichever is
+       present without double-counting. Everything below pads from --sat/--sab. */
+    --sat: max(env(safe-area-inset-top, 0px), var(--cortex-sat, 0px));
+    --sab: max(env(safe-area-inset-bottom, 0px), var(--cortex-sab, 0px));
+    /* Soft-keyboard height above the nav bar (native shell only; --cortex-ime is
+       pulled from CortexShell.env()). The bottom of the layout shrinks by this so the
+       compose bar + soft-keys lift clear of the keyboard — under edge-to-edge the
+       window doesn't resize for the IME, so we carve it out ourselves. 0 in a real
+       browser, which resizes its own viewport for the keyboard. */
+    --ime: var(--cortex-ime, 0px);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body { height: 100%; margin: 0; overscroll-behavior: none; }
@@ -75,11 +97,19 @@
     font: 14px/1.5 ui-monospace, "FiraCode Nerd Font Mono", "Cascadia Code", Consolas, monospace;
     display: flex;
     flex-direction: column;
+    /* Carve the soft-keyboard out of the bottom (box-sizing:border-box, so this shrinks
+       the flex content box) — #main absorbs the shrink and the compose bar + soft-keys
+       ride up above the keyboard instead of hiding behind it. 0 when no keyboard. */
+    padding-bottom: var(--ime);
+    transition: padding-bottom .12s ease-out;
   }
 
   /* ── Top bar ─────────────────────────────────────────────────────────── */
   #topbar {
-    height: var(--topbar-h);
+    /* Grow the bar by the safe-area top inset so the fixed-height content row stays
+       48px while the status bar sits in the added space (border-box: a bare
+       height:var(--topbar-h) would let an 78px padding-top overflow and clip the row). */
+    height: calc(var(--topbar-h) + var(--sat));
     flex: 0 0 auto;
     display: flex;
     align-items: center;
@@ -89,7 +119,7 @@
     justify-content: space-between;
     gap: 6px;
     padding: 0 8px;
-    padding-top: env(safe-area-inset-top, 0);
+    padding-top: var(--sat);
     background: var(--panel);
     border-bottom: 1px solid var(--border);
   }
@@ -113,8 +143,8 @@
   .hdr-chip { flex: 0 0 auto; transform: scale(.72); cursor: default; }
   .icon-btn {
     flex: 0 0 auto;
-    /* Flex-center the glyph so an oversized icon (e.g. #fit-btn) sits dead-center
-       in the 34px box instead of riding low on the text baseline. */
+    /* Flex-center the glyph so an icon/label sits dead-center in the 34px box
+       instead of riding low on the text baseline. */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -130,10 +160,10 @@
     cursor: pointer;
   }
   .icon-btn:active { background: var(--border); }
-  /* The fit-to-view glyph reads too small at the shared 14px; bump just its
-     font so the icon fills the button without changing the 34px footprint.
-     translateY nudge corrects the ⤢ glyph's font-internal low bias. */
-  #fit-btn { font-size: 24px; line-height: 1; transform: translateY(-1px); }
+  /* Right-side font controls: A−／A+ grouped as one flex child so the
+     space-between top bar keeps the menu button pinned far-left. */
+  #font-ctl { display: flex; gap: 6px; flex: 0 0 auto; }
+  #font-dec, #font-inc { font-size: 14px; font-weight: 600; padding: 0 10px; }
   .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bad); flex: 0 0 auto; }
   .dot.on { background: var(--ok); }
   /* Connection state as a compact pill (dot + short label), tinted by state.
@@ -194,7 +224,7 @@
     display: flex;
     flex-direction: column;
     padding: 8px;
-    padding-top: calc(env(safe-area-inset-top, 0) + 8px);
+    padding-top: calc(var(--sat) + 8px);
   }
   #drawer.open { transform: translateX(0); }
   #sidebar { flex: 1 1 auto; overflow-y: auto; min-height: 0; }
@@ -208,7 +238,7 @@
     padding-top: 8px;
     margin-top: 6px;
     border-top: 1px solid var(--border);
-    padding-bottom: env(safe-area-inset-bottom, 0);
+    padding-bottom: var(--sab);
   }
   #profile-select {
     flex: 1 1 0;
@@ -234,7 +264,7 @@
     align-items: center;
     justify-content: center;
     padding: 16px;
-    padding-top: calc(env(safe-area-inset-top, 0) + 16px);
+    padding-top: calc(var(--sat) + 16px);
   }
   #settings-panel[hidden] { display: none; }
   .sp-card {
@@ -335,6 +365,25 @@
   @keyframes lo-spin { to { transform: rotate(360deg); } }
   .lo-title { font-size: 15px; font-weight: 600; color: var(--text); }
   .lo-sub { font-size: 12px; color: var(--dim); min-height: 1em; }
+
+  /* Stale-content veil: blurs the mirror + shows a spinner whenever displayed pane
+     content may be outdated (returned from background, or a dropped/reconnecting
+     socket), until a fresh authoritative snapshot lands. Scoped to #main, so the conn
+     pill and compose bar stay usable; the terminal area absorbs taps so stale content
+     isn't acted on. Reuses .lo-spinner / @keyframes lo-spin above. */
+  #term-wrap.stale { filter: blur(3px); transition: filter .12s ease; }
+  #stale-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 75;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(0,0,0,.42);
+  }
+  #stale-overlay.show { display: flex; }
   .lo-actions { display: flex; gap: 8px; width: 100%; }
   .lo-actions button {
     flex: 1;
@@ -410,14 +459,20 @@
      centered on that point with translate(-50%,-50%). Anchoring the *point* (not a
      5px box) is what keeps the dot dead-centre on the border stroke on every edge —
      a sized box rode the path by its top-left and drifted a different way per side.
-     The path traces the border CENTERLINE (inset 0.75px = half the 1.5px border;
-     corner radius 6.25px = 7 − 0.75) so the dot straddles the stroke. */
+     The path traces the border CENTERLINE. Coordinates are in the comet's own space,
+     whose origin (top:0/left:0) is the parent's PADDING box — i.e. INSIDE the 1.5px
+     border, not the border-box corner. So the centerline is at −0.75 on the top/left
+     (0.75px = half the border, measured outward from the padding edge) and 31.75 on
+     the bottom/right (the 31px padding box + 0.75). Corner radius stays 6.25px
+     (= 7 − 0.75). Earlier the path was authored against the border-box corner, which
+     shifted the whole orbit +1.5px down-and-right (low on top/bottom, right on the
+     sides); subtracting the 1.5px border from every coordinate re-centers it. */
   .pane-sq .comet {
     position: absolute;
     top: 0; left: 0;
     width: 0; height: 0;
     offset-anchor: center;
-    offset-path: path("M 7 0.75 L 27 0.75 A 6.25 6.25 0 0 1 33.25 7 L 33.25 27 A 6.25 6.25 0 0 1 27 33.25 L 7 33.25 A 6.25 6.25 0 0 1 0.75 27 L 0.75 7 A 6.25 6.25 0 0 1 7 0.75 Z");
+    offset-path: path("M 5.5 -0.75 L 25.5 -0.75 A 6.25 6.25 0 0 1 31.75 5.5 L 31.75 25.5 A 6.25 6.25 0 0 1 25.5 31.75 L 5.5 31.75 A 6.25 6.25 0 0 1 -0.75 25.5 L -0.75 5.5 A 6.25 6.25 0 0 1 5.5 -0.75 Z");
     offset-distance: 0%;
     offset-rotate: 0deg;
     display: none;
@@ -464,8 +519,75 @@
   }
   .pane-sq.done .donepip { display: block; }
 
+  /* Trailing "+" tile in a tab's pane grid: same 34×34 footprint as a numbered
+     square, dashed so it reads as an "add" affordance. Tapping it adds a terminal
+     pane (split right) to that tab. Border/glyph take the project color when the
+     tab has one, else stay dim. No comet/breath/pip children, so the agent
+     overlays never run on it. */
+  .pane-sq.add-sq {
+    border-style: dashed;
+    background: transparent;
+    color: var(--dim);
+    font-size: 19px;
+    line-height: 1;
+  }
+  .pane-sq.add-sq .num { color: inherit; }
+
+  /* "+ New tab/project" affordance beneath the lowest project card: a dashed,
+     full-width Cortex-styled plus that opens the project picker. */
+  #new-tab-btn {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    border: 1.5px dashed var(--border);
+    border-radius: 9px;
+    background: transparent;
+    color: var(--dim);
+    padding: 7px;
+    margin: 2px 0 10px;
+    font: inherit;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  #new-tab-btn:active { background: var(--border); }
+
+  /* ── New-tab project picker (centered modal over a backdrop) ───────────── */
+  #project-picker {
+    position: fixed;
+    inset: 0;
+    z-index: 66;
+    background: rgba(0,0,0,.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    padding-top: calc(var(--sat) + 16px);
+  }
+  #project-picker[hidden] { display: none; }
+  #pp-list { display: flex; flex-direction: column; gap: 6px; max-height: 62vh; overflow-y: auto; }
+  .pp-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 11px 12px;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+    text-align: left;
+    cursor: pointer;
+  }
+  .pp-row:active { background: var(--border); }
+  .pp-dot { flex: 0 0 auto; width: 12px; height: 12px; border-radius: 50%; }
+  .pp-name { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pp-new { color: var(--dim); border-style: dashed; justify-content: center; }
+
   /* ── Terminal ────────────────────────────────────────────────────────── */
-  #main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; position: relative; }
+  #main { flex: 1 1 auto; min-width: 0; min-height: 0; display: flex; flex-direction: column; position: relative; }
   /* Blinking block pinned at the terminal's home cell, shown only while a pane is
      subscribed AND its buffer is empty — an unmistakable "live & empty, ready"
      signal so a blank pane reads as a real terminal, not a dead/stuck black screen.
@@ -485,14 +607,22 @@
   #term-wrap {
     flex: 1 1 auto;
     min-height: 0;
-    overflow: auto;
+    /* Content is always wrapped to the phone's width (the grid is sized to the
+       viewport, see recomputeGrid), so horizontal scrolling is never needed —
+       forbid it outright and keep only vertical scroll. */
+    overflow-x: hidden;
+    overflow-y: auto;
     background: #000;
     padding: 4px;
-    /* Allow one-finger pan/scroll but suppress the browser's page pinch-zoom —
-       pinching here scales only the terminal font (handled in JS), not the UI. */
-    touch-action: pan-x pan-y;
+    /* We OWN every gesture here in JS: one-finger drag = manual scroll via
+       term.scrollLines (see the touchmove handler), two-finger = font pinch-zoom.
+       touch-action:none disables ALL native gestures. The decisive bit that keeps
+       xterm's own touch-scroll + mouse SelectionService out of the way is
+       pointer-events:none on term.element, set right after term.open() — every
+       touch then falls through xterm and bubbles to our #term-wrap handlers. */
+    touch-action: none;
   }
-  #terminal { width: max-content; }
+  #terminal { width: 100%; }
   #empty-hint { margin: auto; color: var(--dim); text-align: center; padding: 24px; }
 
   /* ── Soft-key bar ────────────────────────────────────────────────────── */
@@ -502,7 +632,7 @@
     flex-wrap: wrap;          /* wrap to a 2nd row so every key stays reachable */
     gap: 6px;
     padding: 7px 8px;
-    padding-bottom: calc(env(safe-area-inset-bottom, 0) + 7px);
+    padding-bottom: calc(var(--sab) + 7px);
     background: var(--panel);
     border-top: 1px solid var(--border);
   }
@@ -570,6 +700,22 @@
   }
   #send-btn:active:not(:disabled) { background: var(--border); }
   #send-btn:disabled { opacity: .4; }
+  /* Jump-to-latest: a narrower SECONDARY button (neutral border/colour so Send stays
+     the primary action) that re-pins the mirror to the newest output. */
+  #jump-bottom {
+    flex: 0 0 auto;
+    align-self: stretch;
+    min-width: 44px;
+    padding: 0 10px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    font: inherit;
+    font-size: 18px;
+    cursor: pointer;
+  }
+  #jump-bottom:active { background: var(--border); }
 
   /* ── Selection handles + copy toast ───────────────────────────────────── */
   .sel-handle {
@@ -593,7 +739,7 @@
   #copy-btn {
     position: fixed;
     left: 50%;
-    top: calc(var(--topbar-h) + env(safe-area-inset-top, 0) + 10px);
+    top: calc(var(--topbar-h) + var(--sat) + 10px);
     transform: translateX(-50%);
     z-index: 65;
     display: none;
@@ -647,7 +793,10 @@
     <button id="menu-btn" class="icon-btn" title="Panes">☰</button>
     <div id="pane-title"><span id="pane-name">No pane</span></div>
     <span id="conn-pill" role="button" tabindex="0" title="Connection status — tap to (re)connect"><span class="dot" id="conn-dot"></span><span id="conn-pill-text">Not Connected</span></span>
-    <button id="fit-btn" class="icon-btn" title="Fit width (pinch to zoom)">⤢</button>
+    <div id="font-ctl">
+      <button id="font-dec" class="icon-btn" title="Smaller text">A−</button>
+      <button id="font-inc" class="icon-btn" title="Larger text">A+</button>
+    </div>
   </header>
 
   <div id="content">
@@ -672,6 +821,7 @@
     <main id="main">
       <div id="term-wrap"><div id="terminal"></div></div>
       <div id="empty-cursor"></div>
+      <div id="stale-overlay"><div class="lo-spinner"></div><div class="lo-sub" id="stale-sub">Refreshing…</div></div>
     </main>
 
     <div id="scrim"></div>
@@ -684,11 +834,22 @@
         <p class="sp-hint">One entry per instance — e.g. each machine's Prod and Dev. Host: use the Tailscale <b>MagicDNS</b> name (e.g. <code>desktop.tailnet.ts.net</code>) so it keeps working when the IP changes. Prod/Dev on one machine share a host and differ by port.</p>
         <div id="sp-list"><!-- one .sp-profile block per connection, built by JS --></div>
         <button id="sp-add" class="sp-add">+ Add connection</button>
+        <button id="sp-scan" class="sp-add" hidden>⃞ Scan QR / Re-pair…</button>
         <span class="status-text" id="conn-status"></span>
         <div class="sp-actions">
           <button id="settings-disconnect">Disconnect</button>
           <button id="settings-done">Done</button>
         </div>
+      </div>
+    </div>
+
+    <!-- New-tab project picker: opened by the "+" beneath the lowest project.
+         Lists the desktop's saved projects (from the pane_list `projects`) plus a
+         "New terminal" blank-tab item; backdrop-tap closes. -->
+    <div id="project-picker" hidden>
+      <div class="sp-card">
+        <h2>Open a tab</h2>
+        <div id="pp-list"><!-- project rows + "New terminal", built by JS --></div>
       </div>
     </div>
   </div>
@@ -708,8 +869,11 @@
   </div>
 
   <div id="compose">
-    <textarea id="compose-input" rows="1" placeholder="Send text…" autocapitalize="off" autocomplete="off" autocorrect="off" spellcheck="false"></textarea>
+    <!-- autocorrect + word suggestions ON (spellcheck drives Android/Gboard, autocorrect
+         covers iOS); autocapitalize stays OFF so typed commands/flags/paths aren't capitalized. -->
+    <textarea id="compose-input" rows="1" placeholder="Send text…" autocapitalize="off" autocorrect="on" spellcheck="true"></textarea>
     <button id="send-btn" class="cmd" title="Enter — paste the composed text and submit, or press Enter alone when empty">⏎</button>
+    <button id="jump-bottom" title="Jump to latest output">⤓</button>
   </div>
 
   <div id="softkeys">
@@ -746,6 +910,68 @@
 
   const $ = (id) => document.getElementById(id);
   const decode = (b64) => Uint8Array.from(atob(b64), (c) => c.charCodeAt(0));
+
+  // Claude Code (and other TUIs) draw horizontal rules sized to the DESKTOP pty width —
+  // the phone never resizes the shared pty — so a full-width ─ run wraps to 3–4 phone rows.
+  // We collapse any over-wide ─ run down to a short stub so each rule occupies one row.
+  //
+  // The catch: the desktop re-serializes the grid cell-by-cell, and every *colored* cell is
+  // emitted as its own `ESC[…m─ESC[0m` (see grid_handler::cell_to_string) — so the ─ glyphs
+  // of a colored border are NOT byte-adjacent; they're separated by SGR escapes. A naive
+  // "consecutive ─ triples" scan therefore sees runs of length 1 and collapses nothing. So
+  // we scan an SGR-aware "rule region": a maximal run of units, each either a ─ triple
+  // (U+2500 = UTF-8 E2 94 80) or a complete CSI escape (1B 5B … final 40–7E). If the region
+  // holds more ─ glyphs than fit the phone's width, we keep the leading color + the first
+  // RULE_STUB dashes (with their interleaved SGR), append a reset, and drop the long tail.
+  // Non-rule bytes (corners ╭╮╰╯, titles, spaces) end the region untouched, so a box border
+  // collapses to ╭───╮ and a titled rule keeps its text. Byte-level throughout so non-UTF-8
+  // bytes are never round-tripped through a decoder and corrupted.
+  const RULE_STUB = 3;   // ─ chars kept when an over-wide rule is collapsed (tunable)
+  const isRuleByte = (b, i) => b[i] === 0xe2 && b[i + 1] === 0x94 && b[i + 2] === 0x80;
+  // Length of a CSI escape (ESC '[' params/intermediates final) starting at i, else 0.
+  const csiLen = (b, i, n) => {
+    if (b[i] !== 0x1b || i + 1 >= n || b[i + 1] !== 0x5b) return 0;
+    let j = i + 2;
+    while (j < n && b[j] >= 0x20 && b[j] <= 0x3f) j++;   // params + intermediates
+    if (j < n && b[j] >= 0x40 && b[j] <= 0x7e) j++;       // final byte
+    return j - i;
+  };
+  const collapseRules = (bytes) => {
+    const n = bytes.length;
+    // Fast path: no ─ at all → return the chunk untouched (zero allocation; common case).
+    let has = false;
+    for (let i = 0; i + 2 < n; i++) { if (isRuleByte(bytes, i)) { has = true; break; } }
+    if (!has) return bytes;
+    const out = new Uint8Array(n + (n >> 3) + 16);   // +slack for the per-region resets
+    let w = 0, i = 0;
+    while (i < n) {
+      // Scan a maximal {─ triple | CSI escape} region starting at i.
+      let j = i, dashes = 0, stubEnd = -1;
+      while (j < n) {
+        if (isRuleByte(bytes, j)) {
+          dashes++;
+          j += 3;
+          if (dashes === RULE_STUB) stubEnd = j;   // byte index just past the RULE_STUB-th ─
+        } else {
+          const cl = csiLen(bytes, j, n);
+          if (cl > 0) j += cl; else break;
+        }
+      }
+      if (dashes > term.cols) {
+        // Over-wide rule: keep leading color + first RULE_STUB dashes, reset, drop the tail.
+        for (let k = i; k < stubEnd; k++) out[w++] = bytes[k];
+        out[w++] = 0x1b; out[w++] = 0x5b; out[w++] = 0x30; out[w++] = 0x6d;   // ESC[0m
+        i = j;
+      } else if (j > i) {
+        // Short rule or a bare SGR run: pass the region through unchanged.
+        for (let k = i; k < j; k++) out[w++] = bytes[k];
+        i = j;
+      } else {
+        out[w++] = bytes[i++];   // ordinary byte
+      }
+    }
+    return out.subarray(0, w);
+  };
   const b64encode = (bytes) => {
     let s = "";
     for (const b of bytes) s += String.fromCharCode(b);
@@ -763,8 +989,12 @@
   const safeColor = (c) => (typeof c === "string" && /^#[0-9a-f]{6}$/i.test(c)) ? c : null;
 
   // ── xterm.js setup ─────────────────────────────────────────────────────
-  // No fit addon: we size the grid to the desktop pane's cols/rows (from the
-  // Snapshot frame) and let the user zoom/pan, so the mirror stays faithful.
+  // No fit addon: we size the grid to the PHONE's own viewport + font (see
+  // recomputeGrid) and let xterm reflow the content to that width, so the mirror
+  // always wraps and never scrolls horizontally. The desktop pane's reported
+  // cols/rows are ignored for sizing — the trade-off is that cursor-addressed
+  // live redraws (Claude/Ink TUIs) computed for the desktop width may ghost
+  // between snapshots; a re-subscribe/clear re-syncs a clean frame.
   let fontSize = 13;
   const term = new Terminal({
     cols: 80,
@@ -781,8 +1011,31 @@
     theme: { background: "#000000" },
   });
   term.open($("terminal"));
+  // ── Own every touch in the mirror ──────────────────────────────────────────
+  // xterm 5.5.0 binds its OWN touchstart/touchmove (Viewport scroll) and a
+  // mouse-driven SelectionService to its internal elements (.xterm-viewport /
+  // .xterm-screen / .xterm-helper-textarea). Those are descendants of #term-wrap,
+  // so on a one-finger touch they fire first and can stopPropagation() — stealing
+  // the gesture and giving the "1 scrolls / 1 highlights / 8 eaten" nondeterminism.
+  // pointer-events:none on term.element (the .xterm root) makes xterm's whole
+  // subtree transparent to hit-testing (the property inherits), so every touch
+  // falls through and bubbles to OUR #term-wrap handlers — sole, deterministic
+  // owner. Safe: the #sel-a/#sel-b/#copy-btn/#jump-bottom controls live outside
+  // #term-wrap; long-press selection maps coords via getBoundingClientRect (no
+  // hit-testing); we never type into xterm's textarea (input rides the compose
+  // bar). Touch-only so desktop mouse copy-on-select is untouched.
+  if (isTouch) term.element.style.pointerEvents = "none";
+  // Match xterm's character widths to Claude/Ink's string-width (Unicode 11) so a
+  // TUI's wrap/cursor math lines up and the mirror stops baking interleaved ghosts.
+  // Non-fatal if the addon is missing — xterm keeps its default (Unicode 6) table.
+  try {
+    const u11 = new Unicode11Addon.Unicode11Addon();
+    term.loadAddon(u11);
+    term.unicode.activeVersion = "11";
+  } catch (e) { console.warn("unicode11 addon unavailable:", e); }
   let dims = { cols: 80, rows: 24 };
 
+  const DEFAULT_FONT_SIZE = 13;
   function applyFont() {
     fontSize = Math.max(5, Math.min(28, fontSize));
     term.options.fontSize = fontSize;
@@ -792,6 +1045,9 @@
       ec.style.width = Math.max(5, Math.round(fontSize * 0.6)) + "px";
       ec.style.height = Math.max(10, Math.round(fontSize * 1.2)) + "px";
     }
+    // A font change means a different cell size → a different number of cells
+    // fit the viewport, so re-wrap the grid to the new width.
+    recomputeGrid();
     if (typeof sel !== "undefined" && sel) placeHandles();
   }
 
@@ -808,17 +1064,44 @@
     return true;
   }
   function updateBlankIndicator() {
-    blankShown = !!currentPaneId && isTerminalBlank();
+    // Only blink for a genuinely idle shell: a pane running a tracked CLI agent (Claude
+    // Code, …) owns its own cursor/layout, so suppress our fake home-cell block there —
+    // otherwise it keeps blinking in the top-left while the TUI draws elsewhere.
+    blankShown = !!currentPaneId && !currentPaneAgent() && isTerminalBlank();
     $("empty-cursor").classList.toggle("show", blankShown);
   }
-  function fitWidth() {
-    // Pick the largest font whose grid width still fits the viewport, so the
-    // whole desktop width is visible; the user can A+ past this and pan.
-    const avail = $("term-wrap").clientWidth - 10;
-    if (avail > 0 && dims.cols > 0) {
-      fontSize = Math.floor(avail / (dims.cols * 0.6));
-      applyFont();
+  // Size the xterm grid to the PHONE's viewport (not the desktop pane). The grid
+  // is made exactly as wide as #term-wrap so xterm wraps content and the wrapper
+  // never overflows horizontally; height fills the viewport like a real terminal
+  // (scrollback keeps history regardless of the row count). Uses the same
+  // cell-metric heuristics already in this file (fontSize*0.6 wide, *1.2 tall —
+  // cf. #empty-cursor sizing in applyFont). xterm reflows the normal buffer on
+  // resize, which is what re-wraps the content to the new width.
+  function recomputeGrid() {
+    const wrap = $("term-wrap");
+    if (!wrap) return;
+    // 8px = #term-wrap's 4px padding each side; +4px slack so the 0.6 cell-width
+    // estimate can never overshoot and clip the last column (overflow-x is hidden,
+    // so an over-wide grid would be cut off, not scrollable). Mirrors the old
+    // fitWidth's `clientWidth - 10` conservatism.
+    const pad = 12;
+    const cellW = fontSize * 0.6;
+    const cellH = fontSize * 1.2;
+    const cols = Math.max(20, Math.floor((wrap.clientWidth  - pad) / cellW));
+    const rows = Math.max(6,  Math.floor((wrap.clientHeight - pad) / cellH));
+    if (cols !== term.cols || rows !== term.rows) {
+      term.resize(cols, rows);
+      dims = { cols, rows };             // keep `dims` consistent for any reader
+      if (typeof sel !== "undefined" && sel) placeHandles();
     }
+  }
+  // Debounced recomputeGrid for viewport-change events (orientation, soft
+  // keyboard, browser chrome show/hide) — these can fire in rapid bursts, and a
+  // resize per event would thrash xterm's reflow.
+  let recomputeTimer = null;
+  function scheduleRecomputeGrid() {
+    clearTimeout(recomputeTimer);
+    recomputeTimer = setTimeout(recomputeGrid, 80);
   }
 
   // ── Connection state ───────────────────────────────────────────────────
@@ -826,10 +1109,7 @@
   let currentPaneId = null;
   let refreshTimer = null;
   let lastWindows = [];      // latest pane tree (for agent-awareness + numbering)
-  // Auto-size (fit-to-width +3) should run only on the FIRST snapshot of a new
-  // subscription — not on re-subscribes to the same pane (e.g. the clear re-sync
-  // below), which would otherwise snap the user's pinch-zoom back to the default.
-  let autoSizeNextSnapshot = false;
+  let lastProjects = [];     // latest saved-project list (for the new-tab picker)
   // Whether the blinking #empty-cursor is currently shown (pane subscribed + buffer
   // empty). Tracked so the output handler only re-scans the buffer while it's blank;
   // once content appears the scan stops until the next subscribe/clear resets it.
@@ -951,11 +1231,14 @@
     // through the switch; the new instance repopulates it once its pane list lands.
     currentPaneId = null;
     lastWindows = [];
+    lastProjects = [];
     lastTreeSig = null;
     term.reset();
+    inAltMirror = false;          // reset() returns xterm to the normal buffer
     clearSelectionUI();
     setInputEnabled(false);
     updateBlankIndicator();    // currentPaneId is null now → hide the blank cursor
+    hideStaleOverlay();        // deliberate switch → the full-screen instance loader takes over
     $("sidebar").innerHTML = '<div id="empty-hint">Connecting…</div>';
     renderSelection();         // header → "No pane"
     showLoading(p.label || id, reveal);
@@ -1032,9 +1315,22 @@
       setConnState("connected", "connected");
       if (loadingActive) $("lo-sub").textContent = "Loading workspace…"; // socket up; await tree
       listPanes();
+      // Background auto-reconnect (a suspended tab waking) lands here with currentPaneId
+      // still set but no live subscription on the fresh socket — ws.onclose disabled the
+      // input and the mirror is frozen. Re-subscribe the pane (the same path "reselect the
+      // pane" takes) to re-seed the mirror and re-enable the compose bar. A deliberate
+      // connectProfile switch clears currentPaneId first, so this only fires on reconnects.
+      if (currentPaneId) subscribe(currentPaneId);
       refreshTimer = setInterval(listPanes, 3000); // server push lands in M4b
     };
-    ws.onclose = () => { stopPolling(); setInputEnabled(false); onDropped("closed"); };
+    ws.onclose = () => {
+      stopPolling(); setInputEnabled(false);
+      // A genuine drop froze the mirror — veil it until the reconnect re-seeds (ws.onopen
+      // re-subscribes). Safe here: programmatic disconnect() detaches handlers first, so
+      // this only fires on real drops, and only when we were actively mirroring a pane.
+      if (currentPaneId) showStaleOverlay("Reconnecting…");
+      onDropped("closed");
+    };
     ws.onerror = () => { /* onclose follows; state is set there */ };
     ws.onmessage = (ev) => {
       let msg;
@@ -1083,6 +1379,7 @@
     retryCount = 0;
     everConnected = false;
     disconnect();
+    hideStaleOverlay();        // intentional disconnect → clear any stale veil
     setConnState("off", "disconnected");
   }
 
@@ -1108,15 +1405,13 @@
   function listPanes() { send({ type: "list_panes" }); }
 
   function subscribe(paneId) {
-    // A genuinely new pane gets the one-time auto-size; a same-pane re-subscribe
-    // (the clear re-sync) keeps whatever zoom the user has pinched to.
-    const isNewPane = !currentPaneId || !sameId(currentPaneId, paneId);
     if (currentPaneId && !sameId(currentPaneId, paneId)) {
       send({ type: "unsubscribe", pane_id: currentPaneId });
     }
     currentPaneId = paneId;
-    autoSizeNextSnapshot = isNewPane;
     term.reset();
+    inAltMirror = false;          // reset() returns xterm to the normal buffer
+    missedFrameWhileScrolled = false;
     clearSelectionUI();
     send({ type: "subscribe", pane_id: paneId });
     setInputEnabled(true);
@@ -1124,6 +1419,47 @@
     renderSelection();
     updateBlankIndicator();    // blink the home cursor until the snapshot/output lands
     acquireWakeLock();         // keep the screen awake while actively mirroring
+  }
+
+  // ── Stale-content veil control ────────────────────────────────────────────
+  function showStaleOverlay(sub) {
+    awaitingFreshSnapshot = true;
+    if (!staleOverlayActive) {
+      staleOverlayActive = true;
+      $("term-wrap").classList.add("stale");
+      $("empty-cursor").classList.remove("show");   // hide the blank blink under the veil
+      $("stale-overlay").classList.add("show");
+    }
+    if (sub) $("stale-sub").textContent = sub;
+    // Soft safety re-arm: if no fresh snapshot has revealed us in ~12s and the socket
+    // is open, re-issue the resync once (covers a lost subscribe) and reassure.
+    if (staleReissueTimer) clearTimeout(staleReissueTimer);
+    staleReissueTimer = setTimeout(() => {
+      if (!awaitingFreshSnapshot) return;
+      $("stale-sub").textContent = "Still loading…";
+      if (currentPaneId && ws && ws.readyState === WebSocket.OPEN) subscribe(currentPaneId);
+    }, 12000);
+  }
+  function hideStaleOverlay() {
+    awaitingFreshSnapshot = false;
+    staleOverlayActive = false;
+    if (staleReissueTimer) { clearTimeout(staleReissueTimer); staleReissueTimer = null; }
+    $("term-wrap").classList.remove("stale");
+    $("stale-overlay").classList.remove("show");
+  }
+  // Foreground return: if we were away long enough (or the socket dropped), the view
+  // is stale — veil it and force a fresh authoritative snapshot. The veil hides when
+  // that snapshot lands (snapshot handler). A quick glance with a live socket skips
+  // the churn (the alt-buffer stream is already current).
+  function refreshOnForeground() {
+    if (!currentPaneId) return;
+    const away = hiddenAt ? (Date.now() - hiddenAt) : 0;
+    hiddenAt = 0;
+    const open = ws && ws.readyState === WebSocket.OPEN;
+    if (open && away < STALE_AFTER_HIDDEN_MS) return;
+    showStaleOverlay("Refreshing…");
+    if (open) subscribe(currentPaneId);   // idempotent server-side: aborts old forwarder, re-seeds
+    // If not open, maybeReconnect() (called just before) drives connect() → onopen → subscribe.
   }
 
   // ── Input ────────────────────────────────────────────────────────────────
@@ -1141,36 +1477,96 @@
     $("send-btn").disabled = !on;
   }
 
+  // ── Live-mirror repaint state ─────────────────────────────────────────────
+  // The bridge now streams clean, reflowed screen snapshots (server-side reflow),
+  // one per coalesced output burst, in place of raw PTY bytes — so the client
+  // just repaints each frame. No client-side heal/heuristics are needed: a
+  // streamed frame can never carry a desktop-width cursor move to ghost. The
+  // only special case is not repainting while the user is reading history.
+  let missedFrameWhileScrolled = false;
+  // True while xterm is in its ALTERNATE buffer showing the live mirror; false
+  // while in the PRIMARY buffer showing scrollable history. Toggled by the
+  // snapshot handler off each frame's `streaming` flag; reset to false wherever
+  // term.reset() returns xterm to the normal buffer (subscribe / connectProfile).
+  let inAltMirror = false;
+
+  // ── Stale-content veil ────────────────────────────────────────────────────
+  // Any time the displayed mirror could be outdated (the app returned from the
+  // background, or the socket dropped / is reconnecting), blur the terminal and
+  // show a spinner until a fresh authoritative snapshot lands — never let the
+  // user act on or trust stale content.
+  let staleOverlayActive = false;      // the blur veil is up
+  let awaitingFreshSnapshot = false;   // waiting for a post-resync snapshot to reveal
+  let hiddenAt = 0;                    // Date.now() when last backgrounded (staleness gate)
+  let staleReissueTimer = null;        // soft re-arm if the awaited snapshot is slow
+  const STALE_AFTER_HIDDEN_MS = 1200;  // backgrounded longer than this ⇒ treat as stale
+
+  // Live = viewport pinned to the bottom of the scrollback. Repainting a streamed
+  // frame while the user has scrolled up would snap them back to the bottom, so we
+  // skip those frames and refresh once they return (see term.onScroll).
+  function termAtBottom() {
+    try { const b = term.buffer.active; return b.viewportY >= b.baseY; }
+    catch (_) { return true; }
+  }
+
   // ── Incoming frames ──────────────────────────────────────────────────────
   function handle(msg) {
     switch (msg.type) {
       case "pane_list":
         lastWindows = msg.windows || [];
+        lastProjects = msg.projects || [];
         renderTree(lastWindows);
         syncActiveDims();
+        // Re-evaluate the blank-pane blink against the freshly-polled agent state, so it
+        // hides the moment a pane's agent (e.g. Claude Code launching) is detected — and
+        // returns when the agent exits — without waiting on the next snapshot frame.
+        updateBlankIndicator();
         // The tree arrived → the deliberate switch succeeded and the interface
         // reloaded. Dismiss the loading overlay (and reveal the fresh pane tree).
         if (loadingActive) { const reveal = loadingReveal; hideLoading(); if (reveal) openDrawer(); }
         break;
-      case "snapshot":
-        if (sameId(msg.pane_id, currentPaneId)) {
-          if (msg.cols && msg.rows) {
-            dims = { cols: msg.cols, rows: msg.rows };
-            term.resize(msg.cols, msg.rows);
-            // Start at fit-to-width then 3 sizes larger (what 3 taps of the old
-            // A+ gave) so the mirror opens comfortably readable; pinch from there.
-            // Only on a fresh subscription — a re-subscribe (clear re-sync) keeps zoom.
-            if (isTouch && autoSizeNextSnapshot) { fitWidth(); fontSize += 3; applyFont(); }
-          }
-          autoSizeNextSnapshot = false;
-          term.reset();
-          term.write(decode(msg.ansi_b64));
-          updateBlankIndicator();   // empty snapshot → keep blinking; content → hide
+      case "snapshot": {
+        if (!sameId(msg.pane_id, currentPaneId)) break;
+        // Live frames (streaming:true) land in xterm's ALTERNATE buffer; the
+        // initial on-attach frame and the idle "settle" frame (streaming:false)
+        // land in the PRIMARY buffer, whose scrollback then holds browsable
+        // history. This split is what fixes both the per-frame flicker and the
+        // "forced back to the bottom" scroll-lock: a full clear+repaint every
+        // frame in the primary buffer churns scrollback/ybase so xterm re-renders
+        // every row (flicker) and pins the viewport (no scroll). In the alt
+        // buffer ybase is fixed at 0, so xterm diffs only changed cells and the
+        // screen updates in place with nothing to snap.
+        const streaming = !!msg.streaming;
+        if (streaming) {
+          // Don't yank a user who has scrolled up reading primary-buffer history
+          // into the live view: skip while scrolled (term.onScroll re-subscribes
+          // on return to the bottom). Once in the alt buffer there's no
+          // scrollback, so termAtBottom() is always true and frames flow freely.
+          if (!inAltMirror && !termAtBottom()) { missedFrameWhileScrolled = true; break; }
+          if (!inAltMirror) { term.write("\x1b[?1049h"); inAltMirror = true; }
+        } else {
+          // Settle/initial: pop back to the primary buffer, then repaint the deep
+          // snapshot so its scrollback carries the accumulated history.
+          if (inAltMirror) { term.write("\x1b[?1049l"); inAltMirror = false; }
+          // A settle arriving while the user reads history shouldn't yank them.
+          if (!termAtBottom()) { missedFrameWhileScrolled = true; break; }
         }
+        // Ignore the desktop pane's reported cols/rows for sizing — the phone owns
+        // its grid width. Fit the grid to the phone viewport BEFORE writing so the
+        // redraw ingests and wraps at the phone's width.
+        recomputeGrid();
+        term.write(collapseRules(decode(msg.ansi_b64)));
+        updateBlankIndicator();   // empty snapshot → keep blinking; content → hide
+        // Reveal the mirror once we've repainted the authoritative initial/settle frame
+        // (streaming:false) for this pane — that's the "we now have current content" signal.
+        if (awaitingFreshSnapshot && !streaming) hideStaleOverlay();
         break;
+      }
       case "output":
+        // Retained for protocol back-compat; the mirror streams snapshot frames
+        // now (server-side reflow), so the bridge no longer emits these.
         if (sameId(msg.pane_id, currentPaneId)) {
-          term.write(decode(msg.bytes_b64));
+          term.write(collapseRules(decode(msg.bytes_b64)));
           if (blankShown) updateBlankIndicator();   // re-scan only while still blank
         }
         break;
@@ -1238,11 +1634,37 @@
         const grid = document.createElement("div");
         grid.className = "pane-grid";
         (tab.panes || []).forEach((pane, pi) => grid.appendChild(renderPaneSquare(pane, pi + 1, col)));
+        grid.appendChild(renderAddPaneSquare(tab.tab_id, col));  // trailing "+" = add a pane
         block.appendChild(grid);
         group.appendChild(block);
       });
       sidebar.appendChild(group);
     });
+    // "+" beneath the lowest project: opens the project picker (saved projects +
+    // a blank "New terminal").
+    const addTab = document.createElement("button");
+    addTab.id = "new-tab-btn";
+    addTab.type = "button";
+    addTab.textContent = "+";
+    addTab.title = "Open a project or a new terminal tab";
+    addTab.addEventListener("click", openProjectPicker);
+    sidebar.appendChild(addTab);
+  }
+
+  // A trailing "+" tile in a tab's pane grid — same footprint as a numbered
+  // square — that adds a terminal pane (split right) to that tab.
+  function renderAddPaneSquare(tabId, projColor) {
+    const sq = document.createElement("div");
+    sq.className = "pane-sq add-sq";
+    sq.style.borderColor = projColor || "";   // project color when the tab has one
+    sq.style.color = projColor || "";
+    const plus = document.createElement("span");
+    plus.className = "num";
+    plus.textContent = "+";
+    sq.appendChild(plus);
+    sq.title = "New pane in this project";
+    sq.addEventListener("click", () => send({ type: "new_pane", tab_id: tabId }));
+    return sq;
   }
 
   // The bare square DOM: a centered number plus the (CSS-driven) comet dots and
@@ -1387,21 +1809,14 @@
     const loc = findPaneLocation(currentPaneId);
     return loc && loc.pane && loc.pane.agent ? loc.pane.agent : null;
   }
-  // Keep the phone's grid sized to the desktop pane it's mirroring. Each poll the
-  // desktop reports the live pane's current cols/rows; if they drift from our grid
-  // we re-resize so a TUI's wrap/cursor math (Claude/Ink computes its redraw moves
-  // from the column count) stays aligned and the mirror stops ghosting. Resizing
-  // reflows xterm; the app's next frame repaints clean at the corrected width. We
-  // touch only the grid, not the font, so the user's pinch-zoom is preserved.
+  // Keep the phone's grid fitted to the phone's own viewport. The grid width is
+  // derived from the viewport + font (recomputeGrid), not the desktop pane's
+  // cols/rows, so the mirror always wraps and never scrolls horizontally. Called
+  // on each poll as a cheap safety net in case the viewport changed between the
+  // explicit resize listeners firing (orientation, soft keyboard, chrome insets).
   function syncActiveDims() {
     if (!currentPaneId) return;
-    const loc = findPaneLocation(currentPaneId);
-    const p = loc && loc.pane;
-    if (!p || !p.cols || !p.rows) return;
-    if (p.cols === term.cols && p.rows === term.rows) return;
-    dims = { cols: p.cols, rows: p.rows };
-    term.resize(p.cols, p.rows);
-    if (typeof sel !== "undefined" && sel) placeHandles();
+    recomputeGrid();
   }
 
   // ── Drawer ───────────────────────────────────────────────────────────────
@@ -1417,11 +1832,13 @@
   // overlay via a UI tap leaves the guard entry on the stack, so the next Back press
   // is a harmless no-op that just consumes it — it never loops or traps.)
   function anyOverlayOpen() {
-    return !$("settings-panel").hidden
+    return !$("project-picker").hidden
+      || !$("settings-panel").hidden
       || !$("loading-overlay").hidden
       || $("drawer").classList.contains("open");
   }
   function closeTopOverlay() {
+    if (!$("project-picker").hidden) { closeProjectPicker(); return true; }
     if (!$("settings-panel").hidden) { closeSettings(false); return true; }
     if (!$("loading-overlay").hidden) { hideLoading(); return true; }
     if ($("drawer").classList.contains("open")) { closeDrawer(); return true; }
@@ -1495,7 +1912,9 @@
 
   $("menu-btn").addEventListener("click", toggleDrawer);
   $("scrim").addEventListener("click", closeDrawer);
-  $("fit-btn").addEventListener("click", fitWidth);   // pinch handles zoom; this re-fits
+  // A−／A+ step the font; applyFont() clamps to [5,28] and re-wraps via recomputeGrid().
+  $("font-dec").addEventListener("click", () => { fontSize -= 1; applyFont(); });
+  $("font-inc").addEventListener("click", () => { fontSize += 1; applyFont(); });
 
   // Top-bar connection pill: tap to (re)connect when off or dropped.
   function pillRetry() { if (connState === "off" || connState === "reconnect") userReconnect(); }
@@ -1535,6 +1954,48 @@
     root.appendChild(nameRow); root.appendChild(hpRow); root.appendChild(token);
     return root;
   }
+  // ── New-tab project picker ──────────────────────────────────────────────────
+  // Built fresh each open from the latest saved-project list (lastProjects, from
+  // the pane_list poll): one row per project (tap → open it as a tab in its dir
+  // with its color) plus a "New terminal" blank-tab row. The desktop creates the
+  // tab and pushes a refreshed pane_list, so the new tab appears in the sidebar.
+  function openProjectPicker() {
+    const list = $("pp-list");
+    list.innerHTML = "";
+    (lastProjects || []).forEach((proj) => {
+      const row = document.createElement("button");
+      row.type = "button";
+      row.className = "pp-row";
+      const dot = document.createElement("span");
+      dot.className = "pp-dot";
+      dot.style.background = safeColor(proj.color) || "var(--dim)";
+      const name = document.createElement("span");
+      name.className = "pp-name";
+      name.textContent = proj.name;
+      row.append(dot, name);
+      row.addEventListener("click", () => {
+        send({ type: "open_project", name: proj.name });
+        closeProjectPicker();
+      });
+      list.appendChild(row);
+    });
+    const blank = document.createElement("button");
+    blank.type = "button";
+    blank.className = "pp-row pp-new";
+    blank.textContent = "+ New terminal";
+    blank.addEventListener("click", () => {
+      send({ type: "new_tab" });
+      closeProjectPicker();
+    });
+    list.appendChild(blank);
+    $("project-picker").hidden = false;
+    armBackGuard();
+  }
+  function closeProjectPicker() { $("project-picker").hidden = true; }
+  $("project-picker").addEventListener("click", (e) => {
+    if (e.target === $("project-picker")) closeProjectPicker();
+  });
+
   function openSettings() {
     const list = $("sp-list");
     list.innerHTML = "";
@@ -1571,6 +2032,67 @@
   }
   $("sp-add").addEventListener("click", () =>
     $("sp-list").appendChild(buildProfileBlock({ id: genId(), label: "", host: "", port: "", token: "" })));
+  // Native-shell only: surface the QR scanner / re-pair flow the Android shell
+  // exposes as window.CortexShell.rescan(). It relaunches the native pairing
+  // screen; on a successful scan the shell reloads this page with the new
+  // ?host=&port=&token= query, which seedFromPairingQuery() turns into an active
+  // profile. A plain browser has no native scanner, so the button stays hidden.
+  if (window.CortexShell && typeof window.CortexShell.rescan === "function") {
+    $("sp-scan").hidden = false;
+    $("sp-scan").addEventListener("click", () => window.CortexShell.rescan());
+  }
+
+  // Native-shell only: WebView never fills env(safe-area-inset-*), so PULL the real
+  // window insets the Android shell captured (CortexShell.env() →
+  // "t=161 b=99 l=0 r=0 ime=0 d=2.0625" — physical px + density) and write them as CSS
+  // px into the --cortex-sat/--cortex-sab vars the topbar/drawer/soft-keys pad from,
+  // plus --cortex-ime (keyboard height above the nav bar) that lifts the bottom bars.
+  // Pull (not native push) so the page owns the timing; retried because the native
+  // inset listener can fire after first paint (env() is briefly "n/a"). The shell also
+  // nudges this on every inset change (esp. keyboard show/hide, which fires no resize).
+  let imePollTimer = null, prevImePx = 0;
+  function applyNativeInsets() {
+    try {
+      if (!(window.CortexShell && CortexShell.env)) return;
+      const s = CortexShell.env() || "";
+      const m = /t=(\d+)\s+b=(\d+).*?\sd=([\d.]+)/.exec(s);
+      if (!m) return;
+      const d = parseFloat(m[3]) || 1;
+      const root = document.documentElement.style;
+      root.setProperty("--cortex-sat", Math.round(+m[1] / d) + "px");
+      root.setProperty("--cortex-sab", Math.round(+m[2] / d) + "px");
+      const ime = /\sime=(\d+)/.exec(s);
+      const imePx = Math.round((ime ? +ime[1] : 0) / d);
+      root.setProperty("--cortex-ime", imePx + "px");
+      // Keyboard just closed (>0 → 0): the reclaimed space sits below the old view, so
+      // re-pin xterm to the latest line once the .12s padding transition has settled.
+      if (prevImePx > 0 && imePx === 0) {
+        setTimeout(() => { try { term.scrollToBottom(); } catch (_) {} }, 140);
+      }
+      prevImePx = imePx;
+      // Self-correcting down-transition: while the keyboard is up, keep re-pulling so the
+      // compose bar + soft-keys come back DOWN even if a native close-event is ever
+      // missed (the symptom was "stuck up" after the keyboard closed). Auto-stops the
+      // instant the inset returns to 0, so it only runs while actually lifted (cheap).
+      if (imePx > 0 && !imePollTimer) {
+        imePollTimer = setInterval(applyNativeInsets, 300);
+      } else if (imePx === 0 && imePollTimer) {
+        clearInterval(imePollTimer);
+        imePollTimer = null;
+      }
+    } catch (e) { /* non-fatal: vars stay 0, the env() path covers real browsers */ }
+  }
+  // Expose for the native shell's inset nudge: MainActivity calls
+  // window.applyNativeInsets() on every inset change — crucially keyboard show/hide,
+  // which fires NO JS resize (the window doesn't shrink under edge-to-edge). Without
+  // this the function stays local to the IIFE, window.applyNativeInsets is undefined,
+  // and the nudge is a silent no-op — so the IME inset never reaches the CSS.
+  window.applyNativeInsets = applyNativeInsets;
+  applyNativeInsets();
+  [250, 800].forEach((t) => setTimeout(applyNativeInsets, t));
+  window.addEventListener("resize", applyNativeInsets);
+  if (window.visualViewport) window.visualViewport.addEventListener("resize", applyNativeInsets);
+
   $("settings-done").addEventListener("click", () => closeSettings(true));
   $("settings-disconnect").addEventListener("click", manualDisconnect);
   $("settings-panel").addEventListener("click", (e) => { if (e.target === $("settings-panel")) closeSettings(false); });
@@ -1582,7 +2104,11 @@
   // Auto-reconnect when the app comes back to the foreground / network returns,
   // and re-take the wake-lock (auto-released while backgrounded) if still mirroring.
   document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") { maybeReconnect(); acquireWakeLock(); }
+    if (document.visibilityState === "hidden") { hiddenAt = Date.now(); return; }
+    // Visible again: reconnect if the socket dropped, re-take the wake-lock, then
+    // veil + force a fresh snapshot if the view may have gone stale while away.
+    maybeReconnect(); acquireWakeLock(); applyNativeInsets();
+    refreshOnForeground();
   });
   window.addEventListener("focus", maybeReconnect);
   window.addEventListener("online", maybeReconnect);
@@ -1656,7 +2182,20 @@
     }
   }
   $("compose-input").addEventListener("input", autoGrow);
+  // Native-shell only: the Android WebView skips the soft keyboard on the FIRST focus
+  // of this textarea after a cold launch (the input connection isn't live yet when the
+  // WebView would raise the IME), so the first tap looks dead and the user taps twice.
+  // When the native bridge is present, explicitly ask the shell to show the keyboard
+  // whenever the box gains focus. Idempotent, so later taps (already working) are
+  // unaffected; a plain browser / installed PWA has no CortexShell and keeps its own IME.
+  if (window.CortexShell && typeof window.CortexShell.showKeyboard === "function") {
+    $("compose-input").addEventListener("focus", () => {
+      try { window.CortexShell.showKeyboard(); } catch (_) {}
+    });
+  }
   $("send-btn").addEventListener("click", sendCompose);
+  // Re-pin the mirror to the newest output (no-op when already at the bottom).
+  $("jump-bottom").addEventListener("click", () => { try { term.scrollToBottom(); } catch (_) {} });
 
   // ── Touch text-selection → auto-copy ───────────────────────────────────────
   // xterm paints to a canvas, so there's no OS-selectable text. We drive xterm's
@@ -1666,10 +2205,19 @@
   // a CSS transform), so the rendered cell geometry stays truthful and mapping a
   // touch point to a grid cell is just screen-rect ÷ cols/rows, offset by the
   // viewport's top buffer line.
-  const LP_MS = 450, LP_MOVE_TOL = 10;
+  const LP_MS = 600, LP_MOVE_TOL = 6;
   let sel = null;            // { anchor:{col,row}, focus:{col,row} } in buffer coords
   let draggingHandle = null; // "a" | "b" while a handle is under the finger
-  let lpTimer = null, lpStart = null, lpMoved = false, toastTimer = null;
+  // lpMoved: finger crossed LP_MOVE_TOL → definitely a pan, abort the press.
+  // lpAnyMove: finger moved AT ALL this gesture → used to tell a user drag-scroll
+  // (cancel the press) apart from an auto-scroll on new output with a still finger
+  // (keep the press, so a deliberate stationary long-press still selects).
+  let lpTimer = null, lpStart = null, lpMoved = false, lpAnyMove = false, toastTimer = null;
+  // One-finger manual scroll state (we own the gesture so xterm's native mouse
+  // selection never fires). scrollAccum carries the sub-cell pixel remainder so
+  // tracking stays 1:1 with the finger across moves; gestureCellH is the rendered
+  // row height captured at touchstart.
+  let scrollLastY = 0, scrollAccum = 0, gestureCellH = 0;
 
   const screenEl = () => $("terminal").querySelector(".xterm-screen");
 
@@ -1783,10 +2331,20 @@
   const termWrap = $("term-wrap");
   termWrap.addEventListener("touchstart", (e) => {
     if (!isTouch || !currentPaneId || e.touches.length !== 1) return;
+    // We're already the sole owner of this gesture: pointer-events:none on the xterm
+    // subtree (set after term.open) routes every touch here, past xterm's own
+    // touch/selection handlers. preventDefault is now just defensive — it suppresses
+    // the browser's emulated mouse + long-press callout; there's no native scroll to
+    // lose either (touch-action:none). We scroll manually below.
+    e.preventDefault();
     clearSelectionUI();                 // a new touch dismisses any prior selection
     const t = e.touches[0];
     lpStart = { x: t.clientX, y: t.clientY };
     lpMoved = false;
+    lpAnyMove = false;
+    scrollLastY = t.clientY;            // seed the manual-scroll tracker
+    scrollAccum = 0;
+    gestureCellH = (cellMetrics() || {}).ch || fontSize * 1.2;
     clearTimeout(lpTimer);
     lpTimer = setTimeout(() => {
       if (lpMoved || !lpStart) return;
@@ -1797,24 +2355,33 @@
       applySelection();
       if (navigator.vibrate) navigator.vibrate(10);
     }, LP_MS);
-  }, { passive: true });
+  }, { passive: false });
   termWrap.addEventListener("touchmove", (e) => {
-    if (!lpStart) return;
+    if (!lpStart || e.touches.length !== 1) return;   // 2-finger → pinch handler owns it
+    e.preventDefault();                               // defensive: suppress emulated mouse + callout
     const t = e.touches[0];
+    lpAnyMove = true;
     if (Math.abs(t.clientX - lpStart.x) > LP_MOVE_TOL || Math.abs(t.clientY - lpStart.y) > LP_MOVE_TOL) {
-      lpMoved = true;
+      lpMoved = true;            // a real drag — never seed a word; scroll instead
       clearTimeout(lpTimer);
     }
-  }, { passive: true });
+    // Manual 1:1 scroll: step the buffer one line per cell of finger travel, in the
+    // natural direction (content follows the finger). scrollLines clamps at the ends.
+    const dy = t.clientY - scrollLastY;
+    scrollLastY = t.clientY;
+    scrollAccum += dy;
+    while (scrollAccum >=  gestureCellH) { term.scrollLines(-1); scrollAccum -= gestureCellH; } // finger down → older
+    while (scrollAccum <= -gestureCellH) { term.scrollLines( 1); scrollAccum += gestureCellH; } // finger up   → newer
+  }, { passive: false });
   const endLongPress = () => { clearTimeout(lpTimer); lpStart = null; };
   termWrap.addEventListener("touchend", endLongPress, { passive: true });
   termWrap.addEventListener("touchcancel", endLongPress, { passive: true });
 
   // ── Pinch-to-zoom: scale only the TERMINAL FONT, never the page ─────────────
-  // `touch-action: pan-x pan-y` on #term-wrap suppresses the browser's page
-  // pinch-zoom (which used to balloon the whole UI — compose bar and all). We
-  // map the two-finger distance ratio onto xterm's fontSize, so only the mirror
-  // text grows/shrinks; one-finger pan/scroll keeps working.
+  // `touch-action: none` on #term-wrap suppresses the browser's page pinch-zoom
+  // (which used to balloon the whole UI — compose bar and all). We map the
+  // two-finger distance ratio onto xterm's fontSize, so only the mirror text
+  // grows/shrinks; one-finger drag is handled as a manual scroll above.
   let pinchDist0 = 0, pinchFont0 = 0;
   const fingerDist = (t) =>
     Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
@@ -1875,10 +2442,25 @@
     });
   }
 
-  // Keep handles glued to their cells as the grid scrolls or the geometry changes.
-  term.onScroll(() => { if (sel) placeHandles(); });
-  termWrap.addEventListener("scroll", () => { if (sel) placeHandles(); }, { passive: true });
-  window.addEventListener("resize", () => { if (sel) placeHandles(); });
+  // Keep handles glued to their cells as the grid scrolls (our manual one-finger
+  // scroll calls term.scrollLines, which fires this). The lpMoved cancel is a
+  // belt-and-suspenders backstop — the touchmove handler already cancels the press
+  // on the first drag — and is gated on lpAnyMove so an auto-scroll from new output
+  // under a still finger doesn't kill a deliberate stationary long-press.
+  term.onScroll(() => {
+    if (lpStart && lpAnyMove) { lpMoved = true; clearTimeout(lpTimer); }
+    if (sel) placeHandles();
+    // Returned to the bottom after skipping streamed frames while reading history
+    // → pull one fresh frame so the mirror is current again.
+    if (missedFrameWhileScrolled && currentPaneId && termAtBottom()) {
+      missedFrameWhileScrolled = false;
+      send({ type: "subscribe", pane_id: currentPaneId });
+    }
+  });
+  // (No native "scroll" listener on #term-wrap: the grid is sized to the viewport so
+  // it never overflows/scrolls — term.onScroll above covers our manual scrollLines.)
+  window.addEventListener("resize", () => { scheduleRecomputeGrid(); if (sel) placeHandles(); });
+  window.addEventListener("orientationchange", scheduleRecomputeGrid);
 
   // ── Keep the docked bars above the soft keyboard ───────────────────────────
   // On Android the soft keyboard resizes only the *visual* viewport by default,
@@ -1894,6 +2476,7 @@
   if (vv) {
     const syncViewport = () => {
       document.body.style.height = vv.height + "px";
+      scheduleRecomputeGrid();   // viewport height changed (e.g. soft keyboard) → refit rows
       if (sel) placeHandles();
     };
     vv.addEventListener("resize", syncViewport);

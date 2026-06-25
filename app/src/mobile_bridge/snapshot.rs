@@ -23,10 +23,13 @@ use crate::terminal::model::grid::RespectDisplayedOutput;
 use crate::terminal::model::RespectObfuscatedSecrets;
 use crate::terminal::TerminalModel;
 
-/// How many rows back to capture for a primary-screen (normal scrolling) pane.
-/// Enough to give a shell or a Claude REPL useful context on attach without
-/// replaying the whole history; the live stream fills in everything after.
-const MAX_PRIMARY_SNAPSHOT_ROWS: usize = 200;
+/// Default primary-screen capture depth for the *initial* snapshot a fresh
+/// subscribe sends — enough to give a shell or a Claude REPL useful history on
+/// attach. Streamed frames pass a smaller cap (see [`forward_reflow_snapshots`])
+/// since they re-send the whole frame ~10×/sec.
+///
+/// [`forward_reflow_snapshots`]: super::forward_reflow_snapshots
+pub(super) const MAX_PRIMARY_SNAPSHOT_ROWS: usize = 200;
 
 /// A column index past any real terminal width. `bounds_to_string` clamps the
 /// final row to its actual content length, so passing this as the end column
@@ -45,10 +48,15 @@ pub(super) struct ScreenSnapshot {
 
 /// Serialize a pane's current screen as an ANSI redraw string plus its grid size.
 ///
+/// `max_primary_rows` bounds how many rows back a *primary-screen* (normal
+/// scrolling) pane captures; alt-screen TUIs always capture the full screen.
+/// The initial subscribe passes [`MAX_PRIMARY_SNAPSHOT_ROWS`] for history; the
+/// reflow streamer passes a smaller cap so each ~10 fps frame stays cheap.
+///
 /// Caller must hold the model lock; this only reads. Pair it with
 /// `event_proxy.cortex_new_pty_reads_receiver()` under the *same* lock so the
 /// receiver observes exactly the bytes that follow this snapshot.
-pub(super) fn screen_snapshot(model: &TerminalModel) -> ScreenSnapshot {
+pub(super) fn screen_snapshot(model: &TerminalModel, max_primary_rows: usize) -> ScreenSnapshot {
     // Terminal grid size (one PTY = one size, primary or alt), so the phone can
     // match the desktop's column count instead of reflowing the stream.
     let size = model.block_list().size();
@@ -71,7 +79,7 @@ pub(super) fn screen_snapshot(model: &TerminalModel) -> ScreenSnapshot {
         (0, last_content_row)
     } else {
         let end = last_content_row.max(cursor.row);
-        (end.saturating_sub(MAX_PRIMARY_SNAPSHOT_ROWS), end)
+        (end.saturating_sub(max_primary_rows), end)
     };
 
     let body = grid.bounds_to_string(
